@@ -64,20 +64,20 @@ func choose_next(state: PlayerState) -> SectionPlan:
 
 Modes: RandomDirector (control group), RuleDirector (rules and formulas, main director), LearnedDirector (contextual bandit trained offline on bot logs, parameters loaded from JSON; no ML libraries on the phone).
 
-Planned layout (create folders as features need them):
+Planned layout (create folders as features need them). File names are snake_case; the class_name / autoload name inside stays PascalCase (game_manager.gd → GameManager):
 
 ```
 res://
-  autoload/      GameManager.gd (run state, seed, director mode), Telemetry.gd (metrics, logs)
-  director/      Director.gd, RandomDirector.gd, RuleDirector.gd, LearnedDirector.gd,
-                 SectionPlan.gd, PlayerState.gd
-  generation/    RoomTemplate.gd, RoomLibrary.gd, SectionBuilder.gd, TunnelCarver.gd
+  autoload/      game_manager.gd (run state, seed, director mode), telemetry.gd (metrics, logs)
+  director/      director.gd, random_director.gd, rule_director.gd, learned_director.gd,
+                 section_plan.gd, player_state.gd
+  generation/    room_template.gd, room_library.gd, section_builder.gd, tunnel_carver.gd
   rooms/         room templates
   actors/        player/, enemies/, projectiles/, pickups/
   combat/        weapons/, skills/, spells/ (Resource definitions + effect scripts)
   ui/            joystick, buttons, HUD, death screen, skill tree, survey
-  main/          Main.tscn
-  tools/         BotPlayer.gd, Simulate.tscn (headless bot runs for experiments)
+  main/          main.tscn
+  tools/         bot_player.gd, simulate.tscn (headless bot runs for experiments)
 training/        train_bandit.py, analyze.py (Python, outside Godot)
 docs/            design.md, ai-usage-log.md
 ```
