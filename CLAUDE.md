@@ -32,7 +32,7 @@ Full design document: docs/design.md. Read it before any larger task.
 - Prefer signals for communication upward and between systems; call methods downward.
 - Data-driven design: weapons, skills, spells, enemies and room templates are defined as custom Resource classes with parameters, not hard-coded in the player or enemy scripts. Adding a new weapon or spell should mean adding a new resource (plus a small effect script if needed).
 - No magic numbers in gameplay code: tunable values live in resources or exported variables.
-- All randomness goes through one seeded RandomNumberGenerator owned by GameManager. Same seed + same director decisions = same tunnel. This is required for experiments and debugging.
+- All randomness comes from GameManager and is derived from one run seed: `GameManager.rng` for gameplay (damage spread, drops), `GameManager.make_section_rng(section_index)` for building a section. A section depends only on the run seed and its index, so combat never changes the tunnel. Same seed + same director decisions = same tunnel. This is required for experiments and debugging. Never use the global `randi()` / `randf()`.
 - Keep scripts small and focused. One class per file.
 
 ## Game design summary (see docs/design.md for details)
