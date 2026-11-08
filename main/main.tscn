@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://d086msg16gvvh" path="res://actors/player/player.tscn" id="1_pjrb6"]
 [ext_resource type="Script" uid="uid://di3pkn0s3mymi" path="res://actors/placeholder_shape.gd" id="2_xwkvk"]
+[ext_resource type="Script" uid="uid://bp2xjhxfnu8nw" path="res://ui/touch_joystick.gd" id="3_xwkvk"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ndusb"]
 size = Vector2(16, 96)
@@ -23,3 +24,14 @@ shape_type = 1
 size = Vector2(16, 96)
 color = Color(0.363367, 0.36336705, 0.36336702, 1)
 metadata/_custom_type_script = "uid://di3pkn0s3mymi"
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1093100423]
+
+[node name="TouchJoystick" type="Control" parent="HUD" unique_id=921833892]
+layout_mode = 3
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 320.0
+grow_vertical = 2
+script = ExtResource("3_xwkvk")
+metadata/_custom_type_script = "uid://bp2xjhxfnu8nw"
