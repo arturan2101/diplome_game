@@ -8,6 +8,9 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ndusb"]
 size = Vector2(16, 96)
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_ndusb"]
+radius = 28.0
+
 [node name="Main" type="Node2D" unique_id=1844842302]
 
 [node name="TrainingDummy2" parent="." unique_id=1620336158 instance=ExtResource("1_c651c")]
@@ -42,3 +45,15 @@ offset_right = 320.0
 grow_vertical = 2
 script = ExtResource("3_xwkvk")
 metadata/_custom_type_script = "uid://bp2xjhxfnu8nw"
+
+[node name="AttackButton" type="TouchScreenButton" parent="HUD" unique_id=1910249902]
+position = Vector2(572, 292)
+shape = SubResource("CircleShape2D_ndusb")
+action = "attack"
+visibility_mode = 1
+
+[node name="PlaceholderShape" type="Node2D" parent="HUD/AttackButton" unique_id=23249879]
+script = ExtResource("2_xwkvk")
+size = Vector2(56, 56)
+color = Color(1, 1, 1, 0.60784316)
+metadata/_custom_type_script = "uid://di3pkn0s3mymi"

@@ -35,7 +35,7 @@ Full design document: docs/design.md. Read it before any larger task.
 - All randomness comes from GameManager and is derived from one run seed: `GameManager.rng` for gameplay (damage spread, drops), `GameManager.make_section_rng(section_index)` for building a section. A section depends only on the run seed and its index, so combat never changes the tunnel. Same seed + same director decisions = same tunnel. This is required for experiments and debugging. Never use the global `randi()` / `randf()`.
 - Keep scripts small and focused. One class per file.
 - 2D physics layers: 1 world, 2 player, 3 enemies, 4 player_hurtbox, 5 enemy_hurtbox. Weapons find targets by hurtbox layer and check line of sight against the world layer.
-- Damage always travels as a `DamageInfo` (amount, source node, source_id = weapon id or enemy type): attacker → `Hurtbox.receive_hit()` → `Health.take_damage()` → signals `damaged(info)` / `died(info)`. Telemetry relies on source_id.
+- Damage always travels as a `DamageInfo` (amount, source node, source_id = weapon id or enemy type, knockback velocity): attacker → `Hurtbox.receive_hit()` → `Health.take_damage()` → signals `damaged(info)` / `died(info)`; `Hurtbox.hit_received(info)` lets the owner react (knockback). Telemetry relies on source_id and on `Weapon.attack_performed(step_index, hits)` for accuracy.
 
 ## Game design summary (see docs/design.md for details)
 

@@ -11,10 +11,11 @@ radius = 7.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_4imvi"]
 radius = 8.0
 
-[node name="TrainingDummy" type="CharacterBody2D" unique_id=1620336158 node_paths=PackedStringArray("health", "visual")]
+[node name="TrainingDummy" type="CharacterBody2D" unique_id=1620336158 node_paths=PackedStringArray("health", "hurtbox", "visual")]
 collision_layer = 4
 script = ExtResource("1_1a3ta")
 health = NodePath("Health")
+hurtbox = NodePath("Hurtbox")
 visual = NodePath("PlaceholderShape")
 metadata/_custom_type_script = "uid://fe4xrj1h6seq"
 

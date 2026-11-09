@@ -3,9 +3,11 @@ extends Node2D
 ## Base class for weapon behaviour. The player creates it from WeaponData.weapon_scene,
 ## calls its methods (downward) and listens to its signals (upward).
 
-## Emitted when an attack ends. targets_hit is how many targets took damage (for accuracy).
+## Emitted after every attack (every step of a combo) when its hit window ends.
+## step_index is the step in the combo (0 for weapons without a combo);
+## hits is how many targets took damage. Telemetry uses it for accuracy.
 @warning_ignore("unused_signal")
-signal attack_finished(targets_hit: int)
+signal attack_performed(step_index: int, hits: int)
 
 ## Parameters of this weapon (a WeaponData subclass).
 var data: WeaponData = null

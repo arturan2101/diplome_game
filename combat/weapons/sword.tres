@@ -1,10 +1,30 @@
 [gd_resource type="Resource" script_class="MeleeWeaponData" format=3 uid="uid://bbblvshpl8u70"]
 
 [ext_resource type="Script" uid="uid://nuho2ph11shq" path="res://combat/weapons/melee_weapon_data.gd" id="1_dljjw"]
+[ext_resource type="Script" uid="uid://dqcnjt2pkdxkd" path="res://combat/weapons/melee_attack_step.gd" id="1_f8ocv"]
 [ext_resource type="PackedScene" uid="uid://bfgh1odevltxd" path="res://combat/weapons/melee_weapon.tscn" id="2_03pyg"]
+
+[sub_resource type="Resource" id="Resource_03pyg"]
+script = ExtResource("1_f8ocv")
+metadata/_custom_type_script = "uid://dqcnjt2pkdxkd"
+
+[sub_resource type="Resource" id="Resource_f8ocv"]
+script = ExtResource("1_f8ocv")
+metadata/_custom_type_script = "uid://dqcnjt2pkdxkd"
+
+[sub_resource type="Resource" id="Resource_qg0wa"]
+script = ExtResource("1_f8ocv")
+damage = 18
+reach = 28.0
+arc_degrees = 160.0
+duration = 0.15
+recovery = 0.25
+knockback = 200.0
+metadata/_custom_type_script = "uid://dqcnjt2pkdxkd"
 
 [resource]
 script = ExtResource("1_dljjw")
+combo = Array[ExtResource("1_f8ocv")]([SubResource("Resource_03pyg"), SubResource("Resource_f8ocv"), SubResource("Resource_qg0wa")])
 id = &"sword"
 display_name = "Sword"
 weapon_scene = ExtResource("2_03pyg")
