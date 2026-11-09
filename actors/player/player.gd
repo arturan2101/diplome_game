@@ -27,8 +27,12 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_move(delta)
-	if weapon != null and Input.is_action_just_pressed("attack"):
-		weapon.try_attack(facing)
+	if weapon == null:
+		return
+	if Input.is_action_just_pressed("attack"):
+		weapon.try_attack(_aim_direction())
+	if Input.is_action_just_released("attack"):
+		weapon.release_attack(_aim_direction())
 
 
 ## Replaces the current weapon with a new one built from weapon_data.
@@ -43,12 +47,21 @@ func equip(weapon_data: WeaponData) -> void:
 	add_child(weapon)
 
 
+## Direction of attacks and shots. The single place to plug in auto-aim later.
+func _aim_direction() -> Vector2:
+	return facing
+
+
 func _move(delta: float) -> void:
 	# Length is at most 1, and below 1 when a joystick is only partly tilted.
 	var input_dir: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	# The weapon can slow the player down, e.g. while drawing a bow.
+	var speed: float = move_speed
+	if weapon != null:
+		speed *= weapon.get_move_speed_multiplier()
 	if input_dir != Vector2.ZERO:
 		facing = input_dir.normalized()
-		velocity = velocity.move_toward(input_dir * move_speed, acceleration * delta)
+		velocity = velocity.move_toward(input_dir * speed, acceleration * delta)
 	else:
 		velocity = velocity.move_toward(Vector2.ZERO, deceleration * delta)
 	move_and_slide()

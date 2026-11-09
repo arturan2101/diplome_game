@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://bnkpe7a4ob1c5"]
+
+[ext_resource type="Script" uid="uid://yjflwqlydqra" path="res://actors/projectiles/arrow.gd" id="1_26kgm"]
+
+[node name="Arrow" type="Node2D" unique_id=1046610674]
+script = ExtResource("1_26kgm")
+metadata/_custom_type_script = "uid://yjflwqlydqra"

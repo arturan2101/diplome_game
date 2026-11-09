@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BowWeaponData" format=3 uid="uid://beg6e5fr0poiv"]
+
+[ext_resource type="Script" uid="uid://d4lia7iluqy18" path="res://combat/weapons/bow_weapon_data.gd" id="1_30041"]
+[ext_resource type="PackedScene" uid="uid://bnkpe7a4ob1c5" path="res://actors/projectiles/arrow.tscn" id="1_hmisi"]
+[ext_resource type="PackedScene" uid="uid://besnotco1in5e" path="res://combat/weapons/bow_weapon.tscn" id="3_e8ixt"]
+
+[resource]
+script = ExtResource("1_30041")
+arrow_scene = ExtResource("1_hmisi")
+id = &"bow"
+display_name = "Bow"
+weapon_scene = ExtResource("3_e8ixt")
+metadata/_custom_type_script = "uid://d4lia7iluqy18"

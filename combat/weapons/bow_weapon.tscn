@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://besnotco1in5e"]
+
+[ext_resource type="Script" uid="uid://jy34cianp7xi" path="res://combat/weapons/bow_weapon.gd" id="1_ydagm"]
+
+[node name="BowWeapon" type="Node2D" unique_id=924606548]
+script = ExtResource("1_ydagm")
+metadata/_custom_type_script = "uid://jy34cianp7xi"
