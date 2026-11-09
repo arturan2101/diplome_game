@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MeleeWeaponData" format=3 uid="uid://bbblvshpl8u70"]
+
+[ext_resource type="Script" uid="uid://nuho2ph11shq" path="res://combat/weapons/melee_weapon_data.gd" id="1_dljjw"]
+[ext_resource type="PackedScene" uid="uid://bfgh1odevltxd" path="res://combat/weapons/melee_weapon.tscn" id="2_03pyg"]
+
+[resource]
+script = ExtResource("1_dljjw")
+id = &"sword"
+display_name = "Sword"
+weapon_scene = ExtResource("2_03pyg")
+metadata/_custom_type_script = "uid://nuho2ph11shq"

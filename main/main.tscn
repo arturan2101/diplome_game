@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://clx07jmctk3k4"]
 
+[ext_resource type="PackedScene" uid="uid://dqytegvmgnaim" path="res://actors/enemies/training_dummy.tscn" id="1_c651c"]
 [ext_resource type="PackedScene" uid="uid://d086msg16gvvh" path="res://actors/player/player.tscn" id="1_pjrb6"]
 [ext_resource type="Script" uid="uid://di3pkn0s3mymi" path="res://actors/placeholder_shape.gd" id="2_xwkvk"]
 [ext_resource type="Script" uid="uid://bp2xjhxfnu8nw" path="res://ui/touch_joystick.gd" id="3_xwkvk"]
@@ -8,6 +9,12 @@
 size = Vector2(16, 96)
 
 [node name="Main" type="Node2D" unique_id=1844842302]
+
+[node name="TrainingDummy2" parent="." unique_id=1620336158 instance=ExtResource("1_c651c")]
+position = Vector2(360, 120)
+
+[node name="TrainingDummy" parent="." unique_id=869666450 instance=ExtResource("1_c651c")]
+position = Vector2(436, 180)
 
 [node name="Player" parent="." unique_id=282258107 instance=ExtResource("1_pjrb6")]
 position = Vector2(320, 180)

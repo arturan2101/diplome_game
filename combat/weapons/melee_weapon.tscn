@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://bfgh1odevltxd"]
+
+[ext_resource type="Script" uid="uid://b5bntoswx5tlc" path="res://combat/weapons/melee_weapon.gd" id="1_tct8c"]
+
+[node name="MeleeWeapon" type="Node2D" unique_id=1231685946]
+script = ExtResource("1_tct8c")
+metadata/_custom_type_script = "uid://b5bntoswx5tlc"
