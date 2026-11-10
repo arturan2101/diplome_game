@@ -118,6 +118,37 @@ func _initialize() -> void:
 	await _physics_frames(40)
 	_check(_performed[-1] == Vector2i(0, 0) and _count_arrows() == 0, "arrow disappears after its range")
 
+	# Putting a drawn bow away: the slowdown ends at once and no arrow comes out.
+	await _physics_frames(COOLDOWN_FRAMES)
+	var shots_before_cancel: int = _performed.size()
+	bow.try_attack(Vector2.RIGHT)
+	await _physics_frames(40)
+	bow.set_active(false)
+	_check(is_equal_approx(bow.get_move_speed_multiplier(), 1.0), "putting the bow away ends the slowdown at once")
+	bow.release_attack(Vector2.RIGHT)
+	bow.set_active(true)
+	bow.release_attack(Vector2.RIGHT)
+	await _physics_frames(FLIGHT_FRAMES)
+	_check(_performed.size() == shots_before_cancel and _count_arrows() == 0, "cancelled draw shoots nothing")
+
+	# An inactive bow ignores presses.
+	bow.set_active(false)
+	bow.try_attack(Vector2.RIGHT)
+	await _physics_frames(20)
+	_check(is_equal_approx(bow.get_draw_progress(), 0.0), "inactive bow ignores presses")
+
+	# The cooldown keeps running while the bow is put away.
+	bow.set_active(true)
+	bow.try_attack(Vector2.RIGHT)
+	bow.release_attack(Vector2.RIGHT)
+	bow.set_active(false)
+	await _physics_frames(COOLDOWN_FRAMES)
+	bow.set_active(true)
+	bow.try_attack(Vector2.RIGHT)
+	bow.release_attack(Vector2.RIGHT)
+	await _physics_frames(FLIGHT_FRAMES)
+	_check(_performed.size() == shots_before_cancel + 2, "cooldown keeps running while the bow is put away")
+
 	# The bow is freed while its arrow flies: no error, the arrow still hits.
 	await _physics_frames(COOLDOWN_FRAMES)
 	var shots_before_free: int = _performed.size()

@@ -94,6 +94,38 @@ func _initialize() -> void:
 	_check(_damage_taken(behind) == 0, "target behind the wielder is never hit")
 	_check(_damage_taken(far) == 0, "target out of reach is never hit")
 
+	# Putting the sword away mid-swing: the hit already landed stays, nothing more is hit.
+	await _physics_frames(20)
+	var performed_before_cancel: int = _performed.size()
+	var damage_before_cancel: int = _damage_taken(front)
+	weapon.try_attack(Vector2.RIGHT)
+	await _physics_frames(1)
+	weapon.set_active(false)
+	_check(_performed.size() == performed_before_cancel + 1 and _performed[-1].y == 1,
+			"interrupted swing is reported with the hits it landed")
+	var late: Hurtbox = _add_target(WIELDER_POSITION + Vector2(20.0, -12.0))
+	await _physics_frames(10)
+	_check(_damage_taken(late) == 0, "cancelled swing hits nothing more")
+	_check(_damage_taken(front) > damage_before_cancel, "damage dealt before the cancel stays")
+
+	# An inactive weapon ignores presses (wait until it is no longer busy, so only
+	# the inactive state can block the press).
+	await _physics_frames(20)
+	var performed_while_inactive: int = _performed.size()
+	weapon.try_attack(Vector2.RIGHT)
+	await _physics_frames(30)
+	_check(_performed.size() == performed_while_inactive, "inactive weapon ignores attacks")
+
+	# Back in hand: the combo starts over, and a buffered press is dropped by a swap.
+	weapon.set_active(true)
+	weapon.try_attack(Vector2.RIGHT)
+	await _physics_frames(14)
+	weapon.try_attack(Vector2.RIGHT)
+	weapon.set_active(false)
+	await _physics_frames(30)
+	_check(_performed.size() == performed_while_inactive + 1 and _performed[-1].x == 0,
+			"combo starts over after a swap and the buffered press is dropped")
+
 	print("ALL PASSED" if _failures == 0 else "%d FAILED" % _failures)
 	quit(_failures)
 

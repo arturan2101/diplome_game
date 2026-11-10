@@ -48,7 +48,20 @@ func setup(weapon_data: WeaponData, weapon_wielder: Node2D) -> void:
 	_query.collide_with_bodies = false
 
 
-func try_attack(direction: Vector2) -> void:
+## Stops the swing: no more hits from it and no buffered press; the combo starts over.
+## Damage already dealt stays, and the busy time keeps running, so swapping weapons
+## back and forth cannot skip it.
+func cancel_attack() -> void:
+	if _active_left > 0.0:
+		_active_left = 0.0
+		# Report the interrupted swing with the hits it managed to land.
+		attack_performed.emit(_step_index, _hit_this_step.size())
+		queue_redraw()
+	_has_buffered_press = false
+	_next_step_index = 0
+
+
+func _on_attack_pressed(direction: Vector2) -> void:
 	if _stats == null or direction.is_zero_approx():
 		return
 	if _busy_left > 0.0:

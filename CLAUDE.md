@@ -36,6 +36,7 @@ Full design document: docs/design.md. Read it before any larger task.
 - Keep scripts small and focused. One class per file.
 - 2D physics layers: 1 world, 2 player, 3 enemies, 4 player_hurtbox, 5 enemy_hurtbox. Weapons find targets by hurtbox layer and check line of sight against the world layer.
 - Damage always travels as a `DamageInfo` (amount, source node, source_id = weapon id or enemy type, knockback velocity): attacker → `Hurtbox.receive_hit()` → `Health.take_damage()` → signals `damaged(info)` / `died(info)`; `Hurtbox.hit_received(info)` lets the owner react (knockback). Telemetry relies on source_id and on `Weapon.attack_performed(step_index, hits)` for accuracy.
+- New weapons extend `Weapon` and override `_on_attack_pressed`, `_on_attack_released`, `cancel_attack` and, if needed, `get_move_speed_multiplier`. The public `try_attack` / `release_attack` check `is_active` in the base class, so an inactive weapon (other slot) never attacks; its cooldowns keep running.
 
 ## Game design summary (see docs/design.md for details)
 

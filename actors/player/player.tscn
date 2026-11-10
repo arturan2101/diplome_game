@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://d086msg16gvvh"]
 
 [ext_resource type="Script" uid="uid://cudcxsst6v8xw" path="res://actors/player/player.gd" id="1_ilk7j"]
+[ext_resource type="Script" uid="uid://dw08xqnneqah7" path="res://combat/weapons/weapon_data.gd" id="2_6p1w3"]
 [ext_resource type="Script" uid="uid://di3pkn0s3mymi" path="res://actors/placeholder_shape.gd" id="2_ax26v"]
-[ext_resource type="Resource" uid="uid://beg6e5fr0poiv" path="res://combat/weapons/bow.tres" id="2_lsqbn"]
+[ext_resource type="Resource" uid="uid://bbblvshpl8u70" path="res://combat/weapons/sword.tres" id="2_lsqbn"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ndusb"]
 radius = 6.0
@@ -11,7 +12,7 @@ radius = 6.0
 collision_layer = 2
 collision_mask = 5
 script = ExtResource("1_ilk7j")
-starting_weapon = ExtResource("2_lsqbn")
+starting_weapons = Array[ExtResource("2_6p1w3")]([ExtResource("2_lsqbn")])
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1846017841]
 shape = SubResource("CircleShape2D_ndusb")

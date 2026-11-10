@@ -26,14 +26,22 @@ func setup(weapon_data: WeaponData, weapon_wielder: Node2D) -> void:
 		_stats = null
 
 
-func try_attack(_direction: Vector2) -> void:
+## Drops the draw without shooting, so the slowdown ends at once.
+## Arrows already in flight keep flying; the cooldown keeps running.
+func cancel_attack() -> void:
+	_is_holding = false
+	_hold_time = 0.0
+	queue_redraw()
+
+
+func _on_attack_pressed(_direction: Vector2) -> void:
 	if _stats == null:
 		return
 	_is_holding = true
 	_hold_time = 0.0
 
 
-func release_attack(direction: Vector2) -> void:
+func _on_attack_released(direction: Vector2) -> void:
 	if not _is_holding:
 		return
 	var hold: float = _hold_time

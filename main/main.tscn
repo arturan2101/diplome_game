@@ -11,6 +11,9 @@ size = Vector2(16, 96)
 [sub_resource type="CircleShape2D" id="CircleShape2D_ndusb"]
 radius = 28.0
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_4imvi"]
+radius = 20.0
+
 [node name="Main" type="Node2D" unique_id=1844842302]
 
 [node name="TrainingDummy2" parent="." unique_id=1620336158 instance=ExtResource("1_c651c")]
@@ -56,4 +59,16 @@ visibility_mode = 1
 script = ExtResource("2_xwkvk")
 size = Vector2(56, 56)
 color = Color(1, 1, 1, 0.60784316)
+metadata/_custom_type_script = "uid://di3pkn0s3mymi"
+
+[node name="SwapButton" type="TouchScreenButton" parent="HUD" unique_id=1150824451]
+position = Vector2(572, 222)
+shape = SubResource("CircleShape2D_4imvi")
+action = "swap_weapon"
+visibility_mode = 1
+
+[node name="PlaceholderShape" type="Node2D" parent="HUD/SwapButton" unique_id=1893837954]
+script = ExtResource("2_xwkvk")
+size = Vector2(40, 40)
+color = Color(1, 1, 1, 0.45882353)
 metadata/_custom_type_script = "uid://di3pkn0s3mymi"
