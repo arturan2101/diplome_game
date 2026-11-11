@@ -1,0 +1,125 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://ui/hud.gd" id="1"]
+[ext_resource type="Script" path="res://ui/touch_joystick.gd" id="2"]
+[ext_resource type="Script" path="res://actors/placeholder_shape.gd" id="3"]
+
+[sub_resource type="CircleShape2D" id="attack_shape"]
+radius = 28.0
+
+[sub_resource type="CircleShape2D" id="small_shape"]
+radius = 20.0
+
+[node name="HUD" type="CanvasLayer" node_paths=PackedStringArray("hp_bar", "hp_label", "coins_label", "depth_label", "fade")]
+script = ExtResource("1")
+hp_bar = NodePath("Info/HpBar")
+hp_label = NodePath("Info/HpLabel")
+coins_label = NodePath("Info/CoinsLabel")
+depth_label = NodePath("Info/DepthLabel")
+fade = NodePath("Fade")
+
+[node name="TouchJoystick" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 320.0
+grow_vertical = 2
+script = ExtResource("2")
+
+[node name="AttackButton" type="TouchScreenButton" parent="."]
+position = Vector2(572, 292)
+shape = SubResource("attack_shape")
+action = "attack"
+visibility_mode = 1
+
+[node name="PlaceholderShape" type="Node2D" parent="AttackButton"]
+script = ExtResource("3")
+size = Vector2(56, 56)
+color = Color(1, 1, 1, 0.35)
+
+[node name="SwapButton" type="TouchScreenButton" parent="."]
+position = Vector2(572, 222)
+shape = SubResource("small_shape")
+action = "swap_weapon"
+visibility_mode = 1
+
+[node name="PlaceholderShape" type="Node2D" parent="SwapButton"]
+script = ExtResource("3")
+size = Vector2(40, 40)
+color = Color(1, 1, 1, 0.3)
+
+[node name="SkillButton" type="TouchScreenButton" parent="."]
+position = Vector2(508, 316)
+shape = SubResource("small_shape")
+action = "skill"
+visibility_mode = 1
+
+[node name="PlaceholderShape" type="Node2D" parent="SkillButton"]
+script = ExtResource("3")
+size = Vector2(40, 40)
+color = Color(0.6, 0.8, 1, 0.35)
+
+[node name="Info" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="HpBar" type="ProgressBar" parent="Info"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 108.0
+offset_bottom = 20.0
+mouse_filter = 2
+value = 100.0
+show_percentage = false
+
+[node name="HpLabel" type="Label" parent="Info"]
+layout_mode = 0
+offset_left = 114.0
+offset_top = 5.0
+offset_right = 200.0
+offset_bottom = 23.0
+theme_override_font_sizes/font_size = 12
+text = "100 / 100"
+
+[node name="DepthLabel" type="Label" parent="Info"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -110.0
+offset_top = 5.0
+offset_right = 110.0
+offset_bottom = 23.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 12
+text = "Depth 1  -  Section 1"
+horizontal_alignment = 1
+
+[node name="CoinsLabel" type="Label" parent="Info"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -130.0
+offset_top = 5.0
+offset_right = -8.0
+offset_bottom = 23.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 12
+text = "Coins: 0"
+horizontal_alignment = 2
+
+[node name="Fade" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0)

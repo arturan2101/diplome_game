@@ -12,7 +12,7 @@ func _ready() -> void:
 	var total_failures: int = 0
 	var total_checks: int = 0
 	for file_name: String in _test_files():
-		if only != "" and not file_name.contains(only):
+		if not _is_wanted(file_name, only):
 			continue
 		var script: GDScript = load(TESTS_DIR.path_join(file_name)) as GDScript
 		if script == null or not script.can_instantiate():
@@ -45,6 +45,16 @@ func _test_files() -> Array[String]:
 			files.append(file_name)
 	files.sort()
 	return files
+
+
+## only is a comma-separated list of name parts; empty means every test.
+func _is_wanted(file_name: String, only: String) -> bool:
+	if only == "":
+		return true
+	for part: String in only.split(",", false):
+		if file_name.contains(part.strip_edges()):
+			return true
+	return false
 
 
 func _only_filter() -> String:

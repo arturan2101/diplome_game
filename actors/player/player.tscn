@@ -1,15 +1,11 @@
 [gd_scene format=3 uid="uid://d086msg16gvvh"]
 
 [ext_resource type="Script" uid="uid://cudcxsst6v8xw" path="res://actors/player/player.gd" id="1_ilk7j"]
-[ext_resource type="Script" uid="uid://dw08xqnneqah7" path="res://combat/weapons/weapon_data.gd" id="2_6p1w3"]
 [ext_resource type="Texture2D" path="res://assets/sprites/player.tres" id="2_ax26v"]
-[ext_resource type="Resource" uid="uid://bbblvshpl8u70" path="res://combat/weapons/sword.tres" id="2_lsqbn"]
-[ext_resource type="Resource" uid="uid://beg6e5fr0poiv" path="res://combat/weapons/bow.tres" id="4_a744p"]
 [ext_resource type="Script" uid="uid://bech2h0liorq5" path="res://combat/health.gd" id="6_388e2"]
 [ext_resource type="Script" uid="uid://dbyxqej24j4mh" path="res://combat/hurtbox.gd" id="7_lsln6"]
 [ext_resource type="Script" uid="uid://de7swotw4iwdj" path="res://combat/invulnerability_blink.gd" id="8_hiosj"]
 
-[ext_resource type="Resource" path="res://combat/skills/dash.tres" id="9_dash"]
 
 [ext_resource type="Script" path="res://level/hazard_receiver.gd" id="hz_script"]
 [ext_resource type="Resource" path="res://level/hazards.tres" id="hz_data"]
@@ -20,15 +16,14 @@ radius = 6.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_4imvi"]
 radius = 6.0
 
-[node name="Player" type="CharacterBody2D" unique_id=282258107 node_paths=PackedStringArray("health", "hurtbox", "hazards")]
+[node name="Player" type="CharacterBody2D" unique_id=282258107 node_paths=PackedStringArray("health", "hurtbox", "hazards", "camera")]
 collision_layer = 2
 collision_mask = 5
 script = ExtResource("1_ilk7j")
-starting_weapons = Array[ExtResource("2_6p1w3")]([ExtResource("2_lsqbn"), ExtResource("4_a744p")])
-starting_skill = ExtResource("9_dash")
 health = NodePath("Health")
 hurtbox = NodePath("Hurtbox")
 hazards = NodePath("HazardReceiver")
+camera = NodePath("Camera2D")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1846017841]
 shape = SubResource("CircleShape2D_ndusb")
@@ -63,3 +58,7 @@ body = NodePath("..")
 health = NodePath("../Health")
 visual = NodePath("../Sprite")
 data = ExtResource("hz_data")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0

@@ -29,6 +29,8 @@ const GROUP: StringName = &"player"
 @export var hurtbox: Hurtbox
 ## Optional: makes the player react to spikes and pits.
 @export var hazards: HazardReceiver
+## Optional: camera that follows the player and stops at the edges of the Level.
+@export var camera: Camera2D
 ## Physics layers of the hurtboxes auto-aim looks for (enemy_hurtbox).
 @export_flags_2d_physics var aim_target_mask: int = 16
 ## Physics layers that hide a target from auto-aim (world).
@@ -70,6 +72,7 @@ func _ready() -> void:
 		add_weapon(weapon_data)
 	if starting_skill != null:
 		set_skill(starting_skill)
+	update_camera_limits()
 
 
 func _physics_process(delta: float) -> void:
@@ -148,6 +151,39 @@ func get_look_direction() -> Vector2:
 	if target == null:
 		return facing
 	return global_position.direction_to(target.global_position)
+
+
+## Moves the player to a new place at once (start of a section).
+func teleport(new_position: Vector2) -> void:
+	global_position = new_position
+	velocity = Vector2.ZERO
+	if hazards != null:
+		hazards.reset()
+	update_camera_limits()
+	if camera != null:
+		camera.reset_smoothing()
+
+
+## Switches player control off (section change) and back on.
+func set_controls_enabled(enabled: bool) -> void:
+	if not enabled:
+		_stop_acting()
+	elif not health.is_dead() and not (hazards != null and hazards.is_falling()):
+		set_physics_process(true)
+
+
+## Keeps the camera inside the Level the player stands on, if there is one.
+func update_camera_limits() -> void:
+	if camera == null or not is_inside_tree():
+		return
+	var level: Level = get_tree().get_first_node_in_group(Level.GROUP) as Level
+	if level == null or level.grid == null:
+		return
+	var bounds: Rect2 = level.get_bounds()
+	camera.limit_left = int(bounds.position.x)
+	camera.limit_top = int(bounds.position.y)
+	camera.limit_right = int(bounds.end.x)
+	camera.limit_bottom = int(bounds.end.y)
 
 
 ## Called by skills that lift the player off the ground (dash).

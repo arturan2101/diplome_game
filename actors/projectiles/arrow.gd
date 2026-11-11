@@ -7,6 +7,9 @@ extends Node2D
 ## Emitted once when the arrow disappears; hit is true if it damaged a target.
 signal landed(hit: bool)
 
+## Group of all projectiles in flight; the game clears it between sections.
+const GROUP: StringName = &"projectiles"
+
 ## Physics layers of the hurtboxes the arrow damages (enemy_hurtbox).
 @export_flags_2d_physics var target_mask: int = 16
 ## Physics layers that stop the arrow (world).
@@ -30,6 +33,7 @@ func setup(info: DamageInfo, direction: Vector2, speed: float, max_distance: flo
 	_info.direction = _direction
 	_speed = speed
 	_distance_left = max_distance
+	add_to_group(GROUP)
 	rotation = _direction.angle()
 
 

@@ -4,7 +4,7 @@ extends Node
 ## adds it to the tree and awaits run(). Tests add their nodes as children of
 ## themselves, so everything is freed with the test.
 ## Run all:  godot --headless --path . res://tests/run_tests.tscn
-## Run some: godot --headless --path . res://tests/run_tests.tscn -- --only=enemy
+## Run some: godot --headless --path . res://tests/run_tests.tscn -- --only=enemy,level
 
 var failures: int = 0
 var checks: int = 0

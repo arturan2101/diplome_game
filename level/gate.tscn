@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://level/gate.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/portal_closed.tres" id="2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/portal_open.tres" id="3"]
+
+[sub_resource type="CircleShape2D" id="shape"]
+radius = 7.0
+
+[node name="Gate" type="Area2D" node_paths=PackedStringArray("sprite")]
+script = ExtResource("1")
+sprite = NodePath("Sprite")
+closed_texture = ExtResource("2")
+open_texture = ExtResource("3")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("shape")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("2")

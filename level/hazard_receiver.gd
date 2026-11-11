@@ -36,6 +36,12 @@ func is_falling() -> bool:
 	return _is_falling
 
 
+## Forgets the last safe tile (the owner was moved to another place or section).
+func reset() -> void:
+	_has_safe_position = false
+	_spikes_time_left = 0.0
+
+
 func _physics_process(delta: float) -> void:
 	if body == null or health == null or data == null:
 		return

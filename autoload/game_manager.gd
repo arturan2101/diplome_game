@@ -2,6 +2,16 @@ extends Node
 ## Global run state, registered as the autoload "GameManager".
 ## Owns the run seed and every random number generator, so a run can be replayed:
 ## the same seed and the same director decisions produce the same tunnel.
+## Also keeps what belongs to the whole run: section and depth counters, coins,
+## kills, and the loadout chosen before the run.
+
+## Emitted when a new run starts (counters are already reset).
+signal run_started
+## Emitted when the player moves on to the next section.
+signal section_changed(section_index: int, depth: int)
+signal coins_changed(coins: int)
+## Emitted once when the player dies; killing_blow is the last hit.
+signal player_died(killing_blow: DamageInfo)
 
 ## Launch argument that fixes the seed, e.g. `--seed=12345`.
 const SEED_ARG_PREFIX: String = "--seed="
@@ -11,41 +21,37 @@ const RANDOM_SEED: int = -1
 const MAX_RANDOM_SEED: int = 1_000_000_000
 ## Seconds between the player's death and the restart (later: the run-end screen).
 const DEATH_RESTART_DELAY: float = 1.5
+## A depth lasts this many sections (picked per depth from the run seed).
+const MIN_SECTIONS_PER_DEPTH: int = 3
+const MAX_SECTIONS_PER_DEPTH: int = 4
+const DEFAULT_WEAPON: WeaponData = preload("res://combat/weapons/sword.tres")
+const DEFAULT_SKILL: SkillData = preload("res://combat/skills/dash.tres")
 
 ## Seed of the current run. Always written to the log.
 var run_seed: int = 0
 ## Randomness during play (damage spread, drops).
 ## Section generation must use make_section_rng() instead.
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+## Index of the current section in the run, starting at 0.
+var section_index: int = 0
+## Current depth, starting at 0. Grows every 3-4 sections.
+var depth: int = 0
+var coins: int = 0
+var kills: int = 0
+## Loadout chosen before the run (the menu sets these).
+var starting_weapon: WeaponData = DEFAULT_WEAPON
+var starting_skill: SkillData = DEFAULT_SKILL
+## True from the player's death until the next run starts.
+var is_run_over: bool = false
 
-## True between the player's death and the restart, so a second report is ignored.
-var _restart_pending: bool = false
+var _sections_into_depth: int = 0
 
 
 func _ready() -> void:
 	start_run(_seed_from_command_line())
 
 
-## Called by the player when it dies; killing_blow is the last hit.
-## Ends the run: for now a message and a restart; later the run-end screen
-## and the death record in telemetry go here.
-func report_player_death(killing_blow: DamageInfo) -> void:
-	if _restart_pending:
-		return
-	_restart_pending = true
-	print("Player died, killed by %s. Restarting in %.1f s" % [killing_blow.source_id, DEATH_RESTART_DELAY])
-	await get_tree().create_timer(DEATH_RESTART_DELAY).timeout
-	restart_run()
-
-
-## Starts a new run and reloads the level. The seed is new unless --seed= was given.
-func restart_run() -> void:
-	_restart_pending = false
-	start_run(_seed_from_command_line())
-	get_tree().reload_current_scene()
-
-
-## Starts a new run. With RANDOM_SEED a random seed is chosen.
+## Starts a new run: new seed (RANDOM_SEED picks a random one) and fresh counters.
 func start_run(new_seed: int = RANDOM_SEED) -> void:
 	if new_seed == RANDOM_SEED:
 		var seeder: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -53,15 +59,71 @@ func start_run(new_seed: int = RANDOM_SEED) -> void:
 		new_seed = seeder.randi_range(0, MAX_RANDOM_SEED - 1)
 	run_seed = new_seed
 	rng.seed = run_seed
+	section_index = 0
+	depth = 0
+	coins = 0
+	kills = 0
+	is_run_over = false
+	_sections_into_depth = 0
 	print("Run seed: %d" % run_seed)
+	run_started.emit()
+	coins_changed.emit(coins)
+
+
+## Starts a new run and reloads the current scene. The seed is new unless --seed= was given.
+func restart_run() -> void:
+	start_run(_seed_from_command_line())
+	get_tree().reload_current_scene()
+
+
+## Called by the game scene when the player goes through a gate.
+func advance_section() -> void:
+	section_index += 1
+	_sections_into_depth += 1
+	if _sections_into_depth >= sections_in_depth(depth):
+		depth += 1
+		_sections_into_depth = 0
+	section_changed.emit(section_index, depth)
+
+
+## How many sections the given depth has: 3 or 4, fixed by the run seed.
+func sections_in_depth(depth_index: int) -> int:
+	var spread: int = MAX_SECTIONS_PER_DEPTH - MIN_SECTIONS_PER_DEPTH + 1
+	return MIN_SECTIONS_PER_DEPTH + absi(hash([run_seed, "depth", depth_index])) % spread
+
+
+func add_coins(amount: int) -> void:
+	coins += amount
+	coins_changed.emit(coins)
+
+
+func add_kill() -> void:
+	kills += 1
+
+
+## Called by the player when it dies; killing_blow is the last hit.
+## The run is over; listeners (game scene, telemetry) react to player_died.
+func report_player_death(killing_blow: DamageInfo) -> void:
+	if is_run_over:
+		return
+	is_run_over = true
+	player_died.emit(killing_blow)
 
 
 ## Returns a new generator for building one section. It depends only on the run seed
 ## and the section index, so randomness used in combat never changes a section.
-func make_section_rng(section_index: int) -> RandomNumberGenerator:
+func make_section_rng(index: int) -> RandomNumberGenerator:
 	var section_rng: RandomNumberGenerator = RandomNumberGenerator.new()
-	section_rng.seed = hash([run_seed, section_index])
+	section_rng.seed = hash([run_seed, index])
 	return section_rng
+
+
+## Returns a new generator for the director's choices about one section.
+## Separate from the section generator, so both stay reproducible on their own.
+func make_director_rng(index: int) -> RandomNumberGenerator:
+	var director_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	director_rng.seed = hash([run_seed, "director", index])
+	return director_rng
 
 
 ## Reads --seed=N from the launch arguments, or returns RANDOM_SEED if it is absent.
