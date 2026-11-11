@@ -1,0 +1,53 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/death_screen.gd" id="1"]
+
+[node name="DeathScreen" type="CanvasLayer" node_paths=PackedStringArray("panel", "stats_label", "again_button", "menu_button")]
+layer = 10
+script = ExtResource("1")
+panel = NodePath("Panel")
+stats_label = NodePath("Panel/Center/Box/Stats")
+again_button = NodePath("Panel/Center/Box/AgainButton")
+menu_button = NodePath("Panel/Center/Box/MenuButton")
+
+[node name="Panel" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="Center" type="CenterContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Box" type="VBoxContainer" parent="Panel/Center"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Panel/Center/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "You died"
+horizontal_alignment = 1
+
+[node name="Stats" type="Label" parent="Panel/Center/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Depth reached: 1"
+horizontal_alignment = 1
+
+[node name="AgainButton" type="Button" parent="Panel/Center/Box"]
+custom_minimum_size = Vector2(160, 32)
+layout_mode = 2
+text = "Play again"
+
+[node name="MenuButton" type="Button" parent="Panel/Center/Box"]
+custom_minimum_size = Vector2(160, 32)
+layout_mode = 2
+text = "Menu"

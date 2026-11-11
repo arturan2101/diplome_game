@@ -25,9 +25,10 @@ const BOT_ARG: String = "--bot"
 @export var level: Level
 @export var player: Player
 @export var hud: Hud
-## Reload the scene with a new run a moment after the player dies.
-## Tests switch it off; the death screen will replace it.
-@export var restart_on_death: bool = true
+@export var death_screen: DeathScreen
+@export var pause_menu: PauseMenu
+## Show the death screen when the player dies. Tests and simulations switch it off.
+@export var death_screen_enabled: bool = true
 
 var plan: SectionPlan = null
 var layout: SectionLayout = null
@@ -46,10 +47,17 @@ func _ready() -> void:
 	player.add_weapon(GameManager.starting_weapon)
 	player.set_skill(GameManager.starting_skill)
 	hud.bind_player(player)
+	if pause_menu != null:
+		hud.pause_pressed.connect(pause_menu.toggle)
 	GameManager.player_died.connect(_on_player_died)
 	if BOT_ARG in OS.get_cmdline_user_args():
 		add_bot()
 	_start_section()
+
+
+func _physics_process(delta: float) -> void:
+	if not GameManager.is_run_over:
+		GameManager.run_time += delta
 
 
 ## Lets the bot play this run (headless simulations and tests).
@@ -178,7 +186,7 @@ func _on_gate_entered(_player: Player) -> void:
 
 func _on_player_died(_killing_blow: DamageInfo) -> void:
 	Telemetry.end_section(true)
-	if not restart_on_death:
+	if not death_screen_enabled or death_screen == null:
 		return
-	await get_tree().create_timer(GameManager.DEATH_RESTART_DELAY).timeout
-	GameManager.restart_run()
+	await get_tree().create_timer(GameManager.DEATH_SCREEN_DELAY).timeout
+	death_screen.show_summary(GameManager.get_run_summary())

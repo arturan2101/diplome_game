@@ -111,7 +111,7 @@ func _test_bot_clears_section() -> void:
 func _start_game(run_seed: int) -> Game:
 	GameManager.start_run(run_seed)
 	var game: Game = (load(GAME_SCENE) as PackedScene).instantiate() as Game
-	game.restart_on_death = false
+	game.death_screen_enabled = false
 	add_child(game)
 	return game
 

@@ -50,7 +50,7 @@ func _ready() -> void:
 func _play_run(run_seed: int) -> int:
 	GameManager.start_run(run_seed)
 	var game: Game = GAME_SCENE.instantiate() as Game
-	game.restart_on_death = false
+	game.death_screen_enabled = false
 	add_child(game)
 	game.add_bot()
 	var time_left: float = RUN_TIME_LIMIT

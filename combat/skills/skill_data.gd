@@ -5,6 +5,8 @@ extends Resource
 ## Stable id used in logs and telemetry, e.g. &"dash".
 @export var id: StringName = &""
 @export var display_name: String = ""
+## Small picture for the HUD and the menu.
+@export var icon: Texture2D
 ## Seconds after the skill ends before it can be used again.
 @export var cooldown: float = 1.0
 ## Scene with the skill behaviour (root node is a Skill), created when the run starts.

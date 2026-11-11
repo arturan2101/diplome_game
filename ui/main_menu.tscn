@@ -1,0 +1,150 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://ui/main_menu.gd" id="1"]
+[ext_resource type="Script" path="res://combat/weapons/weapon_data.gd" id="2"]
+[ext_resource type="Resource" path="res://combat/weapons/sword.tres" id="3"]
+[ext_resource type="Resource" path="res://combat/weapons/bow.tres" id="4"]
+[ext_resource type="Script" path="res://combat/skills/skill_data.gd" id="5"]
+[ext_resource type="Resource" path="res://combat/skills/dash.tres" id="6"]
+[ext_resource type="Resource" path="res://combat/skills/block.tres" id="7"]
+
+[node name="MainMenu" type="Control" node_paths=PackedStringArray("title_screen", "loadout_screen", "title_label", "play_button", "quit_button", "weapon_row", "skill_row", "start_button", "back_button", "debug_panel", "mode_option", "seed_edit")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+weapons = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4")])
+skills = Array[ExtResource("5")]([ExtResource("6"), ExtResource("7")])
+title_screen = NodePath("TitleScreen")
+loadout_screen = NodePath("LoadoutScreen")
+title_label = NodePath("TitleScreen/Box/Title")
+play_button = NodePath("TitleScreen/Box/PlayButton")
+quit_button = NodePath("TitleScreen/Box/QuitButton")
+weapon_row = NodePath("LoadoutScreen/Box/WeaponRow")
+skill_row = NodePath("LoadoutScreen/Box/SkillRow")
+start_button = NodePath("LoadoutScreen/Box/StartButton")
+back_button = NodePath("LoadoutScreen/Box/BackButton")
+debug_panel = NodePath("DebugPanel")
+mode_option = NodePath("DebugPanel/Box/ModeOption")
+seed_edit = NodePath("DebugPanel/Box/SeedEdit")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.07, 0.055, 0.09, 1)
+
+[node name="TitleScreen" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Box" type="VBoxContainer" parent="TitleScreen"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="TitleScreen/Box"]
+layout_mode = 2
+mouse_filter = 0
+theme_override_colors/font_color = Color(0.93, 0.78, 0.5, 1)
+theme_override_font_sizes/font_size = 56
+text = "RUINS"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="TitleScreen/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "tunnels of the ancient ruins"
+horizontal_alignment = 1
+
+[node name="PlayButton" type="Button" parent="TitleScreen/Box"]
+custom_minimum_size = Vector2(160, 36)
+layout_mode = 2
+text = "Play"
+
+[node name="QuitButton" type="Button" parent="TitleScreen/Box"]
+custom_minimum_size = Vector2(160, 32)
+layout_mode = 2
+text = "Quit"
+
+[node name="LoadoutScreen" type="CenterContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Box" type="VBoxContainer" parent="LoadoutScreen"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="WeaponLabel" type="Label" parent="LoadoutScreen/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Starting weapon"
+horizontal_alignment = 1
+
+[node name="WeaponRow" type="HBoxContainer" parent="LoadoutScreen/Box"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="SkillLabel" type="Label" parent="LoadoutScreen/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Basic skill"
+horizontal_alignment = 1
+
+[node name="SkillRow" type="HBoxContainer" parent="LoadoutScreen/Box"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="StartButton" type="Button" parent="LoadoutScreen/Box"]
+custom_minimum_size = Vector2(160, 36)
+layout_mode = 2
+text = "Start run"
+
+[node name="BackButton" type="Button" parent="LoadoutScreen/Box"]
+custom_minimum_size = Vector2(160, 28)
+layout_mode = 2
+text = "Back"
+
+[node name="DebugPanel" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -100.0
+offset_right = 188.0
+offset_bottom = -8.0
+grow_vertical = 0
+
+[node name="Box" type="VBoxContainer" parent="DebugPanel"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="DebugPanel/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Experiment: mode and seed"
+
+[node name="ModeOption" type="OptionButton" parent="DebugPanel/Box"]
+layout_mode = 2
+
+[node name="SeedEdit" type="LineEdit" parent="DebugPanel/Box"]
+layout_mode = 2
+placeholder_text = "seed (empty = random)"

@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="MeleeWeaponData" format=3 uid="uid://bbblvshpl8u70"]
 
+[ext_resource type="Texture2D" path="res://assets/sprites/sword_icon.tres" id="icon_tex"]
 [ext_resource type="Script" uid="uid://nuho2ph11shq" path="res://combat/weapons/melee_weapon_data.gd" id="1_dljjw"]
 [ext_resource type="Script" uid="uid://dqcnjt2pkdxkd" path="res://combat/weapons/melee_attack_step.gd" id="1_f8ocv"]
 [ext_resource type="PackedScene" uid="uid://bfgh1odevltxd" path="res://combat/weapons/melee_weapon.tscn" id="2_03pyg"]
@@ -26,6 +27,7 @@ metadata/_custom_type_script = "uid://dqcnjt2pkdxkd"
 script = ExtResource("1_dljjw")
 combo = Array[ExtResource("1_f8ocv")]([SubResource("Resource_03pyg"), SubResource("Resource_f8ocv"), SubResource("Resource_qg0wa")])
 id = &"sword"
+icon = ExtResource("icon_tex")
 display_name = "Sword"
 auto_aim_radius = 48.0
 weapon_scene = ExtResource("2_03pyg")

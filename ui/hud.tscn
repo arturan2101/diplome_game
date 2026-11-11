@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://ui/hud.gd" id="1"]
 [ext_resource type="Script" path="res://ui/touch_joystick.gd" id="2"]
 [ext_resource type="Script" path="res://actors/placeholder_shape.gd" id="3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/coin.tres" id="4"]
 
 [sub_resource type="CircleShape2D" id="attack_shape"]
 radius = 28.0
@@ -10,21 +11,36 @@ radius = 28.0
 [sub_resource type="CircleShape2D" id="small_shape"]
 radius = 20.0
 
-[node name="HUD" type="CanvasLayer" node_paths=PackedStringArray("hp_bar", "hp_label", "coins_label", "depth_label", "fade")]
+[sub_resource type="StyleBoxFlat" id="hp_fill"]
+bg_color = Color(0.85, 0.22, 0.22, 1)
+
+[sub_resource type="StyleBoxFlat" id="hp_back"]
+bg_color = Color(0.1, 0.08, 0.12, 0.85)
+
+[node name="HUD" type="CanvasLayer" node_paths=PackedStringArray("hp_bar", "hp_label", "coins_label", "depth_label", "weapon_icons", "skill_icon", "skill_cooldown", "pause_button", "attack_button_icon", "swap_button_icon", "skill_button_icon", "fade")]
 script = ExtResource("1")
 hp_bar = NodePath("Info/HpBar")
 hp_label = NodePath("Info/HpLabel")
 coins_label = NodePath("Info/CoinsLabel")
 depth_label = NodePath("Info/DepthLabel")
+weapon_icons = [NodePath("Info/Weapon1"), NodePath("Info/Weapon2")]
+skill_icon = NodePath("Info/Skill")
+skill_cooldown = NodePath("Info/Skill/Cooldown")
+pause_button = NodePath("Info/PauseButton")
+attack_button_icon = NodePath("AttackButton/Icon")
+swap_button_icon = NodePath("SwapButton/Icon")
+skill_button_icon = NodePath("SkillButton/Icon")
 fade = NodePath("Fade")
 
 [node name="TouchJoystick" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 9
 anchor_bottom = 1.0
+offset_top = 60.0
 offset_right = 320.0
 grow_vertical = 2
 script = ExtResource("2")
+rest_position = Vector2(96, 196)
 
 [node name="AttackButton" type="TouchScreenButton" parent="."]
 position = Vector2(572, 292)
@@ -35,7 +51,11 @@ visibility_mode = 1
 [node name="PlaceholderShape" type="Node2D" parent="AttackButton"]
 script = ExtResource("3")
 size = Vector2(56, 56)
-color = Color(1, 1, 1, 0.35)
+color = Color(1, 1, 1, 0.3)
+
+[node name="Icon" type="Sprite2D" parent="AttackButton"]
+modulate = Color(1, 1, 1, 0.85)
+scale = Vector2(2, 2)
 
 [node name="SwapButton" type="TouchScreenButton" parent="."]
 position = Vector2(572, 222)
@@ -46,7 +66,11 @@ visibility_mode = 1
 [node name="PlaceholderShape" type="Node2D" parent="SwapButton"]
 script = ExtResource("3")
 size = Vector2(40, 40)
-color = Color(1, 1, 1, 0.3)
+color = Color(1, 1, 1, 0.25)
+
+[node name="Icon" type="Sprite2D" parent="SwapButton"]
+modulate = Color(1, 1, 1, 0.85)
+scale = Vector2(1.5, 1.5)
 
 [node name="SkillButton" type="TouchScreenButton" parent="."]
 position = Vector2(508, 316)
@@ -57,7 +81,11 @@ visibility_mode = 1
 [node name="PlaceholderShape" type="Node2D" parent="SkillButton"]
 script = ExtResource("3")
 size = Vector2(40, 40)
-color = Color(0.6, 0.8, 1, 0.35)
+color = Color(0.6, 0.8, 1, 0.3)
+
+[node name="Icon" type="Sprite2D" parent="SkillButton"]
+modulate = Color(1, 1, 1, 0.85)
+scale = Vector2(1.5, 1.5)
 
 [node name="Info" type="Control" parent="."]
 layout_mode = 3
@@ -75,6 +103,8 @@ offset_top = 8.0
 offset_right = 108.0
 offset_bottom = 20.0
 mouse_filter = 2
+theme_override_styles/background = SubResource("hp_back")
+theme_override_styles/fill = SubResource("hp_fill")
 value = 100.0
 show_percentage = false
 
@@ -86,6 +116,47 @@ offset_right = 200.0
 offset_bottom = 23.0
 theme_override_font_sizes/font_size = 12
 text = "100 / 100"
+
+[node name="Weapon1" type="TextureRect" parent="Info"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 26.0
+offset_right = 32.0
+offset_bottom = 50.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Weapon2" type="TextureRect" parent="Info"]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 26.0
+offset_right = 60.0
+offset_bottom = 50.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Skill" type="TextureRect" parent="Info"]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 26.0
+offset_right = 96.0
+offset_bottom = 50.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Cooldown" type="ColorRect" parent="Info/Skill"]
+layout_mode = 1
+anchors_preset = 15
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.65)
 
 [node name="DepthLabel" type="Label" parent="Info"]
 layout_mode = 1
@@ -101,19 +172,45 @@ theme_override_font_sizes/font_size = 12
 text = "Depth 1  -  Section 1"
 horizontal_alignment = 1
 
+[node name="CoinIcon" type="TextureRect" parent="Info"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -96.0
+offset_top = 6.0
+offset_right = -80.0
+offset_bottom = 22.0
+grow_horizontal = 0
+mouse_filter = 2
+texture = ExtResource("4")
+
 [node name="CoinsLabel" type="Label" parent="Info"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -130.0
+offset_left = -78.0
 offset_top = 5.0
-offset_right = -8.0
+offset_right = -40.0
 offset_bottom = 23.0
 grow_horizontal = 0
 theme_override_font_sizes/font_size = 12
-text = "Coins: 0"
-horizontal_alignment = 2
+text = "0"
+
+[node name="PauseButton" type="Button" parent="Info"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -34.0
+offset_top = 4.0
+offset_right = -6.0
+offset_bottom = 28.0
+grow_horizontal = 0
+focus_mode = 0
+theme_override_font_sizes/font_size = 12
+text = "II"
 
 [node name="Fade" type="ColorRect" parent="."]
 anchors_preset = 15

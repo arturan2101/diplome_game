@@ -24,8 +24,8 @@ const SEED_ARG_PREFIX: String = "--seed="
 const RANDOM_SEED: int = -1
 ## Random seeds are picked below this value, so they stay short to type and log.
 const MAX_RANDOM_SEED: int = 1_000_000_000
-## Seconds between the player's death and the restart (later: the run-end screen).
-const DEATH_RESTART_DELAY: float = 1.5
+## Seconds between the player's death and the death screen.
+const DEATH_SCREEN_DELAY: float = 1.0
 ## A depth lasts this many sections (picked per depth from the run seed).
 const MIN_SECTIONS_PER_DEPTH: int = 3
 const MAX_SECTIONS_PER_DEPTH: int = 4
@@ -34,6 +34,9 @@ const DEFAULT_SKILL: SkillData = preload("res://combat/skills/dash.tres")
 
 ## Director mode of the next runs (debug menu or --mode=).
 var director_mode: DirectorMode = DirectorMode.RULES
+## Seed for the next runs: from --seed= or the debug menu. RANDOM_SEED = a new random
+## seed for every run.
+var forced_seed: int = RANDOM_SEED
 ## Seed of the current run. Always written to the log.
 var run_seed: int = 0
 ## Randomness during play (damage spread, drops).
@@ -45,6 +48,8 @@ var section_index: int = 0
 var depth: int = 0
 var coins: int = 0
 var kills: int = 0
+## Seconds played in the current run (the game scene adds to it).
+var run_time: float = 0.0
 ## Loadout chosen before the run (the menu sets these).
 var starting_weapon: WeaponData = DEFAULT_WEAPON
 var starting_skill: SkillData = DEFAULT_SKILL
@@ -56,7 +61,8 @@ var _sections_into_depth: int = 0
 
 func _ready() -> void:
 	director_mode = _mode_from_command_line()
-	start_run(_seed_from_command_line())
+	forced_seed = _seed_from_command_line()
+	start_run()
 
 
 ## A new director for the current mode. The game asks for one per run.
@@ -74,8 +80,11 @@ func get_mode_name() -> String:
 	return DirectorMode.keys()[director_mode]
 
 
-## Starts a new run: new seed (RANDOM_SEED picks a random one) and fresh counters.
+## Starts a new run with fresh counters. Without an argument the seed is forced_seed,
+## or a random one if no seed is forced.
 func start_run(new_seed: int = RANDOM_SEED) -> void:
+	if new_seed == RANDOM_SEED:
+		new_seed = forced_seed
 	if new_seed == RANDOM_SEED:
 		var seeder: RandomNumberGenerator = RandomNumberGenerator.new()
 		seeder.randomize()
@@ -86,6 +95,7 @@ func start_run(new_seed: int = RANDOM_SEED) -> void:
 	depth = 0
 	coins = 0
 	kills = 0
+	run_time = 0.0
 	is_run_over = false
 	_sections_into_depth = 0
 	print("Run seed: %d" % run_seed)
@@ -93,10 +103,22 @@ func start_run(new_seed: int = RANDOM_SEED) -> void:
 	coins_changed.emit(coins)
 
 
-## Starts a new run and reloads the current scene. The seed is new unless --seed= was given.
+## Starts a new run and reloads the current scene (the "play again" button).
 func restart_run() -> void:
-	start_run(_seed_from_command_line())
+	start_run()
 	get_tree().reload_current_scene()
+
+
+## Results of the current run for the death screen.
+func get_run_summary() -> Dictionary:
+	return {
+		"seed": run_seed,
+		"depth": depth,
+		"sections": section_index,
+		"time": run_time,
+		"kills": kills,
+		"coins": coins,
+	}
 
 
 ## Called by the game scene when the player goes through a gate.
