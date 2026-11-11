@@ -30,8 +30,10 @@ var _busy_left: float = 0.0
 var _idle_time: float = 0.0
 var _has_buffered_press: bool = false
 var _buffered_direction: Vector2 = Vector2.RIGHT
-## Hurtboxes already damaged by the current step.
+## Hurtboxes already touched by the current step (each is tried once).
 var _hit_this_step: Array[Hurtbox] = []
+## How many of them accepted the damage; reported for accuracy.
+var _hits_landed: int = 0
 
 
 func setup(weapon_data: WeaponData, weapon_wielder: Node2D, damage_source_id: StringName = &"") -> void:
@@ -55,7 +57,7 @@ func cancel_attack() -> void:
 	if _active_left > 0.0:
 		_active_left = 0.0
 		# Report the interrupted swing with the hits it managed to land.
-		attack_performed.emit(_step_index, _hit_this_step.size())
+		attack_performed.emit(_step_index, _hits_landed)
 		queue_redraw()
 	_has_buffered_press = false
 	_next_step_index = 0
@@ -79,7 +81,7 @@ func _physics_process(delta: float) -> void:
 		_hit_targets_in_arc()
 		_active_left -= delta
 		if _active_left <= 0.0:
-			attack_performed.emit(_step_index, _hit_this_step.size())
+			attack_performed.emit(_step_index, _hits_landed)
 			queue_redraw()
 	if _busy_left > 0.0:
 		_busy_left -= delta
@@ -117,6 +119,7 @@ func _start_step(direction: Vector2) -> void:
 	_idle_time = 0.0
 	_reach_shape.radius = _step.reach
 	_hit_this_step.clear()
+	_hits_landed = 0
 	queue_redraw()
 
 
@@ -135,7 +138,8 @@ func _hit_targets_in_arc() -> void:
 		var push_direction: Vector2 = (hurtbox.global_position - global_position).normalized()
 		if push_direction.is_zero_approx():
 			push_direction = _swing_direction
-		hurtbox.receive_hit(DamageInfo.new(_step.damage, wielder, source_id, push_direction * _step.knockback))
+		if hurtbox.receive_hit(DamageInfo.new(_step.damage, wielder, source_id, push_direction * _step.knockback)):
+			_hits_landed += 1
 
 
 func _is_in_arc(target_position: Vector2) -> bool:

@@ -16,8 +16,10 @@ func _ready() -> void:
 		push_warning("Hurtbox %s has no Health assigned" % get_path())
 
 
-func receive_hit(info: DamageInfo) -> void:
-	# An absorbed hit (invulnerable or dead owner) has no effect at all, not even knockback.
+## Returns true if the hit was accepted. An absorbed hit (invulnerable or dead owner)
+## has no effect at all, not even knockback.
+func receive_hit(info: DamageInfo) -> bool:
 	if health != null and not health.take_damage(info):
-		return
+		return false
 	hit_received.emit(info)
+	return true

@@ -10,7 +10,6 @@ signal weapon_changed(slot: int, data: WeaponData)
 const WEAPON_SLOT_COUNT: int = 2
 ## Group the player is in; enemies find their target through it.
 const GROUP: StringName = &"player"
-const GAME_MANAGER_PATH: NodePath = ^"/root/GameManager"
 
 ## Maximum speed in pixels per second.
 @export var move_speed: float = 90.0
@@ -117,9 +116,7 @@ func _on_died(info: DamageInfo) -> void:
 	velocity = Vector2.ZERO
 	if weapon != null:
 		weapon.cancel_attack()
-	# Looked up by path, not by the autoload name: headless tests (--script) compile this
-	# script before autoloads are registered, so the name GameManager would not resolve.
-	get_node(GAME_MANAGER_PATH).report_player_death(info)
+	GameManager.report_player_death(info)
 
 
 func _activate_slot(slot: int) -> void:

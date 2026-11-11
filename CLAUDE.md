@@ -100,9 +100,9 @@ Always build the core first. Do not implement nice-to-have features unless I ask
 ## Testing
 
 - After each task the project must open and run in Godot without errors in the Output panel.
-- Logic that does not need the scene (director formulas, parsing room templates, BFS, spell combination table) should be testable headless, e.g. `godot --headless --script res://tests/<test>.gd` or with GUT if I add it.
+- Logic that does not need the scene (director formulas, parsing room templates, BFS, spell combination table) should be testable headless (see the test runner below).
 - Generation: the same seed must produce the same section.
-- Headless tests run with `--script`, which compiles scripts before autoloads are registered. Scripts that tests load must not use autoload names as identifiers; get them by path (`get_node(^"/root/GameManager")`).
+- Headless tests live in `res://tests/test_*.gd` (each extends `TestCase`) and run through a scene, so autoload names work: `godot --headless --path . res://tests/run_tests.tscn` (add `-- --only=<part of file name>` to run some). Do not run tests with `--script`: it compiles scripts before autoloads are registered.
 
 ## AI usage log
 

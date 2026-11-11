@@ -1,9 +1,7 @@
-extends SceneTree
+extends TestCase
 ## Headless test for BowWeapon and Arrow: tap threshold, draw damage and slowdown,
 ## cooldown, walls, range, DamageInfo, and an arrow outliving its bow.
 ## Builds a tiny scene in code, so it does not depend on .tscn files.
-## Exit code = number of failed checks.
-## Run: godot --headless --path . --script res://tests/test_bow_weapon.gd
 
 const WIELDER_POSITION: Vector2 = Vector2(100.0, 100.0)
 ## Physics layer bits, same as the project layer names.
@@ -22,14 +20,12 @@ const FLIGHT_FRAMES: int = 25
 ## Frames that surely cover the 0.2 s cooldown.
 const COOLDOWN_FRAMES: int = 15
 
-var _failures: int = 0
 ## One entry per attack_performed signal: x = step index, y = hits.
 var _performed: Array[Vector2i] = []
 var _received: Array[DamageInfo] = []
 
 
-func _initialize() -> void:
-	await process_frame
+func run() -> void:
 
 	# At 60 physics frames per second: tap threshold 0.15 s = 9 frames,
 	# full draw after 0.15 + 0.4 s = 33 frames.
@@ -47,7 +43,7 @@ func _initialize() -> void:
 
 	var wielder: Node2D = Node2D.new()
 	wielder.position = WIELDER_POSITION
-	root.add_child(wielder)
+	add_child(wielder)
 	var bow: BowWeapon = BowWeapon.new()
 	bow.setup(stats, wielder)
 	bow.attack_performed.connect(
@@ -59,110 +55,107 @@ func _initialize() -> void:
 	var far_up: Hurtbox = _add_target(WIELDER_POSITION + Vector2(0.0, -200.0))
 	_add_wall(WIELDER_POSITION + Vector2(0.0, 30.0), Vector2(40.0, 4.0))
 	front.hit_received.connect(func(info: DamageInfo) -> void: _received.append(info))
-	await _physics_frames(SETTLE_FRAMES)
+	await physics_frames(SETTLE_FRAMES)
 
 	# Tap: released before the threshold.
 	bow.try_attack(Vector2.RIGHT)
-	await _physics_frames(3)
-	_check(is_equal_approx(bow.get_move_speed_multiplier(), 1.0), "tap does not slow the wielder")
+	await physics_frames(3)
+	check(is_equal_approx(bow.get_move_speed_multiplier(), 1.0), "tap does not slow the wielder")
 	bow.release_attack(Vector2.RIGHT)
-	await _physics_frames(FLIGHT_FRAMES)
-	_check(_damage_taken(front) == MIN_DAMAGE, "tap shot deals min_damage")
-	_check(_performed == ([Vector2i(0, 1)] as Array[Vector2i]), "hit reports attack_performed(0, 1)")
-	_check(_received.size() == 1 and _received[0].source == wielder and _received[0].source_id == &"bow",
+	await physics_frames(FLIGHT_FRAMES)
+	check(_damage_taken(front) == MIN_DAMAGE, "tap shot deals min_damage")
+	check(_performed == ([Vector2i(0, 1)] as Array[Vector2i]), "hit reports attack_performed(0, 1)")
+	check(_received.size() == 1 and _received[0].source == wielder and _received[0].source_id == &"bow",
 			"arrow DamageInfo has the wielder as source and the bow id")
 
 	# Half draw: the slowdown grows gradually.
-	await _physics_frames(COOLDOWN_FRAMES)
+	await physics_frames(COOLDOWN_FRAMES)
 	bow.try_attack(Vector2.RIGHT)
-	await _physics_frames(21)
+	await physics_frames(21)
 	var half_multiplier: float = bow.get_move_speed_multiplier()
-	_check(half_multiplier < 0.9 and half_multiplier > 0.6, "slowdown grows with the draw")
+	check(half_multiplier < 0.9 and half_multiplier > 0.6, "slowdown grows with the draw")
 	bow.release_attack(Vector2.RIGHT)
-	await _physics_frames(FLIGHT_FRAMES)
+	await physics_frames(FLIGHT_FRAMES)
 	var half_damage: int = _damage_taken(front) - MIN_DAMAGE
-	_check(half_damage > MIN_DAMAGE and half_damage < MAX_DAMAGE, "half draw deals damage between min and max")
+	check(half_damage > MIN_DAMAGE and half_damage < MAX_DAMAGE, "half draw deals damage between min and max")
 
 	# Full draw.
-	await _physics_frames(COOLDOWN_FRAMES)
+	await physics_frames(COOLDOWN_FRAMES)
 	var before_full: int = _damage_taken(front)
 	bow.try_attack(Vector2.RIGHT)
-	await _physics_frames(40)
-	_check(is_equal_approx(bow.get_move_speed_multiplier(), SLOW_MULTIPLIER), "full draw slows the wielder to x0.5")
+	await physics_frames(40)
+	check(is_equal_approx(bow.get_move_speed_multiplier(), SLOW_MULTIPLIER), "full draw slows the wielder to x0.5")
 	bow.release_attack(Vector2.RIGHT)
-	_check(is_equal_approx(bow.get_move_speed_multiplier(), 1.0), "speed returns right after the shot")
-	await _physics_frames(FLIGHT_FRAMES)
-	_check(_damage_taken(front) - before_full == MAX_DAMAGE, "full draw deals max_damage")
+	check(is_equal_approx(bow.get_move_speed_multiplier(), 1.0), "speed returns right after the shot")
+	await physics_frames(FLIGHT_FRAMES)
+	check(_damage_taken(front) - before_full == MAX_DAMAGE, "full draw deals max_damage")
 
 	# Cooldown: a second tap right after a shot does nothing.
-	await _physics_frames(COOLDOWN_FRAMES)
+	await physics_frames(COOLDOWN_FRAMES)
 	var shots_before: int = _performed.size()
 	bow.try_attack(Vector2.RIGHT)
 	bow.release_attack(Vector2.RIGHT)
 	bow.try_attack(Vector2.RIGHT)
 	bow.release_attack(Vector2.RIGHT)
-	await _physics_frames(FLIGHT_FRAMES)
-	_check(_performed.size() - shots_before == 1, "cooldown blocks tap spam")
+	await physics_frames(FLIGHT_FRAMES)
+	check(_performed.size() - shots_before == 1, "cooldown blocks tap spam")
 
 	# Wall below the wielder.
-	await _physics_frames(COOLDOWN_FRAMES)
+	await physics_frames(COOLDOWN_FRAMES)
 	bow.try_attack(Vector2.DOWN)
 	bow.release_attack(Vector2.DOWN)
-	await _physics_frames(FLIGHT_FRAMES)
-	_check(_damage_taken(walled) == 0 and _performed[-1] == Vector2i(0, 0), "wall stops the arrow")
+	await physics_frames(FLIGHT_FRAMES)
+	check(_damage_taken(walled) == 0 and _performed[-1] == Vector2i(0, 0), "wall stops the arrow")
 
 	# Nothing to the left: the arrow flies its range and disappears.
-	await _physics_frames(COOLDOWN_FRAMES)
+	await physics_frames(COOLDOWN_FRAMES)
 	bow.try_attack(Vector2.LEFT)
 	bow.release_attack(Vector2.LEFT)
-	await _physics_frames(40)
-	_check(_performed[-1] == Vector2i(0, 0) and _count_arrows() == 0, "arrow disappears after its range")
+	await physics_frames(40)
+	check(_performed[-1] == Vector2i(0, 0) and _count_arrows() == 0, "arrow disappears after its range")
 
 	# Putting a drawn bow away: the slowdown ends at once and no arrow comes out.
-	await _physics_frames(COOLDOWN_FRAMES)
+	await physics_frames(COOLDOWN_FRAMES)
 	var shots_before_cancel: int = _performed.size()
 	bow.try_attack(Vector2.RIGHT)
-	await _physics_frames(40)
+	await physics_frames(40)
 	bow.set_active(false)
-	_check(is_equal_approx(bow.get_move_speed_multiplier(), 1.0), "putting the bow away ends the slowdown at once")
+	check(is_equal_approx(bow.get_move_speed_multiplier(), 1.0), "putting the bow away ends the slowdown at once")
 	bow.release_attack(Vector2.RIGHT)
 	bow.set_active(true)
 	bow.release_attack(Vector2.RIGHT)
-	await _physics_frames(FLIGHT_FRAMES)
-	_check(_performed.size() == shots_before_cancel and _count_arrows() == 0, "cancelled draw shoots nothing")
+	await physics_frames(FLIGHT_FRAMES)
+	check(_performed.size() == shots_before_cancel and _count_arrows() == 0, "cancelled draw shoots nothing")
 
 	# An inactive bow ignores presses.
 	bow.set_active(false)
 	bow.try_attack(Vector2.RIGHT)
-	await _physics_frames(20)
-	_check(is_equal_approx(bow.get_draw_progress(), 0.0), "inactive bow ignores presses")
+	await physics_frames(20)
+	check(is_equal_approx(bow.get_draw_progress(), 0.0), "inactive bow ignores presses")
 
 	# The cooldown keeps running while the bow is put away.
 	bow.set_active(true)
 	bow.try_attack(Vector2.RIGHT)
 	bow.release_attack(Vector2.RIGHT)
 	bow.set_active(false)
-	await _physics_frames(COOLDOWN_FRAMES)
+	await physics_frames(COOLDOWN_FRAMES)
 	bow.set_active(true)
 	bow.try_attack(Vector2.RIGHT)
 	bow.release_attack(Vector2.RIGHT)
-	await _physics_frames(FLIGHT_FRAMES)
-	_check(_performed.size() == shots_before_cancel + 2, "cooldown keeps running while the bow is put away")
+	await physics_frames(FLIGHT_FRAMES)
+	check(_performed.size() == shots_before_cancel + 2, "cooldown keeps running while the bow is put away")
 
 	# The bow is freed while its arrow flies: no error, the arrow still hits.
-	await _physics_frames(COOLDOWN_FRAMES)
+	await physics_frames(COOLDOWN_FRAMES)
 	var shots_before_free: int = _performed.size()
 	bow.try_attack(Vector2.UP)
 	bow.release_attack(Vector2.UP)
-	await _physics_frames(3)
+	await physics_frames(3)
 	bow.free()
-	await _physics_frames(FLIGHT_FRAMES)
-	_check(_damage_taken(far_up) == MIN_DAMAGE, "arrow outlives its bow and still hits")
-	_check(_performed.size() == shots_before_free and _count_arrows() == 0,
+	await physics_frames(FLIGHT_FRAMES)
+	check(_damage_taken(far_up) == MIN_DAMAGE, "arrow outlives its bow and still hits")
+	check(_performed.size() == shots_before_free and _count_arrows() == 0,
 			"landing after the bow is gone is ignored safely")
-
-	print("ALL PASSED" if _failures == 0 else "%d FAILED" % _failures)
-	quit(_failures)
 
 
 func _make_arrow_scene() -> PackedScene:
@@ -187,7 +180,7 @@ func _add_target(at: Vector2) -> Hurtbox:
 	health.max_hp = TARGET_HP
 	hurtbox.add_child(health)
 	hurtbox.health = health
-	root.add_child(hurtbox)
+	add_child(hurtbox)
 	return hurtbox
 
 
@@ -200,7 +193,7 @@ func _add_wall(at: Vector2, size: Vector2) -> void:
 	rect.size = size
 	shape.shape = rect
 	wall.add_child(shape)
-	root.add_child(wall)
+	add_child(wall)
 
 
 func _damage_taken(hurtbox: Hurtbox) -> int:
@@ -208,17 +201,4 @@ func _damage_taken(hurtbox: Hurtbox) -> int:
 
 
 func _count_arrows() -> int:
-	return root.get_children().filter(func(node: Node) -> bool: return node is Arrow).size()
-
-
-func _physics_frames(count: int) -> void:
-	for _i in count:
-		await physics_frame
-
-
-func _check(condition: bool, description: String) -> void:
-	if condition:
-		print("PASS: ", description)
-	else:
-		print("FAIL: ", description)
-		_failures += 1
+	return get_tree().current_scene.get_children().filter(func(node: Node) -> bool: return node is Arrow).size()

@@ -42,9 +42,8 @@ func _physics_process(delta: float) -> void:
 	var result: Dictionary = get_world_2d().direct_space_state.intersect_ray(ray)
 	if not result.is_empty():
 		var hurtbox: Hurtbox = result["collider"] as Hurtbox
-		if hurtbox != null:
-			hurtbox.receive_hit(_info)
-		_land(hurtbox != null)
+		# A wall or an absorbed hit (invulnerable target) is a miss; the arrow is spent either way.
+		_land(hurtbox != null and hurtbox.receive_hit(_info))
 		return
 	global_position = to
 	_distance_left -= travel
