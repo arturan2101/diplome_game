@@ -33,7 +33,9 @@ func run() -> void:
 
 	var sword: Weapon = player.weapon
 	check(sword != null and sword.data == sword_data and sword.visible, "first slot is active at start")
-	check(_changes.is_empty(), "no weapon_changed at start")
+	check(player.get_weapon_slots() == ([sword_data, bow_data] as Array[WeaponData]) and player.get_active_slot() == 0,
+			"both starting weapons are in the slots")
+	_changes.clear()
 
 	player.swap_weapon()
 	var bow: BowWeapon = player.weapon as BowWeapon
@@ -63,6 +65,7 @@ func run() -> void:
 	add_child(solo)
 	await physics_frames(1)
 	var solo_weapon: Weapon = solo.weapon
+	_solo_changes.clear()
 	solo.swap_weapon()
 	check(solo.weapon == solo_weapon and solo_weapon.is_active and _solo_changes.is_empty(),
 			"with one weapon swap does nothing and emits nothing")
@@ -80,4 +83,8 @@ func _new_player() -> Player:
 	var health: Health = Health.new()
 	player.add_child(health)
 	player.health = health
+	var hurtbox: Hurtbox = Hurtbox.new()
+	hurtbox.health = health
+	player.add_child(hurtbox)
+	player.hurtbox = hurtbox
 	return player

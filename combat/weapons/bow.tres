@@ -8,6 +8,7 @@
 script = ExtResource("1_30041")
 arrow_scene = ExtResource("1_hmisi")
 id = &"bow"
+auto_aim_radius = 160.0
 display_name = "Bow"
 weapon_scene = ExtResource("3_e8ixt")
 metadata/_custom_type_script = "uid://d4lia7iluqy18"

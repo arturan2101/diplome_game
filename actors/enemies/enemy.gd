@@ -119,12 +119,18 @@ func _create_weapon() -> void:
 	add_child(weapon)
 
 
+## Pushes the enemy with the given velocity and interrupts what it was doing.
+## Called for hits with knockback and by the player's shield.
+func apply_knockback(knockback_velocity: Vector2) -> void:
+	if weapon != null:
+		weapon.cancel_attack()
+	_enter(State.STAGGER)
+	velocity = knockback_velocity
+
+
 func _on_hit_received(info: DamageInfo) -> void:
 	if not info.knockback.is_zero_approx():
-		if weapon != null:
-			weapon.cancel_attack()
-		_enter(State.STAGGER)
-		velocity = info.knockback
+		apply_knockback(info.knockback)
 	elif state == State.IDLE:
 		# Hit from afar (an arrow): start chasing even outside the detection range.
 		_target = get_tree().get_first_node_in_group(Player.GROUP) as Node2D

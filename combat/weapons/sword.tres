@@ -26,6 +26,7 @@ metadata/_custom_type_script = "uid://dqcnjt2pkdxkd"
 script = ExtResource("1_dljjw")
 combo = Array[ExtResource("1_f8ocv")]([SubResource("Resource_03pyg"), SubResource("Resource_f8ocv"), SubResource("Resource_qg0wa")])
 id = &"sword"
+auto_aim_radius = 48.0
 display_name = "Sword"
 weapon_scene = ExtResource("2_03pyg")
 metadata/_custom_type_script = "uid://nuho2ph11shq"

@@ -6,5 +6,8 @@ extends Resource
 ## Stable id used in logs and telemetry, e.g. &"sword".
 @export var id: StringName = &""
 @export var display_name: String = ""
+## The wielder aims at the nearest visible enemy within this distance, in pixels.
+## 0 turns auto-aim off.
+@export var auto_aim_radius: float = 56.0
 ## Scene with the weapon behaviour (root node is a Weapon), created when the weapon is equipped.
 @export var weapon_scene: PackedScene

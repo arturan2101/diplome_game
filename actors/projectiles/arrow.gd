@@ -24,8 +24,9 @@ var _distance_left: float = 0.0
 
 ## Called by the bow before adding the arrow to the scene.
 func setup(info: DamageInfo, direction: Vector2, speed: float, max_distance: float) -> void:
-	_info = info
 	_direction = direction.normalized()
+	_info = info
+	_info.direction = _direction
 	_speed = speed
 	_distance_left = max_distance
 	rotation = _direction.angle()

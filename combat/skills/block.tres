@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="BlockSkillData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://combat/skills/block_skill_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://combat/skills/block_skill.tscn" id="2"]
+
+[resource]
+script = ExtResource("1")
+arc_degrees = 120.0
+move_speed_multiplier = 0.7
+hold_mode = true
+max_hold_time = 1.5
+tap_duration = 0.5
+push_speed = 120.0
+push_range = 40.0
+id = &"block"
+display_name = "Shield block"
+cooldown = 1.0
+skill_scene = ExtResource("2")

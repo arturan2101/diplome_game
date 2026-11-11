@@ -15,6 +15,9 @@ radius = 28.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_4imvi"]
 radius = 20.0
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_skill"]
+radius = 20.0
+
 [node name="Main" type="Node2D" unique_id=1844842302]
 
 [node name="Skeleton2" parent="." unique_id=325434225 instance=ExtResource("1_3wy1v")]
@@ -79,3 +82,14 @@ script = ExtResource("2_xwkvk")
 size = Vector2(40, 40)
 color = Color(1, 1, 1, 0.45882353)
 metadata/_custom_type_script = "uid://di3pkn0s3mymi"
+
+[node name="SkillButton" type="TouchScreenButton" parent="HUD"]
+position = Vector2(508, 316)
+shape = SubResource("CircleShape2D_skill")
+action = "skill"
+visibility_mode = 1
+
+[node name="PlaceholderShape" type="Node2D" parent="HUD/SkillButton"]
+script = ExtResource("2_xwkvk")
+size = Vector2(40, 40)
+color = Color(0.6, 0.8, 1, 0.45)
