@@ -5,9 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://d086msg16gvvh" path="res://actors/player/player.tscn" id="1_pjrb6"]
 [ext_resource type="Script" uid="uid://di3pkn0s3mymi" path="res://actors/placeholder_shape.gd" id="2_xwkvk"]
 [ext_resource type="Script" uid="uid://bp2xjhxfnu8nw" path="res://ui/touch_joystick.gd" id="3_xwkvk"]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ndusb"]
-size = Vector2(16, 96)
+[ext_resource type="Script" uid="uid://pgwm8ug3ig4c" path="res://level/level.gd" id="lvl_script"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ndusb"]
 radius = 28.0
@@ -19,6 +17,31 @@ radius = 20.0
 radius = 20.0
 
 [node name="Main" type="Node2D" unique_id=1844842302]
+
+[node name="Level" type="Node2D" parent="." unique_id=927557579]
+script = ExtResource("lvl_script")
+debug_map = "########################################
+#......................................#
+#......................................#
+#.........~~~~.........................#
+#.........~~~~............#............#
+#.........~~~~............#............#
+#.........................#............#
+#.........................#............#
+#.............^^..........#............#
+#.............^^..........#............#
+#.....%...................#............#
+#.........................#............#
+#.....%...................#............#
+#.........................#............#
+#.........................#............#
+#................~~.......#............#
+#................~~....................#
+#.............................%........#
+#......................................#
+#......................................#
+#......................................#
+########################################"
 
 [node name="Skeleton2" parent="." unique_id=325434225 instance=ExtResource("1_3wy1v")]
 position = Vector2(180, 320)
@@ -34,19 +57,6 @@ position = Vector2(436, 180)
 
 [node name="Player" parent="." unique_id=282258107 instance=ExtResource("1_pjrb6")]
 position = Vector2(320, 180)
-
-[node name="Wall" type="StaticBody2D" parent="." unique_id=840203491]
-position = Vector2(420, 180)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall" unique_id=993869094]
-shape = SubResource("RectangleShape2D_ndusb")
-
-[node name="PlaceholderShape" type="Node2D" parent="Wall" unique_id=398817127]
-script = ExtResource("2_xwkvk")
-shape_type = 1
-size = Vector2(16, 96)
-color = Color(0.363367, 0.36336705, 0.36336702, 1)
-metadata/_custom_type_script = "uid://di3pkn0s3mymi"
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=1093100423]
 
@@ -83,13 +93,13 @@ size = Vector2(40, 40)
 color = Color(1, 1, 1, 0.45882353)
 metadata/_custom_type_script = "uid://di3pkn0s3mymi"
 
-[node name="SkillButton" type="TouchScreenButton" parent="HUD"]
+[node name="SkillButton" type="TouchScreenButton" parent="HUD" unique_id=2101169772]
 position = Vector2(508, 316)
 shape = SubResource("CircleShape2D_skill")
 action = "skill"
 visibility_mode = 1
 
-[node name="PlaceholderShape" type="Node2D" parent="HUD/SkillButton"]
+[node name="PlaceholderShape" type="Node2D" parent="HUD/SkillButton" unique_id=202882734]
 script = ExtResource("2_xwkvk")
 size = Vector2(40, 40)
 color = Color(0.6, 0.8, 1, 0.45)

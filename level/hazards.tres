@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="HazardData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://level/hazard_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+spikes_damage = 8
+spikes_interval = 0.5
+pit_damage_fraction = 0.3
+fall_delay = 0.5

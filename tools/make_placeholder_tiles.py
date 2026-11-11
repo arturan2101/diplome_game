@@ -4,7 +4,7 @@ Kenney Tiny Dungeon pack does not have. Run from the project root:
     python tools/make_placeholder_tiles.py
 
 Tile order (left to right): 0 pit, 1 spikes, 2 coin, 3 portal closed, 4 portal open,
-5 bow icon, 6 dash icon, 7 spikes icon reserved (empty).
+5 bow icon, 6 dash icon, 7 pit without the rim (below another pit tile).
 The art is our own placeholder and can be replaced; the game refers to tiles only
 through resources (tile theme, AtlasTexture files), never by pixel content.
 """
@@ -76,6 +76,11 @@ put(image, index)
 image, draw, index = tile(6)
 for x in (3, 8):
     draw.line([(x, 3), (x + 4, 7), (x, 12)], fill=(240, 240, 250, 255), width=2)
+put(image, index)
+
+# 7: pit interior - used under another pit tile, so the rim shows only at the top edge
+image, draw, index = tile(7)
+draw.rectangle([0, 0, 15, 15], fill=(16, 12, 22, 255))
 put(image, index)
 
 sheet.save("assets/placeholder/placeholder_tiles.png")

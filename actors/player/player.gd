@@ -27,6 +27,8 @@ const GROUP: StringName = &"player"
 @export var health: Health
 ## Area where enemy attacks hit the player. The shield guards it.
 @export var hurtbox: Hurtbox
+## Optional: makes the player react to spikes and pits.
+@export var hazards: HazardReceiver
 ## Physics layers of the hurtboxes auto-aim looks for (enemy_hurtbox).
 @export_flags_2d_physics var aim_target_mask: int = 16
 ## Physics layers that hide a target from auto-aim (world).
@@ -61,6 +63,9 @@ func _ready() -> void:
 		health.died.connect(_on_died)
 	else:
 		push_warning("Player has no Health assigned")
+	if hazards != null:
+		hazards.fall_started.connect(_on_fall_started)
+		hazards.fall_ended.connect(_on_fall_ended)
 	for weapon_data: WeaponData in starting_weapons:
 		add_weapon(weapon_data)
 	if starting_skill != null:
@@ -148,6 +153,8 @@ func get_look_direction() -> Vector2:
 ## Called by skills that lift the player off the ground (dash).
 func set_airborne(value: bool) -> void:
 	is_airborne = value
+	if hazards != null:
+		hazards.suspended = value
 
 
 func _move(delta: float) -> void:
@@ -225,13 +232,27 @@ func _find_aim_target() -> Hurtbox:
 
 ## The player only reports its death; GameManager decides what happens next.
 func _on_died(info: DamageInfo) -> void:
+	_stop_acting()
+	GameManager.report_player_death(info)
+
+
+func _on_fall_started() -> void:
+	_stop_acting()
+
+
+func _on_fall_ended() -> void:
+	if not health.is_dead():
+		set_physics_process(true)
+
+
+## Freezes the player: no movement, attacks or skill (death, falling into a pit).
+func _stop_acting() -> void:
 	set_physics_process(false)
 	velocity = Vector2.ZERO
 	if weapon != null:
 		weapon.cancel_attack()
 	if skill != null:
 		skill.cancel()
-	GameManager.report_player_death(info)
 
 
 func _activate_slot(slot: int) -> void:

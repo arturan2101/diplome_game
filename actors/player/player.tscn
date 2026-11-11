@@ -11,13 +11,16 @@
 
 [ext_resource type="Resource" path="res://combat/skills/dash.tres" id="9_dash"]
 
+[ext_resource type="Script" path="res://level/hazard_receiver.gd" id="hz_script"]
+[ext_resource type="Resource" path="res://level/hazards.tres" id="hz_data"]
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_ndusb"]
 radius = 6.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_4imvi"]
 radius = 6.0
 
-[node name="Player" type="CharacterBody2D" unique_id=282258107 node_paths=PackedStringArray("health", "hurtbox")]
+[node name="Player" type="CharacterBody2D" unique_id=282258107 node_paths=PackedStringArray("health", "hurtbox", "hazards")]
 collision_layer = 2
 collision_mask = 5
 script = ExtResource("1_ilk7j")
@@ -25,6 +28,7 @@ starting_weapons = Array[ExtResource("2_6p1w3")]([ExtResource("2_lsqbn"), ExtRes
 starting_skill = ExtResource("9_dash")
 health = NodePath("Health")
 hurtbox = NodePath("Hurtbox")
+hazards = NodePath("HazardReceiver")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1846017841]
 shape = SubResource("CircleShape2D_ndusb")
@@ -52,3 +56,10 @@ script = ExtResource("8_hiosj")
 health = NodePath("../Health")
 visual = NodePath("../Sprite")
 metadata/_custom_type_script = "uid://de7swotw4iwdj"
+
+[node name="HazardReceiver" type="Node" parent="." node_paths=PackedStringArray("body", "health", "visual")]
+script = ExtResource("hz_script")
+body = NodePath("..")
+health = NodePath("../Health")
+visual = NodePath("../Sprite")
+data = ExtResource("hz_data")

@@ -6,13 +6,16 @@
 [ext_resource type="Script" uid="uid://bech2h0liorq5" path="res://combat/health.gd" id="4_i8opf"]
 [ext_resource type="Script" uid="uid://dbyxqej24j4mh" path="res://combat/hurtbox.gd" id="5_g5vae"]
 
+[ext_resource type="Script" path="res://level/hazard_receiver.gd" id="hz_script"]
+[ext_resource type="Resource" path="res://level/hazards.tres" id="hz_data"]
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_ndusb"]
 radius = 6.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_4imvi"]
 radius = 7.0
 
-[node name="Skeleton" type="CharacterBody2D" unique_id=325434225 node_paths=PackedStringArray("health", "hurtbox", "visual")]
+[node name="Skeleton" type="CharacterBody2D" unique_id=325434225 node_paths=PackedStringArray("health", "hurtbox", "visual", "hazards")]
 collision_layer = 4
 collision_mask = 7
 script = ExtResource("1_s7b7v")
@@ -20,6 +23,7 @@ data = ExtResource("2_ar7lc")
 health = NodePath("Health")
 hurtbox = NodePath("Hurtbox")
 visual = NodePath("Sprite")
+hazards = NodePath("HazardReceiver")
 metadata/_custom_type_script = "uid://d0eq1gnppy4ug"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1841158772]
@@ -41,3 +45,10 @@ metadata/_custom_type_script = "uid://dbyxqej24j4mh"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=338997249]
 shape = SubResource("CircleShape2D_4imvi")
+
+[node name="HazardReceiver" type="Node" parent="." node_paths=PackedStringArray("body", "health", "visual")]
+script = ExtResource("hz_script")
+body = NodePath("..")
+health = NodePath("../Health")
+visual = NodePath("../Sprite")
+data = ExtResource("hz_data")

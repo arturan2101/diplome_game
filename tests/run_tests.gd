@@ -20,6 +20,10 @@ func _ready() -> void:
 			total_failures += 1
 			continue
 		var test: TestCase = script.new() as TestCase
+		if test == null:
+			print("%s: NOT A TestCase" % file_name)
+			total_failures += 1
+			continue
 		test.name = file_name.get_basename()
 		add_child(test)
 		await test.run()
