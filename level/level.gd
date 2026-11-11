@@ -129,7 +129,10 @@ func _paint_cell(cell: Vector2i) -> void:
 		LevelGrid.Cell.FLOOR:
 			_ground.set_cell(cell, MAIN_SOURCE, _floor_tile(cell))
 		LevelGrid.Cell.WALL:
-			_ground.set_cell(cell, MAIN_SOURCE, theme.wall_tiles[_cell_hash(cell) % theme.wall_tiles.size()])
+			# Solid rock that touches nothing walkable gets no tile and no collision:
+			# big sections stay cheap to draw and to simulate.
+			if _touches_open_cell(cell):
+				_ground.set_cell(cell, MAIN_SOURCE, theme.wall_tiles[_cell_hash(cell) % theme.wall_tiles.size()])
 		LevelGrid.Cell.PIT:
 			var below_pit: bool = grid.get_cell(cell + Vector2i.UP) == LevelGrid.Cell.PIT
 			_ground.set_cell(cell, HAZARD_SOURCE, theme.pit_inner_tile if below_pit else theme.pit_tile)
@@ -138,6 +141,15 @@ func _paint_cell(cell: Vector2i) -> void:
 		LevelGrid.Cell.COVER:
 			_ground.set_cell(cell, MAIN_SOURCE, _floor_tile(cell))
 			_props.set_cell(cell, MAIN_SOURCE, theme.cover_tile)
+
+
+## True if any of the 8 cells around is not a wall.
+func _touches_open_cell(cell: Vector2i) -> bool:
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			if grid.get_cell(cell + Vector2i(dx, dy)) != LevelGrid.Cell.WALL:
+				return true
+	return false
 
 
 ## Floor tile for a cell. Variants are picked from the cell coordinates, not from
