@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://d0eq1gnppy4ug" path="res://actors/enemies/enemy.gd" id="1_s7b7v"]
 [ext_resource type="Resource" uid="uid://dri0811re2pdk" path="res://actors/enemies/skeleton.tres" id="2_ar7lc"]
-[ext_resource type="Script" uid="uid://di3pkn0s3mymi" path="res://actors/placeholder_shape.gd" id="3_5gwyt"]
+[ext_resource type="Texture2D" path="res://assets/sprites/skeleton.tres" id="3_5gwyt"]
 [ext_resource type="Script" uid="uid://bech2h0liorq5" path="res://combat/health.gd" id="4_i8opf"]
 [ext_resource type="Script" uid="uid://dbyxqej24j4mh" path="res://combat/hurtbox.gd" id="5_g5vae"]
 
@@ -19,16 +19,14 @@ script = ExtResource("1_s7b7v")
 data = ExtResource("2_ar7lc")
 health = NodePath("Health")
 hurtbox = NodePath("Hurtbox")
-visual = NodePath("PlaceholderShape")
+visual = NodePath("Sprite")
 metadata/_custom_type_script = "uid://d0eq1gnppy4ug"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1841158772]
 shape = SubResource("CircleShape2D_ndusb")
 
-[node name="PlaceholderShape" type="Node2D" parent="." unique_id=291162465]
-script = ExtResource("3_5gwyt")
-color = Color(0.7641886, 0.66405886, 0.5115612, 1)
-metadata/_custom_type_script = "uid://di3pkn0s3mymi"
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("3_5gwyt")
 
 [node name="Health" type="Node" parent="." unique_id=2065356700]
 script = ExtResource("4_i8opf")

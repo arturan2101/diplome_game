@@ -1,7 +1,14 @@
 [gd_scene format=3 uid="uid://bnkpe7a4ob1c5"]
 
 [ext_resource type="Script" uid="uid://yjflwqlydqra" path="res://actors/projectiles/arrow.gd" id="1_26kgm"]
+[ext_resource type="Texture2D" path="res://assets/sprites/arrow.tres" id="2_sprite"]
 
 [node name="Arrow" type="Node2D" unique_id=1046610674]
 script = ExtResource("1_26kgm")
+length = 0.0
 metadata/_custom_type_script = "uid://yjflwqlydqra"
+
+[node name="Sprite" type="Sprite2D" parent="."]
+position = Vector2(-6, 0)
+rotation = 1.5707964
+texture = ExtResource("2_sprite")

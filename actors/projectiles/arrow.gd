@@ -11,7 +11,8 @@ signal landed(hit: bool)
 @export_flags_2d_physics var target_mask: int = 16
 ## Physics layers that stop the arrow (world).
 @export_flags_2d_physics var wall_mask: int = 1
-## Placeholder look: a line of this length, width and colour.
+## Placeholder look: a line of this length, width and colour. Length 0 draws nothing
+## (the scene then shows a Sprite2D child instead).
 @export var length: float = 8.0
 @export var width: float = 2.0
 @export var color: Color = Color(0.95, 0.85, 0.55)
@@ -53,6 +54,8 @@ func _physics_process(delta: float) -> void:
 
 
 func _draw() -> void:
+	if length <= 0.0:
+		return
 	draw_line(Vector2(-length, 0.0), Vector2.ZERO, color, width)
 
 
