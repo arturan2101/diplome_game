@@ -6,16 +6,21 @@ extends RefCounted
 ## budget just grows with the section index. Subclasses override choose_next().
 
 const CATALOG_PATH: String = "res://actors/enemies/enemy_catalog.tres"
+const SETTINGS_PATH: String = "res://director/director_settings.tres"
 ## Budget of the very first section and its growth per section for this baseline.
 const BASELINE_BUDGET: int = 3
 const MIN_ROOMS: int = 3
 const MAX_ROOMS: int = 5
+const MIN_CORRIDOR_WIDTH: int = 2
+const MAX_CORRIDOR_WIDTH: int = 4
 
 var catalog: EnemyCatalog = null
+var settings: DirectorSettings = null
 
 
-func _init(enemy_catalog: EnemyCatalog = null) -> void:
+func _init(enemy_catalog: EnemyCatalog = null, director_settings: DirectorSettings = null) -> void:
 	catalog = enemy_catalog if enemy_catalog != null else load(CATALOG_PATH) as EnemyCatalog
+	settings = director_settings if director_settings != null else load(SETTINGS_PATH) as DirectorSettings
 
 
 ## Plans the next section for the given state.
@@ -64,3 +69,13 @@ func buy_enemies(budget: int, rng: RandomNumberGenerator, weights: Dictionary = 
 		mix[chosen.id] = int(mix.get(chosen.id, 0)) + 1
 		left -= chosen.danger_cost
 	return mix
+
+
+## Danger cost of an enemy mix (type id -> number of spawns).
+func mix_cost(mix: Dictionary) -> int:
+	var cost: int = 0
+	for id: StringName in mix:
+		var enemy_data: EnemyData = catalog.get_by_id(id)
+		if enemy_data != null:
+			cost += enemy_data.danger_cost * int(mix[id])
+	return cost

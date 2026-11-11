@@ -35,6 +35,8 @@ var coins: int = 6
 var cover_density: float = 0.5
 ## Room tags the director would like to see more often (e.g. cover, open, hazard).
 var preferred_tags: Array[StringName] = []
+## Room tags the director would like to see less often.
+var avoided_tags: Array[StringName] = []
 
 
 ## Total number of enemy spawns in the plan.
@@ -62,4 +64,5 @@ func to_dictionary() -> Dictionary:
 		"coins": coins,
 		"cover_density": cover_density,
 		"preferred_tags": preferred_tags.duplicate(),
+		"avoided_tags": avoided_tags.duplicate(),
 	}

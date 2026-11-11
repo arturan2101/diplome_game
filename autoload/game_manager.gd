@@ -59,6 +59,16 @@ func _ready() -> void:
 	start_run(_seed_from_command_line())
 
 
+## A new director for the current mode. The game asks for one per run.
+func make_director() -> Director:
+	match director_mode:
+		DirectorMode.RANDOM:
+			return RandomDirector.new()
+		DirectorMode.LEARNED:
+			return LearnedDirector.new()
+	return RuleDirector.new()
+
+
 ## Name of the director mode as written to the log: RANDOM, RULES or LEARNED.
 func get_mode_name() -> String:
 	return DirectorMode.keys()[director_mode]

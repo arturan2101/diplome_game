@@ -25,6 +25,7 @@ const BRANCH_SHIFT: int = 2
 const MAX_ATTEMPTS: int = 20
 ## A room with a tag the director prefers is this many times more likely per tag.
 const PREFERRED_TAG_WEIGHT: int = 3
+const NEUTRAL_WEIGHT: int = 9
 const COINS_PER_SLOT: int = 3
 ## Reference time added per tunnel, in seconds.
 const TUNNEL_REF_TIME: float = 3.0
@@ -135,10 +136,14 @@ func _pick_room(candidates: Array[RoomTemplate], plan: SectionPlan, rng: RandomN
 	var weights: Array[int] = []
 	var total: int = 0
 	for template: RoomTemplate in candidates:
-		var weight: int = 1
+		# Weights are in thirds: 9 is neutral, a preferred tag triples it, an avoided one cuts it to a third.
+		var weight: int = NEUTRAL_WEIGHT
 		for tag: StringName in plan.preferred_tags:
 			if template.has_tag(tag):
 				weight *= PREFERRED_TAG_WEIGHT
+		for tag: StringName in plan.avoided_tags:
+			if template.has_tag(tag):
+				weight = maxi(1, weight / PREFERRED_TAG_WEIGHT)
 		# The same room twice in a row looks odd.
 		if template == previous and candidates.size() > 1:
 			weight = 0

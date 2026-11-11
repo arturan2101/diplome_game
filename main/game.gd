@@ -33,7 +33,7 @@ var plan: SectionPlan = null
 var layout: SectionLayout = null
 var gate: Gate = null
 
-var _director: Director = Director.new()
+var _director: Director = null
 var _builder: SectionBuilder = SectionBuilder.new()
 ## Enemies, pickups and the gate of the current section; freed with the section.
 var _contents: Node2D = null
@@ -42,6 +42,7 @@ var _is_changing_section: bool = false
 
 
 func _ready() -> void:
+	_director = GameManager.make_director()
 	player.add_weapon(GameManager.starting_weapon)
 	player.set_skill(GameManager.starting_skill)
 	hud.bind_player(player)
