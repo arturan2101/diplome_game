@@ -20,6 +20,9 @@ enum State { IDLE, CHASE, RETREAT, WINDUP, RECOVER, STAGGER, FALLING }
 @export var visual: CanvasItem
 ## Optional: makes the enemy react to spikes and pits.
 @export var hazards: HazardReceiver
+## Optional: collision shapes resized from data.body_radius.
+@export var body_shape: CollisionShape2D
+@export var hurtbox_shape: CollisionShape2D
 ## Physics layers that block the enemy's sight (world).
 @export_flags_2d_physics var sight_mask: int = 1
 ## Tint during the windup, so the player sees the attack coming.
@@ -50,6 +53,10 @@ var _flash_tween: Tween = null
 func _ready() -> void:
 	# Top-down game: no floor or gravity, every collision is treated as a wall.
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
+	if data == null:
+		push_error("Enemy %s has no EnemyData" % get_path())
+		set_physics_process(false)
+		return
 	_level = get_tree().get_first_node_in_group(Level.GROUP) as Level
 	health.max_hp = data.max_hp
 	health.reset()
@@ -59,9 +66,7 @@ func _ready() -> void:
 	if hazards != null:
 		hazards.fall_started.connect(_on_fall_started)
 		hazards.fall_ended.connect(_on_fall_ended)
-	var sprite: Sprite2D = visual as Sprite2D
-	if sprite != null and data.sprite != null:
-		sprite.texture = data.sprite
+	_apply_look()
 	_create_weapon()
 
 
@@ -207,6 +212,24 @@ func _can_see_target() -> bool:
 	var ray: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(
 			global_position, _target.global_position, sight_mask)
 	return get_world_2d().direct_space_state.intersect_ray(ray).is_empty()
+
+
+## Picture and body size come from the data, so one scene serves every enemy type.
+func _apply_look() -> void:
+	var sprite: Sprite2D = visual as Sprite2D
+	if sprite != null:
+		if data.sprite != null:
+			sprite.texture = data.sprite
+		sprite.scale = Vector2.ONE * data.sprite_scale
+	# New shape objects: the ones in the scene file are shared by all instances.
+	if body_shape != null:
+		var body_circle: CircleShape2D = CircleShape2D.new()
+		body_circle.radius = data.body_radius
+		body_shape.shape = body_circle
+	if hurtbox_shape != null:
+		var hurtbox_circle: CircleShape2D = CircleShape2D.new()
+		hurtbox_circle.radius = data.body_radius + 1.0
+		hurtbox_shape.shape = hurtbox_circle
 
 
 func _create_weapon() -> void:

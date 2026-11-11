@@ -1,0 +1,48 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/enemy.gd" id="1"]
+[ext_resource type="Script" path="res://combat/health.gd" id="2"]
+[ext_resource type="Script" path="res://combat/hurtbox.gd" id="3"]
+[ext_resource type="Script" path="res://level/hazard_receiver.gd" id="4"]
+[ext_resource type="Resource" path="res://level/hazards.tres" id="5"]
+
+[sub_resource type="CircleShape2D" id="body_circle"]
+radius = 6.0
+
+[sub_resource type="CircleShape2D" id="hurtbox_circle"]
+radius = 7.0
+
+[node name="Enemy" type="CharacterBody2D" node_paths=PackedStringArray("health", "hurtbox", "visual", "hazards", "body_shape", "hurtbox_shape")]
+collision_layer = 4
+collision_mask = 7
+script = ExtResource("1")
+health = NodePath("Health")
+hurtbox = NodePath("Hurtbox")
+visual = NodePath("Sprite")
+hazards = NodePath("HazardReceiver")
+body_shape = NodePath("CollisionShape2D")
+hurtbox_shape = NodePath("Hurtbox/CollisionShape2D")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("body_circle")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="Hurtbox" type="Area2D" parent="." node_paths=PackedStringArray("health")]
+collision_layer = 16
+collision_mask = 0
+script = ExtResource("3")
+health = NodePath("../Health")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("hurtbox_circle")
+
+[node name="HazardReceiver" type="Node" parent="." node_paths=PackedStringArray("body", "health", "visual")]
+script = ExtResource("4")
+body = NodePath("..")
+health = NodePath("../Health")
+visual = NodePath("../Sprite")
+data = ExtResource("5")

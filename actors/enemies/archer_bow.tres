@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="BowWeaponData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://combat/weapons/bow_weapon_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://actors/projectiles/enemy_arrow.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://combat/weapons/bow_weapon.tscn" id="3"]
+
+[resource]
+script = ExtResource("1")
+min_damage = 8
+max_damage = 8
+tap_threshold = 0.15
+draw_time = 0.8
+cooldown = 0.1
+arrow_speed = 190.0
+arrow_range = 220.0
+arrow_scene = ExtResource("2")
+id = &"archer_bow"
+display_name = "Archer bow"
+auto_aim_radius = 0.0
+weapon_scene = ExtResource("3")

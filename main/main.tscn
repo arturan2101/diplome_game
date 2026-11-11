@@ -1,6 +1,9 @@
 [gd_scene format=3 uid="uid://clx07jmctk3k4"]
 
-[ext_resource type="PackedScene" uid="uid://cilt82rm68y6g" path="res://actors/enemies/skeleton.tscn" id="1_3wy1v"]
+[ext_resource type="PackedScene" path="res://actors/enemies/enemy.tscn" id="1_3wy1v"]
+[ext_resource type="Resource" path="res://actors/enemies/skeleton.tres" id="en_skeleton"]
+[ext_resource type="Resource" path="res://actors/enemies/archer.tres" id="en_archer"]
+[ext_resource type="Resource" path="res://actors/enemies/beetle.tres" id="en_beetle"]
 [ext_resource type="PackedScene" uid="uid://dqytegvmgnaim" path="res://actors/enemies/training_dummy.tscn" id="1_c651c"]
 [ext_resource type="PackedScene" uid="uid://d086msg16gvvh" path="res://actors/player/player.tscn" id="1_pjrb6"]
 [ext_resource type="Script" uid="uid://di3pkn0s3mymi" path="res://actors/placeholder_shape.gd" id="2_xwkvk"]
@@ -43,11 +46,37 @@ debug_map = "########################################
 #......................................#
 ########################################"
 
-[node name="Skeleton2" parent="." unique_id=325434225 instance=ExtResource("1_3wy1v")]
+[node name="Skeleton2" parent="." instance=ExtResource("1_3wy1v")]
 position = Vector2(180, 320)
+data = ExtResource("en_skeleton")
 
-[node name="Skeleton" parent="." unique_id=2007284738 instance=ExtResource("1_3wy1v")]
+[node name="Skeleton" parent="." instance=ExtResource("1_3wy1v")]
 position = Vector2(120, 80)
+data = ExtResource("en_skeleton")
+
+[node name="Archer" parent="." instance=ExtResource("1_3wy1v")]
+position = Vector2(552, 72)
+data = ExtResource("en_archer")
+
+[node name="Beetle1" parent="." instance=ExtResource("1_3wy1v")]
+position = Vector2(472, 296)
+data = ExtResource("en_beetle")
+
+[node name="Beetle2" parent="." instance=ExtResource("1_3wy1v")]
+position = Vector2(488, 304)
+data = ExtResource("en_beetle")
+
+[node name="Beetle3" parent="." instance=ExtResource("1_3wy1v")]
+position = Vector2(504, 296)
+data = ExtResource("en_beetle")
+
+[node name="Beetle4" parent="." instance=ExtResource("1_3wy1v")]
+position = Vector2(480, 320)
+data = ExtResource("en_beetle")
+
+[node name="Beetle5" parent="." instance=ExtResource("1_3wy1v")]
+position = Vector2(500, 318)
+data = ExtResource("en_beetle")
 
 [node name="TrainingDummy2" parent="." unique_id=1620336158 instance=ExtResource("1_c651c")]
 position = Vector2(360, 120)

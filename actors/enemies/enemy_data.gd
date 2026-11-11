@@ -8,6 +8,10 @@ extends Resource
 @export var display_name: String = ""
 ## Picture of the enemy. Empty keeps whatever the enemy scene shows.
 @export var sprite: Texture2D
+## Scale of the picture (beetles are smaller than a tile).
+@export var sprite_scale: float = 1.0
+## Radius of the body collision in pixels; the hurtbox is one pixel larger.
+@export var body_radius: float = 6.0
 ## Points of the director's danger budget one spawn of this type costs
 ## (for pack enemies: the whole pack).
 @export var danger_cost: int = 1

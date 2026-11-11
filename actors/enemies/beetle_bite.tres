@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MeleeWeaponData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://combat/weapons/melee_attack_step.gd" id="1"]
+[ext_resource type="Script" path="res://combat/weapons/melee_weapon_data.gd" id="2"]
+[ext_resource type="PackedScene" path="res://combat/weapons/enemy_melee_weapon.tscn" id="3"]
+
+[sub_resource type="Resource" id="bite_step"]
+script = ExtResource("1")
+damage = 4
+reach = 14.0
+arc_degrees = 120.0
+duration = 0.1
+recovery = 0.0
+
+[resource]
+script = ExtResource("2")
+combo = Array[ExtResource("1")]([SubResource("bite_step")])
+id = &"beetle_bite"
+display_name = "Beetle bite"
+auto_aim_radius = 0.0
+weapon_scene = ExtResource("3")

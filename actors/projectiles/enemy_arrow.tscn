@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://actors/projectiles/arrow.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/arrow.tres" id="2"]
+
+[node name="EnemyArrow" type="Node2D"]
+script = ExtResource("1")
+target_mask = 8
+length = 0.0
+
+[node name="Sprite" type="Sprite2D" parent="."]
+modulate = Color(1, 0.55, 0.45, 1)
+position = Vector2(-6, 0)
+rotation = 1.5707964
+texture = ExtResource("2")

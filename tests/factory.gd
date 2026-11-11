@@ -56,6 +56,35 @@ static func melee_enemy_data(id: StringName, damage: int = 10) -> EnemyData:
 	return data
 
 
+## Data of a ranged enemy: shoots arrows at the player hurtbox layer and steps back
+## when the player is closer than preferred_distance.
+static func ranged_enemy_data(id: StringName, damage: int = 8) -> EnemyData:
+	var arrow_template: Arrow = Arrow.new()
+	arrow_template.target_mask = PLAYER_HURTBOX_LAYER
+	var bow_data: BowWeaponData = BowWeaponData.new()
+	bow_data.id = &"test_bow"
+	bow_data.min_damage = damage
+	bow_data.max_damage = damage
+	bow_data.cooldown = 0.1
+	bow_data.arrow_speed = 600.0
+	bow_data.arrow_range = 300.0
+	bow_data.arrow_scene = pack(arrow_template)
+	bow_data.weapon_scene = pack(BowWeapon.new())
+	var data: EnemyData = EnemyData.new()
+	data.id = id
+	data.max_hp = 20
+	data.move_speed = 60.0
+	data.detection_range = 400.0
+	data.attack_range = 140.0
+	data.windup = 0.3
+	data.recovery = 0.3
+	data.preferred_distance = 70.0
+	data.retreat_time = 0.6
+	data.retreat_cooldown = 2.0
+	data.weapon = bow_data
+	return data
+
+
 ## An enemy with health, hurtbox, a visual and (optionally) a hazard receiver.
 static func enemy(data: EnemyData, with_hazards: bool = false) -> Enemy:
 	var new_enemy: Enemy = Enemy.new()
