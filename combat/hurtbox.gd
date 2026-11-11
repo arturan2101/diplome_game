@@ -3,7 +3,7 @@ extends Area2D
 ## Area that attacks can hit. Forwards every hit to the owner's Health.
 ## Put it on a hurtbox physics layer (player_hurtbox or enemy_hurtbox).
 
-## Emitted for every hit after the damage is passed to Health.
+## Emitted for every hit that Health accepted (not absorbed by invulnerability or death).
 ## The owner reacts to it, for example by applying info.knockback.
 signal hit_received(info: DamageInfo)
 
@@ -17,6 +17,7 @@ func _ready() -> void:
 
 
 func receive_hit(info: DamageInfo) -> void:
-	if health != null:
-		health.take_damage(info)
+	# An absorbed hit (invulnerable or dead owner) has no effect at all, not even knockback.
+	if health != null and not health.take_damage(info):
+		return
 	hit_received.emit(info)

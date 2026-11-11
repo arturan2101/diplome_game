@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://jcv57ecwdsrp"]
+
+[ext_resource type="Script" uid="uid://b5bntoswx5tlc" path="res://combat/weapons/melee_weapon.gd" id="1_dvgc5"]
+
+[node name="MeleeWeapon" type="Node2D" unique_id=1150231426]
+script = ExtResource("1_dvgc5")
+target_mask = 8
+arc_color = Color(1, 0.029999971, 0.029999971, 0.827451)
+metadata/_custom_type_script = "uid://b5bntoswx5tlc"

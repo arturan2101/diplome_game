@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3 uid="uid://dri0811re2pdk"]
+
+[ext_resource type="Script" uid="uid://d25stp0m0v27c" path="res://actors/enemies/enemy_data.gd" id="1_yxqwr"]
+[ext_resource type="Resource" uid="uid://cs6kmg7e2dt34" path="res://actors/enemies/skeleton_weapon.tres" id="2_65ny6"]
+
+[resource]
+script = ExtResource("1_yxqwr")
+id = &"skeleton"
+display_name = "Skeleton guard"
+danger_cost = 2
+weapon = ExtResource("2_65ny6")
+metadata/_custom_type_script = "uid://d25stp0m0v27c"

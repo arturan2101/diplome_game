@@ -34,8 +34,8 @@ var _buffered_direction: Vector2 = Vector2.RIGHT
 var _hit_this_step: Array[Hurtbox] = []
 
 
-func setup(weapon_data: WeaponData, weapon_wielder: Node2D) -> void:
-	super(weapon_data, weapon_wielder)
+func setup(weapon_data: WeaponData, weapon_wielder: Node2D, damage_source_id: StringName = &"") -> void:
+	super(weapon_data, weapon_wielder, damage_source_id)
 	_stats = weapon_data as MeleeWeaponData
 	if _stats == null or _stats.combo.is_empty():
 		push_error("MeleeWeapon needs MeleeWeaponData with at least one combo step: %s" % weapon_data)
@@ -135,7 +135,7 @@ func _hit_targets_in_arc() -> void:
 		var push_direction: Vector2 = (hurtbox.global_position - global_position).normalized()
 		if push_direction.is_zero_approx():
 			push_direction = _swing_direction
-		hurtbox.receive_hit(DamageInfo.new(_step.damage, wielder, data.id, push_direction * _step.knockback))
+		hurtbox.receive_hit(DamageInfo.new(_step.damage, wielder, source_id, push_direction * _step.knockback))
 
 
 func _is_in_arc(target_position: Vector2) -> bool:

@@ -35,7 +35,7 @@ Full design document: docs/design.md. Read it before any larger task.
 - All randomness comes from GameManager and is derived from one run seed: `GameManager.rng` for gameplay (damage spread, drops), `GameManager.make_section_rng(section_index)` for building a section. A section depends only on the run seed and its index, so combat never changes the tunnel. Same seed + same director decisions = same tunnel. This is required for experiments and debugging. Never use the global `randi()` / `randf()`.
 - Keep scripts small and focused. One class per file.
 - 2D physics layers: 1 world, 2 player, 3 enemies, 4 player_hurtbox, 5 enemy_hurtbox. Weapons find targets by hurtbox layer and check line of sight against the world layer.
-- Damage always travels as a `DamageInfo` (amount, source node, source_id = weapon id or enemy type, knockback velocity): attacker → `Hurtbox.receive_hit()` → `Health.take_damage()` → signals `damaged(info)` / `died(info)`; `Hurtbox.hit_received(info)` lets the owner react (knockback). Telemetry relies on source_id and on `Weapon.attack_performed(step_index, hits)` for accuracy.
+- Damage always travels as a `DamageInfo` (amount, source node, source_id = weapon id or enemy type, knockback velocity): attacker → `Hurtbox.receive_hit()` → `Health.take_damage()` → signals `damaged(info)` / `died(info)`; `Hurtbox.hit_received(info)` lets the owner react (knockback). `take_damage()` returns false when the hit is absorbed (invulnerable or dead): then no `damaged`, no `hit_received`. Invulnerability (after a hit, dash) is only `Health.make_invulnerable()`. Telemetry relies on source_id and on `Weapon.attack_performed(step_index, hits)` for accuracy.
 - New weapons extend `Weapon` and override `_on_attack_pressed`, `_on_attack_released`, `cancel_attack` and, if needed, `get_move_speed_multiplier`. The public `try_attack` / `release_attack` check `is_active` in the base class, so an inactive weapon (other slot) never attacks; its cooldowns keep running.
 
 ## Game design summary (see docs/design.md for details)
@@ -102,6 +102,7 @@ Always build the core first. Do not implement nice-to-have features unless I ask
 - After each task the project must open and run in Godot without errors in the Output panel.
 - Logic that does not need the scene (director formulas, parsing room templates, BFS, spell combination table) should be testable headless, e.g. `godot --headless --script res://tests/<test>.gd` or with GUT if I add it.
 - Generation: the same seed must produce the same section.
+- Headless tests run with `--script`, which compiles scripts before autoloads are registered. Scripts that tests load must not use autoload names as identifiers; get them by path (`get_node(^"/root/GameManager")`).
 
 ## AI usage log
 

@@ -9,6 +9,8 @@ const SEED_ARG_PREFIX: String = "--seed="
 const RANDOM_SEED: int = -1
 ## Random seeds are picked below this value, so they stay short to type and log.
 const MAX_RANDOM_SEED: int = 1_000_000_000
+## Seconds between the player's death and the restart (later: the run-end screen).
+const DEATH_RESTART_DELAY: float = 1.5
 
 ## Seed of the current run. Always written to the log.
 var run_seed: int = 0
@@ -16,9 +18,31 @@ var run_seed: int = 0
 ## Section generation must use make_section_rng() instead.
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
+## True between the player's death and the restart, so a second report is ignored.
+var _restart_pending: bool = false
+
 
 func _ready() -> void:
 	start_run(_seed_from_command_line())
+
+
+## Called by the player when it dies; killing_blow is the last hit.
+## Ends the run: for now a message and a restart; later the run-end screen
+## and the death record in telemetry go here.
+func report_player_death(killing_blow: DamageInfo) -> void:
+	if _restart_pending:
+		return
+	_restart_pending = true
+	print("Player died, killed by %s. Restarting in %.1f s" % [killing_blow.source_id, DEATH_RESTART_DELAY])
+	await get_tree().create_timer(DEATH_RESTART_DELAY).timeout
+	restart_run()
+
+
+## Starts a new run and reloads the level. The seed is new unless --seed= was given.
+func restart_run() -> void:
+	_restart_pending = false
+	start_run(_seed_from_command_line())
+	get_tree().reload_current_scene()
 
 
 ## Starts a new run. With RANDOM_SEED a random seed is chosen.

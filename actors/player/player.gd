@@ -8,6 +8,9 @@ signal weapon_changed(slot: int, data: WeaponData)
 
 ## How many weapons the player can carry.
 const WEAPON_SLOT_COUNT: int = 2
+## Group the player is in; enemies find their target through it.
+const GROUP: StringName = &"player"
+const GAME_MANAGER_PATH: NodePath = ^"/root/GameManager"
 
 ## Maximum speed in pixels per second.
 @export var move_speed: float = 90.0
@@ -17,6 +20,8 @@ const WEAPON_SLOT_COUNT: int = 2
 @export var deceleration: float = 1200.0
 ## Weapons the player starts with, at most WEAPON_SLOT_COUNT. Later chosen before the run.
 @export var starting_weapons: Array[WeaponData] = []
+## Health of the player. Its death is reported to GameManager.
+@export var health: Health
 
 ## Last non-zero movement direction (unit vector). Used by attacks and later by auto-aim.
 var facing: Vector2 = Vector2.RIGHT
@@ -32,6 +37,12 @@ var _active_slot: int = 0
 func _ready() -> void:
 	# Top-down game: no floor or gravity, every collision is treated as a wall.
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
+	add_to_group(GROUP)
+	if health != null:
+		health.damaged.connect(_on_damaged)
+		health.died.connect(_on_died)
+	else:
+		push_warning("Player has no Health assigned")
 	_create_starting_weapons()
 
 
@@ -94,6 +105,21 @@ func _create_weapon(weapon_data: WeaponData) -> Weapon:
 	new_weapon.setup(weapon_data, self)
 	add_child(new_weapon)
 	return new_weapon
+
+
+func _on_damaged(info: DamageInfo) -> void:
+	print("Player: %d damage from %s, hp %d/%d" % [info.amount, info.source_id, health.hp, health.max_hp])
+
+
+## The player only reports its death; GameManager decides what happens next.
+func _on_died(info: DamageInfo) -> void:
+	set_physics_process(false)
+	velocity = Vector2.ZERO
+	if weapon != null:
+		weapon.cancel_attack()
+	# Looked up by path, not by the autoload name: headless tests (--script) compile this
+	# script before autoloads are registered, so the name GameManager would not resolve.
+	get_node(GAME_MANAGER_PATH).report_player_death(info)
 
 
 func _activate_slot(slot: int) -> void:

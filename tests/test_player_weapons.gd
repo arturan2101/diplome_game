@@ -29,7 +29,7 @@ func _initialize() -> void:
 	bow_data.arrow_scene = _pack(Arrow.new())
 	bow_data.weapon_scene = _pack(BowWeapon.new())
 
-	var player: Player = Player.new()
+	var player: Player = _new_player()
 	player.starting_weapons = [sword_data, bow_data] as Array[WeaponData]
 	player.weapon_changed.connect(func(slot: int, data: WeaponData) -> void: _changes.append([slot, data.id]))
 	root.add_child(player)
@@ -61,7 +61,7 @@ func _initialize() -> void:
 	_check(_changes == [[1, &"bow"], [0, &"sword"], [1, &"bow"]], "every swap emits weapon_changed")
 
 	# With one weapon the swap does nothing.
-	var solo: Player = Player.new()
+	var solo: Player = _new_player()
 	solo.starting_weapons = [sword_data] as Array[WeaponData]
 	solo.weapon_changed.connect(func(slot: int, data: WeaponData) -> void: _solo_changes.append([slot, data.id]))
 	root.add_child(solo)
@@ -72,7 +72,7 @@ func _initialize() -> void:
 			"with one weapon swap does nothing and emits nothing")
 
 	# Without weapons the swap is safe too.
-	var unarmed: Player = Player.new()
+	var unarmed: Player = _new_player()
 	root.add_child(unarmed)
 	unarmed.swap_weapon()
 	_check(unarmed.weapon == null, "unarmed player can press swap safely")
@@ -100,3 +100,12 @@ func _check(condition: bool, description: String) -> void:
 	else:
 		print("FAIL: ", description)
 		_failures += 1
+
+
+## A player with the Health its scene would have.
+func _new_player() -> Player:
+	var player: Player = Player.new()
+	var health: Health = Health.new()
+	player.add_child(health)
+	player.health = health
+	return player

@@ -18,8 +18,8 @@ var _hold_time: float = 0.0
 var _cooldown_left: float = 0.0
 
 
-func setup(weapon_data: WeaponData, weapon_wielder: Node2D) -> void:
-	super(weapon_data, weapon_wielder)
+func setup(weapon_data: WeaponData, weapon_wielder: Node2D, damage_source_id: StringName = &"") -> void:
+	super(weapon_data, weapon_wielder, damage_source_id)
 	_stats = weapon_data as BowWeaponData
 	if _stats == null or _stats.arrow_scene == null:
 		push_error("BowWeapon needs BowWeaponData with an arrow_scene: %s" % weapon_data)
@@ -97,7 +97,7 @@ func _damage_for_hold(hold: float) -> int:
 
 func _shoot(direction: Vector2, damage: int) -> void:
 	var arrow: Arrow = _stats.arrow_scene.instantiate() as Arrow
-	arrow.setup(DamageInfo.new(damage, wielder, data.id), direction, _stats.arrow_speed, _stats.arrow_range)
+	arrow.setup(DamageInfo.new(damage, wielder, source_id), direction, _stats.arrow_speed, _stats.arrow_range)
 	# The arrow only emits a signal and knows nothing about the bow. If the bow is freed
 	# while the arrow flies, Godot drops this connection and the arrow still works.
 	arrow.landed.connect(_on_arrow_landed)

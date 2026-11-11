@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://cilt82rm68y6g"]
+
+[ext_resource type="Script" uid="uid://d0eq1gnppy4ug" path="res://actors/enemies/enemy.gd" id="1_s7b7v"]
+[ext_resource type="Resource" uid="uid://dri0811re2pdk" path="res://actors/enemies/skeleton.tres" id="2_ar7lc"]
+[ext_resource type="Script" uid="uid://di3pkn0s3mymi" path="res://actors/placeholder_shape.gd" id="3_5gwyt"]
+[ext_resource type="Script" uid="uid://bech2h0liorq5" path="res://combat/health.gd" id="4_i8opf"]
+[ext_resource type="Script" uid="uid://dbyxqej24j4mh" path="res://combat/hurtbox.gd" id="5_g5vae"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ndusb"]
+radius = 6.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_4imvi"]
+radius = 7.0
+
+[node name="Skeleton" type="CharacterBody2D" unique_id=325434225 node_paths=PackedStringArray("health", "hurtbox", "visual")]
+collision_layer = 4
+collision_mask = 7
+script = ExtResource("1_s7b7v")
+data = ExtResource("2_ar7lc")
+health = NodePath("Health")
+hurtbox = NodePath("Hurtbox")
+visual = NodePath("PlaceholderShape")
+metadata/_custom_type_script = "uid://d0eq1gnppy4ug"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1841158772]
+shape = SubResource("CircleShape2D_ndusb")
+
+[node name="PlaceholderShape" type="Node2D" parent="." unique_id=291162465]
+script = ExtResource("3_5gwyt")
+color = Color(0.7641886, 0.66405886, 0.5115612, 1)
+metadata/_custom_type_script = "uid://di3pkn0s3mymi"
+
+[node name="Health" type="Node" parent="." unique_id=2065356700]
+script = ExtResource("4_i8opf")
+metadata/_custom_type_script = "uid://bech2h0liorq5"
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1357691913 node_paths=PackedStringArray("health")]
+collision_layer = 16
+collision_mask = 0
+script = ExtResource("5_g5vae")
+health = NodePath("../Health")
+metadata/_custom_type_script = "uid://dbyxqej24j4mh"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=338997249]
+shape = SubResource("CircleShape2D_4imvi")

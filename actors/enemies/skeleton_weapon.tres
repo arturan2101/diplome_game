@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="MeleeWeaponData" format=3 uid="uid://cs6kmg7e2dt34"]
+
+[ext_resource type="Script" uid="uid://dqcnjt2pkdxkd" path="res://combat/weapons/melee_attack_step.gd" id="1_8ub7n"]
+[ext_resource type="Script" uid="uid://nuho2ph11shq" path="res://combat/weapons/melee_weapon_data.gd" id="2_jtgsv"]
+[ext_resource type="PackedScene" uid="uid://jcv57ecwdsrp" path="res://combat/weapons/enemy_melee_weapon.tscn" id="3_jtgsv"]
+
+[sub_resource type="Resource" id="Resource_ndusb"]
+script = ExtResource("1_8ub7n")
+reach = 20.0
+arc_degrees = 100.0
+recovery = 0.0
+metadata/_custom_type_script = "uid://dqcnjt2pkdxkd"
+
+[resource]
+script = ExtResource("2_jtgsv")
+combo = Array[ExtResource("1_8ub7n")]([SubResource("Resource_ndusb")])
+id = &"skeleton_blade"
+weapon_scene = ExtResource("3_jtgsv")
+metadata/_custom_type_script = "uid://nuho2ph11shq"

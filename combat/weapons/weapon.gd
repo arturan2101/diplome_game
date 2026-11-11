@@ -15,14 +15,18 @@ signal attack_performed(step_index: int, hits: int)
 var data: WeaponData = null
 ## Actor holding the weapon; becomes DamageInfo.source.
 var wielder: Node2D = null
+## Becomes DamageInfo.source_id: the weapon id for the player, the enemy type for enemies.
+var source_id: StringName = &""
 ## False while the weapon is in the other slot.
 var is_active: bool = true
 
 
 ## Called by the wielder right after creating the weapon, before adding it to the tree.
-func setup(weapon_data: WeaponData, weapon_wielder: Node2D) -> void:
+## damage_source_id overrides the weapon id in DamageInfo (enemies pass their type).
+func setup(weapon_data: WeaponData, weapon_wielder: Node2D, damage_source_id: StringName = &"") -> void:
 	data = weapon_data
 	wielder = weapon_wielder
+	source_id = damage_source_id if damage_source_id != &"" else weapon_data.id
 
 
 ## Called when the attack button is pressed. direction is the aim at that moment.
