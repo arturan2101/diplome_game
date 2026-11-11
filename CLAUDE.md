@@ -87,7 +87,7 @@ docs/            design.md, ai-usage-log.md
 
 ## Telemetry (thesis data)
 
-Telemetry records metrics per section and appends one JSON line per section to `user://logs/<session>.jsonl`: session id, director mode, seed, section index, depth, budget, enemy mix, time, damage taken (total and per enemy type), HP on exit, kill ratio, weapon and skill usage, accuracy, idle time, death flag, estimated skill. Do not change the log format without telling me: the analysis scripts depend on it.
+Telemetry records metrics per section and appends one JSON line per section to `user://logs/<session>.jsonl`: session id, director mode, seed, section index, depth, budget, enemy mix, time, damage taken (total and per enemy type), HP on exit, kill ratio, weapon and skill usage, accuracy, idle time, death flag, estimated skill; plus run number, coins, blocked damage, damage total, reference time and section result p (exact keys: docs/design.md and `autoload/telemetry.gd`). Do not change the log format without telling me: the analysis scripts depend on it.
 
 ## Scope
 

@@ -101,6 +101,9 @@ func _test_bot_clears_section() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	check(worst_delta < 1.5 / 60.0, "fast-forward keeps the physics step at 1/60 s (largest %.4f)" % worst_delta)
+	check(not Telemetry.history.is_empty() and Telemetry.history[0]["section"] == 0 and Telemetry.history[0]["died"] == false
+			and float(Telemetry.history[0]["kills_ratio"]) == 1.0 and FileAccess.file_exists(Telemetry.get_log_path()),
+			"the section played by the bot is logged")
 	check(GameManager.section_index >= 1, "the bot clears a section and goes through the gate (%.0f s of game time)" % (frames / 60.0))
 	await _stop_game(game)
 

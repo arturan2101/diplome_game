@@ -13,6 +13,11 @@ signal coins_changed(coins: int)
 ## Emitted once when the player dies; killing_blow is the last hit.
 signal player_died(killing_blow: DamageInfo)
 
+## Who plans the sections. The player never sees the mode; it is written to the log.
+enum DirectorMode { RANDOM, RULES, LEARNED }
+
+## Launch argument that picks the director mode, e.g. `--mode=rules`.
+const MODE_ARG_PREFIX: String = "--mode="
 ## Launch argument that fixes the seed, e.g. `--seed=12345`.
 const SEED_ARG_PREFIX: String = "--seed="
 ## Pass this to start_run() to pick a random seed.
@@ -27,6 +32,8 @@ const MAX_SECTIONS_PER_DEPTH: int = 4
 const DEFAULT_WEAPON: WeaponData = preload("res://combat/weapons/sword.tres")
 const DEFAULT_SKILL: SkillData = preload("res://combat/skills/dash.tres")
 
+## Director mode of the next runs (debug menu or --mode=).
+var director_mode: DirectorMode = DirectorMode.RULES
 ## Seed of the current run. Always written to the log.
 var run_seed: int = 0
 ## Randomness during play (damage spread, drops).
@@ -48,7 +55,13 @@ var _sections_into_depth: int = 0
 
 
 func _ready() -> void:
+	director_mode = _mode_from_command_line()
 	start_run(_seed_from_command_line())
+
+
+## Name of the director mode as written to the log: RANDOM, RULES or LEARNED.
+func get_mode_name() -> String:
+	return DirectorMode.keys()[director_mode]
 
 
 ## Starts a new run: new seed (RANDOM_SEED picks a random one) and fresh counters.
@@ -124,6 +137,18 @@ func make_director_rng(index: int) -> RandomNumberGenerator:
 	var director_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	director_rng.seed = hash([run_seed, "director", index])
 	return director_rng
+
+
+## Reads --mode=random|rules|learned from the launch arguments; RULES if absent.
+func _mode_from_command_line() -> DirectorMode:
+	for arg: String in OS.get_cmdline_user_args() + OS.get_cmdline_args():
+		if not arg.begins_with(MODE_ARG_PREFIX):
+			continue
+		var value: String = arg.trim_prefix(MODE_ARG_PREFIX).to_upper()
+		if DirectorMode.has(value):
+			return DirectorMode[value]
+		push_warning("Ignoring unknown director mode: %s" % arg)
+	return DirectorMode.RULES
 
 
 ## Reads --seed=N from the launch arguments, or returns RANDOM_SEED if it is absent.

@@ -17,6 +17,8 @@ const ITEM_SCENES: Dictionary = {
 	SectionLayout.ITEM_COIN: preload("res://actors/pickups/coin.tscn"),
 	SectionLayout.ITEM_CHEST: preload("res://actors/pickups/chest.tscn"),
 }
+## How many past sections the director looks at for "who hurts the player".
+const RECENT_SECTIONS: int = 3
 ## Launch argument that lets the bot play instead of a person.
 const BOT_ARG: String = "--bot"
 
@@ -93,6 +95,7 @@ func _start_section() -> void:
 	_spawn_items()
 	_spawn_enemies()
 	player.teleport(level.cell_center(layout.entrance))
+	Telemetry.begin_section(plan, layout, player)
 	section_started.emit(plan, layout)
 	if _enemies_left == 0:
 		gate.open()
@@ -105,6 +108,13 @@ func _make_player_state() -> PlayerState:
 	state.hp_fraction = float(player.health.hp) / float(player.health.max_hp)
 	state.weapon_count = player.get_weapon_slots().size()
 	state.rng = GameManager.make_director_rng(GameManager.section_index)
+	state.skill = Telemetry.estimator.skill
+	for record: Dictionary in Telemetry.history:
+		state.results.append(float(record["p"]))
+		state.phases.append(StringName(record["phase"]))
+	state.recent_damage = Telemetry.recent_damage(RECENT_SECTIONS)
+	if not Telemetry.history.is_empty():
+		state.weapon_use = Telemetry.history[Telemetry.history.size() - 1]["weapon_use"]
 	return state
 
 
@@ -144,6 +154,7 @@ func _spawn_enemies() -> void:
 
 func _on_enemy_defeated(_enemy: Enemy) -> void:
 	GameManager.add_kill()
+	Telemetry.record_kill()
 	_enemies_left -= 1
 	if _enemies_left <= 0:
 		gate.open()
@@ -155,6 +166,7 @@ func _on_gate_entered(_player: Player) -> void:
 	_is_changing_section = true
 	player.set_controls_enabled(false)
 	await hud.fade_out()
+	Telemetry.end_section(false)
 	section_finished.emit(plan, layout)
 	GameManager.advance_section()
 	_start_section()
@@ -164,6 +176,7 @@ func _on_gate_entered(_player: Player) -> void:
 
 
 func _on_player_died(_killing_blow: DamageInfo) -> void:
+	Telemetry.end_section(true)
 	if not restart_on_death:
 		return
 	await get_tree().create_timer(GameManager.DEATH_RESTART_DELAY).timeout

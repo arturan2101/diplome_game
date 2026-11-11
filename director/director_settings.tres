@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="DirectorSettings" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://director/director_settings.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+start_skill = 0.4
+alpha = 0.3
+damage_norm_fraction = 0.6
+damage_weight = 0.5
+time_weight = 0.25
+kills_weight = 0.25
+budget_base = 3.0
+budget_skill_factor = 9.0
+budget_depth_factor = 0.5
+min_budget = 2
+build_multipliers = Array[float]([0.8, 1.0])
+peak_multiplier = 1.3
+rest_multiplier = 0.3
+low_hp_fraction = 0.25
+low_result_streak = 2
+low_result = 0.3
+base_health_packs = 1
+extra_pack_below_hp = 0.5
+coins_min = 4
+coins_max = 9
+cover_density = 0.5
+rest_cover_density = 0.9
+problem_enemy_share = 0.5
+weak_player_below = 0.4
+strong_player_above = 0.7
+problem_enemy_weight_weak = 0.4
+problem_enemy_weight_strong = 1.6
+random_budget_min = 2
+random_budget_max = 10

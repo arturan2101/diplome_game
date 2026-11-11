@@ -5,9 +5,12 @@ extends Node
 
 const TESTS_DIR: String = "res://tests"
 const ONLY_ARG_PREFIX: String = "--only="
+const TEST_LOG_DIR: String = "user://test_logs"
 
 
 func _ready() -> void:
+	# Tests must not write into the real play logs.
+	Telemetry.log_directory = TEST_LOG_DIR
 	var only: String = _only_filter()
 	var total_failures: int = 0
 	var total_checks: int = 0
