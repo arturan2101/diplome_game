@@ -23,7 +23,11 @@ const SIDES: Array[RoomTemplate.DoorSide] = [
 const MARGIN: int = 3
 ## A layout cell is the largest room plus this many tiles; rooms sit somewhere inside
 ## their cell, so tunnels between neighbours differ in length.
-const NODE_GAP: int = 8
+const NODE_GAP: int = 4
+## The layout of an ordinary section fits in this many cells (columns, rows): with the
+## largest room at 23x15 tiles that is at most about 80x60 tiles. An arena may be larger.
+const SECTION_SPAN: Vector2i = Vector2i(3, 3)
+const ARENA_SPAN: Vector2i = Vector2i(4, 3)
 ## A room keeps at least this distance from the border of its layout cell.
 const CELL_EDGE: int = 2
 const MAX_ATTEMPTS: int = 20
@@ -79,8 +83,9 @@ static func is_passable(layout: SectionLayout) -> bool:
 
 func _build_once(plan: SectionPlan, rng: RandomNumberGenerator) -> SectionLayout:
 	_links.clear()
-	var path: Array[PlacedRoom] = _lay_out_path(plan, rng)
-	var branches: Array[PlacedRoom] = _lay_out_branches(path, plan, rng)
+	var span: Vector2i = ARENA_SPAN if plan.is_arena else SECTION_SPAN
+	var path: Array[PlacedRoom] = _lay_out_path(plan, span, rng)
+	var branches: Array[PlacedRoom] = _lay_out_branches(path, plan, span, rng)
 	var rooms: Array[PlacedRoom] = path + branches
 	_choose_templates(path, branches, plan, rng)
 	var size: Vector2i = _move_into_grid(rooms)
@@ -123,24 +128,29 @@ func _build_once(plan: SectionPlan, rng: RandomNumberGenerator) -> SectionLayout
 
 # --- layout --------------------------------------------------------------
 
-## The main path: a walk over the coarse grid that never steps on its own cells.
-func _lay_out_path(plan: SectionPlan, rng: RandomNumberGenerator) -> Array[PlacedRoom]:
-	var count: int = clampi(plan.room_count, 2, 8)
+## The main path: a walk over the coarse grid that never steps on its own cells and
+## stays inside span. A walk is kept only if it leaves room for the planned branches.
+func _lay_out_path(plan: SectionPlan, span: Vector2i, rng: RandomNumberGenerator) -> Array[PlacedRoom]:
+	var count: int = clampi(plan.room_count, 2, span.x * span.y)
 	var nodes: Array[Vector2i] = []
+	var found: bool = false
 	for _try in PATH_TRIES:
 		nodes = [Vector2i.ZERO]
 		while nodes.size() < count:
-			var free: Array[Vector2i] = _free_neighbours(nodes[nodes.size() - 1], nodes)
+			var free: Array[Vector2i] = _free_neighbours(nodes[nodes.size() - 1], nodes, span)
 			if free.is_empty():
 				break
 			nodes.append(free[rng.randi_range(0, free.size() - 1)])
-		if nodes.size() == count:
+		if nodes.size() == count and _branch_capacity(nodes, span) >= plan.side_branches:
+			found = true
 			break
-	# A walk can corner itself; a straight line always fits.
-	if nodes.size() < count:
+	# A walk can corner itself; a snake through the box always fits.
+	if not found:
 		nodes.clear()
 		for i in count:
-			nodes.append(Vector2i(i, 0))
+			var row: int = i / span.x
+			var column: int = i % span.x if row % 2 == 0 else span.x - 1 - i % span.x
+			nodes.append(Vector2i(column, row))
 	var path: Array[PlacedRoom] = []
 	for i in count:
 		var room: PlacedRoom = PlacedRoom.new()
@@ -151,9 +161,19 @@ func _lay_out_path(plan: SectionPlan, rng: RandomNumberGenerator) -> Array[Place
 	return path
 
 
+## Free layout cells next to the path rooms that may carry a branch (not the first one).
+func _branch_capacity(nodes: Array[Vector2i], span: Vector2i) -> int:
+	var free: Dictionary = {}
+	for i in range(1, nodes.size()):
+		for cell: Vector2i in _free_neighbours(nodes[i], nodes, span):
+			free[cell] = true
+	return free.size()
+
+
 ## Treasure rooms: each hangs off a room of the path (not the first one) that still
 ## has a free cell next to it.
-func _lay_out_branches(path: Array[PlacedRoom], plan: SectionPlan, rng: RandomNumberGenerator) -> Array[PlacedRoom]:
+func _lay_out_branches(path: Array[PlacedRoom], plan: SectionPlan, span: Vector2i,
+		rng: RandomNumberGenerator) -> Array[PlacedRoom]:
 	var branches: Array[PlacedRoom] = []
 	if _library.filter_by_tag(RoomTemplate.TREASURE_TAG).is_empty():
 		return branches
@@ -163,12 +183,12 @@ func _lay_out_branches(path: Array[PlacedRoom], plan: SectionPlan, rng: RandomNu
 	for _i in plan.side_branches:
 		var hosts: Array[PlacedRoom] = []
 		for i in range(1, path.size()):
-			if not _free_neighbours(path[i].node, occupied).is_empty():
+			if not _free_neighbours(path[i].node, occupied, span).is_empty():
 				hosts.append(path[i])
 		if hosts.is_empty():
 			break
 		var host: PlacedRoom = hosts[rng.randi_range(0, hosts.size() - 1)]
-		var free: Array[Vector2i] = _free_neighbours(host.node, occupied)
+		var free: Array[Vector2i] = _free_neighbours(host.node, occupied, span)
 		var branch: PlacedRoom = PlacedRoom.new()
 		branch.node = free[rng.randi_range(0, free.size() - 1)]
 		branch.is_branch = true
@@ -178,12 +198,23 @@ func _lay_out_branches(path: Array[PlacedRoom], plan: SectionPlan, rng: RandomNu
 	return branches
 
 
-func _free_neighbours(node: Vector2i, occupied: Array[Vector2i]) -> Array[Vector2i]:
+## Neighbouring layout cells that are free and keep all cells inside span.
+func _free_neighbours(node: Vector2i, occupied: Array[Vector2i], span: Vector2i) -> Array[Vector2i]:
+	var low: Vector2i = occupied[0]
+	var high: Vector2i = occupied[0]
+	for cell: Vector2i in occupied:
+		low = low.min(cell)
+		high = high.max(cell)
 	var free: Array[Vector2i] = []
 	for side: RoomTemplate.DoorSide in SIDES:
 		var next: Vector2i = node + _door_direction(side)
-		if not next in occupied:
-			free.append(next)
+		if next in occupied:
+			continue
+		# Cells spanned (inclusive) if this one is added.
+		var cells_spanned: Vector2i = high.max(next) - low.min(next) + Vector2i.ONE
+		if cells_spanned.x > span.x or cells_spanned.y > span.y:
+			continue
+		free.append(next)
 	return free
 
 

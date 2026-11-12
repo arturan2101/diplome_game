@@ -26,6 +26,8 @@ const ITEM_SCENES: Dictionary = {
 const RECENT_SECTIONS: int = 3
 ## The arena seals when the player is this many tiles inside its last room.
 const ARENA_TRIGGER_DEPTH: int = 2
+## Debug-only zoom; the export preset leaves tools/debug out, so it is loaded by path.
+const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 ## Launch argument that lets the bot play instead of a person.
 const BOT_ARG: String = "--bot"
 
@@ -64,6 +66,10 @@ func _ready() -> void:
 	if chest_weapons == null:
 		chest_weapons = DEFAULT_CHEST_WEAPONS
 	_director = GameManager.make_director()
+	if OS.is_debug_build() and ResourceLoader.exists(DEBUG_ZOOM_SCRIPT):
+		var zoom: Node = (load(DEBUG_ZOOM_SCRIPT) as GDScript).new()
+		zoom.name = "DebugCameraZoom"
+		add_child(zoom)
 	player.add_weapon(GameManager.starting_weapon)
 	player.set_skill(GameManager.starting_skill)
 	hud.bind_player(player)

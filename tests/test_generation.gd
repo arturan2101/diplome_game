@@ -5,11 +5,12 @@ extends TestCase
 
 const SEED_COUNT: int = 100
 const RUN_SEED: int = 777
-## Sections must stay small enough for a phone.
-const MAX_WIDTH: int = 220
-## Sections now grow in any direction; rock that touches nothing walkable is not drawn,
-## so only the floor area costs anything on a phone.
-const MAX_HEIGHT: int = 160
+## Ordinary sections must stay small enough to clear in 1-2 minutes (about 80x60 tiles
+## plus the margin); arenas may be larger.
+const MAX_WIDTH: int = 90
+const MAX_HEIGHT: int = 66
+const MAX_ARENA_WIDTH: int = 116
+const MAX_ARENA_HEIGHT: int = 66
 
 
 func run() -> void:
@@ -43,7 +44,8 @@ func _test_many_seeds() -> void:
 		for entry: Dictionary in layout.enemies:
 			if int(entry["room"]) == 0:
 				enemies_at_start += 1
-		if layout.grid.width > MAX_WIDTH or layout.grid.height > MAX_HEIGHT:
+		var limit: Vector2i = Vector2i(MAX_ARENA_WIDTH, MAX_ARENA_HEIGHT) if plan.is_arena else Vector2i(MAX_WIDTH, MAX_HEIGHT)
+		if layout.grid.width > limit.x or layout.grid.height > limit.y:
 			too_big += 1
 		if layout.room_rects.size() != plan.room_count + plan.side_branches:
 			missing_branch += 1
@@ -57,7 +59,7 @@ func _test_many_seeds() -> void:
 	check(impassable == 0, "all %d sections are passable from the entrance to the gate (%d are not)" % [SEED_COUNT, impassable])
 	check(wrong_content == 0, "every section has the enemies, health packs, coins and chest of its plan (%d do not)" % wrong_content)
 	check(enemies_at_start == 0, "no enemy stands in the first room (%d do)" % enemies_at_start)
-	check(too_big == 0, "sections stay within %dx%d tiles (largest: %s)" % [MAX_WIDTH, MAX_HEIGHT, max_size])
+	check(too_big == 0, "ordinary sections stay within %dx%d tiles, arenas within %dx%d (largest: %s)" % [MAX_WIDTH, MAX_HEIGHT, MAX_ARENA_WIDTH, MAX_ARENA_HEIGHT, max_size])
 	check(missing_branch == 0, "every planned side branch is built (%d sections miss one)" % missing_branch)
 	check(directions.size() == 4, "sections run in all four directions (%s)" % [directions.keys()])
 	check(empty_rooms == 0, "every room but the first has enemies, an item or hazards (%d empty)" % empty_rooms)
