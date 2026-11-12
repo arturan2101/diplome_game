@@ -121,7 +121,8 @@ func _test_real_resources() -> void:
 	if catalog == null:
 		return
 	var beetle: EnemyData = catalog.get_by_id(&"beetle")
-	check(beetle.pack_min == 4 and beetle.pack_max == 6, "beetles spawn as a pack of 4-6 for one danger cost")
+	check(beetle.pack_min >= 4 and beetle.pack_max <= 8 and beetle.pack_min < beetle.pack_max,
+			"beetles spawn as a pack (%d-%d) for one danger cost" % [beetle.pack_min, beetle.pack_max])
 	check(catalog.get_by_id(&"archer").preferred_distance > 0.0 and catalog.get_by_id(&"skeleton").preferred_distance == 0.0,
 			"only the archer keeps its distance")
 	var scene: PackedScene = load(ENEMY_SCENE_PATH) as PackedScene

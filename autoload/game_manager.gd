@@ -142,6 +142,13 @@ func is_last_section_of_depth() -> bool:
 	return _sections_into_depth == sections_in_depth(depth) - 1
 
 
+## Returns a new generator for the bot's own choices in this run (only bots use it).
+func make_bot_rng() -> RandomNumberGenerator:
+	var bot_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	bot_rng.seed = hash([run_seed, "bot"])
+	return bot_rng
+
+
 ## Returns a new generator for the loot of one section (what chests hold).
 ## Separate from the section generator, so loot does not change the tunnels.
 func make_loot_rng(index: int) -> RandomNumberGenerator:

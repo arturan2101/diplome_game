@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://jcv57ecwdsrp" path="res://combat/weapons/enemy_melee_weapon.tscn" id="3_jtgsv"]
 
 [sub_resource type="Resource" id="Resource_ndusb"]
+damage = 12
 script = ExtResource("1_8ub7n")
 reach = 20.0
 arc_degrees = 100.0

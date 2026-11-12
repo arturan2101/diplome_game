@@ -1,6 +1,6 @@
 ; name: long_gallery
 ; tags: combat, open, long
-; ref_time: 16
+; ref_time: 6.5
 ##########DDD##########
 #..E.....C.....C....E.#
 #.....................#

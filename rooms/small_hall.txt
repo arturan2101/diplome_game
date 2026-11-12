@@ -1,6 +1,6 @@
 ; name: small_hall
 ; tags: combat, small
-; ref_time: 8
+; ref_time: 3.5
 #####DDD#####
 #...........#
 #..E.....I..#

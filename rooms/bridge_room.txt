@@ -1,6 +1,6 @@
 ; name: bridge_room
 ; tags: combat, hazard
-; ref_time: 14
+; ref_time: 5.5
 ##DDD##############
 #......~~~~~......#
 #..E...~~~~~...E..#

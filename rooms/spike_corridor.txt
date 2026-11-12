@@ -1,6 +1,6 @@
 ; name: spike_corridor
 ; tags: combat, hazard, narrow
-; ref_time: 10
+; ref_time: 5
 #########DDD#########
 #....^......E....^..#
 D....^..........^...D

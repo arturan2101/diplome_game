@@ -138,7 +138,8 @@ func _hit_targets_in_arc() -> void:
 		var push_direction: Vector2 = (hurtbox.global_position - global_position).normalized()
 		if push_direction.is_zero_approx():
 			push_direction = _swing_direction
-		var info: DamageInfo = DamageInfo.new(_step.damage, wielder, source_id, push_direction * _step.knockback)
+		var damage: int = roundi(_step.damage * damage_multiplier)
+		var info: DamageInfo = DamageInfo.new(damage, wielder, source_id, push_direction * _step.knockback)
 		info.direction = push_direction
 		if hurtbox.receive_hit(info):
 			_hits_landed += 1

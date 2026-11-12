@@ -1,6 +1,6 @@
 ; name: arena
 ; tags: combat, open, big, arena
-; ref_time: 22
+; ref_time: 10.5
 #########DDD#########
 #...................#
 #...E...........E...#

@@ -1,6 +1,6 @@
 ; name: crypt
 ; tags: combat, cover
-; ref_time: 14
+; ref_time: 4.5
 #######DDD#######
 #...............#
 #.%...E...E...%.#

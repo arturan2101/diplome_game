@@ -19,6 +19,8 @@ var wielder: Node2D = null
 var source_id: StringName = &""
 ## False while the weapon is in the other slot.
 var is_active: bool = true
+## Multiplies the damage of every hit (enemy depth scaling, later weapon rarity).
+var damage_multiplier: float = 1.0
 
 
 ## Called by the wielder right after creating the weapon, before adding it to the tree.

@@ -1,6 +1,6 @@
 ; name: collapsed_temple
 ; tags: combat, hazard, big
-; ref_time: 20
+; ref_time: 6
 #########DDD#########
 #...................#
 #..E......~~.....E..#

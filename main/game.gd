@@ -26,10 +26,10 @@ const ITEM_SCENES: Dictionary = {
 const RECENT_SECTIONS: int = 3
 ## The arena seals when the player is this many tiles inside its last room.
 const ARENA_TRIGGER_DEPTH: int = 2
+## Where an enemy was spawned (an arena puts strays back there when it seals).
+const SPAWN_CELL_META: StringName = &"spawn_cell"
 ## Debug-only zoom; the export preset leaves tools/debug out, so it is loaded by path.
 const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
-## Launch argument that lets the bot play instead of a person.
-const BOT_ARG: String = "--bot"
 
 @export var level: Level
 @export var player: Player
@@ -73,9 +73,11 @@ func _ready() -> void:
 	player.add_weapon(GameManager.starting_weapon)
 	player.set_skill(GameManager.starting_skill)
 	hud.bind_player(player)
+	Telemetry.bot_profile = ""
 	GameManager.player_died.connect(_on_player_died)
-	if BOT_ARG in OS.get_cmdline_user_args():
-		add_bot()
+	var bot_profile: BotProfile = BotPlayer.profile_from_command_line()
+	if bot_profile != null:
+		add_bot(bot_profile)
 	_start_section()
 
 
@@ -95,11 +97,14 @@ func is_arena_sealed() -> bool:
 	return _is_arena_sealed
 
 
-## Lets the bot play this run (headless simulations and tests).
-func add_bot() -> BotPlayer:
+## Lets a bot play this run (headless simulations and tests). Without a profile it
+## is the mid bot. The profile name goes to the log.
+func add_bot(profile: BotProfile = null) -> BotPlayer:
 	var bot: BotPlayer = BotPlayer.new()
 	bot.game = self
+	bot.profile = profile
 	add_child(bot)
+	Telemetry.bot_profile = String(bot.profile.id)
 	return bot
 
 
@@ -211,7 +216,11 @@ func _spawn_enemies() -> void:
 func _spawn_enemy(entry: Dictionary) -> void:
 	var enemy: Enemy = ENEMY_SCENE.instantiate() as Enemy
 	enemy.data = _director.catalog.get_by_id(entry["id"])
+	# Deeper ruins, tougher enemies.
+	enemy.hp_multiplier = _director.catalog.hp_multiplier(GameManager.depth)
+	enemy.damage_multiplier = _director.catalog.damage_multiplier(GameManager.depth)
 	enemy.position = level.to_local(level.cell_center(entry["cell"]))
+	enemy.set_meta(SPAWN_CELL_META, entry["cell"])
 	enemy.defeated.connect(_on_enemy_defeated)
 	_contents.add_child(enemy)
 	_enemies_left += 1
@@ -251,6 +260,13 @@ func _is_player_inside_arena() -> bool:
 func _seal_arena() -> void:
 	_is_arena_sealed = true
 	level.set_cells(layout.arena_doors, LevelGrid.Cell.WALL)
+	# An arena enemy that chased the player out (or stands in a doorway) would be shut
+	# out for good: put it back where it started, inside the room.
+	var inside: Rect2i = layout.room_rects[layout.arena_room].grow(-1)
+	for enemy: Enemy in get_enemies():
+		var cell: Vector2i = level.cell_at(enemy.global_position)
+		if not inside.has_point(cell) or not level.grid.is_floor(cell):
+			enemy.global_position = level.cell_center(enemy.get_meta(SPAWN_CELL_META, layout.exit))
 	hud.show_banner("The doors are sealed")
 	if _enemies_left <= 0:
 		_advance_arena()

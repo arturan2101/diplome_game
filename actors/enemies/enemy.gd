@@ -37,6 +37,9 @@ enum State { IDLE, CHASE, RETREAT, WINDUP, RECOVER, STAGGER, FALLING }
 
 var state: State = State.IDLE
 var weapon: Weapon = null
+## Set by the game before the enemy enters the tree: deeper ruins, tougher enemies.
+var hp_multiplier: float = 1.0
+var damage_multiplier: float = 1.0
 
 var _target: Node2D = null
 var _level: Level = null
@@ -58,7 +61,7 @@ func _ready() -> void:
 		set_physics_process(false)
 		return
 	_level = get_tree().get_first_node_in_group(Level.GROUP) as Level
-	health.max_hp = data.max_hp
+	health.max_hp = maxi(1, roundi(data.max_hp * hp_multiplier))
 	health.reset()
 	health.damaged.connect(_on_damaged)
 	health.died.connect(_on_died)
@@ -239,6 +242,7 @@ func _create_weapon() -> void:
 	weapon = data.weapon.weapon_scene.instantiate() as Weapon
 	# Damage from this weapon is reported with the enemy type as its source.
 	weapon.setup(data.weapon, self, data.id)
+	weapon.damage_multiplier = damage_multiplier
 	add_child(weapon)
 
 

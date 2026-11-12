@@ -5,8 +5,6 @@ extends Control
 ## player; it only goes to the log.
 
 const GAME_SCENE: String = "res://main/main.tscn"
-## Launch argument that skips the menu and lets the bot play.
-const BOT_ARG: String = "--bot"
 const RANDOM_SEED_TEXT: String = ""
 
 ## Weapons and skills offered before a run. Adding one here adds a button.
@@ -34,7 +32,7 @@ var _title_held_time: float = -1.0
 
 func _ready() -> void:
 	get_tree().paused = false
-	if BOT_ARG in OS.get_cmdline_user_args():
+	if BotPlayer.profile_from_command_line() != null:
 		_start_run.call_deferred()
 		return
 	play_button.pressed.connect(_show_loadout.bind(true))

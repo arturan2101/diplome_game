@@ -37,7 +37,7 @@ const PREFERRED_TAG_WEIGHT: int = 3
 const NEUTRAL_WEIGHT: int = 9
 const COINS_PER_SLOT: int = 3
 ## Reference time added per tunnel, in seconds.
-const TUNNEL_REF_TIME: float = 3.0
+const TUNNEL_REF_TIME: float = 2.5
 const RANDOM_CELL_TRIES: int = 60
 
 var _library: RoomLibrary = null

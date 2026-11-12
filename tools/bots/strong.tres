@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BotProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tools/bot_profile.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"strong"
+reaction_time = 0.15
+dodge_chance = 0.85
+skill_use_chance = 0.8
+dodge_time = 0.4
+miss_chance = 0.03
+move_jitter_degrees = 5.0
+hesitation_chance = 0.0
+hesitation_time = 0.3
+hazard_blind_chance = 0.0
+heal_below = 0.55
+bow_hold_time = 0.9
+bow_keep_distance = 60.0

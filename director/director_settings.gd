@@ -18,11 +18,11 @@ extends Resource
 
 @export_group("Danger budget")
 ## B = round((base + skill_factor * S + depth_factor * depth) * phase multiplier).
-@export var budget_base: float = 3.0
-@export var budget_skill_factor: float = 9.0
+@export var budget_base: float = 7.0
+@export var budget_skill_factor: float = 12.0
 @export var budget_depth_factor: float = 0.5
 ## A section never gets less than this, except in the rest phase.
-@export var min_budget: int = 2
+@export var min_budget: int = 4
 
 @export_group("Tension wave")
 ## Budget multipliers of the phases: two build-up sections, a peak, a rest.
@@ -62,9 +62,9 @@ extends Resource
 ## Rooms of an arena section: lead-in rooms plus the locked room at the end.
 @export var arena_rooms: int = 3
 ## From this budget on, the arena comes in two waves.
-@export var arena_two_waves_budget: int = 8
+@export var arena_two_waves_budget: int = 12
 
 @export_group("Random mode")
 ## RandomDirector picks the budget uniformly from this range (plus depth growth).
-@export var random_budget_min: int = 2
-@export var random_budget_max: int = 10
+@export var random_budget_min: int = 8
+@export var random_budget_max: int = 20

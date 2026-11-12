@@ -6,7 +6,7 @@
 
 [sub_resource type="Resource" id="bite_step"]
 script = ExtResource("1")
-damage = 4
+damage = 6
 reach = 14.0
 arc_degrees = 120.0
 duration = 0.1

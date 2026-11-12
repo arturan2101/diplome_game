@@ -37,20 +37,23 @@ func _test_buy_enemies() -> void:
 
 
 func _test_budget_formula() -> void:
+	# Settings: base 7, skill factor 12, depth factor 0.5, phases 0.8 / 1.0 / 1.3 / 0.3, minimum 4.
 	var director: RuleDirector = RuleDirector.new()
 	var state: PlayerState = _state(0, [], [])
-	check(director.budget_for(state, SectionPlan.PHASE_BUILD) == 5, "first build-up section: round((3 + 9*0.4) * 0.8) = 5")
+	check(director.budget_for(state, SectionPlan.PHASE_BUILD) == 9, "first build-up section: round((7 + 12*0.4) * 0.8) = 9")
 	state.phases = [SectionPlan.PHASE_BUILD]
-	check(director.budget_for(state, SectionPlan.PHASE_BUILD) == 7, "second build-up section: round(6.6 * 1.0) = 7")
-	check(director.budget_for(state, SectionPlan.PHASE_PEAK) == 9, "peak: round(6.6 * 1.3) = 9")
-	check(director.budget_for(state, SectionPlan.PHASE_REST) == 2, "rest: round(6.6 * 0.3) = 2")
+	check(director.budget_for(state, SectionPlan.PHASE_BUILD) == 12, "second build-up section: round(11.8 * 1.0) = 12")
+	check(director.budget_for(state, SectionPlan.PHASE_PEAK) == 15, "peak: round(11.8 * 1.3) = 15")
+	check(director.budget_for(state, SectionPlan.PHASE_REST) == 4, "rest: round(11.8 * 0.3) = 4")
 	state.skill = 0.7
 	state.depth = 2
-	check(director.budget_for(state, SectionPlan.PHASE_PEAK) == 13, "skill and depth raise the budget: round((3 + 6.3 + 1) * 1.3) = 13")
-	state.skill = 0.0
-	state.depth = 0
-	state.phases = []
-	check(director.budget_for(state, SectionPlan.PHASE_BUILD) == 2, "the budget never drops below the minimum outside rest")
+	check(director.budget_for(state, SectionPlan.PHASE_PEAK) == 21, "skill and depth raise the budget: round((7 + 8.4 + 1) * 1.3) = 21")
+	var low: DirectorSettings = (load(Director.SETTINGS_PATH) as DirectorSettings).duplicate()
+	low.budget_base = 2.0
+	var low_state: PlayerState = _state(0, [], [])
+	low_state.skill = 0.0
+	check(RuleDirector.new(null, low).budget_for(low_state, SectionPlan.PHASE_BUILD) == low.min_budget,
+			"the budget never drops below the minimum outside rest")
 
 
 func _test_tension_wave() -> void:

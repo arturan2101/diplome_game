@@ -51,7 +51,7 @@ func _on_attack_released(direction: Vector2) -> void:
 	# Released during the cooldown or without a direction: no shot.
 	if _cooldown_left > 0.0 or direction.is_zero_approx():
 		return
-	_shoot(direction, _damage_for_hold(hold))
+	_shoot(direction, roundi(_damage_for_hold(hold) * damage_multiplier))
 	_cooldown_left = _stats.cooldown
 
 

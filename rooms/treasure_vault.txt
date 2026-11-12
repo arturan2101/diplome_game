@@ -1,6 +1,6 @@
 ; name: treasure_vault
 ; tags: treasure
-; ref_time: 6
+; ref_time: 2.5
 ####DDD####
 #.........#
 #.^.....^.#

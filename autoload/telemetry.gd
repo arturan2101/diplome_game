@@ -26,6 +26,8 @@ var write_enabled: bool = true
 var session_id: String = ""
 ## Number of the run inside this session, starting at 1.
 var run_number: int = 0
+## Bot profile playing this run ("weak", "mid", "strong"), empty for a person.
+var bot_profile: String = ""
 var settings: DirectorSettings = null
 var estimator: SkillEstimator = null
 ## Records of the finished sections of the current run, oldest first.
@@ -107,6 +109,7 @@ func end_section(died: bool) -> Dictionary:
 		"session": session_id,
 		"run": run_number,
 		"mode": GameManager.get_mode_name(),
+		"bot": bot_profile,
 		"seed": GameManager.run_seed,
 		"section": _plan.section_index,
 		"depth": _plan.depth,

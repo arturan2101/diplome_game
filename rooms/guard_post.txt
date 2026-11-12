@@ -1,6 +1,6 @@
 ; name: guard_post
 ; tags: combat, small, cover
-; ref_time: 9
+; ref_time: 4.5
 ##DDD##########
 #......C......#
 #..E.......E..#
