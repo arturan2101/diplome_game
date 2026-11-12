@@ -137,6 +137,19 @@ func sections_in_depth(depth_index: int) -> int:
 	return MIN_SECTIONS_PER_DEPTH + absi(hash([run_seed, "depth", depth_index])) % spread
 
 
+## True if the current section is the last of its depth (the arena).
+func is_last_section_of_depth() -> bool:
+	return _sections_into_depth == sections_in_depth(depth) - 1
+
+
+## Returns a new generator for the loot of one section (what chests hold).
+## Separate from the section generator, so loot does not change the tunnels.
+func make_loot_rng(index: int) -> RandomNumberGenerator:
+	var loot_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	loot_rng.seed = hash([run_seed, "loot", index])
+	return loot_rng
+
+
 func add_coins(amount: int) -> void:
 	coins += amount
 	coins_changed.emit(coins)

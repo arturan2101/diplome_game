@@ -7,7 +7,9 @@ const SEED_COUNT: int = 100
 const RUN_SEED: int = 777
 ## Sections must stay small enough for a phone.
 const MAX_WIDTH: int = 220
-const MAX_HEIGHT: int = 90
+## Sections now grow in any direction; rock that touches nothing walkable is not drawn,
+## so only the floor area costs anything on a phone.
+const MAX_HEIGHT: int = 160
 
 
 func run() -> void:
@@ -25,6 +27,9 @@ func _test_many_seeds() -> void:
 	var too_big: int = 0
 	var retries: int = 0
 	var missing_branch: int = 0
+	var empty_rooms: int = 0
+	var bad_arenas: int = 0
+	var directions: Dictionary = {}
 	var max_size: Vector2i = Vector2i.ZERO
 	for i in SEED_COUNT:
 		var plan: SectionPlan = _varied_plan(i)
@@ -36,18 +41,27 @@ func _test_many_seeds() -> void:
 		if not _content_matches(layout, plan, catalog):
 			wrong_content += 1
 		for entry: Dictionary in layout.enemies:
-			if layout.room_rects[0].has_point(entry["cell"]):
+			if int(entry["room"]) == 0:
 				enemies_at_start += 1
 		if layout.grid.width > MAX_WIDTH or layout.grid.height > MAX_HEIGHT:
 			too_big += 1
-		if plan.has_side_branch and layout.room_rects.size() != plan.room_count + 1:
+		if layout.room_rects.size() != plan.room_count + plan.side_branches:
 			missing_branch += 1
+		for room in range(1, layout.path_room_count):
+			directions[_direction(layout.room_rects[room - 1], layout.room_rects[room])] = true
+		if not plan.is_arena:
+			empty_rooms += _count_empty_rooms(layout)
+		elif not _arena_ok(layout, plan):
+			bad_arenas += 1
 		max_size = Vector2i(maxi(max_size.x, layout.grid.width), maxi(max_size.y, layout.grid.height))
 	check(impassable == 0, "all %d sections are passable from the entrance to the gate (%d are not)" % [SEED_COUNT, impassable])
 	check(wrong_content == 0, "every section has the enemies, health packs, coins and chest of its plan (%d do not)" % wrong_content)
 	check(enemies_at_start == 0, "no enemy stands in the first room (%d do)" % enemies_at_start)
 	check(too_big == 0, "sections stay within %dx%d tiles (largest: %s)" % [MAX_WIDTH, MAX_HEIGHT, max_size])
-	check(missing_branch == 0, "a planned side branch is always built (%d missing)" % missing_branch)
+	check(missing_branch == 0, "every planned side branch is built (%d sections miss one)" % missing_branch)
+	check(directions.size() == 4, "sections run in all four directions (%s)" % [directions.keys()])
+	check(empty_rooms == 0, "every room but the first has enemies, an item or hazards (%d empty)" % empty_rooms)
+	check(bad_arenas == 0, "arena sections keep all enemies in the last room, in waves, with its doors listed (%d bad)" % bad_arenas)
 	check(retries <= SEED_COUNT / 10, "rebuilds are rare (%d of %d)" % [retries, SEED_COUNT])
 	print("  generation: largest section %s tiles, %d of %d needed a rebuild" % [max_size, retries, SEED_COUNT])
 
@@ -94,8 +108,10 @@ func _varied_plan(i: int) -> SectionPlan:
 	var plan: SectionPlan = SectionPlan.new()
 	plan.section_index = i
 	plan.room_count = 3 + i % 3
-	plan.has_side_branch = i % 2 == 0
-	plan.has_chest = i % 3 == 0
+	plan.chests = i % 3
+	plan.side_branches = mini(plan.chests, i % 2 + 1) if plan.chests > 0 else 0
+	plan.is_arena = i % 5 == 4
+	plan.waves = 2 if plan.is_arena else 1
 	plan.corridor_width = 2 + i % 3
 	plan.corridor_twist = 0.1 * float(i % 7)
 	plan.health_packs = i % 3
@@ -117,6 +133,42 @@ func _content_matches(layout: SectionLayout, plan: SectionPlan, catalog: EnemyCa
 			return false
 	if layout.count_items(SectionLayout.ITEM_HEALTH_PACK) != plan.health_packs:
 		return false
-	if layout.count_items(SectionLayout.ITEM_COIN) != plan.coins:
+	if layout.count_items(SectionLayout.ITEM_COIN) < plan.coins:
 		return false
-	return layout.count_items(SectionLayout.ITEM_CHEST) == (1 if plan.has_chest else 0)
+	return layout.count_items(SectionLayout.ITEM_CHEST) == plan.chests
+
+
+## Direction of a step between two neighbouring rooms of the path.
+func _direction(from: Rect2i, to: Rect2i) -> String:
+	var step: Vector2 = Vector2(to.get_center() - from.get_center())
+	if absf(step.x) > absf(step.y):
+		return "right" if step.x > 0.0 else "left"
+	return "down" if step.y > 0.0 else "up"
+
+
+## Rooms of the path (not the first) with no enemy, no item and no hazard tiles.
+func _count_empty_rooms(layout: SectionLayout) -> int:
+	var empty: int = 0
+	for i in range(1, layout.path_room_count):
+		var busy: bool = false
+		for entry: Dictionary in layout.enemies + layout.items:
+			if int(entry["room"]) == i:
+				busy = true
+		var rect: Rect2i = layout.room_rects[i]
+		for y in range(rect.position.y, rect.end.y):
+			for x in range(rect.position.x, rect.end.x):
+				var cell: LevelGrid.Cell = layout.grid.get_cell(Vector2i(x, y))
+				if cell == LevelGrid.Cell.PIT or cell == LevelGrid.Cell.SPIKES:
+					busy = true
+		if not busy:
+			empty += 1
+	return empty
+
+
+func _arena_ok(layout: SectionLayout, plan: SectionPlan) -> bool:
+	if layout.arena_room != layout.path_room_count - 1 or layout.arena_doors.is_empty():
+		return false
+	for entry: Dictionary in layout.enemies:
+		if int(entry["room"]) != layout.arena_room:
+			return false
+	return layout.wave_count() == mini(plan.waves, plan.get_spawn_count())

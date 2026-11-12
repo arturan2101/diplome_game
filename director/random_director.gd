@@ -12,7 +12,8 @@ const MAX_HEALTH_PACKS: int = 2
 func choose_next(state: PlayerState) -> SectionPlan:
 	var rng: RandomNumberGenerator = state.rng
 	var plan: SectionPlan = new_plan(state)
-	plan.phase = SectionPlan.PHASE_RANDOM
+	if not plan.is_arena:
+		plan.phase = SectionPlan.PHASE_RANDOM
 	plan.budget = rng.randi_range(settings.random_budget_min, settings.random_budget_max) \
 			+ roundi(settings.budget_depth_factor * state.depth)
 	plan.enemy_mix = buy_enemies(plan.budget, rng)
@@ -21,4 +22,5 @@ func choose_next(state: PlayerState) -> SectionPlan:
 	plan.health_packs = rng.randi_range(0, MAX_HEALTH_PACKS)
 	plan.coins = rng.randi_range(settings.coins_min, settings.coins_max)
 	plan.cover_density = rng.randf()
+	finish_arena(plan)
 	return plan

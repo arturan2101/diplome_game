@@ -6,8 +6,9 @@ extends Node2D
 @export var run_seed: int = 12345
 @export var section_index: int = 0
 @export_range(3, 5) var room_count: int = 4
-@export var has_side_branch: bool = true
-@export var has_chest: bool = true
+@export_range(0, 2) var side_branches: int = 1
+@export_range(0, 2) var chests: int = 1
+@export var is_arena: bool = false
 @export_range(2, 4) var corridor_width: int = 3
 @export_range(0.0, 1.0) var corridor_twist: float = 0.3
 @export_range(0.0, 1.0) var cover_density: float = 0.5
@@ -53,8 +54,10 @@ func _build() -> void:
 	var plan: SectionPlan = SectionPlan.new()
 	plan.section_index = section_index
 	plan.room_count = room_count
-	plan.has_side_branch = has_side_branch
-	plan.has_chest = has_chest
+	plan.side_branches = side_branches
+	plan.chests = chests
+	plan.is_arena = is_arena
+	plan.waves = 2 if is_arena else 1
 	plan.corridor_width = corridor_width
 	plan.corridor_twist = corridor_twist
 	plan.cover_density = cover_density

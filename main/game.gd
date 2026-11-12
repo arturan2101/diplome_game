@@ -2,7 +2,9 @@ class_name Game
 extends Node2D
 ## One run: asks the director for a plan, has the generator build the section, fills
 ## the Level with enemies and pickups, and moves on when the player goes through the
-## gate. The gate opens only when every enemy of the section is dead.
+## gate. In an ordinary section the gate is open from the start. The last section of
+## a depth is an arena: when the player walks into its last room the doors seal, the
+## enemies come in one or two waves, and only then do the doors and the gate open.
 ## The director and the generator never touch the scene tree; this script does.
 
 ## Emitted when a section is built and the player stands at its entrance.
@@ -11,6 +13,9 @@ signal section_started(plan: SectionPlan, layout: SectionLayout)
 signal section_finished(plan: SectionPlan, layout: SectionLayout)
 
 const ENEMY_SCENE: PackedScene = preload("res://actors/enemies/enemy.tscn")
+const WEAPON_PICKUP_SCENE: PackedScene = preload("res://actors/pickups/weapon_pickup.tscn")
+const COIN_SCENE: PackedScene = preload("res://actors/pickups/coin.tscn")
+const DEFAULT_CHEST_WEAPONS: WeaponPool = preload("res://combat/weapons/chest_weapons.tres")
 const GATE_SCENE: PackedScene = preload("res://level/gate.tscn")
 const ITEM_SCENES: Dictionary = {
 	SectionLayout.ITEM_HEALTH_PACK: preload("res://actors/pickups/health_pack.tscn"),
@@ -19,6 +24,8 @@ const ITEM_SCENES: Dictionary = {
 }
 ## How many past sections the director looks at for "who hurts the player".
 const RECENT_SECTIONS: int = 3
+## The arena seals when the player is this many tiles inside its last room.
+const ARENA_TRIGGER_DEPTH: int = 2
 ## Launch argument that lets the bot play instead of a person.
 const BOT_ARG: String = "--bot"
 
@@ -29,6 +36,11 @@ const BOT_ARG: String = "--bot"
 @export var pause_menu: PauseMenu
 ## Show the death screen when the player dies. Tests and simulations switch it off.
 @export var death_screen_enabled: bool = true
+## Weapons chests can hold. Empty = combat/weapons/chest_weapons.tres.
+@export var chest_weapons: WeaponPool
+## How many coins fall out of a chest.
+@export var chest_coins_min: int = 3
+@export var chest_coins_max: int = 6
 
 var plan: SectionPlan = null
 var layout: SectionLayout = null
@@ -40,9 +52,17 @@ var _builder: SectionBuilder = SectionBuilder.new()
 var _contents: Node2D = null
 var _enemies_left: int = 0
 var _is_changing_section: bool = false
+## Arena: enemies of the waves not spawned yet (index 0 = second wave).
+var _pending_waves: Array[Array] = []
+var _is_arena_sealed: bool = false
+var _is_arena_cleared: bool = false
+## Generator for what chests hold in the current section.
+var _loot_rng: RandomNumberGenerator = null
 
 
 func _ready() -> void:
+	if chest_weapons == null:
+		chest_weapons = DEFAULT_CHEST_WEAPONS
 	_director = GameManager.make_director()
 	player.add_weapon(GameManager.starting_weapon)
 	player.set_skill(GameManager.starting_skill)
@@ -56,6 +76,17 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if not GameManager.is_run_over:
 		GameManager.run_time += delta
+	if is_arena() and not _is_arena_sealed and not _is_arena_cleared and _is_player_inside_arena():
+		_seal_arena()
+
+
+## True if the current section ends with a locked arena.
+func is_arena() -> bool:
+	return layout != null and layout.arena_room >= 0
+
+
+func is_arena_sealed() -> bool:
+	return _is_arena_sealed
 
 
 ## Lets the bot play this run (headless simulations and tests).
@@ -93,6 +124,9 @@ func get_pickups() -> Array[Pickup]:
 func _start_section() -> void:
 	plan = _director.choose_next(_make_player_state())
 	layout = _builder.build(plan, GameManager.make_section_rng(GameManager.section_index))
+	_loot_rng = GameManager.make_loot_rng(GameManager.section_index)
+	_is_arena_sealed = false
+	_is_arena_cleared = false
 	_clear_section()
 	level.build(layout.grid)
 	_contents = Node2D.new()
@@ -104,7 +138,7 @@ func _start_section() -> void:
 	player.teleport(level.cell_center(layout.entrance))
 	Telemetry.begin_section(plan, layout, player)
 	section_started.emit(plan, layout)
-	if _enemies_left == 0:
+	if not is_arena():
 		gate.open()
 
 
@@ -114,6 +148,7 @@ func _make_player_state() -> PlayerState:
 	state.depth = GameManager.depth
 	state.hp_fraction = float(player.health.hp) / float(player.health.max_hp)
 	state.weapon_count = player.get_weapon_slots().size()
+	state.is_depth_end = GameManager.is_last_section_of_depth()
 	state.rng = GameManager.make_director_rng(GameManager.section_index)
 	state.skill = Telemetry.estimator.skill
 	for record: Dictionary in Telemetry.history:
@@ -145,26 +180,89 @@ func _spawn_items() -> void:
 	for entry: Dictionary in layout.items:
 		var pickup: Pickup = (ITEM_SCENES[entry["id"]] as PackedScene).instantiate() as Pickup
 		pickup.position = level.to_local(level.cell_center(entry["cell"]))
+		var chest: Chest = pickup as Chest
+		if chest != null:
+			# Loot is decided now, in spawn order, so the same seed gives the same chests.
+			chest.loot_weapon = chest_weapons.pick(_loot_rng)
+			chest.loot_coins = _loot_rng.randi_range(chest_coins_min, chest_coins_max)
+			chest.opened.connect(_on_chest_opened)
 		_contents.add_child(pickup)
 
 
+## Spawns the first wave; later waves (arena only) wait in _pending_waves.
 func _spawn_enemies() -> void:
 	_enemies_left = 0
+	_pending_waves.clear()
+	for _wave in range(1, layout.wave_count()):
+		_pending_waves.append([])
 	for entry: Dictionary in layout.enemies:
-		var enemy: Enemy = ENEMY_SCENE.instantiate() as Enemy
-		enemy.data = _director.catalog.get_by_id(entry["id"])
-		enemy.position = level.to_local(level.cell_center(entry["cell"]))
-		enemy.defeated.connect(_on_enemy_defeated)
-		_contents.add_child(enemy)
-		_enemies_left += 1
+		if int(entry["wave"]) == 0:
+			_spawn_enemy(entry)
+		else:
+			_pending_waves[int(entry["wave"]) - 1].append(entry)
+
+
+func _spawn_enemy(entry: Dictionary) -> void:
+	var enemy: Enemy = ENEMY_SCENE.instantiate() as Enemy
+	enemy.data = _director.catalog.get_by_id(entry["id"])
+	enemy.position = level.to_local(level.cell_center(entry["cell"]))
+	enemy.defeated.connect(_on_enemy_defeated)
+	_contents.add_child(enemy)
+	_enemies_left += 1
 
 
 func _on_enemy_defeated(_enemy: Enemy) -> void:
 	GameManager.add_kill()
 	Telemetry.record_kill()
 	_enemies_left -= 1
+	if _is_arena_sealed and _enemies_left <= 0:
+		_advance_arena()
+
+
+## The weapon falls next to the opened chest (taken with the interact button),
+## and the coins around it.
+func _on_chest_opened(chest: Chest) -> void:
+	var cells: Array[Vector2i] = level.free_floor_cells_near(chest.global_position, chest.loot_coins + 1)
+	if cells.is_empty():
+		return
+	if chest.loot_weapon != null:
+		var weapon_pickup: WeaponPickup = WEAPON_PICKUP_SCENE.instantiate() as WeaponPickup
+		weapon_pickup.weapon_data = chest.loot_weapon
+		weapon_pickup.position = level.to_local(level.cell_center(cells[0]))
+		_contents.add_child.call_deferred(weapon_pickup)
+	for i in range(1, cells.size()):
+		var coin: Coin = COIN_SCENE.instantiate() as Coin
+		coin.position = level.to_local(level.cell_center(cells[i]))
+		# Deferred: adding areas while a physics callback runs is not allowed.
+		_contents.add_child.call_deferred(coin)
+
+
+func _is_player_inside_arena() -> bool:
+	var room: Rect2i = layout.room_rects[layout.arena_room].grow(-ARENA_TRIGGER_DEPTH)
+	return room.has_point(level.cell_at(player.global_position))
+
+
+func _seal_arena() -> void:
+	_is_arena_sealed = true
+	level.set_cells(layout.arena_doors, LevelGrid.Cell.WALL)
+	hud.show_banner("The doors are sealed")
 	if _enemies_left <= 0:
-		gate.open()
+		_advance_arena()
+
+
+## Next wave, or, when all waves are dead, open the doors and the gate.
+func _advance_arena() -> void:
+	if not _pending_waves.is_empty():
+		var wave: Array = _pending_waves.pop_front()
+		hud.show_banner("Another wave!")
+		for entry: Dictionary in wave:
+			_spawn_enemy.call_deferred(entry)
+		return
+	_is_arena_sealed = false
+	_is_arena_cleared = true
+	level.set_cells(layout.arena_doors, LevelGrid.Cell.FLOOR)
+	gate.open()
+	hud.show_banner("The way down is open")
 
 
 func _on_gate_entered(_player: Player) -> void:

@@ -4,11 +4,13 @@ extends RefCounted
 ## the generator (SectionBuilder) turns it into tiles and placements. Nothing here
 ## refers to the scene tree, so directors can be tested without the game.
 
-## Phases of the tension wave (RuleDirector) and the marker of the random mode.
+## Phases of the tension wave (RuleDirector), the marker of the random mode, and the
+## locked fight that ends a depth.
 const PHASE_BUILD: StringName = &"build"
 const PHASE_PEAK: StringName = &"peak"
 const PHASE_REST: StringName = &"rest"
 const PHASE_RANDOM: StringName = &"random"
+const PHASE_ARENA: StringName = &"arena"
 
 var section_index: int = 0
 var depth: int = 0
@@ -18,12 +20,17 @@ var phase: StringName = PHASE_BUILD
 var budget: int = 4
 ## Enemy type id -> number of spawns. One spawn of a pack enemy is the whole pack.
 var enemy_mix: Dictionary = {&"skeleton": 2}
-## Rooms in the main chain from the entrance to the gate, 3-5.
+## Rooms on the main path from the entrance to the gate, 3-5 (an arena has 2).
 var room_count: int = 3
-## Add a side branch with a treasure room.
-var has_side_branch: bool = false
-## Put a chest into the section (in the treasure room if there is a branch).
-var has_chest: bool = false
+## Side branches: dead-end treasure rooms hanging off the main path, 0-2.
+var side_branches: int = 0
+## Chests in the section, 0-2. They go into the side branches first.
+var chests: int = 0
+## Last section of a depth: the doors of the final room lock behind the player and
+## the gate opens only when every wave is dead.
+var is_arena: bool = false
+## How many waves the enemies of an arena come in (1 or 2).
+var waves: int = 1
 ## Tunnel width in tiles, 2-4 (doors are always 3 wide).
 var corridor_width: int = 3
 ## How winding tunnels are: 0 = straight, 1 = wandering a lot.
@@ -56,8 +63,10 @@ func to_dictionary() -> Dictionary:
 		"budget": budget,
 		"enemies": enemy_mix.duplicate(),
 		"rooms": room_count,
-		"branch": has_side_branch,
-		"chest": has_chest,
+		"side_branches": side_branches,
+		"chests": chests,
+		"arena": is_arena,
+		"waves": waves,
 		"corridor_width": corridor_width,
 		"corridor_twist": corridor_twist,
 		"health_packs": health_packs,

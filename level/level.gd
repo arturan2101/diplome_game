@@ -62,6 +62,37 @@ func build(new_grid: LevelGrid) -> void:
 			_astar.set_point_solid(cell, not grid.is_floor(cell))
 
 
+## Changes cells while the level is running (the doors of an arena lock and unlock).
+## Tiles, collision and pathfinding follow.
+func set_cells(cells: Array[Vector2i], type: LevelGrid.Cell) -> void:
+	for cell: Vector2i in cells:
+		grid.set_cell(cell, type)
+		_ground.erase_cell(cell)
+		_props.erase_cell(cell)
+		_paint_cell(cell)
+		_astar.set_point_solid(cell, not grid.is_floor(cell))
+
+
+## Up to count floor cells around a world position, nearest first (where loot falls).
+func free_floor_cells_near(world_position: Vector2, count: int) -> Array[Vector2i]:
+	var found: Array[Vector2i] = []
+	var start: Vector2i = cell_at(world_position)
+	var seen: Dictionary = {start: true}
+	var queue: Array[Vector2i] = [start]
+	var head: int = 0
+	while head < queue.size() and found.size() < count:
+		var cell: Vector2i = queue[head]
+		head += 1
+		if grid.is_floor(cell) and cell != start:
+			found.append(cell)
+		for step: Vector2i in LevelGrid.NEIGHBOURS:
+			var next: Vector2i = cell + step
+			if grid.is_floor(next) and not seen.has(next):
+				seen[next] = true
+				queue.append(next)
+	return found
+
+
 func cell_at(world_position: Vector2) -> Vector2i:
 	return Vector2i((to_local(world_position) / float(theme.tile_size)).floor())
 

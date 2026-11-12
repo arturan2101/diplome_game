@@ -28,19 +28,45 @@ func choose_next(state: PlayerState) -> SectionPlan:
 	var plan: SectionPlan = new_plan(state)
 	plan.budget = BASELINE_BUDGET + state.section_index
 	plan.enemy_mix = buy_enemies(plan.budget, state.rng)
+	finish_arena(plan)
 	return plan
 
 
 ## A plan with the parts every mode fills the same way: indexes, layout size,
-## and a chest (in a side branch) while the player has a free weapon slot.
+## chests and side branches, and the arena that ends every depth.
 func new_plan(state: PlayerState) -> SectionPlan:
 	var plan: SectionPlan = SectionPlan.new()
 	plan.section_index = state.section_index
 	plan.depth = state.depth
 	plan.room_count = state.rng.randi_range(MIN_ROOMS, MAX_ROOMS)
-	plan.has_chest = state.weapon_count < Player.WEAPON_SLOT_COUNT and state.section_index > 0
-	plan.has_side_branch = plan.has_chest
+	plan.chests = pick_weighted(settings.chest_count_weights, state.rng)
+	for _i in plan.chests:
+		if state.rng.randf() < settings.chest_branch_chance:
+			plan.side_branches += 1
+	if state.is_depth_end:
+		plan.is_arena = true
+		plan.phase = SectionPlan.PHASE_ARENA
+		plan.room_count = settings.arena_rooms
 	return plan
+
+
+## Sets the number of waves of an arena from its budget. Call after the budget is known.
+func finish_arena(plan: SectionPlan) -> void:
+	if plan.is_arena:
+		plan.waves = 2 if plan.budget >= settings.arena_two_waves_budget else 1
+
+
+## Index picked with the given weights (they need not add up to 1).
+func pick_weighted(weights: Array[float], rng: RandomNumberGenerator) -> int:
+	var total: float = 0.0
+	for weight: float in weights:
+		total += weight
+	var roll: float = rng.randf() * total
+	for i in weights.size():
+		roll -= weights[i]
+		if roll < 0.0:
+			return i
+	return weights.size() - 1
 
 
 ## Spends a danger budget on enemies: picks random affordable types until nothing

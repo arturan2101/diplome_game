@@ -1,34 +1,29 @@
 class_name Chest
 extends Pickup
-## Opens when the player touches it. Gives the first weapon from its list that the
-## player does not carry (the second weapon of the run); if the player already has
-## them all or no free slot, it gives coins instead. Stays in place, opened.
+## Opens when the player touches it and stays open. The game then puts the loot next
+## to it: a weapon lying on the floor (taken with the interact button) and a few coins.
+## What a chest holds is decided by the game when the section is built.
 
-## Weapons the chest can give, in order of preference.
-@export var weapons: Array[WeaponData] = []
-## Coins given when no weapon can be given.
-@export var coins_instead: int = 10
+## Emitted once, when the chest opens.
+signal opened(chest: Chest)
+
 @export var sprite: Sprite2D
 @export var open_texture: Texture2D
 
+## The weapon inside, set by the game when the chest is spawned.
+var loot_weapon: WeaponData = null
+## How many coins fall out, set by the game.
+var loot_coins: int = 0
 var is_open: bool = false
-## What the chest gave: a weapon id, or &"coins". Empty until opened.
-var given: StringName = &""
 
 
-func _collect(player: Player) -> bool:
+func _collect(_player: Player) -> bool:
 	if is_open:
 		return false
 	is_open = true
-	given = &"coins"
-	for weapon_data: WeaponData in weapons:
-		if not player.has_weapon(weapon_data.id) and player.add_weapon(weapon_data):
-			given = weapon_data.id
-			break
-	if given == &"coins":
-		GameManager.add_coins(coins_instead)
 	if sprite != null and open_texture != null:
 		sprite.texture = open_texture
+	opened.emit(self)
 	return true
 
 

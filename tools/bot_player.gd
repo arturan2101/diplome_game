@@ -4,7 +4,8 @@ extends Node
 ## training the learned director. It "presses" the same Input Map actions as the
 ## keyboard and the touch controls, so the player script does not know the difference.
 ## Behaviour: walk along the grid path to the nearest enemy and attack it; pick up a
-## health pack when hurt; when no enemies are left, walk to the gate.
+## health pack when hurt; take a weapon from the floor while a slot is free; when no
+## enemies are left, walk to the gate.
 
 const MOVE_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down"]
 
@@ -42,6 +43,7 @@ func _physics_process(delta: float) -> void:
 	var goal: Vector2 = _choose_goal(player, enemy)
 	var wants_to_stand: bool = _handle_attack(player, enemy, delta)
 	_move(player, goal, delta, wants_to_stand)
+	_handle_interact(player)
 
 
 ## Where to walk: a health pack when hurt, else the nearest enemy, else the gate.
@@ -119,7 +121,16 @@ func _set_attack(pressed: bool) -> void:
 		Input.action_release(&"attack")
 
 
+## Presses interact for one frame when a weapon lies near and a slot is free.
+func _handle_interact(player: Player) -> void:
+	if Input.is_action_pressed(&"interact"):
+		Input.action_release(&"interact")
+	elif player.interaction_target != null and player.get_weapon_slots().size() < Player.WEAPON_SLOT_COUNT:
+		Input.action_press(&"interact")
+
+
 func _release_everything() -> void:
+	Input.action_release(&"interact")
 	for action: StringName in MOVE_ACTIONS:
 		Input.action_release(action)
 	_set_attack(false)

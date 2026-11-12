@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WeaponPool" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://combat/weapons/weapon_pool.gd" id="1"]
+[ext_resource type="Script" path="res://combat/weapons/weapon_data.gd" id="2"]
+[ext_resource type="Resource" path="res://combat/weapons/sword.tres" id="3"]
+[ext_resource type="Resource" path="res://combat/weapons/bow.tres" id="4"]
+
+[resource]
+script = ExtResource("1")
+weapons = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4")])

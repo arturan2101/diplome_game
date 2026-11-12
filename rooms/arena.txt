@@ -1,5 +1,5 @@
 ; name: arena
-; tags: combat, open, big
+; tags: combat, open, big, arena
 ; ref_time: 22
 #########DDD#########
 #...................#

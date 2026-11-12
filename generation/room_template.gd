@@ -17,6 +17,8 @@ const ITEM_SLOT: String = "I"
 const CHEST_SLOT: String = "T"
 const WALL_SYMBOLS: String = "# "
 const TREASURE_TAG: StringName = &"treasure"
+## Rooms big enough for the locked fight at the end of a depth.
+const ARENA_TAG: StringName = &"arena"
 
 var name: StringName = &""
 var tags: Array[StringName] = []
@@ -61,6 +63,13 @@ func has_tag(tag: StringName) -> bool:
 
 func has_door(side: DoorSide) -> bool:
 	return doors.has(side)
+
+
+func has_doors(sides: Array[DoorSide]) -> bool:
+	for side: DoorSide in sides:
+		if not doors.has(side):
+			return false
+	return true
 
 
 ## Middle cell of the door on the given side.
@@ -164,15 +173,17 @@ func _check_door(side: DoorSide, cells: Array) -> void:
 	doors[side] = cells
 
 
-## Ordinary rooms connect left to right; treasure rooms hang above or below a room.
+## A room on the main path needs a way in and a way out; a treasure room is a dead end.
+## Sections can run in any direction, so the more sides have a door, the more places
+## the room fits.
 func _check_required_doors() -> void:
 	if has_tag(TREASURE_TAG):
-		if not (has_door(DoorSide.NORTH) and has_door(DoorSide.SOUTH)):
-			errors.append("a treasure room needs NORTH and SOUTH doors")
+		if doors.is_empty():
+			errors.append("a treasure room needs at least one door")
 		if chest_slots.is_empty():
 			errors.append("a treasure room needs a chest slot (T)")
-	elif not (has_door(DoorSide.WEST) and has_door(DoorSide.EAST)):
-		errors.append("a room needs WEST and EAST doors")
+	elif doors.size() < 2:
+		errors.append("a room needs at least two doors")
 
 
 ## Every door and every slot must be reachable from the first door over plain floor.

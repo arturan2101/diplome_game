@@ -54,6 +54,16 @@ extends Resource
 @export var problem_enemy_weight_weak: float = 0.4
 @export var problem_enemy_weight_strong: float = 1.6
 
+@export_group("Chests and arenas")
+## Chance of 0, 1 and 2 chests in a section (usually one).
+@export var chest_count_weights: Array[float] = [0.15, 0.65, 0.2]
+## Chance that a chest stands in its own side branch (a dead-end treasure room).
+@export_range(0.0, 1.0) var chest_branch_chance: float = 0.75
+## Rooms of an arena section: lead-in rooms plus the locked room at the end.
+@export var arena_rooms: int = 3
+## From this budget on, the arena comes in two waves.
+@export var arena_two_waves_budget: int = 8
+
 @export_group("Random mode")
 ## RandomDirector picks the budget uniformly from this range (plus depth growth).
 @export var random_budget_min: int = 2

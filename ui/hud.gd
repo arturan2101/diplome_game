@@ -19,6 +19,13 @@ extends CanvasLayer
 @export var attack_button_icon: Sprite2D
 @export var swap_button_icon: Sprite2D
 @export var skill_button_icon: Sprite2D
+## Hint above the Take button ("Take Bow") and the button itself; both appear only
+## while there is something to take.
+@export var interact_prompt: Label
+@export var interact_button: TouchScreenButton
+## Text over the screen for a moment (the arena locking, the gate opening).
+@export var banner: Label
+@export var banner_time: float = 1.6
 ## Full-screen rectangle faded in and out between sections.
 @export var fade: ColorRect
 ## Seconds one fade takes.
@@ -36,6 +43,9 @@ func _ready() -> void:
 	_on_section_changed(GameManager.section_index, GameManager.depth)
 	if fade != null:
 		fade.color.a = 0.0
+	_on_interaction_changed(null)
+	if banner != null:
+		banner.visible = false
 
 
 func _process(_delta: float) -> void:
@@ -50,6 +60,7 @@ func bind_player(player: Player) -> void:
 	_player = player
 	player.health.hp_changed.connect(_on_hp_changed)
 	player.weapon_changed.connect(_on_weapon_changed)
+	player.interaction_changed.connect(_on_interaction_changed)
 	_on_hp_changed(player.health.hp, player.health.max_hp)
 	_refresh_weapons()
 	var skill_texture: Texture2D = player.skill.data.icon if player.skill != null else null
@@ -57,6 +68,28 @@ func bind_player(player: Player) -> void:
 		skill_icon.texture = skill_texture
 	if skill_button_icon != null:
 		skill_button_icon.texture = skill_texture
+
+
+## Shows a short message in the middle of the screen.
+func show_banner(text: String) -> void:
+	if banner == null:
+		return
+	banner.text = text
+	banner.visible = true
+	banner.modulate.a = 1.0
+	var tween: Tween = create_tween()
+	tween.tween_interval(banner_time)
+	tween.tween_property(banner, "modulate:a", 0.0, fade_time)
+	tween.tween_callback(banner.hide)
+
+
+func _on_interaction_changed(target: WeaponPickup) -> void:
+	if interact_prompt != null:
+		interact_prompt.visible = target != null
+		if target != null:
+			interact_prompt.text = "%s  [E]" % target.get_prompt()
+	if interact_button != null:
+		interact_button.visible = target != null
 
 
 ## Darkens the screen; await it before swapping the section.

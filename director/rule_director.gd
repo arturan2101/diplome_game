@@ -21,7 +21,8 @@ const NORMAL_TWIST: float = 0.3
 
 func choose_next(state: PlayerState) -> SectionPlan:
 	var plan: SectionPlan = new_plan(state)
-	plan.phase = next_phase(state)
+	if not plan.is_arena:
+		plan.phase = next_phase(state)
 	plan.budget = budget_for(state, plan.phase)
 	var problem: StringName = _problem_source(state)
 	plan.enemy_mix = buy_enemies(plan.budget, state.rng, _enemy_weights(state, problem))
@@ -45,6 +46,7 @@ func choose_next(state: PlayerState) -> SectionPlan:
 			plan.room_count = MAX_ROOMS
 			plan.corridor_width = MIN_CORRIDOR_WIDTH
 	_help_with_problem(plan, state, problem)
+	finish_arena(plan)
 	return plan
 
 
@@ -56,7 +58,8 @@ func next_phase(state: PlayerState) -> StringName:
 	if state.phases.is_empty():
 		return SectionPlan.PHASE_BUILD
 	var last: StringName = state.phases[state.phases.size() - 1]
-	if last == SectionPlan.PHASE_PEAK:
+	# The arena that ends a depth counts as a peak: a rest follows it.
+	if last == SectionPlan.PHASE_PEAK or last == SectionPlan.PHASE_ARENA:
 		return SectionPlan.PHASE_REST
 	if last != SectionPlan.PHASE_BUILD:
 		return SectionPlan.PHASE_BUILD
@@ -76,7 +79,10 @@ func budget_for(state: PlayerState, phase: StringName) -> int:
 
 func _phase_multiplier(state: PlayerState, phase: StringName) -> float:
 	match phase:
-		SectionPlan.PHASE_PEAK:
+		SectionPlan.PHASE_PEAK, SectionPlan.PHASE_ARENA:
+			# The frustration guard softens an arena to an ordinary build-up section.
+			if phase == SectionPlan.PHASE_ARENA and _needs_rest(state):
+				return settings.build_multipliers[settings.build_multipliers.size() - 1]
 			return settings.peak_multiplier
 		SectionPlan.PHASE_REST:
 			return settings.rest_multiplier

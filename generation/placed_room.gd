@@ -6,13 +6,14 @@ extends RefCounted
 var template: RoomTemplate = null
 ## Top-left cell of the room in the section grid.
 var origin: Vector2i = Vector2i.ZERO
+## Position of the room on the coarse layout grid (one room per layout cell).
+var node: Vector2i = Vector2i.ZERO
 ## Doors connected to a tunnel; all other doors are walled up.
 var used_doors: Array[RoomTemplate.DoorSide] = []
-
-
-func _init(room_template: RoomTemplate, room_origin: Vector2i) -> void:
-	template = room_template
-	origin = room_origin
+## True for a dead-end treasure room.
+var is_branch: bool = false
+## Index of the room in SectionLayout.room_rects.
+var index: int = 0
 
 
 func get_rect() -> Rect2i:

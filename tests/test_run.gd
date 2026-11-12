@@ -17,6 +17,7 @@ var _finished_sections: int = 0
 func run() -> void:
 	await _test_gate_and_next_section()
 	_test_depth_rule()
+	await _test_arena()
 	await _test_same_seed_same_section()
 	await _test_bot_clears_section()
 
@@ -35,15 +36,13 @@ func _test_gate_and_next_section() -> void:
 	check(game.player.weapon != null and game.player.weapon.data == GameManager.starting_weapon
 			and game.player.skill != null, "the player gets the loadout from GameManager")
 
-	game.player.teleport(game.gate.global_position)
-	await physics_frames(10)
-	check(not game.gate.is_open and GameManager.section_index == 0, "the gate stays closed while enemies live")
-
+	check(game.gate.is_open and not game.is_arena(), "in an ordinary section the gate is open from the start")
 	var enemy_count: int = game.get_enemies().size()
 	for enemy: Enemy in game.get_enemies():
 		enemy.hurtbox.receive_hit(DamageInfo.new(HUGE_HP, null, &"test"))
 	await physics_frames(2)
-	check(game.gate.is_open and GameManager.kills == enemy_count, "killing the last enemy opens the gate; kills are counted")
+	check(GameManager.kills == enemy_count, "kills are counted")
+	game.player.teleport(game.gate.global_position)
 	await physics_frames(60)
 	check(GameManager.section_index == 1 and _finished_sections == 1, "the open gate takes the player to the next section")
 	check(game.layout != first_layout and game.layout.to_text() != first_layout.to_text()
@@ -71,6 +70,48 @@ func _test_depth_rule() -> void:
 			sections_in_this_depth = 0
 	check(follows_rule and manager.depth >= 10 and manager.section_index == 40, "depth grows by one every 3-4 sections")
 	manager.free()
+
+
+func _test_arena() -> void:
+	GameManager.start_run(RUN_SEED)
+	while not GameManager.is_last_section_of_depth():
+		GameManager.advance_section()
+	var game: Game = (load(GAME_SCENE) as PackedScene).instantiate() as Game
+	game.death_screen_enabled = false
+	add_child(game)
+	game.player.health.max_hp = HUGE_HP
+	game.player.health.reset()
+	await physics_frames(3)
+	check(game.plan.is_arena and game.is_arena() and not game.gate.is_open, "the last section of a depth is an arena with a closed gate")
+	var room: Rect2i = game.layout.room_rects[game.layout.arena_room]
+	game.player.teleport(game.level.cell_center(game.level.nearest_floor_cell(room.get_center())))
+	await physics_frames(3)
+	var sealed: bool = game.is_arena_sealed()
+	var doors_are_walls: bool = true
+	for cell: Vector2i in game.layout.arena_doors:
+		if game.level.grid.get_cell(cell) != LevelGrid.Cell.WALL:
+			doors_are_walls = false
+	check(sealed and doors_are_walls, "walking into the arena seals its doors")
+	var waves_seen: int = 0
+	for _round in 4:
+		var enemies: Array[Enemy] = game.get_enemies()
+		if enemies.is_empty():
+			break
+		waves_seen += 1
+		for enemy: Enemy in enemies:
+			enemy.hurtbox.receive_hit(DamageInfo.new(HUGE_HP, null, &"test"))
+		await physics_frames(3)
+	check(waves_seen == game.layout.wave_count(), "the enemies come in %d wave(s), each after the previous one dies" % game.layout.wave_count())
+	var doors_open: bool = true
+	for cell: Vector2i in game.layout.arena_doors:
+		if game.level.grid.get_cell(cell) != LevelGrid.Cell.FLOOR:
+			doors_open = false
+	check(game.gate.is_open and doors_open and not game.is_arena_sealed(), "after the last wave the doors and the gate open")
+	var depth_before: int = GameManager.depth
+	game.player.teleport(game.gate.global_position)
+	await physics_frames(60)
+	check(GameManager.depth == depth_before + 1, "the arena's gate leads to the next depth")
+	await _stop_game(game)
 
 
 func _test_same_seed_same_section() -> void:

@@ -44,7 +44,7 @@ func _test_validation() -> void:
 	check(_has_error("#####\nD...D\nD...D\nD...D\n####", "wide, expected"), "ragged lines are rejected")
 	check(_has_error("#####\nD...D\nD...D\nD...D\n#.###", "must be a wall or a door"), "a hole in the border is rejected")
 	check(_has_error("#####\nD..?D\nD...D\nD...D\n#####", "unknown symbol"), "unknown symbols are rejected")
-	check(_has_error("#####\nD...#\nD...#\nD...#\n#####", "WEST and EAST"), "a room without an east door is rejected")
+	check(_has_error("#####\nD...#\nD...#\nD...#\n#####", "at least two doors"), "a room with a single door is rejected")
 	check(_has_error("#######\nD.#E#.D\nD.###.D\nD.....D\n#######", "cannot be reached"), "a walled-off slot is rejected")
 	check(_has_error("; tags: treasure\n#DDD#\n#...#\n#...#\n#DDD#", "chest slot"), "a treasure room without a chest slot is rejected")
 
@@ -66,6 +66,13 @@ func _test_library() -> void:
 			with_branch_door += 1
 	check(all_usable, "every ordinary room has at least 2 enemy slots, an item slot and a reference time")
 	check(with_branch_door >= 2, "some rooms have a top or bottom door for side branches")
+	var all_sides: bool = true
+	for room: RoomTemplate in library.templates:
+		if not room.has_doors([RoomTemplate.DoorSide.WEST, RoomTemplate.DoorSide.EAST,
+				RoomTemplate.DoorSide.NORTH, RoomTemplate.DoorSide.SOUTH] as Array[RoomTemplate.DoorSide]):
+			all_sides = false
+	check(all_sides, "every room has a door on every side, so a section can turn in any direction")
+	check(not library.filter_by_tag(RoomTemplate.ARENA_TAG).is_empty(), "there is a room big enough for the arena")
 	check(RoomLibrary.get_default() == RoomLibrary.get_default() and RoomLibrary.get_default().get_by_name(&"small_hall") != null,
 			"the default library is loaded once and finds rooms by name")
 

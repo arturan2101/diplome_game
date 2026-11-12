@@ -9,8 +9,10 @@ var section_index: int = 0
 var depth: int = 0
 ## Player HP as a share of max HP, 0-1, at the moment of planning.
 var hp_fraction: float = 1.0
-## How many weapons the player carries (a chest is useful while it is below 2).
+## How many weapons the player carries.
 var weapon_count: int = 1
+## True if this is the last section of its depth: it ends with the locked arena.
+var is_depth_end: bool = false
 ## Generator for the director's own random choices about this section
 ## (GameManager.make_director_rng(section_index)).
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()

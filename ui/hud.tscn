@@ -20,7 +20,7 @@ bg_color = Color(0.85, 0.22, 0.22, 1)
 [sub_resource type="StyleBoxFlat" id="hp_back"]
 bg_color = Color(0.1, 0.08, 0.12, 0.85)
 
-[node name="HUD" type="CanvasLayer" node_paths=PackedStringArray("hp_bar", "hp_label", "coins_label", "depth_label", "weapon_icons", "skill_icon", "skill_cooldown", "attack_button_icon", "swap_button_icon", "skill_button_icon", "fade")]
+[node name="HUD" type="CanvasLayer" node_paths=PackedStringArray("hp_bar", "hp_label", "coins_label", "depth_label", "weapon_icons", "skill_icon", "skill_cooldown", "attack_button_icon", "swap_button_icon", "skill_button_icon", "interact_prompt", "interact_button", "banner", "fade")]
 script = ExtResource("1")
 hp_bar = NodePath("Info/HpBar")
 hp_label = NodePath("Info/HpLabel")
@@ -32,6 +32,9 @@ skill_cooldown = NodePath("Info/Skill/Cooldown")
 attack_button_icon = NodePath("AttackButton/Icon")
 swap_button_icon = NodePath("SwapButton/Icon")
 skill_button_icon = NodePath("SkillButton/Icon")
+interact_prompt = NodePath("Info/InteractPrompt")
+interact_button = NodePath("TakeButton")
+banner = NodePath("Info/Banner")
 fade = NodePath("Fade")
 
 [node name="TouchJoystick" type="Control" parent="."]
@@ -108,6 +111,27 @@ offset_right = 13.0
 offset_bottom = 11.0
 theme_override_font_sizes/font_size = 12
 text = "II"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TakeButton" type="TouchScreenButton" parent="."]
+position = Vector2(508, 246)
+shape = SubResource("small_shape")
+action = "interact"
+visibility_mode = 1
+
+[node name="PlaceholderShape" type="Node2D" parent="TakeButton"]
+script = ExtResource("3")
+size = Vector2(40, 40)
+color = Color(1, 0.85, 0.4, 0.45)
+
+[node name="Label" type="Label" parent="TakeButton"]
+offset_left = -20.0
+offset_top = -9.0
+offset_right = 20.0
+offset_bottom = 9.0
+theme_override_font_sizes/font_size = 10
+text = "Take"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -221,6 +245,42 @@ offset_bottom = 23.0
 grow_horizontal = 0
 theme_override_font_sizes/font_size = 12
 text = "0"
+
+[node name="InteractPrompt" type="Label" parent="Info"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -120.0
+offset_top = -52.0
+offset_right = 120.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 13
+text = "Take Sword  [E]"
+horizontal_alignment = 1
+
+[node name="Banner" type="Label" parent="Info"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 70.0
+offset_right = 200.0
+offset_bottom = 100.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.5, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 20
+text = "The doors are sealed"
+horizontal_alignment = 1
 
 [node name="Fade" type="ColorRect" parent="."]
 anchors_preset = 15

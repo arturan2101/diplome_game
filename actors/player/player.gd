@@ -7,6 +7,8 @@ extends CharacterBody2D
 ## Emitted when the player swaps to another weapon or gets a new one.
 ## For the HUD and telemetry (weapon usage).
 signal weapon_changed(slot: int, data: WeaponData)
+## Emitted when the thing the interact button would use changes (null = nothing near).
+signal interaction_changed(target: WeaponPickup)
 
 ## How many weapons the player can carry.
 const WEAPON_SLOT_COUNT: int = 2
@@ -35,6 +37,8 @@ const GROUP: StringName = &"player"
 @export_flags_2d_physics var aim_target_mask: int = 16
 ## Physics layers that hide a target from auto-aim (world).
 @export_flags_2d_physics var aim_wall_mask: int = 1
+## Things closer than this can be used with the interact button, in pixels.
+@export var interact_radius: float = 20.0
 
 ## Last non-zero movement direction (unit vector).
 var facing: Vector2 = Vector2.RIGHT
@@ -44,6 +48,8 @@ var weapon: Weapon = null
 var skill: Skill = null
 ## True while a skill carries the player over the ground (dash): hazards are ignored.
 var is_airborne: bool = false
+## What the interact button would use now, or null.
+var interaction_target: WeaponPickup = null
 
 ## Weapon nodes by slot. Only the active one is visible and gets input;
 ## the other one's cooldown keeps running.
@@ -80,7 +86,30 @@ func _physics_process(delta: float) -> void:
 	_handle_skill_input()
 	if Input.is_action_just_pressed("swap_weapon"):
 		swap_weapon()
+	_update_interaction()
+	if Input.is_action_just_pressed("interact") and interaction_target != null:
+		interaction_target.interact(self)
 	_handle_attack_input()
+
+
+## Takes a weapon from the floor. With a free slot it goes there and nothing is
+## returned. With both slots full it replaces the weapon in hand, which is returned
+## so it can be left on the floor.
+func pick_up_weapon(weapon_data: WeaponData) -> WeaponData:
+	if _weapons.size() < WEAPON_SLOT_COUNT:
+		add_weapon(weapon_data)
+		return null
+	var dropped: WeaponData = weapon.data
+	var old_weapon: Weapon = weapon
+	old_weapon.set_active(false)
+	old_weapon.queue_free()
+	var new_weapon: Weapon = _create_weapon(weapon_data)
+	if new_weapon == null:
+		return null
+	_weapons[_active_slot] = new_weapon
+	_activate_slot(_active_slot)
+	weapon_changed.emit(_active_slot, weapon.data)
+	return dropped
 
 
 ## Puts a weapon into the first free slot. Returns false if both slots are taken.
@@ -88,12 +117,9 @@ func _physics_process(delta: float) -> void:
 func add_weapon(weapon_data: WeaponData) -> bool:
 	if _weapons.size() >= WEAPON_SLOT_COUNT:
 		return false
-	if weapon_data == null or weapon_data.weapon_scene == null:
-		push_error("Weapon %s has no weapon_scene" % weapon_data)
+	var new_weapon: Weapon = _create_weapon(weapon_data)
+	if new_weapon == null:
 		return false
-	var new_weapon: Weapon = weapon_data.weapon_scene.instantiate() as Weapon
-	new_weapon.setup(weapon_data, self)
-	add_child(new_weapon)
 	_weapons.append(new_weapon)
 	if _weapons.size() == 1:
 		_activate_slot(0)
@@ -121,6 +147,33 @@ func get_weapon_slots() -> Array[WeaponData]:
 
 func get_active_slot() -> int:
 	return _active_slot
+
+
+func _create_weapon(weapon_data: WeaponData) -> Weapon:
+	if weapon_data == null or weapon_data.weapon_scene == null:
+		push_error("Weapon %s has no weapon_scene" % weapon_data)
+		return null
+	var new_weapon: Weapon = weapon_data.weapon_scene.instantiate() as Weapon
+	new_weapon.setup(weapon_data, self)
+	add_child(new_weapon)
+	return new_weapon
+
+
+## Finds the nearest thing to interact with and reports when it changes.
+func _update_interaction() -> void:
+	var nearest: WeaponPickup = null
+	var nearest_distance: float = interact_radius
+	for node: Node in get_tree().get_nodes_in_group(WeaponPickup.GROUP):
+		var pickup: WeaponPickup = node as WeaponPickup
+		if pickup == null or pickup.is_queued_for_deletion():
+			continue
+		var distance: float = global_position.distance_to(pickup.global_position)
+		if distance <= nearest_distance:
+			nearest = pickup
+			nearest_distance = distance
+	if nearest != interaction_target:
+		interaction_target = nearest
+		interaction_changed.emit(nearest)
 
 
 ## Switches to the next weapon slot. With fewer than two weapons it does nothing.
@@ -283,6 +336,9 @@ func _on_fall_ended() -> void:
 
 ## Freezes the player: no movement, attacks or skill (death, falling into a pit).
 func _stop_acting() -> void:
+	if interaction_target != null:
+		interaction_target = null
+		interaction_changed.emit(null)
 	set_physics_process(false)
 	velocity = Vector2.ZERO
 	if weapon != null:

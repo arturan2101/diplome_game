@@ -14,6 +14,7 @@ func run() -> void:
 	_test_adaptation()
 	_test_random_director()
 	_test_learned_and_factory()
+	_test_chests_and_arena()
 	_test_plans_build_sections()
 
 
@@ -157,6 +158,31 @@ func _test_learned_and_factory() -> void:
 	manager.free()
 
 
+func _test_chests_and_arena() -> void:
+	var director: RuleDirector = RuleDirector.new()
+	var counts: Array[int] = [0, 0, 0]
+	var branches_ok: bool = true
+	for i in SEEDS:
+		var plan: SectionPlan = director.choose_next(_state(1, [&"build"], [0.7], i))
+		counts[plan.chests] += 1
+		if plan.side_branches > plan.chests or plan.is_arena:
+			branches_ok = false
+	check(counts[1] > counts[0] and counts[1] > counts[2] and counts[0] > 0 and counts[2] > 0,
+			"0-2 chests per section, one is the most common (%s)" % [counts])
+	check(branches_ok, "side branches never outnumber chests; ordinary sections are not arenas")
+	var depth_end: PlayerState = _state(3, [&"build", &"build", &"peak"], [0.7, 0.7, 0.7])
+	depth_end.is_depth_end = true
+	var arena: SectionPlan = director.choose_next(depth_end)
+	check(arena.is_arena and arena.phase == SectionPlan.PHASE_ARENA and arena.room_count == director.settings.arena_rooms
+			and arena.waves == (2 if arena.budget >= director.settings.arena_two_waves_budget else 1),
+			"the last section of a depth is an arena with 1-2 waves")
+	check(director.choose_next(_state(4, [&"build", &"build", &"peak", &"arena"], [0.7, 0.7, 0.7, 0.7])).phase == SectionPlan.PHASE_REST,
+			"a rest follows the arena")
+	var random_end: PlayerState = _state(3, [], [], 4)
+	random_end.is_depth_end = true
+	check(RandomDirector.new().choose_next(random_end).is_arena, "the random director also ends a depth with an arena")
+
+
 func _test_plans_build_sections() -> void:
 	var builder: SectionBuilder = SectionBuilder.new()
 	var impassable: int = 0
@@ -167,6 +193,7 @@ func _test_plans_build_sections() -> void:
 		for i in 12:
 			var state: PlayerState = _state(i, phases, results, 1000 + i)
 			state.depth = i / 3
+			state.is_depth_end = i % 3 == 2
 			state.skill = 0.3 + 0.05 * i
 			var plan: SectionPlan = director.choose_next(state)
 			phases.append(plan.phase)
