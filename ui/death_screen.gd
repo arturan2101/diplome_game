@@ -26,6 +26,12 @@ func show_summary(summary: Dictionary) -> void:
 	again_button.grab_focus()
 
 
+func _notification(what: int) -> void:
+	# The phone's back button on the results screen leads to the menu.
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and is_node_ready() and panel.visible:
+		_on_menu_pressed()
+
+
 func _on_again_pressed() -> void:
 	GameManager.restart_run()
 

@@ -24,6 +24,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+func _notification(what: int) -> void:
+	# The phone's back button pauses instead of closing the game.
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		toggle()
+
+
 func toggle() -> void:
 	set_paused(not get_tree().paused)
 

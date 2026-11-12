@@ -40,8 +40,8 @@ func _input(event: InputEvent) -> void:
 
 
 func _notification(what: int) -> void:
-	# A finger can be lost without a release event (app minimised, scene changed).
-	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_EXIT_TREE:
+	# A finger can be lost without a release event (app minimised, scene changed, game paused).
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_EXIT_TREE or what == NOTIFICATION_PAUSED:
 		_end_touch()
 
 

@@ -1,3 +1,10 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Export output and signing keys (never commit keys)
+/build/
+*.keystore
+*.jks
+*.apk
+*.aab

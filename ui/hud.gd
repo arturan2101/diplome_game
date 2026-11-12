@@ -1,11 +1,10 @@
 class_name Hud
 extends CanvasLayer
 ## Heads-up display of a run: health, weapon slots, skill cooldown, coins, depth,
-## the pause button, icons on the touch buttons, and a black fade used between
-## sections. Reads GameManager through its signals and the player through its nodes.
-
-## Emitted when the pause button is pressed.
-signal pause_pressed
+## icons on the touch buttons, and a black fade used between sections. Every button
+## here is a TouchScreenButton that presses an Input Map action (attack, swap_weapon,
+## skill, pause), so several fingers can use them at the same time.
+## Reads GameManager through its signals and the player through its nodes.
 
 @export var hp_bar: ProgressBar
 @export var hp_label: Label
@@ -16,7 +15,6 @@ signal pause_pressed
 @export var skill_icon: TextureRect
 ## Dark overlay on the skill icon; its height shows the cooldown left.
 @export var skill_cooldown: Control
-@export var pause_button: Button
 ## Icons drawn on the touch buttons.
 @export var attack_button_icon: Sprite2D
 @export var swap_button_icon: Sprite2D
@@ -36,8 +34,6 @@ func _ready() -> void:
 	GameManager.section_changed.connect(_on_section_changed)
 	_on_coins_changed(GameManager.coins)
 	_on_section_changed(GameManager.section_index, GameManager.depth)
-	if pause_button != null:
-		pause_button.pressed.connect(pause_pressed.emit)
 	if fade != null:
 		fade.color.a = 0.0
 

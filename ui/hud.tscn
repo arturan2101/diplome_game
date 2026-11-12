@@ -11,13 +11,16 @@ radius = 28.0
 [sub_resource type="CircleShape2D" id="small_shape"]
 radius = 20.0
 
+[sub_resource type="RectangleShape2D" id="pause_shape"]
+size = Vector2(32, 28)
+
 [sub_resource type="StyleBoxFlat" id="hp_fill"]
 bg_color = Color(0.85, 0.22, 0.22, 1)
 
 [sub_resource type="StyleBoxFlat" id="hp_back"]
 bg_color = Color(0.1, 0.08, 0.12, 0.85)
 
-[node name="HUD" type="CanvasLayer" node_paths=PackedStringArray("hp_bar", "hp_label", "coins_label", "depth_label", "weapon_icons", "skill_icon", "skill_cooldown", "pause_button", "attack_button_icon", "swap_button_icon", "skill_button_icon", "fade")]
+[node name="HUD" type="CanvasLayer" node_paths=PackedStringArray("hp_bar", "hp_label", "coins_label", "depth_label", "weapon_icons", "skill_icon", "skill_cooldown", "attack_button_icon", "swap_button_icon", "skill_button_icon", "fade")]
 script = ExtResource("1")
 hp_bar = NodePath("Info/HpBar")
 hp_label = NodePath("Info/HpLabel")
@@ -26,7 +29,6 @@ depth_label = NodePath("Info/DepthLabel")
 weapon_icons = [NodePath("Info/Weapon1"), NodePath("Info/Weapon2")]
 skill_icon = NodePath("Info/Skill")
 skill_cooldown = NodePath("Info/Skill/Cooldown")
-pause_button = NodePath("Info/PauseButton")
 attack_button_icon = NodePath("AttackButton/Icon")
 swap_button_icon = NodePath("SwapButton/Icon")
 skill_button_icon = NodePath("SkillButton/Icon")
@@ -86,6 +88,28 @@ color = Color(0.6, 0.8, 1, 0.3)
 [node name="Icon" type="Sprite2D" parent="SkillButton"]
 modulate = Color(1, 1, 1, 0.85)
 scale = Vector2(1.5, 1.5)
+
+[node name="PauseButton" type="TouchScreenButton" parent="."]
+position = Vector2(620, 16)
+shape = SubResource("pause_shape")
+action = "pause"
+visibility_mode = 1
+
+[node name="PlaceholderShape" type="Node2D" parent="PauseButton"]
+script = ExtResource("3")
+shape_type = 1
+size = Vector2(26, 22)
+color = Color(1, 1, 1, 0.2)
+
+[node name="Label" type="Label" parent="PauseButton"]
+offset_left = -13.0
+offset_top = -11.0
+offset_right = 13.0
+offset_bottom = 11.0
+theme_override_font_sizes/font_size = 12
+text = "II"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Info" type="Control" parent="."]
 layout_mode = 3
@@ -197,20 +221,6 @@ offset_bottom = 23.0
 grow_horizontal = 0
 theme_override_font_sizes/font_size = 12
 text = "0"
-
-[node name="PauseButton" type="Button" parent="Info"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -34.0
-offset_top = 4.0
-offset_right = -6.0
-offset_bottom = 28.0
-grow_horizontal = 0
-focus_mode = 0
-theme_override_font_sizes/font_size = 12
-text = "II"
 
 [node name="Fade" type="ColorRect" parent="."]
 anchors_preset = 15

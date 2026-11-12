@@ -80,9 +80,12 @@ res://
   combat/        weapons/, skills/, spells/ (Resource definitions + effect scripts)
   ui/            joystick, buttons, HUD, death screen, skill tree, survey
   main/          main.tscn
-  tools/         bot_player.gd, simulate.tscn (headless bot runs for experiments)
+  level/         level.gd (tiles, collision, pathfinding), gate, hazards, tile theme
+  assets/        Kenney Tiny Dungeon (CC0), placeholder tiles, sprite resources
+  tests/         test_*.gd (headless), run_tests.tscn, manual/arena.tscn
+  tools/         bot_player.gd, simulate.tscn (headless bot runs for experiments), viewers
 training/        train_bandit.py, analyze.py (Python, outside Godot)
-docs/            design.md, ai-usage-log.md
+docs/            design.md, ai-usage-log.md, progress.md (stage journal), android-build.md
 ```
 
 ## Telemetry (thesis data)

@@ -93,10 +93,13 @@ func _test_hud_pause_and_death() -> void:
 	var paused_ok: bool = get_tree().paused and game.pause_menu.panel.visible
 	game.pause_menu.set_paused(false)
 	check(paused_ok and not get_tree().paused and not game.pause_menu.panel.visible, "pause stops the game and resume continues it")
-	hud.pause_button.pressed.emit()
-	var button_paused: bool = get_tree().paused
+	var pause_event: InputEventAction = InputEventAction.new()
+	pause_event.action = &"pause"
+	pause_event.pressed = true
+	game.pause_menu._unhandled_input(pause_event)
+	var action_paused: bool = get_tree().paused
 	game.pause_menu.toggle()
-	check(button_paused and not get_tree().paused, "the HUD pause button opens the pause menu")
+	check(action_paused and not get_tree().paused, "the pause action (Esc, HUD button) opens the pause menu")
 
 	await physics_frames(60)
 	GameManager.kills = 4

@@ -59,6 +59,15 @@ func _process(delta: float) -> void:
 		_toggle_debug_panel()
 
 
+func _notification(what: int) -> void:
+	# The phone's back button: from the loadout to the title, from the title out of the game.
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and is_node_ready():
+		if loadout_screen.visible:
+			_show_loadout(false)
+		else:
+			get_tree().quit()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("debug_menu"):
 		_toggle_debug_panel()

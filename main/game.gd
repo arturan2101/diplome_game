@@ -47,8 +47,6 @@ func _ready() -> void:
 	player.add_weapon(GameManager.starting_weapon)
 	player.set_skill(GameManager.starting_skill)
 	hud.bind_player(player)
-	if pause_menu != null:
-		hud.pause_pressed.connect(pause_menu.toggle)
 	GameManager.player_died.connect(_on_player_died)
 	if BOT_ARG in OS.get_cmdline_user_args():
 		add_bot()

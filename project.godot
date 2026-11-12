@@ -11,7 +11,9 @@ config_version=5
 [application]
 
 config/name="Ruins"
+config/version="0.1.0"
 run/main_scene="res://ui/main_menu.tscn"
+config/quit_on_go_back=false
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
@@ -25,6 +27,7 @@ Telemetry="*res://autoload/telemetry.gd"
 window/size/viewport_width=640
 window/size/viewport_height=360
 window/stretch/mode="canvas_items"
+window/handheld/orientation=4
 
 [input]
 
@@ -100,4 +103,5 @@ textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(0.07, 0.055, 0.09, 1)
