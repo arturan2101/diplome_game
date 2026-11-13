@@ -57,7 +57,7 @@ def cone(img, cx, by, height):
             if not (0 <= x < T and 0 <= y < T):
                 continue
             if h == height - 1:
-                key = "g"  # the point in plain steel, no white highlight
+                key = "t"  # the point in the same steel as the shaft, no highlight
             elif x < cx:
                 key = "g"
             elif x == cx:
