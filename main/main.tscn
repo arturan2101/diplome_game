@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://ui/hud.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://ui/death_screen.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://ui/pause_menu.tscn" id="6"]
+[ext_resource type="Script" path="res://level/pit_decor.gd" id="pit_decor"]
 
 [node name="Main" type="Node2D" node_paths=PackedStringArray("level", "player", "hud", "death_screen", "pause_menu")]
 script = ExtResource("1")
@@ -17,6 +18,9 @@ pause_menu = NodePath("PauseMenu")
 
 [node name="Level" type="Node2D" parent="."]
 script = ExtResource("2")
+
+[node name="PitDecor" type="Node2D" parent="Level"]
+script = ExtResource("pit_decor")
 
 [node name="Player" parent="." instance=ExtResource("3")]
 

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://level/tile_theme.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/art/tiles/ruins_tiles_atlas.png" id="2"]
-[ext_resource type="Texture2D" path="res://assets/placeholder/placeholder_tiles.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/art/tiles/ruins_hazards.png" id="3"]
 
 [resource]
 script = ExtResource("1")
