@@ -15,6 +15,9 @@ extends AnimatedSprite2D
 ## Seconds a corpse stays on the ground after its death animation, then fades.
 @export var corpse_time: float = 4.0
 @export var corpse_fade_time: float = 1.0
+## Burst of bits when an enemy dies (bone chips for the skeleton).
+@export var death_particle_color: Color = Color("#d8d4c4")
+@export var death_particles: int = 10
 
 var _direction: String = "down"
 var _body: CharacterBody2D
@@ -128,6 +131,22 @@ func _leave_corpse() -> void:
 	corpse.z_index = -1
 	corpse.position = _body.position
 	holder.add_child.call_deferred(corpse)
+	var bits: CPUParticles2D = CPUParticles2D.new()
+	bits.position = _body.position + offset
+	bits.one_shot = true
+	bits.explosiveness = 1.0
+	bits.amount = death_particles
+	bits.lifetime = 0.6
+	bits.spread = 180.0
+	bits.initial_velocity_min = 30.0
+	bits.initial_velocity_max = 70.0
+	bits.gravity = Vector2(0, 160)
+	bits.damping_min = 40.0
+	bits.damping_max = 60.0
+	bits.color = death_particle_color
+	bits.emitting = true
+	holder.add_child.call_deferred(bits)
+	bits.finished.connect(bits.queue_free)
 	corpse.ready.connect(func() -> void:
 		corpse.play(&"death")
 		var fade: Tween = corpse.create_tween()

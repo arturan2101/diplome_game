@@ -26,8 +26,15 @@ var _emitters: Array[Node] = []
 
 func _ready() -> void:
 	_level = get_parent() as Level
-	# Above the ground tiles, below the actors.
-	z_index = 0
+	_place_above_tiles.call_deferred()
+
+
+## Drawn right above the floor tiles: after the Level's Props layer, before the
+## section contents (pickups, enemies) that the Level adds later.
+func _place_above_tiles() -> void:
+	var props: Node = _level.get_node_or_null("Props") if _level != null else null
+	if props != null:
+		_level.move_child(self, props.get_index() + 1)
 
 
 func _process(_delta: float) -> void:

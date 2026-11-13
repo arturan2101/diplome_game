@@ -27,7 +27,8 @@ enum State { IDLE, CHASE, RETREAT, WINDUP, RECOVER, STAGGER, FALLING }
 @export_flags_2d_physics var sight_mask: int = 1
 ## Tint during the windup, so the player sees the attack coming.
 @export var windup_color: Color = Color(1.0, 0.45, 0.2)
-@export var hit_color: Color = Color(1.0, 0.3, 0.3)
+## A hit flashes the enemy white (values above 1 brighten the sprite).
+@export var hit_color: Color = Color(3.0, 3.0, 3.0)
 ## Seconds for the hit tint to fade.
 @export var hit_flash_duration: float = 0.12
 ## Below this speed (pixels per second) a knocked-back enemy recovers from the stagger.
