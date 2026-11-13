@@ -69,6 +69,7 @@ def load(folders):
         for path in glob.glob(os.path.join(folder, "**", "*.jsonl"), recursive=True):
             with open(path, encoding="utf-8") as file:
                 rows.extend(json.loads(line) for line in file if line.strip())
+    rows = [row for row in rows if row.get("type", "section") == "section"]
     frame = pd.DataFrame(rows)
     if frame.empty or "action" not in frame:
         raise SystemExit(f"No exploration logs with actions under {folders}")

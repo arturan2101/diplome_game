@@ -118,6 +118,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if not GameManager.is_run_over:
 		GameManager.run_time += delta
+		Playtest.add_play_time(delta)
 	if is_arena() and not _is_arena_sealed and not _is_arena_cleared and _is_player_inside_arena():
 		_seal_arena()
 
@@ -471,6 +472,10 @@ func _on_gate_entered(_player: Player) -> void:
 	await hud.fade_out()
 	Telemetry.end_section(false)
 	section_finished.emit(plan, layout)
+	if Playtest.is_block_over():
+		# A playtest block ends at the first gate after its time: survey instead of a new section.
+		Playtest.finish_block()
+		return
 	GameManager.advance_section()
 	_start_section()
 	await hud.fade_in()
@@ -483,4 +488,9 @@ func _on_player_died(_killing_blow: DamageInfo) -> void:
 	if not death_screen_enabled or death_screen == null:
 		return
 	await get_tree().create_timer(GameManager.DEATH_SCREEN_DELAY).timeout
+	if Playtest.is_block_over():
+		Playtest.finish_block()
+		return
+	# In a playtest the block goes on with a new run; the way to the menu is hidden.
+	death_screen.menu_enabled = not Playtest.is_active
 	death_screen.show_summary(GameManager.get_run_summary())

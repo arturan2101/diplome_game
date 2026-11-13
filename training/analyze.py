@@ -93,6 +93,8 @@ def load(folders):
         for path in glob.glob(os.path.join(folder, "**", "*.jsonl"), recursive=True):
             with open(path, encoding="utf-8") as file:
                 rows.extend(json.loads(line) for line in file if line.strip())
+    # Playtest surveys share the log files; only section lines are analysed here.
+    rows = [row for row in rows if row.get("type", "section") == "section"]
     if not rows:
         raise SystemExit(f"No log lines under {folders}")
     frame = pd.DataFrame(rows)

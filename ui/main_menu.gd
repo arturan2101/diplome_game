@@ -22,6 +22,11 @@ const RANDOM_SEED_TEXT: String = ""
 @export var debug_panel: Control
 @export var mode_option: OptionButton
 @export var seed_edit: LineEdit
+## Playtest: the player's id, the start button, log export and a line for messages.
+@export var player_id_edit: LineEdit
+@export var playtest_button: Button
+@export var export_button: Button
+@export var status_label: Label
 ## Seconds to hold the title to open the experiment panel.
 @export var debug_hold_time: float = 1.5
 
@@ -32,6 +37,9 @@ var _title_held_time: float = -1.0
 
 func _ready() -> void:
 	get_tree().paused = false
+	# Coming back to the menu ends a playtest session (the experimenter left it).
+	if Playtest.is_active:
+		Playtest.cancel()
 	if BotPlayer.profile_from_command_line() != null:
 		_start_run.call_deferred()
 		return
@@ -126,6 +134,9 @@ func _setup_debug_panel() -> void:
 	mode_option.item_selected.connect(_on_mode_selected)
 	seed_edit.text = RANDOM_SEED_TEXT if GameManager.forced_seed == GameManager.RANDOM_SEED else str(GameManager.forced_seed)
 	seed_edit.text_changed.connect(_on_seed_changed)
+	playtest_button.pressed.connect(_on_playtest_pressed)
+	export_button.pressed.connect(_on_export_pressed)
+	status_label.text = ""
 
 
 func _toggle_debug_panel() -> void:
@@ -134,6 +145,25 @@ func _toggle_debug_panel() -> void:
 
 func _on_mode_selected(index: int) -> void:
 	GameManager.director_mode = mode_option.get_item_id(index) as GameManager.DirectorMode
+
+
+func _on_playtest_pressed() -> void:
+	var text: String = player_id_edit.text.strip_edges()
+	if not text.is_valid_int() or text.to_int() < 1:
+		status_label.text = "Enter the player's id: a whole number from 1."
+		return
+	Playtest.start(text.to_int())
+
+
+func _on_export_pressed() -> void:
+	var path: String = Telemetry.export_logs()
+	if path.is_empty():
+		status_label.text = "No logs to export yet (or nothing could be written)."
+	elif path.begins_with("user://"):
+		status_label.text = "Downloads could not be written (allow file access and press again). Saved inside the game: %s" \
+				% ProjectSettings.globalize_path(path)
+	else:
+		status_label.text = "Logs saved: %s" % path
 
 
 func _on_seed_changed(text: String) -> void:

@@ -1,0 +1,117 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/survey.gd" id="1"]
+
+[node name="Survey" type="Control" node_paths=PackedStringArray("header", "progress_label", "question_panel", "question_label", "answer_row", "low_label", "high_label", "back_button", "next_panel", "next_label", "next_button")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+header = NodePath("Center/Box/Header")
+progress_label = NodePath("Center/Box/Progress")
+question_panel = NodePath("Center/Box/Question")
+question_label = NodePath("Center/Box/Question/Text")
+answer_row = NodePath("Center/Box/Question/Answers")
+low_label = NodePath("Center/Box/Question/Scale/Low")
+high_label = NodePath("Center/Box/Question/Scale/High")
+back_button = NodePath("Center/Box/Question/BackButton")
+next_panel = NodePath("Center/Box/Next")
+next_label = NodePath("Center/Box/Next/Text")
+next_button = NodePath("Center/Box/Next/NextButton")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.07, 0.06, 0.09, 1)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Box" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="Label" parent="Center/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Блок 1 из 3 пройден"
+horizontal_alignment = 1
+
+[node name="Progress" type="Label" parent="Center/Box"]
+modulate = Color(1, 1, 1, 0.6)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Вопрос 1 из 6"
+horizontal_alignment = 1
+
+[node name="Question" type="VBoxContainer" parent="Center/Box"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Text" type="Label" parent="Center/Box/Question"]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Насколько интересно было играть?"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Answers" type="HBoxContainer" parent="Center/Box/Question"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Scale" type="HBoxContainer" parent="Center/Box/Question"]
+modulate = Color(1, 1, 1, 0.7)
+layout_mode = 2
+
+[node name="Low" type="Label" parent="Center/Box/Question/Scale"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+text = "1 — совсем нет"
+
+[node name="High" type="Label" parent="Center/Box/Question/Scale"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+text = "5 — очень"
+horizontal_alignment = 2
+
+[node name="BackButton" type="Button" parent="Center/Box/Question"]
+custom_minimum_size = Vector2(120, 30)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Назад"
+
+[node name="Next" type="VBoxContainer" parent="Center/Box"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Text" type="Label" parent="Center/Box/Next"]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Спасибо!"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="NextButton" type="Button" parent="Center/Box/Next"]
+custom_minimum_size = Vector2(240, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Начать следующий блок"

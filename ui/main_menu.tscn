@@ -8,7 +8,7 @@
 [ext_resource type="Resource" path="res://combat/skills/dash.tres" id="6"]
 [ext_resource type="Resource" path="res://combat/skills/block.tres" id="7"]
 
-[node name="MainMenu" type="Control" node_paths=PackedStringArray("title_screen", "loadout_screen", "title_label", "play_button", "quit_button", "weapon_row", "skill_row", "start_button", "back_button", "debug_panel", "mode_option", "seed_edit")]
+[node name="MainMenu" type="Control" node_paths=PackedStringArray("title_screen", "loadout_screen", "title_label", "play_button", "quit_button", "weapon_row", "skill_row", "start_button", "back_button", "debug_panel", "mode_option", "seed_edit", "player_id_edit", "playtest_button", "export_button", "status_label")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,6 +30,10 @@ back_button = NodePath("LoadoutScreen/Box/BackButton")
 debug_panel = NodePath("DebugPanel")
 mode_option = NodePath("DebugPanel/Box/ModeOption")
 seed_edit = NodePath("DebugPanel/Box/SeedEdit")
+player_id_edit = NodePath("DebugPanel/Box/PlayerIdEdit")
+playtest_button = NodePath("DebugPanel/Box/PlaytestButton")
+export_button = NodePath("DebugPanel/Box/ExportButton")
+status_label = NodePath("DebugPanel/Box/Status")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -129,8 +133,8 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
-offset_top = -100.0
-offset_right = 188.0
+offset_top = -236.0
+offset_right = 228.0
 offset_bottom = -8.0
 grow_vertical = 0
 
@@ -148,3 +152,26 @@ layout_mode = 2
 [node name="SeedEdit" type="LineEdit" parent="DebugPanel/Box"]
 layout_mode = 2
 placeholder_text = "seed (empty = random)"
+
+[node name="PlaytestLabel" type="Label" parent="DebugPanel/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Playtest"
+
+[node name="PlayerIdEdit" type="LineEdit" parent="DebugPanel/Box"]
+layout_mode = 2
+placeholder_text = "player id (1, 2, 3...)"
+
+[node name="PlaytestButton" type="Button" parent="DebugPanel/Box"]
+layout_mode = 2
+text = "Start playtest"
+
+[node name="ExportButton" type="Button" parent="DebugPanel/Box"]
+layout_mode = 2
+text = "Export logs"
+
+[node name="Status" type="Label" parent="DebugPanel/Box"]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 9
+autowrap_mode = 3

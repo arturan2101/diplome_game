@@ -1,0 +1,58 @@
+[gd_resource type="Resource" script_class="PlaytestSettings" load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://experiment/playtest_settings.gd" id="1"]
+[ext_resource type="Script" path="res://experiment/survey_question.gd" id="2"]
+[ext_resource type="Resource" path="res://experiment/clean.tres" id="3"]
+[ext_resource type="Resource" path="res://combat/weapons/sword.tres" id="4"]
+[ext_resource type="Resource" path="res://combat/skills/dash.tres" id="5"]
+
+[sub_resource type="Resource" id="interest"]
+script = ExtResource("2")
+id = "interest"
+text = "Насколько интересно было играть?"
+low_label = "совсем не интересно"
+high_label = "очень интересно"
+
+[sub_resource type="Resource" id="difficulty"]
+script = ExtResource("2")
+id = "difficulty"
+text = "Насколько сложной была игра?"
+low_label = "слишком легко"
+high_label = "слишком сложно"
+
+[sub_resource type="Resource" id="fairness"]
+script = ExtResource("2")
+id = "fairness"
+text = "Насколько честной казалась игра: я проигрывал из-за своих ошибок, а не из-за случайности?"
+low_label = "совсем нечестно"
+high_label = "полностью честно"
+
+[sub_resource type="Resource" id="smoothness"]
+script = ExtResource("2")
+id = "smoothness"
+text = "Сложность менялась плавно, без резких скачков?"
+low_label = "совсем нет"
+high_label = "да, плавно"
+
+[sub_resource type="Resource" id="replay"]
+script = ExtResource("2")
+id = "replay"
+text = "Хотелось ли сыграть ещё?"
+low_label = "совсем нет"
+high_label = "очень хотелось"
+
+[sub_resource type="Resource" id="fatigue"]
+script = ExtResource("2")
+id = "fatigue"
+text = "Насколько вы устали?"
+low_label = "совсем не устал(а)"
+high_label = "очень устал(а)"
+
+[resource]
+script = ExtResource("1")
+modes = Array[String](["RANDOM", "RULES", "LEARNED"])
+block_minutes = 8.0
+config = ExtResource("3")
+weapon = ExtResource("4")
+skill = ExtResource("5")
+questions = Array[ExtResource("2")]([SubResource("interest"), SubResource("difficulty"), SubResource("fairness"), SubResource("smoothness"), SubResource("replay"), SubResource("fatigue")])

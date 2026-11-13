@@ -9,9 +9,13 @@ extends Node
 
 ## Emitted after a section's record is complete (and written, if writing is on).
 signal section_logged(record: Dictionary)
+## Emitted after a playtest survey is recorded.
+signal survey_logged(record: Dictionary)
 
 const SETTINGS_PATH: String = "res://director/director_settings.tres"
 const LOG_EXTENSION: String = "jsonl"
+## Where export_logs() puts the file when the shared Downloads folder cannot be written.
+const EXPORT_FALLBACK_DIR: String = "user://export"
 ## The player counts as idle below this speed, in pixels per second.
 const IDLE_SPEED: float = 5.0
 ## Decimal places kept for times and for shares.
@@ -26,6 +30,10 @@ var write_enabled: bool = true
 var session_id: String = ""
 ## Number of the run inside this session, starting at 1.
 var run_number: int = 0
+## Playtest: the player's id and the index of the block (set by the Playtest autoload),
+## -1 outside a playtest.
+var playtest_player: int = -1
+var playtest_block: int = -1
 ## Bot profile playing this run ("weak", "mid", "strong"), empty for a person.
 var bot_profile: String = ""
 var settings: DirectorSettings = null
@@ -119,6 +127,8 @@ func end_section(died: bool) -> Dictionary:
 		"mode": GameManager.get_mode_name(),
 		"series": GameManager.config.series,
 		"config": GameManager.config.to_dictionary(),
+		"player": playtest_player,
+		"block": playtest_block,
 		"bot": bot_profile,
 		"seed": GameManager.run_seed,
 		"section": _plan.section_index,
@@ -168,6 +178,57 @@ func _depth_multiplier(depth: int) -> float:
 	if _catalog == null:
 		_catalog = load(Director.CATALOG_PATH) as EnemyCatalog
 	return _catalog.hp_multiplier(depth) * _catalog.damage_multiplier(depth)
+
+
+## Writes one survey to the log, as a line of type "survey" next to the section lines.
+## answers: {question id: 1-5}. Returns the record.
+func log_survey(answers: Dictionary, play_time: float, order: Array[String]) -> Dictionary:
+	var record: Dictionary = {
+		"type": "survey",
+		"session": session_id,
+		"run": run_number,
+		"player": playtest_player,
+		"block": playtest_block,
+		"mode": GameManager.get_mode_name(),
+		"series": GameManager.config.series,
+		"order": order,
+		"time": snappedf(play_time, TIME_STEP),
+		"answers": answers,
+	}
+	if write_enabled:
+		_append_line(JSON.stringify(record))
+	survey_logged.emit(record)
+	return record
+
+
+## Copies every log line of this device (all sessions) into one file in target_dir -
+## by default the shared Downloads folder - and returns the file's path. If that folder
+## cannot be written (no permission on the phone), the file goes to EXPORT_FALLBACK_DIR
+## instead. Returns "" if there is nothing to export or nothing could be written.
+func export_logs(target_dir: String = "") -> String:
+	if target_dir == "":
+		if OS.get_name() == "Android":
+			# Older Android versions ask the user for access to shared storage.
+			OS.request_permissions()
+		target_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)
+	var lines: PackedStringArray = PackedStringArray()
+	for file_name: String in DirAccess.get_files_at(log_directory):
+		if file_name.get_extension() == LOG_EXTENSION:
+			lines.append_array(FileAccess.get_file_as_string(log_directory.path_join(file_name)).split("\n", false))
+	if lines.is_empty():
+		return ""
+	var stamp: String = Time.get_datetime_string_from_system(false, true).replace(":", "-").replace(" ", "_")
+	var file_name: String = "ruins_logs_%s.%s" % [stamp, LOG_EXTENSION]
+	for directory: String in [target_dir, EXPORT_FALLBACK_DIR]:
+		if directory == "":
+			continue
+		DirAccess.make_dir_recursive_absolute(directory)
+		var file: FileAccess = FileAccess.open(directory.path_join(file_name), FileAccess.WRITE)
+		if file != null:
+			file.store_string("\n".join(lines) + "\n")
+			file.close()
+			return directory.path_join(file_name)
+	return ""
 
 
 func get_log_path() -> String:
