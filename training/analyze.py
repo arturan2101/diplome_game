@@ -244,6 +244,11 @@ def fmt_p(p):
     return fmt(p, 3)
 
 
+def p_phrase(p):
+    """"p < 0,001" or "p = 0,012" for running text."""
+    return "p < 0,001" if p < 0.001 else f"p = {fmt(p, 3)}"
+
+
 def series_results(runs, spreads, series, modes, rng):
     """All comparisons of one series, with Holm-adjusted p over the whole series."""
     results = []
@@ -295,9 +300,9 @@ def findings(results):
         if r["p_holm"] < ALPHA:
             direction = "выше" if r["diff_median"] > 0 or (r["diff_median"] == 0 and r["r"] > 0) else "ниже"
             notes.append(f"- {what}: у {r['mode_a']} {direction}, разница значима после поправки Холма "
-                         f"(p = {fmt_p(r['p_holm'])}), эффект {effect_words(r['r'])} (r = {fmt(r['r'])}).")
+                         f"({p_phrase(r['p_holm'])}), эффект {effect_words(r['r'])} (r = {fmt(r['r'])}).")
         else:
-            notes.append(f"- {what}: значимой разницы нет (p с поправкой = {fmt_p(r['p_holm'])}, "
+            notes.append(f"- {what}: значимой разницы нет (с поправкой Холма {p_phrase(r['p_holm'])}, "
                          f"r = {fmt(r['r'])}).")
     return notes
 
@@ -421,7 +426,8 @@ def plot_corridor(runs, modes, series_list, out):
                      yerr=[errors_low, errors_high], ecolor=INK_SECONDARY, capsize=3, label=mode)
         axis.set_xticks(range(len(bots)), [BOT_NAMES.get(b, b) for b in bots])
         axis.set_ylim(0, 1)
-        style_axis(axis, SERIES_NAMES.get(series, series), "Доля участков с HP 30–70 (95% ДИ)")
+        style_axis(axis, SERIES_NAMES.get(series, series),
+                   "Доля участков с HP 30–70 (95% ДИ)" if axis is axes[0][0] else "")
     legend_for(figure, modes)
     figure.tight_layout(rect=(0, 0, 1, 0.93))
     return save(figure, out, "fig2_hp_corridor.png")
@@ -441,7 +447,8 @@ def plot_curves(frame, column, ylabel, file_name, modes, series_list, out):
                 mean = by_section.mean()[counts >= MIN_RUNS_FOR_CURVE]
                 axis.plot(mean.index + 1, mean.values, color=MODE_COLORS.get(mode, INK), linewidth=2,
                           marker="o", markersize=3, label=mode)
-            style_axis(axis, f"{SERIES_NAMES.get(series, series).split(' (')[0]}, {BOT_NAMES.get(bot, bot)} бот", ylabel)
+            style_axis(axis, f"{SERIES_NAMES.get(series, series).split(' (')[0]}, {BOT_NAMES.get(bot, bot)} бот",
+                       ylabel if col == 0 else "")
             axis.set_xlabel("участок", color=INK_SECONDARY)
     legend_for(figure, modes)
     figure.tight_layout(rect=(0, 0, 1, 0.95))
@@ -464,7 +471,7 @@ def plot_cleared(runs, modes, series_list, out):
                 patch.set_alpha(0.55)
                 patch.set_edgecolor(MODE_COLORS.get(mode, INK))
         axis.set_xticks(range(len(bots)), [BOT_NAMES.get(b, b) for b in bots])
-        style_axis(axis, SERIES_NAMES.get(series, series), "Пройдено участков до гибели")
+        style_axis(axis, SERIES_NAMES.get(series, series), "Пройдено участков до гибели" if axis is axes[0][0] else "")
     legend_for(figure, modes)
     figure.tight_layout(rect=(0, 0, 1, 0.93))
     return save(figure, out, "fig4_sections_cleared.png")
@@ -482,6 +489,8 @@ def main():
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
     frame = load(args.logs)
+    # Exploration runs are training data for the learned director, not a mode to compare.
+    frame = frame[frame["mode"] != "EXPLORE"]
     if args.seed_min is not None:
         frame = frame[frame["seed"] >= args.seed_min]
     if args.seed_max is not None:
