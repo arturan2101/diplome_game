@@ -1,4 +1,7 @@
 """Spike sprites (16x16, palette of docs/art-style.md).
+Sharp cones, not rods: each spike has a wide base that narrows to a one-pixel point,
+a lit left face and a dark right face (light from the top-left), a bright tip and a
+black outline, so it reads as a blade even at 1x.
 Static spikes: slot 1 of assets/art/tiles/ruins_hazards.png (always raised).
 Retractable spikes: strips assets/art/tiles/spikes_timed_<state>.png for the states
 hidden, warn, rise, up, retract, and assets/art/tiles/spikes_timed_frames.tres with
@@ -9,83 +12,86 @@ from PIL import Image
 
 T = 16
 COL = {
-    ".": None, "o": "#08070b", "k": "#17161f", "s": "#2a2935", "f": "#343442", "F": "#3f4050",
-    "e": "#4c4e5f", "g": "#9aa2ad", "G": "#d8d4c4", "W": "#f4f0e0", "r": "#5a1820",
+    "o": "#08070b", "k": "#17161f", "s": "#2a2935", "f": "#343442", "F": "#3f4050",
+    "e": "#4c4e5f", "t": "#5d6072", "g": "#9aa2ad", "G": "#d8d4c4", "W": "#f4f0e0",
 }
-# The plate: a square stone slab with four slots, a bit lighter than the floor.
-PLATE = [
-    "ssssssssssssssss",
-    "seeeeeeeeeeeeees",
-    "seFFFFFFFFFFFFfs",
-    "seFkkFFFFFkkFFfs",
-    "seFFFFFFFFFFFFfs",
-    "seFFFFFFFFFFFFfs",
-    "seFFFkkFFkkFFFfs",
-    "seFFFFFFFFFFFFfs",
-    "seFFFFFFFFFFFFfs",
-    "seFkkFFFFFkkFFfs",
-    "seFFFFFFFFFFFFfs",
-    "seFFFFFFFFFFFFfs",
-    "seFFFkkFFkkFFFfs",
-    "seFFFFFFFFFFFFfs",
-    "sfffffffffffffss",
-    "ssssssssssssssss",
-]
-SLOTS = [(3, 3), (10, 3), (5, 6), (9, 6), (3, 9), (10, 9), (5, 12), (9, 12)]
+# Base centre (x, y) of each spike; the back row first, so the front row covers it.
+SLOTS = [(4, 7), (11, 7), (7, 13), (13, 14), (2, 14)]
+FULL = 7
 
 
-def plate(dx=0, dy=0):
-    img = Image.new("RGBA", (T, T))
-    for y, row in enumerate(PLATE):
-        for x, key in enumerate(row):
-            sx, sy = x - dx, y - dy
-            src = PLATE[sy][sx] if 0 <= sx < T and 0 <= sy < T else "s"
-            if COL[src]:
-                img.putpixel((x, y), rgb(COL[src]))
-    return img
-
-
-def rgb(h):
+def rgb(key):
+    h = COL[key]
     return tuple(int(h[i:i + 2], 16) for i in (1, 3, 5)) + (255,)
 
 
-def spike(img, x, y, height, tip="W"):
-    """A steel spike growing up from a slot at (x, y): tip, shaft and outline."""
+def plate(dx=0):
+    """A stone slab a bit lighter than the floor, with a dark slit under every spike."""
+    img = Image.new("RGBA", (T, T))
+    for y in range(T):
+        for x in range(T):
+            edge = x in (0, T - 1) or y in (0, T - 1)
+            key = "s" if edge else ("e" if x == 1 or y == 1 else ("f" if x == T - 2 or y == T - 2 else "F"))
+            img.putpixel((x, y), rgb(key))
+    px = img.load()
+    for cx, by in SLOTS:
+        for x in range(cx - 2 + dx, cx + 3 + dx):
+            if 1 <= x < T - 1 and 1 <= by < T - 1:
+                px[x, by] = rgb("k")
+    return img
+
+
+def cone(img, cx, by, height):
+    """A spike growing up from (cx, by): width shrinks to a point at the top."""
+    if height <= 0:
+        return
+    px = img.load()
     for h in range(height):
-        yy = y - h
-        if yy < 0:
-            break
-        top = h == height - 1
-        img.putpixel((x, yy), rgb(COL[tip] if top else COL["g"]))
-        img.putpixel((x + 1, yy), rgb(COL["G"] if top else COL["e"]))
-    if y - height >= 0:
-        img.putpixel((x, y - height), rgb(COL["o"]))
-        img.putpixel((x + 1, y - height), rgb(COL["o"]))
+        y = by - h
+        half = round(2 * (height - 1 - h) / max(height - 1, 1))
+        for x in range(cx - half, cx + half + 1):
+            if not (0 <= x < T and 0 <= y < T):
+                continue
+            if h == height - 1:
+                key = "W"
+            elif x < cx:
+                key = "G"
+            elif x == cx:
+                key = "g"
+            else:
+                key = "t"
+            px[x, y] = rgb(key)
+        for x in (cx - half - 1, cx + half + 1):
+            if 0 <= x < T and 0 <= y < T:
+                px[x, y] = rgb("o")
+    if 0 <= by - height < T:
+        px[cx, by - height] = rgb("o")
 
 
 def raised(height):
     img = plate()
-    for x, y in SLOTS:
-        spike(img, x, y, height)
+    for cx, by in SLOTS:
+        cone(img, cx, by, height)
     return img
 
 
-def glint(frame):
-    """Warning: the plate trembles and steel glints in the slots."""
-    img = plate(dx=frame % 2, dy=0)
-    for i, (x, y) in enumerate(SLOTS):
+def warn(frame):
+    """The plate trembles; steel points glint in the slits."""
+    img = plate(dx=frame % 2)
+    px = img.load()
+    for i, (cx, by) in enumerate(SLOTS):
         if (i + frame) % 2 == 0:
-            img.putpixel((x, y), rgb(COL["W"]))
-            img.putpixel((x + 1, y), rgb(COL["g"]))
+            px[cx + frame % 2, by] = rgb("W")
+            px[cx - 1 + frame % 2, by] = rgb("g")
     return img
 
 
 STATES = {
     "hidden": ([plate()], 2.0, True),
-    "warn": ([glint(i) for i in range(4)], 12.0, True),
-    "rise": ([raised(1), raised(2)], 20.0, False),
-    "up": ([raised(3), raised(3)], 4.0, True),
-    "retract": ([raised(2), raised(1), plate()], 15.0, False),
+    "warn": ([warn(i) for i in range(4)], 12.0, True),
+    "rise": ([raised(3), raised(5)], 20.0, False),
+    "up": ([raised(FULL), raised(FULL)], 4.0, True),
+    "retract": ([raised(5), raised(2), plate()], 15.0, False),
 }
 
 
@@ -121,6 +127,6 @@ for name, (frames, _, _) in STATES.items():
     strip(frames, f"assets/art/tiles/spikes_timed_{name}.png")
 write_frames("assets/art/tiles/spikes_timed_frames.tres")
 atlas = Image.open("assets/art/tiles/ruins_hazards.png").convert("RGBA")
-atlas.paste(raised(3), (T, 0))
+atlas.paste(raised(FULL), (T, 0))
 atlas.save("assets/art/tiles/ruins_hazards.png")
 print("spikes written")
