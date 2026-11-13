@@ -20,18 +20,24 @@ func run() -> void:
 
 
 func _test_skill_estimator() -> void:
+	# Settings: start 0.55, alpha 0.3, norm 2.5 HP per budget point within 15-90, weights 0.7 / 0.15 / 0.15.
 	var estimator: SkillEstimator = SkillEstimator.new(DirectorSettings.new())
-	check(is_equal_approx(estimator.skill, 0.4), "skill starts at 0.4")
-	var result: float = estimator.section_result(30, 100, 20.0, 20.0, 1.0, false)
-	check(is_equal_approx(result, 0.75), "p = 0.5*(1 - 30/60) + 0.25*1 + 0.25*1 = 0.75")
-	check(is_equal_approx(estimator.update(result), 0.505), "S = 0.7*0.4 + 0.3*0.75 = 0.505")
-	check(is_equal_approx(estimator.section_result(90, 100, 40.0, 20.0, 0.5, false), 0.25),
-			"damage above the norm gives 0 for damage; slow and half the kills: 0.25*0.5 + 0.25*0.5")
-	check(is_equal_approx(estimator.section_result(0, 100, 5.0, 20.0, 1.0, true), 0.0), "death gives p = 0")
+	check(is_equal_approx(estimator.skill, 0.55), "skill starts at 0.55")
+	check(is_equal_approx(estimator.damage_norm_for(20, 100), 50.0) and is_equal_approx(estimator.damage_norm_for(2, 100), 15.0)
+			and is_equal_approx(estimator.damage_norm_for(40, 100), 90.0), "damage norm = 2.5 per budget point, kept within 15-90")
+	check(is_equal_approx(estimator.damage_norm_for(20, 100, 1.5), 75.0), "deeper enemies (multiplier 1.5) raise the norm")
+	var result: float = estimator.section_result(30, 100, 20.0, 20.0, 1.0, false, 20)
+	check(is_equal_approx(result, 0.58), "p = 0.7*(1 - 30/50) + 0.15*1 + 0.15*1 = 0.58")
+	check(is_equal_approx(estimator.update(result), 0.559), "S = 0.7*0.55 + 0.3*0.58 = 0.559")
+	check(estimator.section_result(20, 100, 20.0, 20.0, 1.0, false, 4) < estimator.section_result(20, 100, 20.0, 20.0, 1.0, false, 20),
+			"the same damage counts more against the player in a quiet section")
+	check(is_equal_approx(estimator.section_result(90, 100, 40.0, 20.0, 0.5, false, 20), 0.15),
+			"damage above the norm gives 0 for damage; slow and half the kills: 0.15*0.5 + 0.15*0.5")
+	check(is_equal_approx(estimator.section_result(0, 100, 5.0, 20.0, 1.0, true, 20), 0.0), "death gives p = 0")
 	estimator.update(0.0)
-	check(is_equal_approx(estimator.skill, 0.3535), "a death pulls the skill down: 0.7*0.505")
+	check(is_equal_approx(estimator.skill, 0.3913), "a death pulls the skill down: 0.7*0.559")
 	estimator.reset()
-	check(is_equal_approx(estimator.skill, 0.4), "reset returns to the starting skill")
+	check(is_equal_approx(estimator.skill, 0.55), "reset returns to the starting skill")
 
 
 func _test_section_record() -> void:

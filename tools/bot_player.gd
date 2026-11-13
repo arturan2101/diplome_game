@@ -27,6 +27,9 @@ const DETOUR_TIME: float = 0.8
 const DETOUR_DIRECTIONS: int = 8
 ## Extra pixels of safe floor wanted beyond the end of a dodge.
 const DODGE_SAFETY_MARGIN: float = 8.0
+## The current goal (enemy or health pack) stays the goal unless another one is
+## closer by more than this many pixels of walking.
+const KEEP_GOAL_MARGIN: float = 16.0
 
 ## The run this bot plays.
 @export var game: Game
@@ -105,9 +108,25 @@ func _physics_process(delta: float) -> void:
 	_handle_interact(player)
 
 
+## One line about what the bot is doing, for reports of stuck simulations.
+func debug_state() -> String:
+	var player: Player = game.player
+	var target: String = "none"
+	if is_instance_valid(_target):
+		target = "%s at %d px" % [_target.data.id, roundi(player.global_position.distance_to(_target.global_position))]
+	var next: String = "-"
+	if _path_index < _path.size():
+		next = str(game.level.cell_at(_path[_path_index]))
+	return "target %s, path %d points (next %s), straight %s, dodge %.1f s, block %.1f s, hesitation %.1f s" % [
+			target, _path.size(), next, _walk_straight, _dodge_time_left, _block_time_left, _hesitation_left]
+
+
 # --- choosing what to do -------------------------------------------------
 
 func _update_target(player: Player, delta: float) -> void:
+	# A killed target is freed at the end of a frame; a freed object must not be kept.
+	if not is_instance_valid(_target):
+		_target = null
 	var nearest: Enemy = _target
 	_retarget_time_left -= delta
 	if _retarget_time_left <= 0.0 or not is_instance_valid(_target) or _target.health.is_dead():
@@ -340,31 +359,59 @@ func _release_everything() -> void:
 
 # --- looking around ------------------------------------------------------
 
-## The nearest enemy the bot can walk to (or that is already next to it), or null.
+## The enemy with the shortest walk from the bot (or one already next to it), or null.
 func _nearest_reachable_enemy(player: Player) -> Enemy:
-	var enemies: Array[Enemy] = game.get_enemies()
-	enemies.sort_custom(func(a: Enemy, b: Enemy) -> bool:
-		return player.global_position.distance_squared_to(a.global_position) 				< player.global_position.distance_squared_to(b.global_position))
-	var close: float = float(game.level.theme.tile_size) * 2.0
-	for enemy: Enemy in enemies:
-		if player.global_position.distance_to(enemy.global_position) <= close 				or not game.level.find_path(player.global_position, enemy.global_position).is_empty():
-			return enemy
-	return null
+	var enemies: Array[Node2D] = []
+	enemies.assign(game.get_enemies())
+	return _nearest_by_walk(player, enemies, _target) as Enemy
 
 
-## The nearest health pack the bot can walk to (not one behind a sealed arena door), or null.
+## The health pack with the shortest walk (not one behind a sealed arena door), or null.
 func _nearest_reachable_health_pack(player: Player) -> HealthPack:
-	var packs: Array[HealthPack] = []
+	var packs: Array[Node2D] = []
 	for pickup: Pickup in game.get_pickups():
-		var pack: HealthPack = pickup as HealthPack
-		if pack != null:
-			packs.append(pack)
-	packs.sort_custom(func(a: HealthPack, b: HealthPack) -> bool:
-		return player.global_position.distance_squared_to(a.global_position) 				< player.global_position.distance_squared_to(b.global_position))
-	for pack: HealthPack in packs:
-		if not game.level.find_path(player.global_position, pack.global_position).is_empty():
-			return pack
-	return null
+		if pickup is HealthPack:
+			packs.append(pickup)
+	var current: HealthPack = _pack_goal if is_instance_valid(_pack_goal) else null
+	return _nearest_by_walk(player, packs, current) as HealthPack
+
+
+## The node the bot can reach by the shortest walk, or null if it can reach none.
+## Walking distance, not straight-line distance: two enemies on opposite sides of a
+## wall can swap places as "nearest by straight line" at every step, and the bot then
+## walks back and forth between them forever. Walking towards the nearest node along
+## its path keeps it the nearest. The current goal (keep) also wins near-ties.
+func _nearest_by_walk(player: Player, nodes: Array[Node2D], keep: Node2D) -> Node2D:
+	var from: Vector2 = player.global_position
+	nodes.sort_custom(func(a: Node2D, b: Node2D) -> bool:
+		return from.distance_squared_to(a.global_position) < from.distance_squared_to(b.global_position))
+	var tile: float = float(game.level.theme.tile_size)
+	var best: Node2D = null
+	var best_length: float = INF
+	for node: Node2D in nodes:
+		var straight: float = from.distance_to(node.global_position)
+		# A walk is never shorter than the straight line (up to the cell rounding and
+		# the bonus of the current goal), so the farther nodes cannot win any more.
+		if straight - KEEP_GOAL_MARGIN - tile >= best_length:
+			break
+		var length: float = straight if straight <= tile * 2.0 else _walk_length(from, node.global_position)
+		if node == keep:
+			length -= KEEP_GOAL_MARGIN
+		if length < best_length:
+			best_length = length
+			best = node
+	return best
+
+
+## Length of the walkable path between two points in pixels, INF when there is none.
+func _walk_length(from: Vector2, to: Vector2) -> float:
+	var path: PackedVector2Array = game.level.find_path(from, to)
+	if path.is_empty():
+		return INF
+	var length: float = 0.0
+	for i in range(1, path.size()):
+		length += path[i - 1].distance_to(path[i])
+	return length
 
 
 ## True if every tile along the line, up to the given distance, is plain floor.

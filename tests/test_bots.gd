@@ -6,6 +6,8 @@ extends TestCase
 const GAME_SCENE: String = "res://main/main.tscn"
 const DUEL_SECONDS: int = 12
 const DUEL_SEED: int = 42
+const ENEMY_SCENE: String = "res://actors/enemies/enemy.tscn"
+const SKELETON: String = "res://actors/enemies/skeleton.tres"
 
 
 func run() -> void:
@@ -68,16 +70,15 @@ func _duel(profile_name: String) -> int:
 	await physics_frames(2)
 	game.player.health.max_hp = 100000
 	game.player.health.reset()
-	var keep: Enemy = null
-	for enemy: Enemy in game.get_enemies():
-		if keep == null and enemy.data.id == &"skeleton":
-			keep = enemy
-		else:
-			enemy.queue_free()
-	if keep == null:
-		game.queue_free()
-		await physics_frames(2)
-		return -1
+	# Replace whatever the section spawned with one skeleton next to the player.
+	var enemies: Array[Enemy] = game.get_enemies()
+	var contents: Node = enemies[0].get_parent()
+	for enemy: Enemy in enemies:
+		enemy.queue_free()
+	var keep: Enemy = (load(ENEMY_SCENE) as PackedScene).instantiate() as Enemy
+	keep.data = load(SKELETON) as EnemyData
+	contents.add_child(keep)
+	await physics_frames(2)
 	keep.health.max_hp = 100000
 	keep.health.reset()
 	keep.global_position = game.player.global_position + Vector2(40.0, 0.0)

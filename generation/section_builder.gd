@@ -411,7 +411,8 @@ func _place_enemies(layout: SectionLayout, path: Array[PlacedRoom], branches: Ar
 		var room_slots: Array[Vector2i] = slots[room.index]
 		var slot: Vector2i = room_slots.pop_back() if not room_slots.is_empty() else _random_free_cell(layout.grid, room, rng, taken)
 		var pack_size: int = rng.randi_range(data.pack_min, maxi(data.pack_min, data.pack_max))
-		for cell: Vector2i in _free_cells_near(layout.grid, slot, pack_size, taken):
+		# A pack stays inside its room: not in a doorway (an arena walls those up) nor in a tunnel.
+		for cell: Vector2i in _free_cells_near(layout.grid, slot, pack_size, taken, room.get_rect().grow(-1)):
 			layout.enemies.append({"id": data.id, "cell": cell, "room": room.index, "wave": i % waves})
 			taken[cell] = true
 
@@ -505,7 +506,9 @@ func _has_items(layout: SectionLayout, room: PlacedRoom) -> bool:
 
 
 ## Up to count free floor cells, starting at the given cell and spreading outwards.
-func _free_cells_near(grid: LevelGrid, start: Vector2i, count: int, taken: Dictionary) -> Array[Vector2i]:
+## With bounds, only cells inside them are used.
+func _free_cells_near(grid: LevelGrid, start: Vector2i, count: int, taken: Dictionary,
+		bounds: Rect2i = Rect2i()) -> Array[Vector2i]:
 	var found: Array[Vector2i] = []
 	var seen: Dictionary = {start: true}
 	var queue: Array[Vector2i] = [start]
@@ -517,6 +520,8 @@ func _free_cells_near(grid: LevelGrid, start: Vector2i, count: int, taken: Dicti
 			found.append(cell)
 		for step: Vector2i in LevelGrid.NEIGHBOURS:
 			var next: Vector2i = cell + step
+			if bounds.has_area() and not bounds.has_point(next):
+				continue
 			if grid.is_floor(next) and not seen.has(next):
 				seen[next] = true
 				queue.append(next)

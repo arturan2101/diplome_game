@@ -133,6 +133,10 @@ func _report_stuck() -> void:
 			"open" if _game.gate.is_open else "closed", _game.level.cell_at(_game.gate.global_position),
 			_game.level.find_path(player.global_position, _game.gate.global_position).size(),
 			_game.is_arena_sealed(), ", ".join(enemies)])
+	for child: Node in _game.get_children():
+		var bot: BotPlayer = child as BotPlayer
+		if bot != null:
+			print("   bot: %s" % bot.debug_state())
 
 
 func _on_section_started(_plan: SectionPlan, _layout: SectionLayout) -> void:

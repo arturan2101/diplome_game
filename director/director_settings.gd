@@ -5,21 +5,27 @@ extends Resource
 ## "Детали реализации". Values are starting points to be tuned on bot runs.
 
 @export_group("Skill estimate")
-## Skill S at the start of a run.
-@export_range(0.0, 1.0) var start_skill: float = 0.4
+## Skill S at the start of a run (about the level of an average player).
+@export_range(0.0, 1.0) var start_skill: float = 0.55
 ## Smoothing: S = (1 - alpha) * S + alpha * p.
 @export_range(0.0, 1.0) var alpha: float = 0.3
-## Damage norm per section D_max as a share of max HP (60 at 100 HP).
-@export var damage_norm_fraction: float = 0.6
+## Damage norm of a section: this many HP per point of its danger budget...
+@export var damage_norm_per_budget: float = 2.5
+## ...but at least this share of max HP...
+@export var damage_norm_min_fraction: float = 0.15
+## ...and at most this share (90 at 100 HP).
+@export var damage_norm_fraction: float = 0.9
 ## Weights of the three parts of the section result p (damage, time, kills).
-@export var damage_weight: float = 0.5
-@export var time_weight: float = 0.25
-@export var kills_weight: float = 0.25
+@export var damage_weight: float = 0.7
+@export var time_weight: float = 0.15
+@export var kills_weight: float = 0.15
 
 @export_group("Danger budget")
-## B = round((base + skill_factor * S + depth_factor * depth) * phase multiplier).
-@export var budget_base: float = 7.0
-@export var budget_skill_factor: float = 12.0
+## B = round((base + skill_factor * (S - skill_center) + depth_factor * depth) * phase multiplier):
+## base is the budget for a player of average skill (S = skill_center).
+@export var budget_base: float = 14.0
+@export var budget_skill_center: float = 0.62
+@export var budget_skill_factor: float = 60.0
 @export var budget_depth_factor: float = 0.5
 ## A section never gets less than this, except in the rest phase.
 @export var min_budget: int = 4

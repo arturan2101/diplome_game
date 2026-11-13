@@ -3,8 +3,8 @@ extends Director
 ## The main director: rules and formulas from docs/design.md.
 ## 1. Tension wave: build-up (x0.8, x1.0), peak (x1.3), rest (x0.3), then again.
 ## 2. Frustration guard: low HP or several bad sections in a row force a rest.
-## 3. Danger budget: B = round((base + k_s * S + k_d * depth) * phase multiplier),
-##    where S is the estimated skill.
+## 3. Danger budget: B = round((base + k_s * (S - S_avg) + k_d * depth) * phase multiplier),
+##    where S is the estimated skill and base is the budget for an average player.
 ## 4. Contents follow the phase and the player's trouble: more health and cover when
 ##    resting or hurt, fewer of the enemy type that hurts a weak player most (more of
 ##    it for a strong player).
@@ -67,14 +67,14 @@ func next_phase(state: PlayerState) -> StringName:
 			else SectionPlan.PHASE_PEAK
 
 
-## B = round((base + k_s * S + k_d * depth) * m_phase).
+## B = round((base + k_s * (S - S_avg) + k_d * depth) * m_phase).
 func budget_for(state: PlayerState, phase: StringName) -> int:
-	var raw: float = settings.budget_base + settings.budget_skill_factor * state.skill \
+	var raw: float = settings.budget_base + settings.budget_skill_factor * (state.skill - settings.budget_skill_center) \
 			+ settings.budget_depth_factor * state.depth
 	var budget: int = roundi(raw * _phase_multiplier(state, phase))
 	if phase != SectionPlan.PHASE_REST:
 		budget = maxi(budget, settings.min_budget)
-	return budget
+	return maxi(budget, 0)
 
 
 func _phase_multiplier(state: PlayerState, phase: StringName) -> float:

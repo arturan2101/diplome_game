@@ -33,8 +33,10 @@ func run() -> void:
 			"a health pack stays on the ground at full health")
 	await _step_off(player)
 	player.health.take_damage(DamageInfo.new(50, null, &"test"))
+	var heal: int = pack.heal_amount
 	await _step_on(player)
-	check(player.health.hp == 80 and not is_instance_valid(pack), "a hurt player takes the pack and heals by 30")
+	check(player.health.hp == 50 + heal and not is_instance_valid(pack),
+			"a hurt player takes the pack and heals by its heal amount (%d)" % heal)
 	await _step_off(player)
 
 	# Coin.

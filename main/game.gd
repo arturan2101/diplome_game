@@ -214,6 +214,10 @@ func _spawn_enemies() -> void:
 
 
 func _spawn_enemy(entry: Dictionary) -> void:
+	if not level.grid.is_floor(entry["cell"]):
+		# Never inside a wall (e.g. a doorway the arena has sealed).
+		entry = entry.duplicate()
+		entry["cell"] = level.nearest_floor_cell(entry["cell"])
 	var enemy: Enemy = ENEMY_SCENE.instantiate() as Enemy
 	enemy.data = _director.catalog.get_by_id(entry["id"])
 	# Deeper ruins, tougher enemies.

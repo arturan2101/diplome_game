@@ -17,7 +17,7 @@ var is_depth_end: bool = false
 ## (GameManager.make_director_rng(section_index)).
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 ## Estimated skill S, 0-1 (smoothed result of past sections).
-var skill: float = 0.4
+var skill: float = 0.55
 ## Result p (0-1) of each finished section of this run, oldest first.
 var results: Array[float] = []
 ## Phase of each finished section of this run, oldest first.

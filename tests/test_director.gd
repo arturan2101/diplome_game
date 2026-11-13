@@ -37,17 +37,21 @@ func _test_buy_enemies() -> void:
 
 
 func _test_budget_formula() -> void:
-	# Settings: base 7, skill factor 12, depth factor 0.5, phases 0.8 / 1.0 / 1.3 / 0.3, minimum 4.
+	# Settings: base 14 at S = 0.62, skill factor 60, depth factor 0.5, phases 0.8 / 1.0 / 1.3 / 0.3, minimum 4.
 	var director: RuleDirector = RuleDirector.new()
 	var state: PlayerState = _state(0, [], [])
-	check(director.budget_for(state, SectionPlan.PHASE_BUILD) == 9, "first build-up section: round((7 + 12*0.4) * 0.8) = 9")
+	state.skill = 0.62
+	check(director.budget_for(state, SectionPlan.PHASE_BUILD) == 11, "first build-up section, average skill: round(14 * 0.8) = 11")
 	state.phases = [SectionPlan.PHASE_BUILD]
-	check(director.budget_for(state, SectionPlan.PHASE_BUILD) == 12, "second build-up section: round(11.8 * 1.0) = 12")
-	check(director.budget_for(state, SectionPlan.PHASE_PEAK) == 15, "peak: round(11.8 * 1.3) = 15")
-	check(director.budget_for(state, SectionPlan.PHASE_REST) == 4, "rest: round(11.8 * 0.3) = 4")
+	check(director.budget_for(state, SectionPlan.PHASE_BUILD) == 14, "second build-up section: round(14 * 1.0) = 14")
+	check(director.budget_for(state, SectionPlan.PHASE_PEAK) == 18, "peak: round(14 * 1.3) = 18")
+	check(director.budget_for(state, SectionPlan.PHASE_REST) == 4, "rest: round(14 * 0.3) = 4")
 	state.skill = 0.7
 	state.depth = 2
-	check(director.budget_for(state, SectionPlan.PHASE_PEAK) == 21, "skill and depth raise the budget: round((7 + 8.4 + 1) * 1.3) = 21")
+	check(director.budget_for(state, SectionPlan.PHASE_PEAK) == 26, "skill and depth raise the budget: round((14 + 4.8 + 1) * 1.3) = 26")
+	state.skill = 0.5
+	state.depth = 0
+	check(director.budget_for(state, SectionPlan.PHASE_PEAK) == 9, "a weaker player gets less: round((14 - 7.2) * 1.3) = 9")
 	var low: DirectorSettings = (load(Director.SETTINGS_PATH) as DirectorSettings).duplicate()
 	low.budget_base = 2.0
 	var low_state: PlayerState = _state(0, [], [])

@@ -29,6 +29,7 @@ func _test_many_seeds() -> void:
 	var retries: int = 0
 	var missing_branch: int = 0
 	var empty_rooms: int = 0
+	var enemies_outside: int = 0
 	var bad_arenas: int = 0
 	var directions: Dictionary = {}
 	var max_size: Vector2i = Vector2i.ZERO
@@ -44,6 +45,8 @@ func _test_many_seeds() -> void:
 		for entry: Dictionary in layout.enemies:
 			if int(entry["room"]) == 0:
 				enemies_at_start += 1
+			if not layout.room_rects[int(entry["room"])].grow(-1).has_point(entry["cell"]):
+				enemies_outside += 1
 		var limit: Vector2i = Vector2i(MAX_ARENA_WIDTH, MAX_ARENA_HEIGHT) if plan.is_arena else Vector2i(MAX_WIDTH, MAX_HEIGHT)
 		if layout.grid.width > limit.x or layout.grid.height > limit.y:
 			too_big += 1
@@ -59,6 +62,7 @@ func _test_many_seeds() -> void:
 	check(impassable == 0, "all %d sections are passable from the entrance to the gate (%d are not)" % [SEED_COUNT, impassable])
 	check(wrong_content == 0, "every section has the enemies, health packs, coins and chest of its plan (%d do not)" % wrong_content)
 	check(enemies_at_start == 0, "no enemy stands in the first room (%d do)" % enemies_at_start)
+	check(enemies_outside == 0, "every enemy starts inside its room, not in a doorway or tunnel (%d do not)" % enemies_outside)
 	check(too_big == 0, "ordinary sections stay within %dx%d tiles, arenas within %dx%d (largest: %s)" % [MAX_WIDTH, MAX_HEIGHT, MAX_ARENA_WIDTH, MAX_ARENA_HEIGHT, max_size])
 	check(missing_branch == 0, "every planned side branch is built (%d sections miss one)" % missing_branch)
 	check(directions.size() == 4, "sections run in all four directions (%s)" % [directions.keys()])

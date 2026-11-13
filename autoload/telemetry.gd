@@ -30,6 +30,7 @@ var run_number: int = 0
 var bot_profile: String = ""
 var settings: DirectorSettings = null
 var estimator: SkillEstimator = null
+var _catalog: EnemyCatalog = null
 ## Records of the finished sections of the current run, oldest first.
 var history: Array[Dictionary] = []
 
@@ -103,7 +104,8 @@ func end_section(died: bool) -> Dictionary:
 	for source: StringName in _damage:
 		damage_total += int(_damage[source])
 	var kills_ratio: float = 1.0 if _enemy_total == 0 else float(_kills) / float(_enemy_total)
-	var result: float = estimator.section_result(damage_total, max_hp, _time, _reference_time, kills_ratio, died)
+	var result: float = estimator.section_result(damage_total, max_hp, _time, _reference_time, kills_ratio, died,
+			_plan.budget, _depth_multiplier(_plan.depth))
 	var skill: float = estimator.update(result)
 	var record: Dictionary = {
 		"session": session_id,
@@ -137,6 +139,14 @@ func end_section(died: bool) -> Dictionary:
 		_append_line(JSON.stringify(record))
 	section_logged.emit(record)
 	return record
+
+
+## How much stronger enemies are at this depth: their HP multiplier times their damage
+## multiplier. The skill estimate measures damage against danger of this strength.
+func _depth_multiplier(depth: int) -> float:
+	if _catalog == null:
+		_catalog = load(Director.CATALOG_PATH) as EnemyCatalog
+	return _catalog.hp_multiplier(depth) * _catalog.damage_multiplier(depth)
 
 
 func get_log_path() -> String:
@@ -261,4 +271,6 @@ func _make_session_id() -> String:
 	var random: RandomNumberGenerator = RandomNumberGenerator.new()
 	random.randomize()
 	var stamp: String = Time.get_datetime_string_from_system().replace("-", "").replace(":", "").replace("T", "_")
+	# The process id keeps games started in the same second apart (parallel simulations).
+	stamp += "_%d" % OS.get_process_id()
 	return "%s_%04x" % [stamp, random.randi_range(0, 0xFFFF)]
