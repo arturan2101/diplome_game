@@ -54,6 +54,9 @@ def load(folders):
         for path in glob.glob(os.path.join(folder, "**", "*.jsonl"), recursive=True):
             with open(path, encoding="utf-8") as file:
                 rows.extend(json.loads(line) for line in file if line.strip())
+    for row in rows:
+        if "damage" in row:
+            row["damage"] = analyze.normalize_sources(row["damage"])
     surveys = [r for r in rows if r.get("type") == "survey" and r.get("player", -1) > 0]
     sections = [r for r in rows if r.get("type", "section") == "section" and r.get("player", -1) > 0]
     if not surveys:

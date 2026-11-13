@@ -8,6 +8,8 @@ the figures next to it.
 
 Per run:
   cleared     sections finished before death (a run that hit the section cap counts the cap)
+  capped      the run reached the simulation's section limit alive (--section-limit)
+  start_death the run died in one of the first two sections (the calm start of a run)
   depth       deepest depth reached (shown from 1)
   hp_mean     mean HP on exit of the finished sections
   corridor    share of finished sections with HP on exit in 30-70 ("hard but passable")
@@ -18,6 +20,14 @@ Per run:
               sections after it count as 0: the same sections for every bot
 Per seed (all three bots played it): spread_early and spread_hp, the max - min of the
 bots' early_hp and hp_mean: how far apart players of different skill end up.
+
+Variants: the playtest uses the rules director with soft tension waves (config
+"soft_waves"). In a series that has such runs they are the main RULES, and the runs with
+the usual waves are labelled RULES_NORMAL: the same seeds, compared with RULES only, in
+their own section and figure. A series without soft-wave runs keeps its RULES as is.
+
+Damage sources: old logs (before stage 22) call static spikes "spikes"; they are read as
+"spikes_static".
 
 Statistics: mean and median with a 95% percentile bootstrap interval; paired Wilcoxon
 signed-rank test (zeros dropped, average ranks for ties, normal approximation with tie
@@ -52,14 +62,25 @@ BOT_ORDER = ["weak", "mid", "strong"]
 BOT_NAMES = {"weak": "слабый", "mid": "средний", "strong": "сильный"}
 # Pairs compared, (A, B): the table reports A - B.
 COMPARISONS = [("RULES", "RANDOM"), ("LEARNED", "RANDOM"), ("LEARNED", "RULES")]
-# Validated categorical palette (dataviz reference slots 1-3), fixed order by mode.
-MODE_COLORS = {"RANDOM": "#2a78d6", "RULES": "#eb6834", "LEARNED": "#1baf7a"}
+# A variant of a mode, run on the same seeds, is compared with its base mode only.
+VARIANTS = {"RULES_NORMAL": "RULES"}
+VARIANT_NAMES = {"RULES_NORMAL": "RULES с обычными волнами (пик ×1,3, отдых ×0,3)"}
+DISPLAY_NAMES = {"RULES_NORMAL": "RULES, обычные волны"}
+# Damage source names of older logs -> current names.
+SOURCE_ALIASES = {"spikes": "spikes_static"}
+# Validated categorical palette (dataviz reference slots 1-3), fixed order by mode; the
+# variant gets violet (slot 7), validated against orange, the only colour it meets.
+MODE_COLORS = {"RANDOM": "#2a78d6", "RULES": "#eb6834", "LEARNED": "#1baf7a", "RULES_NORMAL": "#6250d6"}
 INK = "#0b0b0b"
 INK_SECONDARY = "#52514e"
 GRID = "#e4e3df"
 SURFACE = "#fcfcfb"
 HP_CORRIDOR = (30, 70)
 EARLY_SECTIONS = 6
+# The calm start of a run (DirectorSettings.calm_start_sections).
+START_SECTIONS = 2
+# Default section limit of tools/simulate.gd.
+DEFAULT_SECTION_LIMIT = 60
 JUMP_THRESHOLD = 30
 BOOTSTRAP_SAMPLES = 5000
 BOOTSTRAP_SEED = 20261113
@@ -83,6 +104,8 @@ SPREAD_METRICS = [
 ]
 # Metrics of the main hypothesis; Holm corrects them as one family, the rest as another.
 PRIMARY_METRICS = {"spread_early", "corridor", "jump_rate"}
+# The "hard but fair" direction of each primary metric: True if larger is better.
+PRIMARY_BETTER_LARGER = {"spread_early": False, "corridor": True, "jump_rate": False}
 
 
 # --- loading ---------------------------------------------------------------
@@ -101,7 +124,33 @@ def load(folders):
     frame["bot"] = frame["bot"].fillna("") if "bot" in frame else ""
     frame["series"] = frame["series"].fillna("full") if "series" in frame else "full"
     frame["run_id"] = frame["session"] + "#" + frame["run"].astype(str)
+    # Waves of the rules director: where a series has soft-wave runs (as in the playtest),
+    # they are the main RULES and the usual waves are a variant.
+    if "config" in frame:
+        soft = frame["config"].apply(lambda config: isinstance(config, dict) and bool(config.get("soft_waves", False)))
+        rules = frame["mode"] == "RULES"
+        for series in frame["series"].unique():
+            in_series = frame["series"] == series
+            if (rules & soft & in_series).any():
+                frame.loc[rules & ~soft & in_series, "mode"] = "RULES_NORMAL"
+    if "damage" in frame:
+        frame["damage"] = frame["damage"].apply(normalize_sources)
     return frame
+
+
+def normalize_sources(damage):
+    """Damage by source with the names of older logs replaced by the current ones."""
+    if not isinstance(damage, dict):
+        return {}
+    result = {}
+    for source, amount in damage.items():
+        name = SOURCE_ALIASES.get(source, source)
+        result[name] = result.get(name, 0) + amount
+    return result
+
+
+def display(mode):
+    return DISPLAY_NAMES.get(mode, mode)
 
 
 def order(values, preferred):
@@ -111,7 +160,7 @@ def order(values, preferred):
 
 # --- per-run and per-seed metrics ---------------------------------------------
 
-def run_metrics(frame):
+def run_metrics(frame, section_limit):
     """One row per run with the metrics described in the module docstring."""
     records = []
     for (series, mode, bot, run_id), part in frame.groupby(["series", "mode", "bot", "run_id"]):
@@ -128,6 +177,10 @@ def run_metrics(frame):
             "series": series, "mode": mode, "bot": bot, "run_id": run_id, "seed": int(part["seed"].iloc[0]),
             "died": died,
             "cleared": len(finished),
+            "capped": (not died) and len(finished) >= section_limit,
+            # Ended alive before the limit: the simulation cut it (a stuck bot or the time limit).
+            "cut_short": (not died) and len(finished) < section_limit,
+            "start_death": died and int(part[part["died"]]["section"].iloc[0]) < START_SECTIONS,
             "depth": int(part["depth"].max()) + 1,
             "hp_mean": finished["hp_exit"].mean() if len(finished) else np.nan,
             "corridor": finished["hp_exit"].between(*HP_CORRIDOR).mean() if len(finished) else np.nan,
@@ -251,10 +304,10 @@ def p_phrase(p):
     return "p < 0,001" if p < 0.001 else f"p = {fmt(p, 3)}"
 
 
-def series_results(runs, spreads, series, modes, rng):
-    """All comparisons of one series, with Holm-adjusted p over the whole series."""
+def series_results(runs, spreads, series, pairs, rng):
+    """All comparisons (pairs of modes) of one series, with Holm-adjusted p within the
+    primary and the secondary family of these comparisons."""
     results = []
-    pairs = [(a, b) for a, b in COMPARISONS if a in modes and b in modes]
     part_spreads = spreads[spreads["series"] == series]
     for column, title, unit in SPREAD_METRICS:
         for a, b in pairs:
@@ -298,10 +351,10 @@ def findings(results):
         if not r["primary"]:
             continue
         who = f"{BOT_NAMES[r['bot']]} бот" if r["bot"] else "все боты"
-        what = f"{r['title']} ({who}), {r['mode_a']} против {r['mode_b']}"
+        what = f"{r['title']} ({who}), {display(r['mode_a'])} против {display(r['mode_b'])}"
         if r["p_holm"] < ALPHA:
             direction = "выше" if r["diff_median"] > 0 or (r["diff_median"] == 0 and r["r"] > 0) else "ниже"
-            notes.append(f"- {what}: у {r['mode_a']} {direction}, разница значима после поправки Холма "
+            notes.append(f"- {what}: у {display(r['mode_a'])} {direction}, разница значима после поправки Холма "
                          f"({p_phrase(r['p_holm'])}), эффект {effect_words(r['r'])} (r = {fmt(r['r'])}).")
         else:
             notes.append(f"- {what}: значимой разницы нет (с поправкой Холма {p_phrase(r['p_holm'])}, "
@@ -309,14 +362,67 @@ def findings(results):
     return notes
 
 
-def write_summary(frame, runs, spreads, out, figures):
+def variant_verdict(results):
+    """Primary comparisons of a variant against its base: significantly better, worse,
+    or no significant difference (after Holm), in the "hard but fair" direction."""
+    better, worse, unclear = [], [], []
+    for r in results:
+        if not r["primary"]:
+            continue
+        name = f"{r['title'].split(',')[0]} ({BOT_NAMES[r['bot']]} бот)" if r["bot"] else r["title"].split(" (")[0]
+        if r["p_holm"] >= ALPHA:
+            unclear.append(name)
+            continue
+        larger = r["diff_median"] > 0 or (r["diff_median"] == 0 and r["r"] > 0)
+        (better if larger == PRIMARY_BETTER_LARGER[r["metric"]] else worse).append(name)
+    return better, worse, unclear
+
+
+def run_length_rows(part, modes, section_limit):
+    """How long the runs were and how they started, per bot and mode."""
+    lines = [f"| Бот | Режим | Пройдено участков: среднее / медиана | Дошли до предела ({section_limit}), % "
+             f"| Гибель на участках 1–{START_SECTIONS}, % | Оборваны раньше (застревание) | Забегов |",
+             "| --- | --- | --- | --- | --- | --- | --- |"]
+    for bot in order(part["bot"].unique(), BOT_ORDER):
+        for mode in modes:
+            rows = part[(part["bot"] == bot) & (part["mode"] == mode)]
+            if rows.empty:
+                continue
+            lines.append(f"| {BOT_NAMES.get(bot, bot)} | {display(mode)} | {fmt(rows['cleared'].mean(), 1)} / "
+                         f"{fmt(rows['cleared'].median(), 1)} | {fmt(100.0 * rows['capped'].mean(), 0)} "
+                         f"| {fmt(100.0 * rows['start_death'].mean(), 0)} | {int(rows['cut_short'].sum())} | {len(rows)} |")
+    return lines
+
+
+def damage_source_rows(part, modes):
+    """Mean damage per section (every section of every bot) by source, per mode."""
+    means = {}
+    for mode in modes:
+        rows = part[part["mode"] == mode]
+        sums = {}
+        for damage in rows["damage"] if "damage" in rows else []:
+            for source, amount in normalize_sources(damage).items():
+                sums[source] = sums.get(source, 0) + amount
+        means[mode] = {source: total / max(1, len(rows)) for source, total in sums.items()}
+    sources = sorted({s for m in means.values() for s in m}, key=lambda s: -sum(m.get(s, 0.0) for m in means.values()))
+    lines = ["| Источник | " + " | ".join(display(m) for m in modes) + " |",
+             "| --- | " + " | ".join("---" for _ in modes) + " |"]
+    for source in sources:
+        lines.append(f"| {source} | " + " | ".join(fmt(means[m].get(source, 0.0), 1) for m in modes) + " |")
+    return lines
+
+
+def write_summary(frame, runs, spreads, out, figures, section_limit):
     rng = np.random.default_rng(BOOTSTRAP_SEED)
-    modes = order(runs["mode"].unique(), MODE_ORDER)
+    all_modes = order(runs["mode"].unique(), MODE_ORDER)
+    modes = [m for m in all_modes if m not in VARIANTS]
+    variants = [m for m in all_modes if m in VARIANTS]
     seeds = sorted(runs["seed"].unique())
     digits = {"corridor": 3, "jump_rate": 3, "cleared": 1, "depth": 2, "time_mean": 1,
               "hp_mean": 1, "early_hp": 1, "spread_early": 1, "spread_hp": 1}
     lines = ["# Сравнение директоров на ботах", "",
-             f"Логи: {len(runs)} забегов, {len(frame)} участков. Режимы: {', '.join(modes)}. "
+             f"Логи: {len(runs)} забегов, {len(frame)} участков. Режимы: {', '.join(modes)}"
+             + (f"; вариант: {', '.join(VARIANT_NAMES.get(v, v) for v in variants)}" if variants else "") + ". "
              f"Сиды: {len(seeds)} ({seeds[0]}–{seeds[-1]}), одинаковые для всех режимов и ботов, "
              "поэтому сравнение парное: забеги разных режимов с одним сидом, ботом и серией сравниваются между собой.", "",
              "**Как читать.** Для каждой метрики — среднее с 95% доверительным интервалом (бутстрэп, "
@@ -326,19 +432,62 @@ def write_summary(frame, runs, spreads, out, figures):
              "на участках 1–6, доля участков с HP 30–70, доля резких скачков) и вторичные (остальные, описательные); "
              "значимым считается p (Холм) < 0,05. r — размер эффекта (ранговая бисериальная корреляция, от −1 до 1; r > 0 — у A больше; "
              "|r| около 0,1 — малый, 0,3 — средний, 0,5 — большой). Незначимая разница не доказывает, что режимы "
-             "одинаковы: она значит лишь, что данных не хватает, чтобы их различить.", ""]
+             "одинаковы: она значит лишь, что данных не хватает, чтобы их различить.", "",
+             f"Предел симуляции — {section_limit} участков: забег, дошедший до него живым, обрывается; доля таких "
+             "забегов — в таблице «Длина забегов и старт» каждой серии.", ""]
+    if variants:
+        lines += ["**RULES.** В плейтест идёт директор на правилах с мягкими волнами (пик ×1,15, отдых ×0,5). Поэтому "
+                  "в серии, где есть такие забеги, RULES — это мягкие волны, а обычные волны (пик ×1,3, отдых ×0,3) "
+                  "сравниваются с ними отдельно, в разделе «Вариант». В серии без забегов с мягкими волнами RULES — "
+                  "с обычными волнами (так настроена полная игра).", ""]
+    pairs = [(a, b) for a, b in COMPARISONS if a in modes and b in modes]
     for series in order(runs["series"].unique(), SERIES_ORDER):
-        results = series_results(runs, spreads, series, modes, rng)
+        results = series_results(runs, spreads, series, pairs, rng)
         part = runs[runs["series"] == series]
+        part_main = part[part["mode"].isin(modes)]
         lines += [f"## Серия {series}: {SERIES_NAMES.get(series, series)}", "",
-                  f"Забегов: {len(part)} ({', '.join(f'{m}: {(part['mode'] == m).sum()}' for m in modes)}).", "",
+                  f"Забегов: {len(part_main)} ({', '.join(f'{m}: {(part_main['mode'] == m).sum()}' for m in modes)}).", "",
                   "### Главное", ""]
         lines += findings(results) or ["- Нет данных для сравнения."]
         lines += ["", "### Разброс между ботами (по сидам)", ""]
         lines += result_rows([r for r in results if not r["bot"]], digits)
         lines += ["", "### Метрики по ботам", ""]
         lines += result_rows([r for r in results if r["bot"]], digits)
+        series_modes = modes + [v for v in variants if (part["mode"] == v).any()]
+        lines += ["", "### Длина забегов и старт", ""]
+        lines += run_length_rows(part, series_modes, section_limit)
+        lines += ["", "### Урон за участок по источникам (среднее по всем участкам всех ботов)", ""]
+        lines += damage_source_rows(frame[frame["series"] == series], series_modes)
         lines.append("")
+    for series in order(runs["series"].unique(), SERIES_ORDER):
+        part = runs[runs["series"] == series]
+        for variant in variants:
+            base = VARIANTS[variant]
+            if not ((part["mode"] == variant).any() and (part["mode"] == base).any()):
+                continue
+            results = series_results(runs, spreads, series, [(variant, base)], rng)
+            better, worse, unclear = variant_verdict(results)
+            if better and not worse:
+                verdict = "по первичным метрикам вариант лучше"
+            elif worse and not better:
+                verdict = "по первичным метрикам вариант хуже"
+            elif not better and not worse:
+                verdict = "по первичным метрикам значимой разницы нет"
+            else:
+                verdict = "по первичным метрикам картина неоднозначная"
+            lines += [f"## Вариант: {VARIANT_NAMES.get(variant, variant)} против {base} (мягкие волны), серия {series}", "",
+                      f"Те же сиды и боты, отличается только настройка волн напряжения. Пар: по "
+                      f"{int((part['mode'] == variant).sum() / max(1, part['bot'].nunique()))} на бота. "
+                      "Поправка Холма — внутри этого сравнения.", "",
+                      "### Главное", ""]
+            lines += findings(results) or ["- Нет данных для сравнения."]
+            lines += ["", f"Итог: {verdict}. Значимо лучше: {', '.join(better) or 'нигде'}; значимо хуже: "
+                      f"{', '.join(worse) or 'нигде'}; без значимой разницы: {', '.join(unclear) or 'нет'}.", "",
+                      "### Разброс между ботами (по сидам)", ""]
+            lines += result_rows([r for r in results if not r["bot"]], digits)
+            lines += ["", "### Метрики по ботам", ""]
+            lines += result_rows([r for r in results if r["bot"]], digits)
+            lines.append("")
     lines += ["## Определения", "",
               "- **Забег** — единица анализа: один бот, один сид, один режим, одна серия. Участок с гибелью не "
               "считается пройденным.",
@@ -350,7 +499,13 @@ def write_summary(frame, runs, spreads, out, figures):
               "трёх ботов. Меньше — директор держит игроков разного уровня ближе друг к другу.",
               f"- **Резкий скачок** — соседние участки, урон в которых отличается больше чем на {JUMP_THRESHOLD} HP "
               "(30% здоровья); в долю входят все пары соседних участков забега, включая участок гибели.",
-              "- **Пройдено участков** — до гибели; забег, дошедший до предела симуляции, считается с этим пределом.",
+              f"- **Пройдено участков** — до гибели; забег, дошедший до предела симуляции ({section_limit} участков), "
+              "считается с этим пределом и попадает в долю «дошли до предела».",
+              "- **Оборваны раньше** — забеги, которые кончились без гибели до предела: симуляция обрывает забег, "
+              "если бот застрял на одном участке дольше 10 минут игрового времени. Такой забег считается с пройденными "
+              "до обрыва участками.",
+              f"- **Гибель на участках 1–{START_SECTIONS}** — доля забегов, оборвавшихся на первых двух участках, где "
+              "у всех режимов действует спокойный старт (без пика, бюджет не выше среднего).",
               "- **Время участка** — среднее время пройденных участков в секундах игрового времени.", "",
               "## Графики", ""]
     lines += [f"![{name}]({os.path.basename(path)})" for name, path in figures]
@@ -376,7 +531,7 @@ def style_axis(axis, title, ylabel):
 
 def legend_for(figure, modes):
     handles = [plt.Line2D([0], [0], color=MODE_COLORS.get(m, INK), linewidth=6) for m in modes]
-    figure.legend(handles, modes, loc="upper center", ncol=len(modes), frameon=False, fontsize=10)
+    figure.legend(handles, [display(m) for m in modes], loc="upper center", ncol=len(modes), frameon=False, fontsize=10)
 
 
 def save(figure, out, name):
@@ -479,12 +634,56 @@ def plot_cleared(runs, modes, series_list, out):
     return save(figure, out, "fig4_sections_cleared.png")
 
 
+def plot_variant(runs, spreads, variant, series, out):
+    """A variant against its base mode in one series: spread between bots by seed,
+    then the HP corridor share and the jump rate by bot (means with 95% intervals)."""
+    pair = [VARIANTS[variant], variant]
+    figure, axes = plt.subplots(1, 3, figsize=(15, 4.4))
+    rng = np.random.default_rng(3)
+    part_spreads = spreads[spreads["series"] == series]
+    data = [part_spreads[part_spreads["mode"] == m]["spread_early"].dropna() for m in pair]
+    boxes = axes[0].boxplot(data, widths=0.5, patch_artist=True, showfliers=False, medianprops={"color": INK, "linewidth": 2})
+    for patch, mode in zip(boxes["boxes"], pair):
+        patch.set_facecolor(MODE_COLORS.get(mode, INK))
+        patch.set_alpha(0.35)
+        patch.set_edgecolor(MODE_COLORS.get(mode, INK))
+    for i, (values, mode) in enumerate(zip(data, pair), start=1):
+        axes[0].scatter(i + rng.uniform(-0.15, 0.15, len(values)), values, s=10, color=MODE_COLORS.get(mode, INK),
+                        alpha=0.5, linewidths=0)
+    axes[0].set_xticks(range(1, len(pair) + 1), [display(m) for m in pair])
+    style_axis(axes[0], "Разброс HP между ботами, участки 1–6", "HP (max − min)")
+    part = runs[runs["series"] == series]
+    bots = order(part["bot"].unique(), BOT_ORDER)
+    width = 0.8 / len(pair)
+    for axis, column, title in [(axes[1], "corridor", "Доля участков с HP 30–70"),
+                                (axes[2], "jump_rate", "Доля резких скачков урона")]:
+        for k, mode in enumerate(pair):
+            means, errors_low, errors_high = [], [], []
+            for bot in bots:
+                values = part[(part["mode"] == mode) & (part["bot"] == bot)][column].dropna()
+                low, high = bootstrap_ci(values, np.mean, rng)
+                means.append(values.mean())
+                errors_low.append(values.mean() - low)
+                errors_high.append(high - values.mean())
+            positions = np.arange(len(bots)) + (k - (len(pair) - 1) / 2) * width
+            axis.bar(positions, means, width=width * 0.92, color=MODE_COLORS.get(mode, INK), alpha=0.85,
+                     yerr=[errors_low, errors_high], ecolor=INK_SECONDARY, capsize=3)
+        axis.set_xticks(range(len(bots)), [BOT_NAMES.get(b, b) for b in bots])
+        axis.set_ylim(0, 1)
+        style_axis(axis, title, "доля (95% ДИ)")
+    legend_for(figure, pair)
+    figure.tight_layout(rect=(0, 0, 1, 0.92))
+    return save(figure, out, f"fig6_{variant.lower()}.png")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--logs", nargs="+", default=[DEFAULT_LOGS])
     parser.add_argument("--out", default=os.path.join("docs", "figures"))
     parser.add_argument("--seed-min", type=int, default=None, help="use only runs with seed >= this")
     parser.add_argument("--seed-max", type=int, default=None, help="use only runs with seed <= this")
+    parser.add_argument("--section-limit", type=int, default=DEFAULT_SECTION_LIMIT,
+                        help="section limit of the simulation (a run that reached it alive was cut off)")
     args = parser.parse_args()
     os.makedirs(args.out, exist_ok=True)
     # The Windows console is not UTF-8 by default; the report uses Cyrillic and math signs.
@@ -497,22 +696,29 @@ def main():
         frame = frame[frame["seed"] >= args.seed_min]
     if args.seed_max is not None:
         frame = frame[frame["seed"] <= args.seed_max]
-    runs = run_metrics(frame)
+    runs = run_metrics(frame, args.section_limit)
     spreads = spreads_by_seed(runs)
-    modes = order(runs["mode"].unique(), MODE_ORDER)
+    modes = [m for m in order(runs["mode"].unique(), MODE_ORDER) if m not in VARIANTS]
     series_list = order(runs["series"].unique(), SERIES_ORDER)
-    finished = frame[~frame["died"]]
+    frame_main = frame[frame["mode"].isin(modes)]
+    finished = frame_main[~frame_main["died"]]
     figures = [
         ("Рис. 1. Разброс HP между ботами по сидам", plot_spread(spreads, modes, series_list, args.out)),
         ("Рис. 2. Доля участков в коридоре HP 30–70", plot_corridor(runs, modes, series_list, args.out)),
         ("Рис. 3. HP на выходе по номеру участка", plot_curves(finished, "hp_exit", "HP на выходе",
                                                                "fig3_hp_by_section.png", modes, series_list, args.out)),
         ("Рис. 4. Пройдено участков до гибели", plot_cleared(runs, modes, series_list, args.out)),
-        ("Доп. рисунок. Бюджет опасности по номеру участка", plot_curves(frame, "budget", "бюджет опасности",
+        ("Доп. рисунок. Бюджет опасности по номеру участка", plot_curves(frame_main, "budget", "бюджет опасности",
                                                                        "fig5_budget_by_section.png", modes,
                                                                        series_list, args.out)),
     ]
-    print(write_summary(frame, runs, spreads, args.out, figures))
+    for variant in [m for m in order(runs["mode"].unique(), MODE_ORDER) if m in VARIANTS]:
+        for series in series_list:
+            part = runs[runs["series"] == series]
+            if (part["mode"] == variant).any() and (part["mode"] == VARIANTS[variant]).any():
+                figures.append((f"Рис. 6. {VARIANT_NAMES.get(variant, variant)} против {VARIANTS[variant]}, серия {series}",
+                                plot_variant(runs, spreads, variant, series, args.out)))
+    print(write_summary(frame, runs, spreads, args.out, figures, args.section_limit))
 
 
 if __name__ == "__main__":
