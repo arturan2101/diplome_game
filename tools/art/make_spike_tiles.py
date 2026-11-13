@@ -16,8 +16,10 @@ COL = {
     "e": "#4c4e5f", "t": "#5d6072", "g": "#9aa2ad", "G": "#d8d4c4", "W": "#f4f0e0",
 }
 # Base centre (x, y) of each spike; the back row first, so the front row covers it.
-SLOTS = [(3, 6), (8, 6), (12, 6), (5, 10), (10, 10), (3, 14), (8, 14), (12, 14)]
-FULL = 4
+SLOTS = [(3, 8), (7, 8), (11, 8), (5, 14), (9, 14), (13, 14)]
+FULL = 7
+# Half-width of a spike at its base: 1 = three pixels wide, a slim blade.
+BASE_HALF = 1
 
 
 def rgb(key):
@@ -49,7 +51,8 @@ def cone(img, cx, by, height):
     px = img.load()
     for h in range(height):
         y = by - h
-        half = round(2 * (height - 1 - h) / max(height - 1, 1))
+        # Wide only at the base, then a long thin point: a blade, not a rod.
+        half = BASE_HALF if h < max(1, height // 3) else 0
         for x in range(cx - half, cx + half + 1):
             if not (0 <= x < T and 0 <= y < T):
                 continue
@@ -88,9 +91,9 @@ def warn(frame):
 STATES = {
     "hidden": ([plate()], 2.0, True),
     "warn": ([warn(i) for i in range(4)], 12.0, True),
-    "rise": ([raised(2), raised(3)], 20.0, False),
+    "rise": ([raised(3), raised(5)], 20.0, False),
     "up": ([raised(FULL), raised(FULL)], 4.0, True),
-    "retract": ([raised(3), raised(2), plate()], 15.0, False),
+    "retract": ([raised(5), raised(2), plate()], 15.0, False),
 }
 
 
