@@ -1,7 +1,8 @@
 [gd_scene format=3 uid="uid://d086msg16gvvh"]
 
 [ext_resource type="Script" uid="uid://cudcxsst6v8xw" path="res://actors/player/player.gd" id="1_ilk7j"]
-[ext_resource type="Texture2D" path="res://assets/sprites/player.tres" id="2_ax26v"]
+[ext_resource type="SpriteFrames" path="res://assets/art/characters/player_frames.tres" id="2_ax26v"]
+[ext_resource type="Script" path="res://actors/actor_sprite_animator.gd" id="anim_script"]
 [ext_resource type="Script" uid="uid://bech2h0liorq5" path="res://combat/health.gd" id="6_388e2"]
 [ext_resource type="Script" uid="uid://dbyxqej24j4mh" path="res://combat/hurtbox.gd" id="7_lsln6"]
 [ext_resource type="Script" uid="uid://de7swotw4iwdj" path="res://combat/invulnerability_blink.gd" id="8_hiosj"]
@@ -28,8 +29,12 @@ camera = NodePath("Camera2D")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1846017841]
 shape = SubResource("CircleShape2D_ndusb")
 
-[node name="Sprite" type="Sprite2D" parent="."]
-texture = ExtResource("2_ax26v")
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+sprite_frames = ExtResource("2_ax26v")
+animation = &"idle_down"
+autoplay = "idle_down"
+offset = Vector2(0, -4)
+script = ExtResource("anim_script")
 
 [node name="Health" type="Node" parent="." unique_id=779534586]
 script = ExtResource("6_388e2")

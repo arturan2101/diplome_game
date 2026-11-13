@@ -16,6 +16,9 @@ extends Resource
 @export_range(0.0, 1.0) var floor_variant_chance: float = 0.12
 ## Wall tiles in the main atlas (column, row), picked per cell.
 @export var wall_tiles: Array[Vector2i] = []
+## Wall-top tiles (top face only) for walls with no open cell directly south.
+## Empty: every wall uses wall_tiles.
+@export var wall_top_tiles: Array[Vector2i] = []
 ## Cover object in the main atlas, drawn over a floor tile.
 @export var cover_tile: Vector2i = Vector2i.ZERO
 ## Pit and spikes tiles in the hazard atlas. pit_tile has a rim and is used at the

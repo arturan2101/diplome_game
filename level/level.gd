@@ -163,7 +163,7 @@ func _paint_cell(cell: Vector2i) -> void:
 			# Solid rock that touches nothing walkable gets no tile and no collision:
 			# big sections stay cheap to draw and to simulate.
 			if _touches_open_cell(cell):
-				_ground.set_cell(cell, MAIN_SOURCE, theme.wall_tiles[_cell_hash(cell) % theme.wall_tiles.size()])
+				_ground.set_cell(cell, MAIN_SOURCE, _wall_tile(cell))
 		LevelGrid.Cell.PIT:
 			var below_pit: bool = grid.get_cell(cell + Vector2i.UP) == LevelGrid.Cell.PIT
 			_ground.set_cell(cell, HAZARD_SOURCE, theme.pit_inner_tile if below_pit else theme.pit_tile)
@@ -181,6 +181,17 @@ func _touches_open_cell(cell: Vector2i) -> bool:
 			if grid.get_cell(cell + Vector2i(dx, dy)) != LevelGrid.Cell.WALL:
 				return true
 	return false
+
+
+## Wall tile for a cell. A wall with an open cell directly south shows its front
+## face (wall_tiles); any other wall shows only its top (wall_top_tiles), so side
+## walls do not repeat the brick face. Without wall_top_tiles all walls use wall_tiles.
+func _wall_tile(cell: Vector2i) -> Vector2i:
+	var tiles: Array[Vector2i] = theme.wall_tiles
+	var open_south: bool = grid.get_cell(cell + Vector2i.DOWN) != LevelGrid.Cell.WALL
+	if not open_south and not theme.wall_top_tiles.is_empty():
+		tiles = theme.wall_top_tiles
+	return tiles[_cell_hash(cell) % tiles.size()]
 
 
 ## Floor tile for a cell. Variants are picked from the cell coordinates, not from
@@ -206,6 +217,8 @@ func _make_tile_set() -> TileSet:
 	for coords: Vector2i in theme.floor_tiles:
 		_add_tile(main, coords, false)
 	for coords: Vector2i in theme.wall_tiles:
+		_add_tile(main, coords, true)
+	for coords: Vector2i in theme.wall_top_tiles:
 		_add_tile(main, coords, true)
 	_add_tile(main, theme.cover_tile, true)
 	var hazards: TileSetAtlasSource = _make_source(tile_set, HAZARD_SOURCE, theme.hazard_texture)

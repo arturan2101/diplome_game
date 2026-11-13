@@ -133,7 +133,10 @@ func _test_real_resources() -> void:
 		enemy.position = Vector2(-500.0, -500.0)
 		add_child(enemy)
 		var sprite: Sprite2D = enemy.visual as Sprite2D
-		if enemy.weapon == null or sprite == null or sprite.texture != enemy_data.sprite \
+		var animated: AnimatedSprite2D = enemy.visual as AnimatedSprite2D
+		var has_look: bool = (sprite != null and sprite.texture == enemy_data.sprite) \
+				or (animated != null and animated.sprite_frames != null)
+		if enemy.weapon == null or not has_look \
 				or enemy.health.hp != enemy_data.max_hp or enemy_data.danger_cost <= 0:
 			all_ready = false
 		enemy.queue_free()
