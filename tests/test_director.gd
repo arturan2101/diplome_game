@@ -149,7 +149,8 @@ func _test_random_director() -> void:
 
 
 func _test_learned_and_factory() -> void:
-	var learned: LearnedDirector = LearnedDirector.new()
+	# Without a parameter file (a path that does not exist) the learned director falls back to the rules.
+	var learned: LearnedDirector = LearnedDirector.new(null, null, "res://no_such_parameters.json")
 	var rule: RuleDirector = RuleDirector.new()
 	check(not learned.is_trained() and learned.choose_next(_state(2, [&"build", &"build"], [0.8, 0.8], 9)).to_dictionary()
 			== rule.choose_next(_state(2, [&"build", &"build"], [0.8, 0.8], 9)).to_dictionary(),
@@ -161,7 +162,9 @@ func _test_learned_and_factory() -> void:
 	var rules_ok: bool = manager.make_director() is RuleDirector and manager.get_mode_name() == "RULES"
 	manager.director_mode = manager.DirectorMode.LEARNED
 	var learned_ok: bool = manager.make_director() is LearnedDirector and manager.get_mode_name() == "LEARNED"
-	check(random_ok and rules_ok and learned_ok, "GameManager creates the director of the selected mode")
+	manager.director_mode = manager.DirectorMode.EXPLORE
+	var explore_ok: bool = manager.make_director() is ExploreDirector and manager.get_mode_name() == "EXPLORE"
+	check(random_ok and rules_ok and learned_ok and explore_ok, "GameManager creates the director of the selected mode")
 	manager.free()
 
 
