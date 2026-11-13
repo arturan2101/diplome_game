@@ -1,0 +1,119 @@
+[gd_resource type="SpriteFrames" load_steps=18 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/tiles/spikes_timed_hidden.png" id="hidden"]
+[ext_resource type="Texture2D" path="res://assets/art/tiles/spikes_timed_warn.png" id="warn"]
+[ext_resource type="Texture2D" path="res://assets/art/tiles/spikes_timed_rise.png" id="rise"]
+[ext_resource type="Texture2D" path="res://assets/art/tiles/spikes_timed_up.png" id="up"]
+[ext_resource type="Texture2D" path="res://assets/art/tiles/spikes_timed_retract.png" id="retract"]
+
+[sub_resource type="AtlasTexture" id="hidden_0"]
+atlas = ExtResource("hidden")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="warn_0"]
+atlas = ExtResource("warn")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="warn_1"]
+atlas = ExtResource("warn")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="warn_2"]
+atlas = ExtResource("warn")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="warn_3"]
+atlas = ExtResource("warn")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="rise_0"]
+atlas = ExtResource("rise")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="rise_1"]
+atlas = ExtResource("rise")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="up_0"]
+atlas = ExtResource("up")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="up_1"]
+atlas = ExtResource("up")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="retract_0"]
+atlas = ExtResource("retract")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="retract_1"]
+atlas = ExtResource("retract")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="retract_2"]
+atlas = ExtResource("retract")
+region = Rect2(32, 0, 16, 16)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("hidden_0")
+}],
+"loop": true,
+"name": &"hidden",
+"speed": 2.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("warn_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("warn_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("warn_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("warn_3")
+}],
+"loop": true,
+"name": &"warn",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("rise_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("rise_1")
+}],
+"loop": false,
+"name": &"rise",
+"speed": 20.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("up_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("up_1")
+}],
+"loop": true,
+"name": &"up",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("retract_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("retract_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("retract_2")
+}],
+"loop": false,
+"name": &"retract",
+"speed": 15.0
+}]

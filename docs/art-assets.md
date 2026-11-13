@@ -187,3 +187,9 @@ Tiles (hand-drawn in Aseprite, no AI):
 - ruins_wall.png: top 6 px changed to row 0 #767a8c, rows 1-4 #5d6072 with specks, row 5 #4c4e5f; front face unchanged.
 - ruins_floor_2.png, ruins_floor_3.png: same tones and the same border seams (row 0, column 0) as ruins_floor.png, different slab layouts and cracks, so any mix tiles seamlessly.
 - Check: a 10x7 tile room (wall-top border, front wall row, mixed floor variants) with both characters, scratchpad room_check_4x.png.
+
+## Spikes (art, 2026-11-13)
+
+- Static spikes (always raised): slot 1 of `assets/art/tiles/ruins_hazards.png` (the theme's `spikes_tile`).
+- Retractable spikes: `assets/art/tiles/spikes_timed_frames.tres` (16x16), animations `hidden` (plate with slots, loop), `warn` (the plate trembles, steel glints in the slots, loop, 12 fps), `rise` (2 frames, once), `up` (raised, loop), `retract` (3 frames, once). Strips: `spikes_timed_<state>.png`. To use them, point `frames` of `level/spikes_timed.tres` at this file (the mechanics session owns that resource).
+- Generator: `tools/art/make_spike_tiles.py`.
