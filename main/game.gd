@@ -33,6 +33,9 @@ const RECENT_SECTIONS: int = 3
 const ARENA_TRIGGER_DEPTH: int = 2
 ## Where an enemy was spawned (an arena puts strays back there when it seals).
 const SPAWN_CELL_META: StringName = &"spawn_cell"
+## Marks servants called by the boss: not planned, so not counted in the kill ratio,
+## and they crumble when the boss falls.
+const SUMMONED_META: StringName = &"summoned"
 ## Debug-only zoom; the export preset leaves tools/debug out, so it is loaded by path.
 const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 
@@ -78,6 +81,11 @@ var _is_arena_cleared: bool = false
 var _loot_rng: RandomNumberGenerator = null
 ## Scroll whose spell waits for the player to choose a slot.
 var _pending_scroll: SpellPickup = null
+## The bot playing this run, if any (simulations skip the boss's spell reward).
+var _bot: BotPlayer = null
+## Servants the boss called that are still alive, including ones not yet added to the
+## section (they are added deferred, so get_enemies() may not show them yet).
+var _servants: Array[Enemy] = []
 
 
 func _ready() -> void:
@@ -130,6 +138,7 @@ func add_bot(profile: BotProfile = null) -> BotPlayer:
 	bot.game = self
 	bot.profile = profile
 	add_child(bot)
+	_bot = bot
 	Telemetry.bot_profile = String(bot.profile.id)
 	return bot
 
@@ -253,6 +262,7 @@ func _spawn_items() -> void:
 ## Spawns the first wave; later waves (arena only) wait in _pending_waves.
 func _spawn_enemies() -> void:
 	_enemies_left = 0
+	_servants.clear()
 	_pending_waves.clear()
 	for _wave in range(1, layout.wave_count()):
 		_pending_waves.append([])
@@ -268,33 +278,97 @@ func _spawn_enemy(entry: Dictionary) -> void:
 		# Never inside a wall (e.g. a doorway the arena has sealed).
 		entry = entry.duplicate()
 		entry["cell"] = level.nearest_floor_cell(entry["cell"])
-	var enemy: Enemy = ENEMY_SCENE.instantiate() as Enemy
-	enemy.data = _director.catalog.get_by_id(entry["id"])
+	var enemy_data: EnemyData = _director.catalog.get_by_id(entry["id"])
+	var cell: Vector2i = entry["cell"]
+	if enemy_data.is_boss and layout.arena_room >= 0:
+		# The boss waits in the middle of its arena, clear of the walls.
+		cell = level.nearest_floor_cell(layout.room_rects[layout.arena_room].get_center())
+	var enemy: Enemy = _create_enemy(enemy_data, cell)
+	var guardian: Guardian = enemy as Guardian
+	if guardian != null:
+		guardian.summon_requested.connect(_on_summon_requested)
+		guardian.phase_changed.connect(_on_boss_phase_changed)
+	_contents.add_child(enemy)
+
+
+## An enemy of this type on this cell, scaled for the depth, counted as alive.
+func _create_enemy(enemy_data: EnemyData, cell: Vector2i) -> Enemy:
+	var scene: PackedScene = enemy_data.scene if enemy_data.scene != null else ENEMY_SCENE
+	var enemy: Enemy = scene.instantiate() as Enemy
+	enemy.data = enemy_data
 	# Deeper ruins, tougher enemies.
 	enemy.hp_multiplier = _director.catalog.hp_multiplier(GameManager.depth)
 	enemy.damage_multiplier = _director.catalog.damage_multiplier(GameManager.depth)
-	enemy.position = level.to_local(level.cell_center(entry["cell"]))
-	enemy.set_meta(SPAWN_CELL_META, entry["cell"])
+	enemy.position = level.to_local(level.cell_center(cell))
+	enemy.set_meta(SPAWN_CELL_META, cell)
 	enemy.defeated.connect(_on_enemy_defeated)
-	_contents.add_child(enemy)
 	_enemies_left += 1
+	return enemy
 
 
-func _on_enemy_defeated(_enemy: Enemy) -> void:
+func _on_enemy_defeated(enemy: Enemy) -> void:
 	GameManager.add_kill()
-	Telemetry.record_kill()
+	if enemy.has_meta(SUMMONED_META):
+		_servants.erase(enemy)
+	else:
+		Telemetry.record_kill()
 	_enemies_left -= 1
+	if enemy is Guardian:
+		_on_boss_defeated()
 	if _is_arena_sealed and _enemies_left <= 0:
 		_advance_arena()
 
 
-## The player used a shrine: choose one of a few random spells.
+## The boss calls servants next to itself, while fewer than its limit are alive.
+func _on_summon_requested(guardian: Guardian, count: int) -> void:
+	var stats: GuardianData = guardian.data as GuardianData
+	var servant: EnemyData = _director.catalog.get_by_id(stats.summon_id)
+	if servant == null:
+		return
+	var wanted: int = mini(count, stats.summon_max_alive - _servants.size())
+	if wanted <= 0:
+		return
+	for cell: Vector2i in level.free_floor_cells_near(guardian.global_position, wanted):
+		var summoned: Enemy = _create_enemy(servant, cell)
+		summoned.set_meta(SUMMONED_META, true)
+		_servants.append(summoned)
+		# Deferred: the request may come from inside a physics callback.
+		_contents.add_child.call_deferred(summoned)
+
+
+func _on_boss_phase_changed(_phase: int) -> void:
+	hud.show_banner("The Guardian calls its servants!")
+
+
+## The servants crumble with the boss; the player may choose a spell as a reward.
+func _on_boss_defeated() -> void:
+	for servant: Enemy in _servants:
+		servant.defeated.disconnect(_on_enemy_defeated)
+		_enemies_left -= 1
+		if servant.is_inside_tree():
+			servant.queue_free()
+		else:
+			# Called this very frame and not added yet: gone as soon as it is.
+			servant.tree_entered.connect(servant.queue_free)
+	_servants.clear()
+	hud.hide_boss()
+	hud.show_banner("The Guardian has fallen")
+	if _bot == null:
+		spell_choice.open_offers.call_deferred(spell_pool.offer(shrine_offer_count, _loot_rng), player.spell_book)
+
+
+## The player used a shrine: choose one of a few random spells. Bots do not use
+## spells, and the screen would pause their run, so a bot gets nothing.
 func _on_shrine_activated(_shrine: Shrine) -> void:
+	if _bot != null:
+		return
 	spell_choice.open_offers(spell_pool.offer(shrine_offer_count, _loot_rng), player.spell_book)
 
 
 ## A scroll was taken with both spell slots full: ask which spell to forget.
 func _on_scroll_slots_full(scroll: SpellPickup) -> void:
+	if _bot != null:
+		return
 	_pending_scroll = scroll
 	spell_choice.open_replace(scroll.spell_data, player.spell_book)
 
@@ -357,9 +431,21 @@ func _seal_arena() -> void:
 		var cell: Vector2i = level.cell_at(enemy.global_position)
 		if not inside.has_point(cell) or not level.grid.is_floor(cell):
 			enemy.global_position = level.cell_center(enemy.get_meta(SPAWN_CELL_META, layout.exit))
-	hud.show_banner("The doors are sealed")
+	var boss: Guardian = _find_boss()
+	if boss != null:
+		hud.show_boss(boss)
+		hud.show_banner("The Guardian of the Ruins awakens")
+	else:
+		hud.show_banner("The doors are sealed")
 	if _enemies_left <= 0:
 		_advance_arena()
+
+
+func _find_boss() -> Guardian:
+	for enemy: Enemy in get_enemies():
+		if enemy is Guardian:
+			return enemy as Guardian
+	return null
 
 
 ## Next wave, or, when all waves are dead, open the doors and the gate.

@@ -116,8 +116,8 @@ func _test_line_of_sight() -> void:
 
 func _test_real_resources() -> void:
 	var catalog: EnemyCatalog = load(CATALOG_PATH) as EnemyCatalog
-	check(catalog != null and catalog.get_ids() == ([&"skeleton", &"archer", &"beetle"] as Array[StringName]),
-			"enemy catalog lists skeleton, archer and beetle")
+	check(catalog != null and catalog.get_ids() == ([&"skeleton", &"archer", &"beetle", &"guardian"] as Array[StringName]),
+			"enemy catalog lists skeleton, archer, beetle and the boss")
 	if catalog == null:
 		return
 	var beetle: EnemyData = catalog.get_by_id(&"beetle")
@@ -128,7 +128,7 @@ func _test_real_resources() -> void:
 	var scene: PackedScene = load(ENEMY_SCENE_PATH) as PackedScene
 	var all_ready: bool = true
 	for enemy_data: EnemyData in catalog.enemies:
-		var enemy: Enemy = scene.instantiate() as Enemy
+		var enemy: Enemy = (enemy_data.scene if enemy_data.scene != null else scene).instantiate() as Enemy
 		enemy.data = enemy_data
 		enemy.position = Vector2(-500.0, -500.0)
 		add_child(enemy)
@@ -137,7 +137,7 @@ func _test_real_resources() -> void:
 				or enemy.health.hp != enemy_data.max_hp or enemy_data.danger_cost <= 0:
 			all_ready = false
 		enemy.queue_free()
-	check(all_ready, "every catalog enemy spawns from enemy.tscn with weapon, sprite and HP from its data")
+	check(all_ready, "every catalog enemy spawns (from enemy.tscn or its own scene) with weapon, sprite and HP from its data")
 	await physics_frames(2)
 
 

@@ -90,6 +90,8 @@ func _physics_process(delta: float) -> void:
 
 ## Plays one run with the bot. Returns how many sections were cleared.
 func _play_run(run_seed: int) -> int:
+	# Nothing of a previous run may keep the game paused.
+	get_tree().paused = false
 	GameManager.start_run(run_seed)
 	_game = GAME_SCENE.instantiate() as Game
 	_game.death_screen_enabled = false

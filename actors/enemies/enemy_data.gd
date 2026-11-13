@@ -41,3 +41,8 @@ extends Resource
 @export var repath_interval: float = 0.3
 ## Weapon of this enemy. Its weapon_scene must target the player_hurtbox layer.
 @export var weapon: WeaponData
+## Scene created for this enemy type; empty = the common actors/enemies/enemy.tscn.
+## A boss with its own behaviour has its own scene.
+@export var scene: PackedScene
+## Bosses are never bought from the danger budget; the director places them itself.
+@export var is_boss: bool = false

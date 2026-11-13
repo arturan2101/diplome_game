@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://ui/hud.gd" id="1"]
 [ext_resource type="Script" path="res://ui/touch_joystick.gd" id="2"]
@@ -20,7 +20,10 @@ bg_color = Color(0.85, 0.22, 0.22, 1)
 [sub_resource type="StyleBoxFlat" id="hp_back"]
 bg_color = Color(0.1, 0.08, 0.12, 0.85)
 
-[node name="HUD" type="CanvasLayer" node_paths=PackedStringArray("hp_bar", "hp_label", "coins_label", "depth_label", "weapon_icons", "skill_icon", "skill_cooldown", "attack_button_icon", "swap_button_icon", "skill_button_icon", "spell_icons", "spell_cooldowns", "spell_levels", "spell_buttons", "spell_button_icons", "interact_prompt", "interact_button", "banner", "fade")]
+[sub_resource type="StyleBoxFlat" id="boss_fill"]
+bg_color = Color(0.75, 0.35, 0.95, 1)
+
+[node name="HUD" type="CanvasLayer" node_paths=PackedStringArray("hp_bar", "hp_label", "coins_label", "depth_label", "weapon_icons", "skill_icon", "skill_cooldown", "attack_button_icon", "swap_button_icon", "skill_button_icon", "spell_icons", "spell_cooldowns", "spell_levels", "spell_buttons", "spell_button_icons", "interact_prompt", "interact_button", "boss_bar", "boss_label", "banner", "fade")]
 script = ExtResource("1")
 hp_bar = NodePath("Info/HpBar")
 hp_label = NodePath("Info/HpLabel")
@@ -39,6 +42,8 @@ spell_buttons = [NodePath("Spell1Button"), NodePath("Spell2Button")]
 spell_button_icons = [NodePath("Spell1Button/Icon"), NodePath("Spell2Button/Icon")]
 interact_prompt = NodePath("Info/InteractPrompt")
 interact_button = NodePath("TakeButton")
+boss_bar = NodePath("Info/BossBar")
+boss_label = NodePath("Info/BossBar/BossLabel")
 banner = NodePath("Info/Banner")
 fade = NodePath("Fade")
 
@@ -327,6 +332,36 @@ offset_bottom = 23.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 12
 text = "Depth 1  -  Section 1"
+horizontal_alignment = 1
+
+[node name="BossBar" type="ProgressBar" parent="Info"]
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -110.0
+offset_top = 40.0
+offset_right = 110.0
+offset_bottom = 46.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("hp_back")
+theme_override_styles/fill = SubResource("boss_fill")
+value = 100.0
+show_percentage = false
+
+[node name="BossLabel" type="Label" parent="Info/BossBar"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = -15.0
+offset_bottom = -2.0
+grow_horizontal = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 10
+text = "Guardian of the Ruins"
 horizontal_alignment = 1
 
 [node name="CoinIcon" type="TextureRect" parent="Info"]

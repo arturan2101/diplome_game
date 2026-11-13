@@ -46,7 +46,7 @@ func choose_next(state: PlayerState) -> SectionPlan:
 			plan.room_count = MAX_ROOMS
 			plan.corridor_width = MIN_CORRIDOR_WIDTH
 	_help_with_problem(plan, state, problem)
-	finish_arena(plan)
+	finish_arena(plan, state.rng)
 	return plan
 
 

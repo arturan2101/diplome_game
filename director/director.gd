@@ -28,7 +28,7 @@ func choose_next(state: PlayerState) -> SectionPlan:
 	var plan: SectionPlan = new_plan(state)
 	plan.budget = BASELINE_BUDGET + state.section_index
 	plan.enemy_mix = buy_enemies(plan.budget, state.rng)
-	finish_arena(plan)
+	finish_arena(plan, state.rng)
 	return plan
 
 
@@ -47,15 +47,26 @@ func new_plan(state: PlayerState) -> SectionPlan:
 		plan.is_arena = true
 		plan.phase = SectionPlan.PHASE_ARENA
 		plan.room_count = settings.arena_rooms
+		plan.is_boss = settings.boss_every_depths > 0 and (state.depth + 1) % settings.boss_every_depths == 0
 	elif state.rng.randf() < settings.shrine_chance:
 		plan.shrines = 1
 	return plan
 
 
-## Sets the number of waves of an arena from its budget. Call after the budget is known.
-func finish_arena(plan: SectionPlan) -> void:
-	if plan.is_arena:
-		plan.waves = 2 if plan.budget >= settings.arena_two_waves_budget else 1
+## Arenas, after the budget and the enemies are chosen: two waves from a large budget.
+## A boss arena instead holds the boss plus an escort bought with what is left of the
+## budget, all in one wave (the boss calls more help itself).
+func finish_arena(plan: SectionPlan, rng: RandomNumberGenerator) -> void:
+	if not plan.is_arena:
+		return
+	var boss: EnemyData = catalog.get_by_id(settings.boss_id) if plan.is_boss else null
+	if boss != null:
+		plan.enemy_mix = buy_enemies(maxi(0, plan.budget - boss.danger_cost), rng)
+		plan.enemy_mix[boss.id] = 1
+		plan.waves = 1
+		return
+	plan.is_boss = false
+	plan.waves = 2 if plan.budget >= settings.arena_two_waves_budget else 1
 
 
 ## Index picked with the given weights (they need not add up to 1).
@@ -82,7 +93,7 @@ func buy_enemies(budget: int, rng: RandomNumberGenerator, weights: Dictionary = 
 		var total_weight: float = 0.0
 		for enemy_data: EnemyData in catalog.enemies:
 			var weight: float = float(weights.get(enemy_data.id, 1.0))
-			if enemy_data.danger_cost <= left and weight > 0.0:
+			if not enemy_data.is_boss and enemy_data.danger_cost <= left and weight > 0.0:
 				affordable.append(enemy_data)
 				total_weight += weight
 		if affordable.is_empty():

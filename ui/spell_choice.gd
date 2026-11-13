@@ -34,6 +34,12 @@ func is_open() -> bool:
 	return panel.visible
 
 
+## Freed while open (the run ended under it): the pause must not outlive the screen.
+func _exit_tree() -> void:
+	if is_open():
+		get_tree().paused = false
+
+
 ## Shows the offered spells; choosing one learns it (or raises its level).
 func open_offers(offers: Array[SpellData], book: SpellBook) -> void:
 	_book = book

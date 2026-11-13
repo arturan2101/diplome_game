@@ -32,6 +32,9 @@ extends CanvasLayer
 ## button itself; both appear only while there is something to take.
 @export var interact_prompt: RichTextLabel
 @export var interact_button: TouchScreenButton
+## Health bar of the boss with its name, shown during the boss fight.
+@export var boss_bar: ProgressBar
+@export var boss_label: Label
 ## Text over the screen for a moment (the arena locking, the gate opening).
 @export var banner: Label
 @export var banner_time: float = 1.6
@@ -60,6 +63,8 @@ func _ready() -> void:
 	_on_interaction_changed(null)
 	if banner != null:
 		banner.visible = false
+	if boss_bar != null:
+		boss_bar.visible = false
 	_make_rarity_bars()
 
 
@@ -89,6 +94,31 @@ func bind_player(player: Player) -> void:
 		player.spell_book.spells_changed.connect(_refresh_spells)
 		player.spell_book.spell_learned.connect(_on_spell_learned)
 	_refresh_spells()
+
+
+## Shows the boss's health bar until hide_boss() (or until the boss is gone).
+func show_boss(boss: Enemy) -> void:
+	if boss_bar == null:
+		return
+	if boss_label != null:
+		boss_label.text = boss.data.display_name
+	boss_bar.max_value = boss.health.max_hp
+	boss_bar.value = boss.health.hp
+	boss_bar.visible = true
+	if not boss.health.hp_changed.is_connected(_on_boss_hp_changed):
+		boss.health.hp_changed.connect(_on_boss_hp_changed)
+	if not boss.tree_exited.is_connected(hide_boss):
+		boss.tree_exited.connect(hide_boss)
+
+
+func hide_boss() -> void:
+	if boss_bar != null:
+		boss_bar.visible = false
+
+
+func _on_boss_hp_changed(hp: int, max_hp: int) -> void:
+	boss_bar.max_value = max_hp
+	boss_bar.value = hp
 
 
 ## Shows a short message in the middle of the screen.

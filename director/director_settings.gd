@@ -69,6 +69,10 @@ extends Resource
 @export var arena_rooms: int = 3
 ## From this budget on, the arena comes in two waves.
 @export var arena_two_waves_budget: int = 12
+## The arena of every n-th depth holds the boss (2 = depths 2, 4, 6...); 0 = no boss.
+@export var boss_every_depths: int = 2
+## Enemy id of the boss in the enemy catalog.
+@export var boss_id: StringName = &"guardian"
 
 @export_group("Spells")
 ## Chance that an ordinary (not arena) section has a shrine with a spell choice.

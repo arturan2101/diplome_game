@@ -93,6 +93,17 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 
+## How far the attack being wound up reaches; the bot dodges when it is closer.
+## A boss with several attacks answers for the current one.
+func get_windup_reach() -> float:
+	return data.attack_range
+
+
+## True if the attack being wound up flies along a line (step across it, not back).
+func is_windup_ranged() -> bool:
+	return data.preferred_distance > 0.0
+
+
 ## Pushes the enemy with the given velocity and interrupts what it was doing.
 ## Called for hits with knockback and by the player's shield.
 func apply_knockback(knockback_velocity: Vector2) -> void:

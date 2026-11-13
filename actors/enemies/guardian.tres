@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="GuardianData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/guardian_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/guardian.tres" id="2"]
+[ext_resource type="Resource" path="res://actors/enemies/guardian_slam.tres" id="3"]
+[ext_resource type="PackedScene" path="res://actors/enemies/guardian.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://actors/projectiles/stone.tscn" id="5"]
+
+[resource]
+script = ExtResource("1")
+id = &"guardian"
+display_name = "Guardian of the Ruins"
+sprite = ExtResource("2")
+sprite_scale = 2.0
+body_radius = 11.0
+danger_cost = 16
+max_hp = 180
+move_speed = 34.0
+detection_range = 150.0
+attack_range = 30.0
+windup = 0.8
+recovery = 0.8
+weapon = ExtResource("3")
+scene = ExtResource("4")
+is_boss = true
+projectile_scene = ExtResource("5")
+throw_damage = 8
+phase_two_speed_multiplier = 1.2
+shockwave_damage = 10
+summon_interval = 12.0
+summon_max_alive = 3

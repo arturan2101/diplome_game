@@ -212,7 +212,7 @@ func _handle_skill(player: Player, delta: float) -> void:
 		if _seen_windups.has(id):
 			continue
 		var distance: float = player.global_position.distance_to(enemy.global_position)
-		if distance > enemy.data.attack_range + THREAT_MARGIN:
+		if distance > enemy.get_windup_reach() + THREAT_MARGIN:
 			continue
 		_windup_seen_time[id] = float(_windup_seen_time.get(id, 0.0)) + delta
 		if _windup_seen_time[id] < profile.reaction_time:
@@ -226,7 +226,7 @@ func _dodge(player: Player, enemy: Enemy) -> void:
 	var away: Vector2 = enemy.global_position.direction_to(player.global_position)
 	var side: Vector2 = away.orthogonal() * (1.0 if _rng.randf() < 0.5 else -1.0)
 	# Arrows fly along the line to the player: step across it instead.
-	var is_ranged: bool = enemy.data.preferred_distance > 0.0
+	var is_ranged: bool = enemy.is_windup_ranged()
 	# Out of a melee swing: back and to the side leaves both its reach and its arc.
 	var wanted: Array[Vector2] = [(away + side).normalized(), (away - side).normalized(), away, side, -side]
 	if is_ranged:

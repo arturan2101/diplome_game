@@ -22,5 +22,5 @@ func choose_next(state: PlayerState) -> SectionPlan:
 	plan.health_packs = rng.randi_range(0, MAX_HEALTH_PACKS)
 	plan.coins = rng.randi_range(settings.coins_min, settings.coins_max)
 	plan.cover_density = rng.randf()
-	finish_arena(plan)
+	finish_arena(plan, rng)
 	return plan

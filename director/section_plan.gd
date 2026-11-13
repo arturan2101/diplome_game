@@ -31,6 +31,8 @@ var shrines: int = 0
 ## Last section of a depth: the doors of the final room lock behind the player and
 ## the gate opens only when every wave is dead.
 var is_arena: bool = false
+## Arena with the boss (Guardian of the Ruins) and an escort.
+var is_boss: bool = false
 ## How many waves the enemies of an arena come in (1 or 2).
 var waves: int = 1
 ## Tunnel width in tiles, 2-4 (doors are always 3 wide).
@@ -69,6 +71,7 @@ func to_dictionary() -> Dictionary:
 		"chests": chests,
 		"shrines": shrines,
 		"arena": is_arena,
+		"boss": is_boss,
 		"waves": waves,
 		"corridor_width": corridor_width,
 		"corridor_twist": corridor_twist,
