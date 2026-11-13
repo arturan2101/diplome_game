@@ -8,6 +8,9 @@ extends Resource
 @export var display_name: String = ""
 ## Picture of the enemy. Empty keeps whatever the enemy scene shows.
 @export var sprite: Texture2D
+## Animations "<idle|walk>_<down|up|left|right>" (24x24 art). Empty: the enemy shows
+## sprite as a still placeholder.
+@export var sprite_frames: SpriteFrames
 ## Scale of the picture (beetles are smaller than a tile).
 @export var sprite_scale: float = 1.0
 ## Radius of the body collision in pixels; the hurtbox is one pixel larger.

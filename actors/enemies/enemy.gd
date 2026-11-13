@@ -36,6 +36,8 @@ enum State { IDLE, CHASE, RETREAT, WINDUP, RECOVER, STAGGER, FALLING }
 @export var waypoint_reach: float = 4.0
 ## Tint of a dormant enemy: a sleeping boss looks like stone.
 @export var dormant_color: Color = Color(0.55, 0.58, 0.68)
+## Drawing offset of animated 24x24 art, so the feet stand on the body's origin.
+@export var animated_offset: Vector2 = Vector2(0, -4)
 
 var state: State = State.IDLE
 ## A dormant enemy stands still, does not notice the player and takes no damage until
@@ -271,6 +273,19 @@ func _apply_look() -> void:
 		if data.sprite != null:
 			sprite.texture = data.sprite
 		sprite.scale = Vector2.ONE * data.sprite_scale
+	var animated: AnimatedSprite2D = visual as AnimatedSprite2D
+	if animated != null:
+		if data.sprite_frames != null:
+			animated.sprite_frames = data.sprite_frames
+			animated.offset = animated_offset
+		elif data.sprite != null:
+			# No animations yet: the old still picture as a one-frame placeholder.
+			var still: SpriteFrames = SpriteFrames.new()
+			still.add_frame(&"default", data.sprite)
+			animated.sprite_frames = still
+			animated.offset = Vector2.ZERO
+			animated.scale = Vector2.ONE * data.sprite_scale
+		animated.play(animated.sprite_frames.get_animation_names()[0] if animated.sprite_frames != null else &"default")
 	# New shape objects: the ones in the scene file are shared by all instances.
 	if body_shape != null:
 		var body_circle: CircleShape2D = CircleShape2D.new()

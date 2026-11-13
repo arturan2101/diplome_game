@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://actors/enemies/enemy_data.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/skeleton.tres" id="2"]
 [ext_resource type="Resource" path="res://actors/enemies/skeleton_weapon.tres" id="3"]
-[ext_resource type="PackedScene" path="res://actors/enemies/skeleton.tscn" id="4"]
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/skeleton_frames.tres" id="4"]
 
 [resource]
 script = ExtResource("1")
@@ -18,4 +18,4 @@ detection_range = 160.0
 attack_range = 18.0
 windup = 0.55
 recovery = 0.6
-scene = ExtResource("4")
+sprite_frames = ExtResource("4")
