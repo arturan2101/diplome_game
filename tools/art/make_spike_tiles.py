@@ -16,8 +16,8 @@ COL = {
     "e": "#4c4e5f", "t": "#5d6072", "g": "#9aa2ad", "G": "#d8d4c4", "W": "#f4f0e0",
 }
 # Base centre (x, y) of each spike; the back row first, so the front row covers it.
-SLOTS = [(4, 7), (11, 7), (4, 13), (11, 13)]
-FULL = 5
+SLOTS = [(3, 6), (8, 6), (12, 6), (5, 10), (10, 10), (3, 14), (8, 14), (12, 14)]
+FULL = 4
 
 
 def rgb(key):
@@ -36,7 +36,7 @@ def plate(dx=0):
             img.putpixel((x, y), rgb(key))
     px = img.load()
     for cx, by in SLOTS:
-        for x in range(cx - 2 + dx, cx + 3 + dx):
+        for x in range(cx - 1 + dx, cx + 2 + dx):
             if 1 <= x < T - 1 and 1 <= by < T - 1:
                 px[x, by] = rgb("k")
     return img
@@ -88,9 +88,9 @@ def warn(frame):
 STATES = {
     "hidden": ([plate()], 2.0, True),
     "warn": ([warn(i) for i in range(4)], 12.0, True),
-    "rise": ([raised(2), raised(4)], 20.0, False),
+    "rise": ([raised(2), raised(3)], 20.0, False),
     "up": ([raised(FULL), raised(FULL)], 4.0, True),
-    "retract": ([raised(4), raised(2), plate()], 15.0, False),
+    "retract": ([raised(3), raised(2), plate()], 15.0, False),
 }
 
 
