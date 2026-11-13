@@ -9,6 +9,8 @@ extends Director
 ## training alpha is 0, so the game does not experiment on players. The parameters are
 ## read from a JSON file: plain numbers, no ML library runs in the game. Without a valid
 ## file the director plans like the rules director, so the mode always works.
+## Calm start: in the first sections of a run only the actions without a peak and
+## without the high budget may win (a mask over the trained model, no retraining).
 
 const PARAMETERS_PATH: String = "res://director/learned_params.json"
 
@@ -67,17 +69,29 @@ func is_trained() -> bool:
 
 func choose_next(state: PlayerState) -> SectionPlan:
 	if not is_trained():
+		# The experiment config may have replaced the settings after construction.
+		_fallback.settings = settings
 		return _fallback.choose_next(state)
 	var plan: SectionPlan = new_plan(state)
-	BanditActions.apply(self, plan, state, best_action(plan.context))
+	BanditActions.apply(self, plan, state, best_action(plan.context, allowed_actions(state)))
 	return plan
 
 
-## The action with the highest score for this context (the first one on a tie).
-func best_action(x: PackedFloat32Array) -> int:
-	var best: int = 0
+## The actions this state allows: at the calm start of a run only the calm ones
+## (BanditActions.is_calm), later all of them (an empty list).
+func allowed_actions(state: PlayerState) -> PackedInt32Array:
+	return BanditActions.calm_actions(settings) if is_calm_start(state) else PackedInt32Array()
+
+
+## The action with the highest score for this context (the first one on a tie),
+## among the allowed actions; an empty list allows every action.
+func best_action(x: PackedFloat32Array, allowed: PackedInt32Array = PackedInt32Array()) -> int:
+	var candidates: PackedInt32Array = allowed
+	if candidates.is_empty():
+		candidates = PackedInt32Array(range(_theta.size()))
+	var best: int = candidates[0]
 	var best_score: float = -INF
-	for action in _theta.size():
+	for action: int in candidates:
 		var value: float = score(action, x)
 		if value > best_score:
 			best_score = value

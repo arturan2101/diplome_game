@@ -8,6 +8,8 @@ extends Director
 ## 4. Contents follow the phase and the player's trouble: more health and cover when
 ##    resting or hurt, fewer of the enemy type that hurts a weak player most (more of
 ##    it for a strong player).
+## 5. Calm start: the first sections of a run stay in the build-up and get at most the
+##    medium budget, as in every mode.
 ## All numbers live in DirectorSettings.
 
 const OPEN_TAG: StringName = &"open"
@@ -20,6 +22,8 @@ func choose_next(state: PlayerState) -> SectionPlan:
 	if not plan.is_arena:
 		plan.phase = next_phase(state)
 	plan.budget = budget_for(state, plan.phase)
+	if is_calm_start(state):
+		plan.budget = mini(plan.budget, calm_start_budget_cap(state))
 	var problem: StringName = _problem_source(state)
 	plan.enemy_mix = buy_enemies(plan.budget, state.rng, _enemy_weights(state, problem))
 	fill_contents(plan, state)
@@ -41,8 +45,10 @@ func next_phase(state: PlayerState) -> StringName:
 		return SectionPlan.PHASE_REST
 	if last != SectionPlan.PHASE_BUILD:
 		return SectionPlan.PHASE_BUILD
-	return SectionPlan.PHASE_BUILD if _build_steps_done(state) < settings.build_multipliers.size() \
-			else SectionPlan.PHASE_PEAK
+	# The calm start never peaks (with two build-up steps the first peak comes later anyway).
+	if _build_steps_done(state) < settings.build_multipliers.size() or is_calm_start(state):
+		return SectionPlan.PHASE_BUILD
+	return SectionPlan.PHASE_PEAK
 
 
 ## B = round((base + k_s * (S - S_avg) + k_d * depth) * m_phase).

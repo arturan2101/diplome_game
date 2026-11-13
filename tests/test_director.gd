@@ -1,7 +1,8 @@
 extends TestCase
 ## Headless test for the directors: the budget formula, the tension wave, the
 ## frustration guard, adaptation to the player's trouble, the random control mode,
-## the learned-director placeholder, and that every plan builds a passable section.
+## the calm start of a run, the learned-director placeholder, and that every plan
+## builds a passable section.
 
 const SEEDS: int = 200
 
@@ -13,6 +14,7 @@ func run() -> void:
 	_test_frustration_guard()
 	_test_adaptation()
 	_test_random_director()
+	_test_calm_start()
 	_test_learned_and_factory()
 	_test_chests_and_arena()
 	_test_plans_build_sections()
@@ -146,6 +148,43 @@ func _test_random_director() -> void:
 	bad_player.hp_fraction = 0.1
 	check(director.choose_next(good_player).to_dictionary() == director.choose_next(bad_player).to_dictionary(),
 			"the random director ignores how the player is doing")
+
+
+## The first two sections of a run: no peak and at most the medium budget (14 plus
+## the depth growth) in the rules and random modes; from the third section on, as usual.
+func _test_calm_start() -> void:
+	var rules: RuleDirector = RuleDirector.new()
+	var cap: int = rules.settings.calm_start_max_budget
+	var calm: bool = true
+	for i in SEEDS:
+		var phases: Array = [] if i % 2 == 0 else [SectionPlan.PHASE_BUILD]
+		var state: PlayerState = _state(i % 2, phases, [] if phases.is_empty() else [0.95], i)
+		state.skill = 0.95
+		var plan: SectionPlan = rules.choose_next(state)
+		if plan.phase == SectionPlan.PHASE_PEAK or plan.budget > cap:
+			calm = false
+	check(calm, "rules: the first two sections build up with at most the medium budget, even for a strong player")
+	var strong_later: PlayerState = _state(2, [SectionPlan.PHASE_BUILD, SectionPlan.PHASE_BUILD], [0.95, 0.95])
+	strong_later.skill = 0.95
+	var later: SectionPlan = rules.choose_next(strong_later)
+	check(later.phase == SectionPlan.PHASE_PEAK and later.budget > cap, "rules: the third section peaks again")
+	var short_wave: DirectorSettings = rules.settings.duplicate() as DirectorSettings
+	short_wave.build_multipliers = [1.0] as Array[float]
+	var quick: RuleDirector = RuleDirector.new(null, short_wave)
+	check(quick.next_phase(_state(1, [SectionPlan.PHASE_BUILD], [0.8])) == SectionPlan.PHASE_BUILD
+			and quick.next_phase(_state(2, [SectionPlan.PHASE_BUILD, SectionPlan.PHASE_BUILD], [0.8, 0.8])) == SectionPlan.PHASE_PEAK,
+			"rules: a one-step build-up still waits for the end of the calm start before its first peak")
+	var random: RandomDirector = RandomDirector.new()
+	var random_cap: int = mini(cap, random.settings.random_budget_max)
+	var calm_random: bool = true
+	var above_later: int = 0
+	for i in SEEDS:
+		if random.choose_next(_state(i % 2, [], [], i)).budget > random_cap:
+			calm_random = false
+		if random.choose_next(_state(2, [], [], i)).budget > random_cap:
+			above_later += 1
+	check(calm_random and above_later > 0,
+			"random: the first two sections draw at most the medium budget, later sections the whole range (%d above)" % above_later)
 
 
 func _test_learned_and_factory() -> void:

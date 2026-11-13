@@ -1,8 +1,9 @@
 extends TestCase
 ## Headless test for the learned director's parts: the context features, the 27
 ## actions and how they fill a plan, the exploring director, the LinUCB choice with
-## hand-made parameters, the fall back to the rules without parameters, the trained
-## parameter file (if it exists) and the action and context in the log.
+## hand-made parameters, the calm-start mask, the fall back to the rules without
+## parameters, the trained parameter file (if it exists) and the action and context
+## in the log.
 
 const PLAYER_SCENE: String = "res://actors/player/player.tscn"
 const PLANS: int = 600
@@ -111,6 +112,23 @@ func _test_learned() -> void:
 	weak.skill = 0.2
 	check(learned.choose_next(strong).action == high and learned.choose_next(weak).action == low,
 			"the action with the best expected reward wins: high budget for a skilled player, rest for a weak one")
+	var calm: PackedInt32Array = BanditActions.calm_actions(learned.settings)
+	var calm_ok: bool = calm.size() == 12
+	for index: int in calm:
+		var action: Dictionary = BanditActions.decode(index, learned.settings)
+		if action["type"] == SectionPlan.PHASE_PEAK or action["level"] == 2:
+			calm_ok = false
+	check(calm_ok, "the calm start allows 12 actions: build or rest, low or mid budget, any enemy")
+	var first: PlayerState = _state(0)
+	first.skill = 0.9
+	first.depth = 0
+	var second: PlayerState = _state(1)
+	second.skill = 0.9
+	second.depth = 0
+	var first_plan: SectionPlan = learned.choose_next(first)
+	check(BanditActions.is_calm(first_plan.action, learned.settings) and BanditActions.is_calm(learned.choose_next(second).action, learned.settings)
+			and first_plan.budget <= learned.settings.calm_start_max_budget,
+			"in the first two sections the mask stops the peak and the high budget the model prefers")
 	var bad: Dictionary = data.duplicate()
 	bad["features"] = ["bias", "skill"]
 	check(not learned.load_parameters(bad) and not learned.is_trained(), "parameters for other features are refused")
@@ -134,7 +152,23 @@ func _test_learned() -> void:
 		length += value * value
 	check(is_equal_approx(learned.score(high, x), x[1] + 0.5 * sqrt(length)), "LinUCB adds alpha * sqrt(x^T A^-1 x) for exploration")
 	if FileAccess.file_exists(LearnedDirector.PARAMETERS_PATH):
-		check(LearnedDirector.new().is_trained(), "the trained parameter file fits the game's features and actions")
+		var trained: LearnedDirector = LearnedDirector.new()
+		check(trained.is_trained(), "the trained parameter file fits the game's features and actions")
+		var start_calm: bool = true
+		var later_peaks: int = 0
+		for i in PLANS:
+			var state: PlayerState = _state(i)
+			state.section_index = i % 2
+			state.depth = 0
+			state.hp_fraction = 1.0 if i % 3 == 0 else state.hp_fraction
+			if not BanditActions.is_calm(trained.choose_next(state).action, trained.settings):
+				start_calm = false
+			var later: PlayerState = _state(i)
+			later.section_index = 2 + i % 5
+			if not BanditActions.is_calm(trained.choose_next(later).action, trained.settings):
+				later_peaks += 1
+		check(start_calm and later_peaks > 0,
+				"the trained director starts calmly and uses peaks and high budgets later (%d of %d)" % [later_peaks, PLANS])
 
 
 func _test_log() -> void:

@@ -35,6 +35,19 @@ extends Resource
 @export var build_multipliers: Array[float] = [0.8, 1.0]
 @export var peak_multiplier: float = 1.3
 @export var rest_multiplier: float = 0.3
+## The "soft waves" variant (ExperimentConfig.soft_waves): a lower peak and a milder
+## rest replace peak_multiplier and rest_multiplier.
+@export var soft_peak_multiplier: float = 1.15
+@export var soft_rest_multiplier: float = 0.5
+
+@export_group("Run start")
+## Calm start: the first sections of a run are never a peak and get at most the medium
+## danger budget, in every mode (the learned director masks its peak and high actions,
+## the rules director keeps building up, the random one draws from the lower half).
+@export var calm_start_sections: int = 2
+## The medium budget, plus the usual growth with depth: the learned director's mid
+## level, the middle of the random range, the rules budget of an average player.
+@export var calm_start_max_budget: int = 14
 
 @export_group("Frustration guard")
 ## The next section is forced into the rest phase if HP is below this share...

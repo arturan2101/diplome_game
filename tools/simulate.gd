@@ -8,7 +8,7 @@ extends Node
 ##   --mode=random|rules|learned
 ##   --runs=N                number of runs (default 5)
 ##   --seed=N                seed of the first run; the next runs use N+1, N+2, ...
-##   --sections=N            stop a run after N sections (default 30)
+##   --sections=N            stop a run after N sections (default 60)
 ##   --speed=N               times faster than real time (default 8)
 ##   --log-dir=NAME          write the logs to user://sim_logs/NAME instead of user://logs
 ##   --calibrate             also measure the time the bot spends in each room and in the
@@ -25,11 +25,12 @@ const CALIBRATE_ARG: String = "--calibrate"
 const SIM_LOGS_ROOT: String = "user://sim_logs"
 const CALIBRATION_DIR: String = "user://calibration"
 const DEFAULT_RUNS: int = 5
-const DEFAULT_SECTIONS: int = 30
+const DEFAULT_SECTIONS: int = 60
 const DEFAULT_SPEED: int = 8
 const DEFAULT_FIRST_SEED: int = 1
-## A run that takes longer than this many seconds of game time is cut off.
-const RUN_TIME_LIMIT: float = 3600.0
+## A run is cut off after this many seconds of game time per section of the limit
+## (an hour for 30 sections): far more than a bot needs, only a hung run gets there.
+const RUN_TIME_PER_SECTION: float = 120.0
 ## A section that takes longer than this is reported as stuck and the run is cut off.
 const STUCK_TIME: float = 600.0
 
@@ -62,18 +63,21 @@ func _ready() -> void:
 			GameManager.config.series, Telemetry.get_log_path()])
 	var total_sections: int = 0
 	var deaths: int = 0
+	var at_limit: int = 0
 	for i in _runs:
 		var cleared: int = await _play_run(_first_seed + i)
 		total_sections += cleared
 		if GameManager.is_run_over:
 			deaths += 1
+		elif cleared >= _max_sections:
+			at_limit += 1
 		print("run %d (seed %d): %d sections cleared, depth %d, %s" % [
 				i + 1, _first_seed + i, cleared, GameManager.depth, "died" if GameManager.is_run_over else "stopped"])
 	SimulationSpeed.reset()
 	if _calibrate:
 		_write_calibration()
-	print("Done: %d runs, %.1f sections per run on average, %d deaths" % [
-			_runs, float(total_sections) / float(maxi(_runs, 1)), deaths])
+	print("Done: %d runs, %.1f sections per run on average, %d deaths, %d reached the limit of %d sections" % [
+			_runs, float(total_sections) / float(maxi(_runs, 1)), deaths, at_limit, _max_sections])
 	get_tree().quit()
 
 
@@ -100,7 +104,7 @@ func _play_run(run_seed: int) -> int:
 	_game.section_finished.connect(_on_section_finished)
 	add_child(_game)
 	_game.add_bot(_profile)
-	var time_left: float = RUN_TIME_LIMIT
+	var time_left: float = RUN_TIME_PER_SECTION * _max_sections
 	var section_seen: int = -1
 	var section_time: float = 0.0
 	while time_left > 0.0 and not GameManager.is_run_over and GameManager.section_index < _max_sections:

@@ -8,8 +8,8 @@
 #   bash training/run_experiment.sh experiment 15 2 3000      # 30 runs per bot and mode
 # Environment (optional):
 #   GODOT=<path to the console Godot binary>   (default: godot)
-#   MODES="random rules"   BOTS="weak mid strong"   SECTIONS=30   SPEED=30
-#   CONFIG=clean|full      (experiment series, res://experiment/<CONFIG>.tres; default full)
+#   MODES="random rules"   BOTS="weak mid strong"   SECTIONS=60   SPEED=30
+#   CONFIG=clean|clean_soft|full   (experiment series, res://experiment/<CONFIG>.tres; default full)
 # Then: python training/analyze.py --logs <sim_logs>/<name> --out docs/figures
 set -u
 cd "$(dirname "$0")/.."
@@ -24,7 +24,7 @@ for mode in ${MODES:-random rules}; do
 		for p in $(seq 0 $((PROCS - 1))); do
 			# Each process plays RUNS runs with seeds SEED0 + p * RUNS and up.
 			( "$GODOT" --headless --path . res://tools/simulate.tscn -- --bot="$bot" --mode="$mode" \
-					--runs="$RUNS" --seed=$((SEED0 + p * RUNS)) --sections="${SECTIONS:-30}" \
+					--runs="$RUNS" --seed=$((SEED0 + p * RUNS)) --sections="${SECTIONS:-60}" \
 					--speed="${SPEED:-30}" --config="${CONFIG:-full}" --log-dir="$NAME/${mode}_$bot" 2>&1 \
 				| grep -E -A1 "STUCK|ERROR" | sed "s/^/$mode $bot: /" ) &
 		done

@@ -60,6 +60,17 @@ func new_plan(state: PlayerState) -> SectionPlan:
 	return plan
 
 
+## Calm start of a run (DirectorSettings.calm_start_sections): the first sections are
+## never a peak and get no more than the medium budget, whatever the mode.
+func is_calm_start(state: PlayerState) -> bool:
+	return state.section_index < settings.calm_start_sections
+
+
+## The most a calm-start section may get: the medium budget plus the growth with depth.
+func calm_start_budget_cap(state: PlayerState) -> int:
+	return settings.calm_start_max_budget + roundi(settings.budget_depth_factor * state.depth)
+
+
 ## Contents and layout the adaptive directors (rules and learned) fill the same way,
 ## after the phase, the budget and the enemies: coins, health packs (one more for a hurt
 ## player), cover, corridors; then the phase's layout: a rest section is short and wide

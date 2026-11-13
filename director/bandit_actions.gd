@@ -32,6 +32,23 @@ static func encode(type: StringName, level: int, enemy: StringName, settings: Di
 	return (TYPES.find(type) * settings.bandit_budget_levels.size() + level) * ENEMIES.size() + ENEMIES.find(enemy)
 
 
+## True if the action fits the calm start of a run: not a peak, and a budget level no
+## higher than DirectorSettings.calm_start_max_budget (low and mid with the usual settings).
+static func is_calm(index: int, settings: DirectorSettings) -> bool:
+	var action: Dictionary = decode(index, settings)
+	return action["type"] != SectionPlan.PHASE_PEAK \
+			and settings.bandit_budget_levels[action["level"]] <= settings.calm_start_max_budget
+
+
+## Every action allowed at the calm start: 2 types x 2 levels x 3 enemies = 12 of the 27.
+static func calm_actions(settings: DirectorSettings) -> PackedInt32Array:
+	var allowed: PackedInt32Array = PackedInt32Array()
+	for index in count(settings):
+		if is_calm(index, settings):
+			allowed.append(index)
+	return allowed
+
+
 ## Readable name, e.g. "peak/high/archer".
 static func label(index: int, settings: DirectorSettings) -> String:
 	var action: Dictionary = decode(index, settings)
