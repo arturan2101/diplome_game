@@ -63,14 +63,26 @@ func build(new_grid: LevelGrid) -> void:
 
 
 ## Changes cells while the level is running (the doors of an arena lock and unlock).
-## Tiles, collision and pathfinding follow.
+## Tiles, collision and pathfinding follow, and the result looks exactly as if the
+## level had been built that way: the cells around are drawn again too, because a
+## wall's tile depends on its neighbours (brick front only above an open cell, no tile
+## at all for rock that touches nothing open).
 func set_cells(cells: Array[Vector2i], type: LevelGrid.Cell) -> void:
+	var to_paint: Dictionary = {}
 	for cell: Vector2i in cells:
 		grid.set_cell(cell, type)
+		_astar.set_point_solid(cell, not grid.is_floor(cell))
+		for dy in range(-1, 2):
+			for dx in range(-1, 2):
+				to_paint[cell + Vector2i(dx, dy)] = true
+	# Painted only after every cell has its new type: a door cell painted while the
+	# door cell below it was still floor would keep a brick front.
+	for cell: Vector2i in to_paint:
+		if not grid.in_bounds(cell):
+			continue
 		_ground.erase_cell(cell)
 		_props.erase_cell(cell)
 		_paint_cell(cell)
-		_astar.set_point_solid(cell, not grid.is_floor(cell))
 
 
 ## Up to count floor cells around a world position, nearest first (where loot falls).

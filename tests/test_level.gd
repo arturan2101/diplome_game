@@ -19,6 +19,26 @@ const ENEMY_MAP: String = """############
 #..........#
 ############"""
 
+## A room with a door in a side wall (5, 3-4) and one in the bottom wall (2-3, 6).
+const DOOR_MAP: String = """##########
+#....#...#
+#....#...#
+#........#
+#........#
+#....#...#
+##..######
+#........#
+##########"""
+const DOOR_MAP_SEALED: String = """##########
+#....#...#
+#....#...#
+#....#...#
+#....#...#
+#....#...#
+##########
+#........#
+##########"""
+
 var _damage_sources: Array[StringName] = []
 var _fall_events: Array[String] = []
 
@@ -26,6 +46,7 @@ var _fall_events: Array[String] = []
 func run() -> void:
 	_test_grid()
 	await _test_level()
+	await _test_changed_cells()
 	await _test_spikes()
 	await _test_pit()
 	await _test_enemy_on_level()
@@ -170,6 +191,42 @@ func _test_enemy_on_level() -> void:
 	target.queue_free()
 	level.queue_free()
 	await physics_frames(2)
+
+
+## Sealing doors (Level.set_cells, as an arena does) must draw the walls exactly as a
+## level built with those walls: a side door is a column of cells, so the wall above it
+## and the upper door cells lose their brick front; opening the doors brings it back.
+func _test_changed_cells() -> void:
+	var level: Level = _add_level(DOOR_MAP)
+	var doors: Array[Vector2i] = [Vector2i(5, 3), Vector2i(5, 4), Vector2i(2, 6), Vector2i(3, 6)]
+	level.set_cells(doors, LevelGrid.Cell.WALL)
+	var sealed: Level = _add_level(DOOR_MAP_SEALED)
+	check(_same_tiles(level, sealed), "sealed doors are drawn like walls built that way (wall tops above, no stale bricks)")
+	await physics_frames(2)
+	var space: PhysicsDirectSpaceState2D = level.get_world_2d().direct_space_state
+	var through_door: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(
+			_center(4, 3), _center(6, 3), TestFactory.WORLD_LAYER)
+	check(not space.intersect_ray(through_door).is_empty(), "a sealed door has wall collision")
+	level.set_cells(doors, LevelGrid.Cell.FLOOR)
+	var opened: Level = _add_level(DOOR_MAP)
+	check(_same_tiles(level, opened), "opened doors are drawn like the level before sealing")
+	for node: Level in [level, sealed, opened]:
+		node.queue_free()
+	await physics_frames(2)
+
+
+## True if both levels show the same tile in every cell of both layers.
+func _same_tiles(a: Level, b: Level) -> bool:
+	for layer_name: String in ["Ground", "Props"]:
+		var layer_a: TileMapLayer = a.get_node(layer_name) as TileMapLayer
+		var layer_b: TileMapLayer = b.get_node(layer_name) as TileMapLayer
+		for y in a.grid.height:
+			for x in a.grid.width:
+				var cell: Vector2i = Vector2i(x, y)
+				if layer_a.get_cell_source_id(cell) != layer_b.get_cell_source_id(cell) \
+						or layer_a.get_cell_atlas_coords(cell) != layer_b.get_cell_atlas_coords(cell):
+					return false
+	return true
 
 
 func _add_level(map: String) -> Level:

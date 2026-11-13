@@ -1,6 +1,6 @@
 # Ruins: art style guide
 
-Status: APPROVED 2026-11-13 (rev 4, "dark ruins"; approval relayed by the coordinator; rev 4 changes relayed by the coordinator: 4 directions, wall top tile, skeleton helmet). Mass generation still waits for approval of the first sample batch.
+Status: APPROVED 2026-11-13 (rev 4, "dark ruins"; approval relayed by the coordinator; rev 4 changes relayed by the coordinator: 4 directions, wall top tile, skeleton helmet; rev 5 on the author's request: darker, calmer floor and lighter wall top, because the brick-like floor made the wall's brick front read as floor). Mass generation still waits for approval of the first sample batch.
 
 ## Setting and mood
 
@@ -89,12 +89,12 @@ Rarity accent: common = steel #9aa2ad, rare = blue #3a7ac0, legendary = gold #e0
 
 ## Floor and wall look
 
-- Floor: cool, desaturated dark stone slabs. Base #3f4050, seams #2a2935, darker slab #343442, few top-left edge highlights #4c4e5f. Low internal contrast (max 3 adjacent steps), so actors stay the brightest thing. Variants add cracks, a little moss (#263a32), scattered pebbles; no bright details.
+- Floor: cool, desaturated dark stone, calm and almost uniform: base #343442, a few small marks in #2a2935 (pebble shadows, cracks) and #3f4050 (pebble tops). No slab grid and no edge highlight lines: a floor of bricks or slabs looks like the wall's brick front, and a character in front of a wall then seems to stand on it. Low internal contrast (max 3 adjacent steps), so walls and actors stay brighter. Variants add a crack, a seam fragment with a little moss (#263a32); no bright details.
 - Wall tiles, two kinds, chosen per cell:
   - `ruins_wall` (wall cell with floor directly south): top face plus brick front.
-  - `ruins_wall_top` (every other wall cell): top face only, full 16x16, main #5d6072, #767a8c highlight on top/left edges, bottom row #2a2935. Must be clearly lighter than the floor.
-- Wall top faces are always lighter than the floor (#5d6072 / #767a8c); front faces are darker than the floor.
-- `ruins_wall` layout: top face (upper 6 px) #5d6072 with #767a8c top-left edge. Front face (lower 10 px) bricks #2a2935 / #1f1e29 with #17161f mortar; bottom row #08070b contact shadow where it meets the floor. The bright top edge plus dark front face is what makes a wall read as solid.
+  - `ruins_wall_top` (every other wall cell): top face only, full 16x16, main #767a8c, a few #5d6072 marks, bottom row #5d6072 (joint to the next wall cell). Must be clearly lighter than the floor.
+- Wall top faces are always much lighter than the floor (#767a8c / #5d6072); front faces are darker than the floor.
+- `ruins_wall` layout: top face (upper 5 px) #767a8c, the same as the wall top tile, then a #5d6072 lip row. Front face (lower 10 px) bricks #2a2935 / #1f1e29 with #17161f mortar; bottom row #08070b contact shadow where it meets the floor. The bright top plus dark front face is what makes a wall read as solid.
 - Tiles have no black outline except the wall's bottom contact row.
 
 ## Shading
