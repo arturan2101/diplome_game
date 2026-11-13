@@ -14,7 +14,8 @@ signal coins_changed(coins: int)
 signal player_died(killing_blow: DamageInfo)
 
 ## Who plans the sections. The player never sees the mode; it is written to the log.
-enum DirectorMode { RANDOM, RULES, LEARNED }
+## EXPLORE is for bot simulations only: random bandit actions, data for training LEARNED.
+enum DirectorMode { RANDOM, RULES, LEARNED, EXPLORE }
 
 ## Launch argument that picks the director mode, e.g. `--mode=rules`.
 const MODE_ARG_PREFIX: String = "--mode="
@@ -81,6 +82,8 @@ func make_director() -> Director:
 			director = RandomDirector.new()
 		DirectorMode.LEARNED:
 			director = LearnedDirector.new()
+		DirectorMode.EXPLORE:
+			director = ExploreDirector.new()
 		_:
 			director = RuleDirector.new()
 	_apply_config(director)
@@ -236,7 +239,7 @@ func _config_from_command_line() -> ExperimentConfig:
 	return DEFAULT_CONFIG
 
 
-## Reads --mode=random|rules|learned from the launch arguments; RULES if absent.
+## Reads --mode=random|rules|learned|explore from the launch arguments; RULES if absent.
 func _mode_from_command_line() -> DirectorMode:
 	for arg: String in OS.get_cmdline_user_args() + OS.get_cmdline_args():
 		if not arg.begins_with(MODE_ARG_PREFIX):

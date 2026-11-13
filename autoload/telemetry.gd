@@ -125,6 +125,8 @@ func end_section(died: bool) -> Dictionary:
 		"depth": _plan.depth,
 		"phase": String(_plan.phase),
 		"budget": _plan.budget,
+		"action": _plan.action,
+		"context": _rounded(_plan.context),
 		"enemies": _string_keys(_enemies),
 		"time": snappedf(_time, TIME_STEP),
 		"t_ref": snappedf(_reference_time, TIME_STEP),
@@ -279,6 +281,14 @@ func _weapon_shares() -> Dictionary:
 
 
 ## JSON keys must be plain strings.
+## Features as a plain array with SHARE_STEP precision, for a short log line.
+func _rounded(values: PackedFloat32Array) -> Array:
+	var result: Array = []
+	for value: float in values:
+		result.append(snappedf(value, SHARE_STEP))
+	return result
+
+
 func _string_keys(source: Dictionary) -> Dictionary:
 	var result: Dictionary = {}
 	for key: Variant in source:

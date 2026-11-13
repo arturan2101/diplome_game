@@ -78,6 +78,12 @@ extends Resource
 ## Chance that an ordinary (not arena) section has a shrine with a spell choice.
 @export_range(0.0, 1.0) var shrine_chance: float = 0.3
 
+@export_group("Learned director")
+## Danger budget of the bandit's levels low / mid / high (plus the usual depth growth).
+@export var bandit_budget_levels: Array[int] = [9, 14, 19]
+## Weight of the action's dominant enemy type when buying enemies (the others weigh 1).
+@export var bandit_dominant_weight: float = 4.0
+
 @export_group("Random mode")
 ## RandomDirector picks the budget uniformly from this range (plus depth growth).
 @export var random_budget_min: int = 8

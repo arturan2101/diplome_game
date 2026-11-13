@@ -118,8 +118,11 @@ func _start_run() -> void:
 func _setup_debug_panel() -> void:
 	debug_panel.visible = false
 	for mode_name: String in GameManager.DirectorMode.keys():
-		mode_option.add_item(mode_name)
-	mode_option.select(GameManager.director_mode)
+		var mode: int = GameManager.DirectorMode[mode_name]
+		# Exploring is for bot simulations only (training data for the learned director).
+		if mode != GameManager.DirectorMode.EXPLORE:
+			mode_option.add_item(mode_name, mode)
+	mode_option.select(mode_option.get_item_index(GameManager.director_mode))
 	mode_option.item_selected.connect(_on_mode_selected)
 	seed_edit.text = RANDOM_SEED_TEXT if GameManager.forced_seed == GameManager.RANDOM_SEED else str(GameManager.forced_seed)
 	seed_edit.text_changed.connect(_on_seed_changed)
@@ -130,7 +133,7 @@ func _toggle_debug_panel() -> void:
 
 
 func _on_mode_selected(index: int) -> void:
-	GameManager.director_mode = index as GameManager.DirectorMode
+	GameManager.director_mode = mode_option.get_item_id(index) as GameManager.DirectorMode
 
 
 func _on_seed_changed(text: String) -> void:

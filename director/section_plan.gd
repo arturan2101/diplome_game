@@ -33,6 +33,10 @@ var shrines: int = 0
 var is_arena: bool = false
 ## Arena with the boss (Guardian of the Ruins) and an escort.
 var is_boss: bool = false
+## Action of the learned or exploring director (BanditActions index), -1 for the others.
+var action: int = -1
+## Features of the player the learned director decides by (BanditContext.FEATURE_NAMES).
+var context: PackedFloat32Array = PackedFloat32Array()
 ## How many waves the enemies of an arena come in (1 or 2).
 var waves: int = 1
 ## Tunnel width in tiles, 2-4 (doors are always 3 wide).
@@ -72,6 +76,7 @@ func to_dictionary() -> Dictionary:
 		"shrines": shrines,
 		"arena": is_arena,
 		"boss": is_boss,
+		"action": action,
 		"waves": waves,
 		"corridor_width": corridor_width,
 		"corridor_twist": corridor_twist,

@@ -13,6 +13,11 @@ const MIN_ROOMS: int = 3
 const MAX_ROOMS: int = 5
 const MIN_CORRIDOR_WIDTH: int = 2
 const MAX_CORRIDOR_WIDTH: int = 4
+## Layout and contents of the adaptive directors (rules and learned), see fill_contents().
+const COVER_TAG: StringName = &"cover"
+const NORMAL_WIDTH: int = 3
+const REST_ROOMS: int = 3
+const NORMAL_TWIST: float = 0.3
 
 var catalog: EnemyCatalog = null
 var settings: DirectorSettings = null
@@ -43,6 +48,8 @@ func new_plan(state: PlayerState) -> SectionPlan:
 	for _i in plan.chests:
 		if state.rng.randf() < settings.chest_branch_chance:
 			plan.side_branches += 1
+	# What the learned director sees; logged for every mode.
+	plan.context = BanditContext.features(state)
 	if state.is_depth_end:
 		plan.is_arena = true
 		plan.phase = SectionPlan.PHASE_ARENA
@@ -51,6 +58,32 @@ func new_plan(state: PlayerState) -> SectionPlan:
 	elif state.rng.randf() < settings.shrine_chance:
 		plan.shrines = 1
 	return plan
+
+
+## Contents and layout the adaptive directors (rules and learned) fill the same way,
+## after the phase, the budget and the enemies: coins, health packs (one more for a hurt
+## player), cover, corridors; then the phase's layout: a rest section is short and wide
+## with cover and one more health pack, a peak is long and narrow.
+func fill_contents(plan: SectionPlan, state: PlayerState) -> void:
+	plan.corridor_twist = NORMAL_TWIST
+	plan.coins = state.rng.randi_range(settings.coins_min, settings.coins_max)
+	plan.health_packs = settings.base_health_packs
+	plan.cover_density = settings.cover_density
+	plan.corridor_width = NORMAL_WIDTH
+	if state.hp_fraction < settings.extra_pack_below_hp:
+		plan.health_packs += 1
+	match plan.phase:
+		SectionPlan.PHASE_REST:
+			# A breather: short, wide, with cover and an extra health pack.
+			plan.room_count = REST_ROOMS
+			plan.corridor_width = MAX_CORRIDOR_WIDTH
+			plan.health_packs += 1
+			plan.cover_density = settings.rest_cover_density
+			plan.preferred_tags.append(COVER_TAG)
+		SectionPlan.PHASE_PEAK:
+			# The tense one: long and narrow.
+			plan.room_count = MAX_ROOMS
+			plan.corridor_width = MIN_CORRIDOR_WIDTH
 
 
 ## Arenas, after the budget and the enemies are chosen: two waves from a large budget.
