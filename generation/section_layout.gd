@@ -29,6 +29,9 @@ var path_room_count: int = 0
 var arena_room: int = -1
 ## Door cells of the arena room that are walled up while the fight goes on.
 var arena_doors: Array[Vector2i] = []
+## Spike traps actually placed: trap id -> number of groups (a trap that found no
+## place is skipped).
+var traps: Dictionary = {}
 ## Reference time to clear the section, in seconds (the director's T_ref).
 var reference_time: float = 0.0
 ## How many tries the generator needed (1 = first try).

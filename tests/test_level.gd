@@ -107,8 +107,8 @@ func _test_spikes() -> void:
 
 	body.position = _center(7, 3)
 	await physics_frames(2)
-	check(health.hp == 92 and _damage_sources == ([&"spikes"] as Array[StringName]),
-			"spikes hurt at once when stepped on, with source spikes")
+	check(health.hp == 92 and _damage_sources == ([&"spikes_static"] as Array[StringName]),
+			"static spikes hurt at once when stepped on, with source spikes_static")
 	await physics_frames(32)
 	check(health.hp == 84, "spikes hurt again after the interval")
 	hazards.suspended = true

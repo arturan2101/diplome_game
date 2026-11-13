@@ -16,10 +16,12 @@ var section_index: int = 0
 var depth: int = 0
 ## Tension phase this section belongs to (written to the log).
 var phase: StringName = PHASE_BUILD
-## Danger budget spent on enemy_mix (written to the log).
+## Danger budget of the section, spent on enemy_mix and traps (written to the log).
 var budget: int = 4
 ## Enemy type id -> number of spawns. One spawn of a pack enemy is the whole pack.
 var enemy_mix: Dictionary = {&"skeleton": 2}
+## Spike traps bought from the budget: trap id (SpikeTrapData.id) -> number of groups.
+var traps: Dictionary = {}
 ## Rooms on the main path from the entrance to the gate, 3-5 (an arena has 2).
 var room_count: int = 3
 ## Side branches: dead-end treasure rooms hanging off the main path, 0-2.
@@ -70,6 +72,7 @@ func to_dictionary() -> Dictionary:
 		"phase": String(phase),
 		"budget": budget,
 		"enemies": enemy_mix.duplicate(),
+		"traps": traps.duplicate(),
 		"rooms": room_count,
 		"side_branches": side_branches,
 		"chests": chests,

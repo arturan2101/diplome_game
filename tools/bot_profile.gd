@@ -35,3 +35,6 @@ extends Resource
 @export var bow_hold_time: float = 0.6
 ## Bow: step back when an enemy is closer than this, in pixels (0 = never).
 @export var bow_keep_distance: float = 0.0
+## Timed spikes: the bot waits until the spikes ahead stay down while it crosses, but
+## misjudges the moment by up to this many seconds (0 = never wrong).
+@export var spike_timing_error: float = 0.0

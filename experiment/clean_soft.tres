@@ -7,5 +7,6 @@ script = ExtResource("1")
 series = "clean"
 boss_enabled = false
 spells_enabled = false
+spike_traps = false
 rarity_enabled = false
 soft_waves = true

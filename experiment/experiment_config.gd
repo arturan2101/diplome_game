@@ -14,6 +14,10 @@ extends Resource
 @export var spells_enabled: bool = true
 ## Rare and legendary weapons in chests; when off every found weapon is common.
 @export var rarity_enabled: bool = true
+## Spike traps the director buys from the danger budget (static patches and timed
+## waves). Off in the clean series and the playtest, so their results stay comparable;
+## the spikes drawn into room maps are always there.
+@export var spike_traps: bool = true
 ## Soft tension waves of the rules director: a peak of x1.15 and a rest of x0.5
 ## (DirectorSettings.soft_peak_multiplier, soft_rest_multiplier) instead of x1.3 and
 ## x0.3. The other modes have no wave and do not change.
@@ -22,4 +26,5 @@ extends Resource
 
 ## The switches as plain data for the log.
 func to_dictionary() -> Dictionary:
-	return {"boss": boss_enabled, "spells": spells_enabled, "rarity": rarity_enabled, "soft_waves": soft_waves}
+	return {"boss": boss_enabled, "spells": spells_enabled, "rarity": rarity_enabled, "soft_waves": soft_waves,
+			"spike_traps": spike_traps}

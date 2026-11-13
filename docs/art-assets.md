@@ -59,6 +59,17 @@ Actor sizes per docs/art-style.md rev 3: collisions in code are unchanged; sprit
 | L | Skill-tree altar (hub before ruins) | assets/art/level/altar.png | 32x32 | 4 glow | - | todo |
 | C | Wall torch (light accent, decorative) | assets/art/level/torch.png | 16x16 | 4 flicker | - | todo |
 
+## Requested by gameplay code
+
+Assets the code already uses with placeholders; integration = repointing the resource in the last column. Added by the gameplay session.
+
+| P | Asset | File | Size | Frames | Code hook | Status |
+|---|---|---|---|---|---|---|
+| C | Static spikes (always up), ruins style; replaces the "Spikes" row below | assets/art/tiles/spikes_static.png | 16x16 | 1 | `level/ruins_theme.tres`: `hazard_texture` + `spikes_tile` (now the placeholder atlas) | todo |
+| C | Timed spikes, one cell: animations `hidden` (flush with the floor, holes), `warn` (0.5 s warning: glint or dust in the holes), `rise`, `up` (fully out, hurts), `retract` | assets/art/tiles/spikes_timed.png (one strip per animation or one sheet) | 16x16 | any count per animation; the code picks the frame from the phase progress (hidden 1.6 s, warn 0.5 s, rise 0.1 s, up 0.8 s, retract 0.2 s) | `assets/sprites/spikes_timed_frames.tres` (SpriteFrames with exactly these 5 animation names) | todo (placeholder: assets/placeholder/spikes_timed.png) |
+
+Check spike sprites with `tests/manual/spikes_preview.tscn` (saves the five phases side by side).
+
 ## Tilesets (per biome)
 
 Biome 1 "Sandstone ruins" (core). Later biomes reuse the same layout: flooded ruins, jungle ruins (L).

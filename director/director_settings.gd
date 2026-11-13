@@ -97,6 +97,18 @@ extends Resource
 ## Weight of the action's dominant enemy type when buying enemies (the others weigh 1).
 @export var bandit_dominant_weight: float = 4.0
 
+@export_group("Spike traps")
+## Kinds of spikes the director can buy from the danger budget (SpikeTrapData: a
+## static patch in a room, a timed wave across a tunnel), each for its danger_cost.
+@export var trap_kinds: Array[SpikeTrapData] = []
+## Chance that an ordinary section (not rest, not arena) gets spike traps; 0 = never
+## (ExperimentConfig.spike_traps switches them off for a series).
+@export_range(0.0, 1.0) var trap_chance: float = 0.5
+## At most this share of the danger budget goes to traps; the rest buys enemies.
+@export_range(0.0, 1.0) var trap_budget_share: float = 0.3
+## At most this many trap groups in one section.
+@export var max_trap_groups: int = 2
+
 @export_group("Random mode")
 ## RandomDirector picks the budget uniformly from this range (plus depth growth).
 @export var random_budget_min: int = 8

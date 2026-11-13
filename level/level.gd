@@ -2,10 +2,12 @@ class_name Level
 extends Node2D
 ## One section in the scene: draws a LevelGrid with tiles, gives walls their collision,
 ## and answers questions about the ground (cell types, paths, safe positions).
+## Keeps the section clock that drives the timed spikes (TimedSpikeField).
 ## Actors find it through the "level" group.
 
 const GROUP: StringName = &"level"
 const DEFAULT_THEME: TileTheme = preload("res://level/ruins_theme.tres")
+const DEFAULT_HAZARDS: HazardData = preload("res://level/hazards.tres")
 ## Ids of the two atlases inside the generated TileSet.
 const MAIN_SOURCE: int = 0
 const HAZARD_SOURCE: int = 1
@@ -16,8 +18,17 @@ const NEAREST_FLOOR_RADIUS: int = 6
 @export var theme: TileTheme
 ## Optional text map built on start, for hand-made test levels (see LevelGrid.TEXT_CELLS).
 @export_multiline var debug_map: String = ""
+## Hazard numbers; the timed spikes' cycle and look come from here. Empty = default.
+@export var hazards: HazardData
+## Path cost of a timed spike cell for enemies and the bot: they walk around a wave
+## when there is a way around, and cross it (in rhythm) when there is not.
+@export var timed_spikes_path_weight: float = 8.0
 
 var grid: LevelGrid = null
+## Seconds of play since this section was built: the clock of the timed spikes. It
+## grows by the physics step, so a section replays the same way for the same seed.
+var section_time: float = 0.0
+var timed_spikes: TimedSpikeField = null
 
 var _ground: TileMapLayer = null
 var _props: TileMapLayer = null
@@ -34,6 +45,11 @@ func _ready() -> void:
 	_props = TileMapLayer.new()
 	_props.name = "Props"
 	add_child(_props)
+	if hazards == null:
+		hazards = DEFAULT_HAZARDS
+	timed_spikes = TimedSpikeField.new()
+	timed_spikes.name = "TimedSpikes"
+	add_child(timed_spikes)
 	var tile_set: TileSet = _make_tile_set()
 	_ground.tile_set = tile_set
 	_props.tile_set = tile_set
@@ -41,9 +57,15 @@ func _ready() -> void:
 		build(LevelGrid.from_text(debug_map))
 
 
+func _physics_process(delta: float) -> void:
+	section_time += delta
+	timed_spikes.update_look(section_time)
+
+
 ## Draws the grid and prepares pathfinding. Replaces whatever was built before.
 func build(new_grid: LevelGrid) -> void:
 	grid = new_grid
+	section_time = 0.0
 	_ground.clear()
 	_props.clear()
 	for y in grid.height:
@@ -57,9 +79,9 @@ func build(new_grid: LevelGrid) -> void:
 	_astar.update()
 	for y in grid.height:
 		for x in grid.width:
-			var cell: Vector2i = Vector2i(x, y)
-			# Enemies walk over plain floor only: walls, cover, pits and spikes are all "solid".
-			_astar.set_point_solid(cell, not grid.is_floor(cell))
+			_update_path_cell(Vector2i(x, y))
+	timed_spikes.rebuild(grid, hazards.timed_spikes, theme.tile_size)
+	timed_spikes.update_look(section_time)
 
 
 ## Changes cells while the level is running (the doors of an arena lock and unlock).
@@ -71,7 +93,7 @@ func set_cells(cells: Array[Vector2i], type: LevelGrid.Cell) -> void:
 	var to_paint: Dictionary = {}
 	for cell: Vector2i in cells:
 		grid.set_cell(cell, type)
-		_astar.set_point_solid(cell, not grid.is_floor(cell))
+		_update_path_cell(cell)
 		for dy in range(-1, 2):
 			for dx in range(-1, 2):
 				to_paint[cell + Vector2i(dx, dy)] = true
@@ -83,6 +105,17 @@ func set_cells(cells: Array[Vector2i], type: LevelGrid.Cell) -> void:
 		_ground.erase_cell(cell)
 		_props.erase_cell(cell)
 		_paint_cell(cell)
+
+
+## True if the timed spikes on this cell hurt right now (false for any other cell).
+func are_timed_spikes_up(cell: Vector2i) -> bool:
+	return timed_spikes.is_up(cell, section_time)
+
+
+## True if the timed spikes on this cell stay harmless from `from` to `to` seconds from
+## now (true for a cell without timed spikes).
+func are_timed_spikes_down_during(cell: Vector2i, from: float, to: float) -> bool:
+	return timed_spikes.is_down_during(cell, section_time + from, section_time + to)
 
 
 ## Up to count floor cells around a world position, nearest first (where loot falls).
@@ -181,9 +214,20 @@ func _paint_cell(cell: Vector2i) -> void:
 			_ground.set_cell(cell, HAZARD_SOURCE, theme.pit_inner_tile if below_pit else theme.pit_tile)
 		LevelGrid.Cell.SPIKES:
 			_ground.set_cell(cell, HAZARD_SOURCE, theme.spikes_tile)
+		LevelGrid.Cell.SPIKES_TIMED:
+			# Floor under the spikes' own sprite (TimedSpikeField).
+			_ground.set_cell(cell, MAIN_SOURCE, _floor_tile(cell))
 		LevelGrid.Cell.COVER:
 			_ground.set_cell(cell, MAIN_SOURCE, _floor_tile(cell))
 			_props.set_cell(cell, MAIN_SOURCE, theme.cover_tile)
+
+
+## Paths go over plain floor and, at a cost, over timed spikes; walls, cover, pits and
+## static spikes are "solid".
+func _update_path_cell(cell: Vector2i) -> void:
+	_astar.set_point_solid(cell, not grid.is_walkable(cell))
+	var timed: bool = grid.get_cell(cell) == LevelGrid.Cell.SPIKES_TIMED
+	_astar.set_point_weight_scale(cell, timed_spikes_path_weight if timed else 1.0)
 
 
 ## True if any of the 8 cells around is not a wall.

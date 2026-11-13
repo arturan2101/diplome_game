@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpikeTrapData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://level/spike_trap_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/spikes_timed_frames.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"spikes_timed"
+danger_cost = 3
+damage = 8
+hit_interval = 0.5
+timed = true
+hidden_time = 1.6
+warn_time = 0.5
+rise_time = 0.1
+up_time = 0.8
+retract_time = 0.2
+wave_step = 0.3
+group_rows = 3
+frames = ExtResource("2")

@@ -8,3 +8,6 @@
 *.jks
 *.apk
 *.aab
+
+# Python caches of training/ scripts
+__pycache__/

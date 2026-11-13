@@ -90,17 +90,19 @@ func make_director() -> Director:
 	return director
 
 
-## The experiment series as the director sees it: no boss arenas and no shrines when
-## they are switched off, the soft tension wave when it is on. Works on a copy, the
-## shared settings resource stays as is.
+## The experiment series as the director sees it: no boss arenas, shrines or spike
+## traps when they are switched off, the soft tension wave when it is on. Works on a
+## copy, the shared settings resource stays as is.
 func _apply_config(director: Director) -> void:
-	if config.boss_enabled and config.spells_enabled and not config.soft_waves:
+	if config.boss_enabled and config.spells_enabled and config.spike_traps and not config.soft_waves:
 		return
 	director.settings = director.settings.duplicate() as DirectorSettings
 	if not config.boss_enabled:
 		director.settings.boss_every_depths = 0
 	if not config.spells_enabled:
 		director.settings.shrine_chance = 0.0
+	if not config.spike_traps:
+		director.settings.trap_chance = 0.0
 	if config.soft_waves:
 		director.settings.peak_multiplier = director.settings.soft_peak_multiplier
 		director.settings.rest_multiplier = director.settings.soft_rest_multiplier

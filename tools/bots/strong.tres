@@ -16,4 +16,5 @@ hesitation_time = 0.3
 hazard_blind_chance = 0.0
 heal_below = 0.55
 bow_hold_time = 0.9
+spike_timing_error = 0.0
 bow_keep_distance = 60.0

@@ -154,6 +154,43 @@ func buy_enemies(budget: int, rng: RandomNumberGenerator, weights: Dictionary = 
 	return mix
 
 
+## Spike traps bought from the danger budget before the enemies, the same rule in
+## every mode: with trap_chance an ordinary section (not rest, not arena) gets trap
+## groups worth up to trap_budget_share of its budget (at most max_trap_groups), kinds
+## picked at random among the affordable ones. Draws nothing from the generator when
+## traps are off, so such a series plans exactly as before. Returns what is left for
+## the enemies.
+func buy_traps(plan: SectionPlan, rng: RandomNumberGenerator) -> int:
+	plan.traps = {}
+	if settings.trap_chance <= 0.0 or settings.trap_kinds.is_empty() or plan.is_arena \
+			or plan.phase == SectionPlan.PHASE_REST:
+		return plan.budget
+	if rng.randf() >= settings.trap_chance:
+		return plan.budget
+	var left: int = floori(plan.budget * settings.trap_budget_share)
+	var groups: int = 0
+	while groups < settings.max_trap_groups:
+		var affordable: Array[SpikeTrapData] = []
+		for kind: SpikeTrapData in settings.trap_kinds:
+			if kind.danger_cost <= left:
+				affordable.append(kind)
+		if affordable.is_empty():
+			break
+		var chosen: SpikeTrapData = affordable[rng.randi_range(0, affordable.size() - 1)]
+		plan.traps[chosen.id] = int(plan.traps.get(chosen.id, 0)) + 1
+		left -= chosen.danger_cost
+		groups += 1
+	return plan.budget - trap_cost(plan.traps)
+
+
+## Danger cost of the traps of a plan (trap id -> number of groups).
+func trap_cost(traps: Dictionary) -> int:
+	var cost: int = 0
+	for kind: SpikeTrapData in settings.trap_kinds:
+		cost += kind.danger_cost * int(traps.get(kind.id, 0))
+	return cost
+
+
 ## Danger cost of an enemy mix (type id -> number of spawns).
 func mix_cost(mix: Dictionary) -> int:
 	var cost: int = 0

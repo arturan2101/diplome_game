@@ -3,7 +3,8 @@ extends RefCounted
 ## Tile grid of one section: pure data without nodes, so generation and its tests
 ## run without the game. Level turns it into a TileMapLayer.
 
-enum Cell { WALL, FLOOR, PIT, SPIKES, COVER }
+## SPIKES are static (always up); SPIKES_TIMED rise and hide on a cycle (SpikeTrapData).
+enum Cell { WALL, FLOOR, PIT, SPIKES, COVER, SPIKES_TIMED }
 
 ## Characters of text maps (room templates, test maps). Anything else is read as floor.
 const TEXT_CELLS: Dictionary = {
@@ -13,11 +14,15 @@ const TEXT_CELLS: Dictionary = {
 	"~": Cell.PIT,
 	"^": Cell.SPIKES,
 	"%": Cell.COVER,
+	"!": Cell.SPIKES_TIMED,
 }
 const NEIGHBOURS: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]
 
 var width: int = 0
 var height: int = 0
+## Phase shift in seconds of every timed spike cell (cell -> seconds): where in its
+## cycle the cell is when the section starts.
+var spike_phase: Dictionary = {}
 
 var _cells: PackedByteArray = PackedByteArray()
 
@@ -59,6 +64,17 @@ func get_cell(cell: Vector2i) -> Cell:
 func set_cell(cell: Vector2i, type: Cell) -> void:
 	if in_bounds(cell):
 		_cells[cell.y * width + cell.x] = type
+		if type != Cell.SPIKES_TIMED:
+			spike_phase.erase(cell)
+		elif not spike_phase.has(cell):
+			spike_phase[cell] = 0.0
+
+
+## Turns a cell into timed spikes with the given phase shift (seconds).
+func set_timed_spikes(cell: Vector2i, phase_shift: float) -> void:
+	if in_bounds(cell):
+		set_cell(cell, Cell.SPIKES_TIMED)
+		spike_phase[cell] = phase_shift
 
 
 func fill_rect(rect: Rect2i, type: Cell) -> void:
@@ -72,17 +88,24 @@ func is_floor(cell: Vector2i) -> bool:
 	return get_cell(cell) == Cell.FLOOR
 
 
+## Can be walked over: plain floor, and timed spikes, which are crossed between strikes.
+func is_walkable(cell: Vector2i) -> bool:
+	var type: Cell = get_cell(cell)
+	return type == Cell.FLOOR or type == Cell.SPIKES_TIMED
+
+
 ## Blocks movement and sight: walls and cover.
 func is_solid(cell: Vector2i) -> bool:
 	var type: Cell = get_cell(cell)
 	return type == Cell.WALL or type == Cell.COVER
 
 
-## All floor cells reachable from start by walking over floor only (4 directions).
+## All cells reachable from start by walking (4 directions) over plain floor and timed
+## spikes (they can be crossed between strikes); pits and static spikes stop the walk.
 ## Returned as a set: Dictionary with cells as keys.
 func reachable_floor(start: Vector2i) -> Dictionary:
 	var reached: Dictionary = {}
-	if not is_floor(start):
+	if not is_walkable(start):
 		return reached
 	var queue: Array[Vector2i] = [start]
 	reached[start] = true
@@ -92,7 +115,7 @@ func reachable_floor(start: Vector2i) -> Dictionary:
 		head += 1
 		for step: Vector2i in NEIGHBOURS:
 			var next: Vector2i = cell + step
-			if is_floor(next) and not reached.has(next):
+			if is_walkable(next) and not reached.has(next):
 				reached[next] = true
 				queue.append(next)
 	return reached
@@ -100,7 +123,8 @@ func reachable_floor(start: Vector2i) -> Dictionary:
 
 ## Text form of the grid: for debugging and for comparing two builds.
 func to_text() -> String:
-	var symbols: Dictionary = {Cell.WALL: "#", Cell.FLOOR: ".", Cell.PIT: "~", Cell.SPIKES: "^", Cell.COVER: "%"}
+	var symbols: Dictionary = {Cell.WALL: "#", Cell.FLOOR: ".", Cell.PIT: "~", Cell.SPIKES: "^", Cell.COVER: "%",
+			Cell.SPIKES_TIMED: "!"}
 	var lines: PackedStringArray = PackedStringArray()
 	for y in height:
 		var line: String = ""

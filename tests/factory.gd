@@ -26,8 +26,9 @@ static func circle_shape(radius: float) -> CollisionShape2D:
 	return shape
 
 
+## The game's hazard numbers (both kinds of spikes, pits).
 static func hazard_data() -> HazardData:
-	return HazardData.new()
+	return load("res://level/hazards.tres") as HazardData
 
 
 ## Data of a melee enemy that hits the player hurtbox layer.

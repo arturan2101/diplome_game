@@ -9,7 +9,7 @@ var amount: int = 0
 ## It may be freed later, so read it right away.
 var source: Node = null
 ## Stable id of what dealt the damage: weapon id (&"sword"), enemy type (&"skeleton")
-## or hazard (&"pit", &"spikes").
+## or hazard (&"pit", &"spikes_static", &"spikes_timed").
 var source_id: StringName = &""
 ## Velocity in pixels per second to give the target. Zero for hits without knockback.
 var knockback: Vector2 = Vector2.ZERO

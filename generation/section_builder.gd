@@ -8,12 +8,19 @@ extends RefCounted
 ##    between the doors that face each other (TunnelCarver),
 ## 3. fills the rooms: cover, enemies spread over the rooms, chests, health packs and
 ##    coins, so that hardly any room is empty,
-## 4. checks that the gate and every placed thing can be reached from the entrance
-##    over plain floor (no pits, no spikes); if not, builds again.
+## 4. puts the spike traps of the plan: a timed wave across a tunnel of the main path,
+##    a static patch on free floor of a room,
+## 5. checks that the gate and every placed thing can be reached from the entrance
+##    over plain floor and timed spikes (no pits, no static spikes); if not, builds again.
 ## All randomness comes from the generator passed to build(), so the same seed,
 ## section index and plan always give the same section.
 
 const CATALOG_PATH: String = "res://actors/enemies/enemy_catalog.tres"
+const HAZARDS_PATH: String = "res://level/hazards.tres"
+## A timed wave keeps this many cells of free tunnel before and after it.
+const WAVE_MARGIN: int = 2
+## A static patch keeps this far (in cells) from the walls of its room.
+const PATCH_WALL_GAP: int = 2
 const HAZARD_TAG: StringName = &"hazard"
 const SIDES: Array[RoomTemplate.DoorSide] = [
 	RoomTemplate.DoorSide.WEST, RoomTemplate.DoorSide.EAST,
@@ -42,6 +49,8 @@ const RANDOM_CELL_TRIES: int = 60
 
 var _library: RoomLibrary = null
 var _catalog: EnemyCatalog = null
+## Spike kinds by id (HazardData.static_spikes, timed_spikes): how to place a trap.
+var _trap_kinds: Dictionary = {}
 ## Size of one layout cell in tiles.
 var _cell_size: Vector2i = Vector2i.ZERO
 ## Tunnels to dig: [room_a, side_a, room_b, side_b].
@@ -124,6 +133,7 @@ func _build_once(plan: SectionPlan, rng: RandomNumberGenerator) -> SectionLayout
 	_place_chests(layout, path, branches, plan, rng, taken)
 	_place_shrines(layout, path, plan, rng, taken)
 	_place_items(layout, path, branches, plan, rng, taken)
+	_place_traps(layout, path, plan, rng, taken)
 	return layout
 
 
@@ -366,6 +376,129 @@ func _free_spot(grid: LevelGrid, room: PlacedRoom, taken: Dictionary) -> Vector2
 
 
 # --- contents ------------------------------------------------------------
+
+## The plan's spike traps, timed waves first (they need a tunnel), then static patches.
+func _place_traps(layout: SectionLayout, path: Array[PlacedRoom], plan: SectionPlan,
+		rng: RandomNumberGenerator, taken: Dictionary) -> void:
+	if plan.traps.is_empty():
+		return
+	_load_trap_kinds()
+	var tunnels: Array[Array] = []
+	for link: Array in _links:
+		if link[0] in path and link[2] in path:
+			tunnels.append([_outside(link[0], link[1]), _outside(link[2], link[3])])
+	var rooms: Array[PlacedRoom] = []
+	for i in range(1, path.size()):
+		if path[i].index != layout.arena_room:
+			rooms.append(path[i])
+	var ids: Array = plan.traps.keys()
+	ids.sort_custom(func(a: StringName, b: StringName) -> bool:
+		return _trap_kinds.has(a) and (_trap_kinds[a] as SpikeTrapData).timed and not (_trap_kinds.has(b) and (_trap_kinds[b] as SpikeTrapData).timed))
+	for id: StringName in ids:
+		var kind: SpikeTrapData = _trap_kinds.get(id) as SpikeTrapData
+		if kind == null:
+			continue
+		for _group in int(plan.traps[id]):
+			var placed: bool = _place_wave(layout, kind, tunnels, rng, taken) if kind.timed \
+					else _place_patch(layout, kind, rooms, rng, taken)
+			if placed:
+				layout.traps[id] = int(layout.traps.get(id, 0)) + 1
+
+
+func _load_trap_kinds() -> void:
+	if not _trap_kinds.is_empty():
+		return
+	var hazards: HazardData = load(HAZARDS_PATH) as HazardData
+	for kind: SpikeTrapData in [hazards.static_spikes, hazards.timed_spikes]:
+		if kind != null:
+			_trap_kinds[kind.id] = kind
+
+
+## A timed wave across one tunnel of the main path: the rows are the tunnel cells at the
+## same walking distance from its start, so every way through crosses every row; each
+## row rises wave_step later than the one before it.
+func _place_wave(layout: SectionLayout, kind: SpikeTrapData, tunnels: Array[Array],
+		rng: RandomNumberGenerator, taken: Dictionary) -> bool:
+	var order: Array[int] = []
+	for i in tunnels.size():
+		order.insert(rng.randi_range(0, order.size()), i)
+	for i: int in order:
+		var start: Vector2i = tunnels[i][0]
+		var distance: Dictionary = _tunnel_distances(layout, start)
+		var end: Vector2i = tunnels[i][1]
+		if not distance.has(end) or int(distance[end]) < kind.group_rows + WAVE_MARGIN * 2:
+			continue
+		var first: int = rng.randi_range(WAVE_MARGIN, int(distance[end]) - WAVE_MARGIN - kind.group_rows)
+		var base_shift: float = rng.randf() * kind.get_period()
+		for cell: Vector2i in distance:
+			var row: int = int(distance[cell]) - first
+			if row >= 0 and row < kind.group_rows and not taken.has(cell):
+				layout.grid.set_timed_spikes(cell, base_shift - row * kind.wave_step)
+		tunnels.remove_at(i)
+		return true
+	return false
+
+
+## Walking distance (4 directions) from a tunnel cell to every tunnel cell: plain floor
+## outside the rooms.
+func _tunnel_distances(layout: SectionLayout, start: Vector2i) -> Dictionary:
+	var distance: Dictionary = {start: 0}
+	var queue: Array[Vector2i] = [start]
+	var head: int = 0
+	while head < queue.size():
+		var cell: Vector2i = queue[head]
+		head += 1
+		for step: Vector2i in LevelGrid.NEIGHBOURS:
+			var next: Vector2i = cell + step
+			if distance.has(next) or not layout.grid.is_floor(next) or _in_any_room(layout, next):
+				continue
+			distance[next] = int(distance[cell]) + 1
+			queue.append(next)
+	return distance
+
+
+func _in_any_room(layout: SectionLayout, cell: Vector2i) -> bool:
+	for rect: Rect2i in layout.room_rects:
+		if rect.has_point(cell):
+			return true
+	return false
+
+
+## A short line of static spikes on free floor of a room (away from the walls, from
+## anything placed and from its neighbours), kept only if every way stays open.
+func _place_patch(layout: SectionLayout, kind: SpikeTrapData, rooms: Array[PlacedRoom],
+		rng: RandomNumberGenerator, taken: Dictionary) -> bool:
+	if rooms.is_empty():
+		return false
+	for _try in RANDOM_CELL_TRIES:
+		var area: Rect2i = rooms[rng.randi_range(0, rooms.size() - 1)].get_rect().grow(-PATCH_WALL_GAP)
+		if area.size.x <= 0 or area.size.y <= 0:
+			continue
+		var cell: Vector2i = Vector2i(rng.randi_range(area.position.x, area.end.x - 1), rng.randi_range(area.position.y, area.end.y - 1))
+		var step: Vector2i = Vector2i.RIGHT if rng.randf() < 0.5 else Vector2i.DOWN
+		var cells: Array[Vector2i] = []
+		for k in kind.group_cells:
+			cells.append(cell + step * k)
+		if not _patch_fits(layout, cells, area, taken):
+			continue
+		for patch_cell: Vector2i in cells:
+			layout.grid.set_cell(patch_cell, LevelGrid.Cell.SPIKES)
+		if is_passable(layout):
+			return true
+		for patch_cell: Vector2i in cells:
+			layout.grid.set_cell(patch_cell, LevelGrid.Cell.FLOOR)
+	return false
+
+
+func _patch_fits(layout: SectionLayout, cells: Array[Vector2i], area: Rect2i, taken: Dictionary) -> bool:
+	for cell: Vector2i in cells:
+		if not area.has_point(cell) or not layout.grid.is_floor(cell) or taken.has(cell):
+			return false
+		for step: Vector2i in LevelGrid.NEIGHBOURS:
+			if taken.has(cell + step):
+				return false
+	return true
+
 
 func _place_cover(layout: SectionLayout, rooms: Array[PlacedRoom], plan: SectionPlan,
 		rng: RandomNumberGenerator, taken: Dictionary) -> void:

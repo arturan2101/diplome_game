@@ -1,16 +1,16 @@
 class_name HazardReceiver
 extends Node
 ## Makes its owner react to floor hazards of the Level it stands on:
-## spikes hurt on entering and then at intervals; a pit makes the owner fall, lose
-## a share of max HP and reappear on the last safe tile. Works the same for the
-## player and enemies. Without a Level in the scene it does nothing.
+## spikes hurt on entering and then at intervals (timed spikes only while they are up;
+## the damage source is the kind of spikes); a pit makes the owner fall, lose a share of
+## max HP and reappear on the last safe tile. Works the same for the player and
+## enemies. Without a Level in the scene it does nothing.
 
 ## Emitted when the owner starts falling into a pit: the owner must stop acting.
 signal fall_started
 ## Emitted when the owner is back on a safe tile and may act again.
 signal fall_ended
 
-const SPIKES_SOURCE: StringName = &"spikes"
 const PIT_SOURCE: StringName = &"pit"
 
 ## Body whose position is checked and moved back after a fall.
@@ -60,12 +60,23 @@ func _physics_process(delta: float) -> void:
 			_has_safe_position = true
 			_spikes_time_left = 0.0
 		LevelGrid.Cell.SPIKES:
-			_spikes_time_left -= delta
-			if _spikes_time_left <= 0.0:
-				_spikes_time_left = data.spikes_interval
-				health.take_damage(DamageInfo.new(data.spikes_damage, null, SPIKES_SOURCE))
+			_on_spikes(data.static_spikes, delta)
+		LevelGrid.Cell.SPIKES_TIMED:
+			if _level.are_timed_spikes_up(_level.cell_at(body.global_position)):
+				_on_spikes(data.timed_spikes, delta)
+			else:
+				# Down: the next rise hits at once.
+				_spikes_time_left = 0.0
 		LevelGrid.Cell.PIT:
 			_start_fall()
+
+
+## Standing on raised spikes: a hit on entering, then one every hit_interval.
+func _on_spikes(trap: SpikeTrapData, delta: float) -> void:
+	_spikes_time_left -= delta
+	if _spikes_time_left <= 0.0:
+		_spikes_time_left = trap.hit_interval
+		health.take_damage(DamageInfo.new(trap.damage, null, trap.id))
 
 
 func _start_fall() -> void:

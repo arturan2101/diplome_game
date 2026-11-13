@@ -26,7 +26,7 @@ func _test_files() -> void:
 			"the clean series has boss, spells and rarity off")
 	check(GameManager.load_config("res://experiment/clean.tres") == clean, "a config also loads by its path")
 	check(GameManager.load_config("no_such_series") == GameManager.DEFAULT_CONFIG, "an unknown name falls back to the full game")
-	check(clean.to_dictionary() == {"boss": false, "spells": false, "rarity": false, "soft_waves": false},
+	check(clean.to_dictionary() == {"boss": false, "spells": false, "rarity": false, "soft_waves": false, "spike_traps": false},
 			"the switches go to the log as a dictionary")
 	var soft: ExperimentConfig = GameManager.load_config("clean_soft")
 	check(soft.series == "clean" and soft.soft_waves and not soft.boss_enabled and not soft.spells_enabled
@@ -102,5 +102,5 @@ func _test_game_and_log() -> void:
 	GameManager.config = GameManager.DEFAULT_CONFIG
 	check(chests > 0 and rare == 0 and scrolls == 0,
 			"in the clean series chests hold common weapons and no scrolls (%d chests)" % chests)
-	check(record.get("series") == "clean" and record.get("config") == {"boss": false, "spells": false, "rarity": false, "soft_waves": false},
+	check(record.get("series") == "clean" and record.get("config") == {"boss": false, "spells": false, "rarity": false, "soft_waves": false, "spike_traps": false},
 			"every log line names the series and its switches")

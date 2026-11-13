@@ -1,6 +1,9 @@
-[gd_resource type="Resource" script_class="DirectorSettings" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="DirectorSettings" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://director/director_settings.gd" id="1"]
+[ext_resource type="Script" path="res://level/spike_trap_data.gd" id="2"]
+[ext_resource type="Resource" path="res://level/spikes_static.tres" id="3"]
+[ext_resource type="Resource" path="res://level/spikes_timed.tres" id="4"]
 
 [resource]
 script = ExtResource("1")
@@ -47,5 +50,9 @@ boss_id = &"guardian"
 bandit_budget_levels = Array[int]([9, 14, 19])
 bandit_dominant_weight = 4.0
 shrine_chance = 0.3
+trap_kinds = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4")])
+trap_chance = 0.5
+trap_budget_share = 0.3
+max_trap_groups = 2
 random_budget_min = 8
 random_budget_max = 20

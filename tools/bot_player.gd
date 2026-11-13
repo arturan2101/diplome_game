@@ -30,6 +30,10 @@ const DODGE_SAFETY_MARGIN: float = 8.0
 ## The current goal (enemy or health pack) stays the goal unless another one is
 ## closer by more than this many pixels of walking.
 const KEEP_GOAL_MARGIN: float = 16.0
+## Timed spikes: the bot decides at most this far (pixels) before the first spiked cell,
+## and keeps this much time (seconds) clear before and after its crossing.
+const SPIKE_LOOKAHEAD: float = 24.0
+const SPIKE_SAFETY: float = 0.1
 
 ## The run this bot plays.
 @export var game: Game
@@ -63,6 +67,11 @@ var _hesitation_left: float = 0.0
 var _jitter_angle: float = 0.0
 var _jitter_time_left: float = 0.0
 var _progress_time: float = 0.0
+## True while the bot stands before timed spikes, waiting for its moment.
+var _waiting_for_spikes: bool = false
+## This approach's misjudgement of the spikes' timing (seconds), drawn once per wait.
+var _spike_error: float = 0.0
+var _spike_error_drawn: bool = false
 var _progress_distance: float = INF
 
 
@@ -162,6 +171,10 @@ func _movement_direction(player: Player, enemy: Enemy, delta: float, stand_still
 
 
 func _check_progress(player: Player, goal: Vector2, delta: float) -> void:
+	if _waiting_for_spikes:
+		# Standing before spikes on purpose is not being stuck.
+		_progress_time = 0.0
+		return
 	var distance: float = player.global_position.distance_to(goal)
 	if distance < _progress_distance - PROGRESS_DISTANCE or distance <= profile.melee_attack_distance:
 		_progress_distance = distance
@@ -299,11 +312,50 @@ func _direction_along_path(player: Player, goal: Vector2, delta: float) -> Vecto
 		_path_index = 1
 	while _path_index < _path.size() and player.global_position.distance_to(_path[_path_index]) <= waypoint_reach:
 		_path_index += 1
+	_waiting_for_spikes = _path_index < _path.size() and _must_wait_for_spikes(player)
+	if _waiting_for_spikes:
+		return Vector2.ZERO
 	if _path_index < _path.size():
 		return player.global_position.direction_to(_path[_path_index])
 	if player.global_position.distance_to(goal) > waypoint_reach:
 		return player.global_position.direction_to(goal)
 	return Vector2.ZERO
+
+
+## Before stepping onto timed spikes the bot waits until every spiked cell ahead on its
+## path stays down while it walks over it (plus a safety margin). It never stops on the
+## spikes themselves. A careless bot misjudges the moment by up to spike_timing_error.
+func _must_wait_for_spikes(player: Player) -> bool:
+	var level: Level = game.level
+	if level.grid.get_cell(level.cell_at(player.global_position)) == LevelGrid.Cell.SPIKES_TIMED:
+		_spike_error_drawn = false
+		return false
+	var speed: float = maxf(player.move_speed, 1.0)
+	var half_cell: float = level.theme.tile_size * 0.5
+	var walked: float = 0.0
+	var from: Vector2 = player.global_position
+	var crossing: Array[Array] = []
+	for i in range(_path_index, _path.size()):
+		var point: Vector2 = _path[i]
+		walked += from.distance_to(point)
+		from = point
+		var cell: Vector2i = level.cell_at(point)
+		if level.grid.get_cell(cell) == LevelGrid.Cell.SPIKES_TIMED:
+			crossing.append([cell, maxf(walked - half_cell * 2.0, 0.0) / speed, (walked + half_cell * 2.0) / speed])
+		elif not crossing.is_empty() or walked > SPIKE_LOOKAHEAD + half_cell * 2.0:
+			break
+	if crossing.is_empty() or float(crossing[0][1]) * speed > SPIKE_LOOKAHEAD:
+		_spike_error_drawn = false
+		return false
+	if not _spike_error_drawn:
+		_spike_error_drawn = true
+		_spike_error = _rng.randf_range(-profile.spike_timing_error, profile.spike_timing_error)
+	for entry: Array in crossing:
+		if not level.are_timed_spikes_down_during(entry[0], float(entry[1]) + _spike_error - SPIKE_SAFETY,
+				float(entry[2]) + _spike_error + SPIKE_SAFETY):
+			return true
+	_spike_error_drawn = false
+	return false
 
 
 ## Turns the direction a little at random, so the bot does not move perfectly.

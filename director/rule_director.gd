@@ -14,7 +14,7 @@ extends Director
 
 const OPEN_TAG: StringName = &"open"
 const HAZARD_TAG: StringName = &"hazard"
-const HAZARD_SOURCES: Array[StringName] = [&"pit", &"spikes"]
+const HAZARD_SOURCES: Array[StringName] = [&"pit", &"spikes_static", &"spikes_timed"]
 
 
 func choose_next(state: PlayerState) -> SectionPlan:
@@ -25,7 +25,11 @@ func choose_next(state: PlayerState) -> SectionPlan:
 	if is_calm_start(state):
 		plan.budget = mini(plan.budget, calm_start_budget_cap(state))
 	var problem: StringName = _problem_source(state)
-	plan.enemy_mix = buy_enemies(plan.budget, state.rng, _enemy_weights(state, problem))
+	# A weak player hurt by hazards gets no spike traps (see _help_with_problem).
+	var enemy_budget: int = plan.budget
+	if not (problem in HAZARD_SOURCES and state.skill < settings.weak_player_below):
+		enemy_budget = buy_traps(plan, state.rng)
+	plan.enemy_mix = buy_enemies(enemy_budget, state.rng, _enemy_weights(state, problem))
 	fill_contents(plan, state)
 	_help_with_problem(plan, state, problem)
 	finish_arena(plan, state.rng)
