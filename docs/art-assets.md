@@ -193,3 +193,10 @@ Tiles (hand-drawn in Aseprite, no AI):
 - Static spikes (always raised): slot 1 of `assets/art/tiles/ruins_hazards.png` (the theme's `spikes_tile`).
 - Retractable spikes: `assets/art/tiles/spikes_timed_frames.tres` (16x16), animations `hidden` (plate with slots, loop), `warn` (the plate trembles, steel glints in the slots, loop, 12 fps), `rise` (2 frames, once), `up` (raised, loop), `retract` (3 frames, once). Strips: `spikes_timed_<state>.png`. To use them, point `frames` of `level/spikes_timed.tres` at this file (the mechanics session owns that resource).
 - Generator: `tools/art/make_spike_tiles.py`.
+
+## Elite enemies and the wave warning (art, 2026-11-13)
+
+- Shield skeleton: `assets/art/enemies/skeleton_elite_frames.tres` (all skeleton animations: idle, walk, attack, hurt, death; dark red helmet and armour instead of copper, glowing yellow eyes, a big dark red shield on the leading side). To use: `sprite_frames` of the shield skeleton's EnemyData (or the AnimatedSprite2D of its scene).
+- Triple-shot archer: `assets/art/enemies/archer_elite.png` (16x16 still, like the ordinary archer: dark red cloth, three arrow heads above). To use: `sprite` of `actors/enemies/archer_triple.tres`.
+- Wave / elite spawn warning: `actors/effects/spawn_warning.tscn` (`SpawnWarning`, a flat ring on the floor that grows and turns brighter for `duration` seconds, 0.8 by default, then frees itself; strip `assets/art/fx/spawn_warning.png`, 8 frames 32x32). Add it at the spawn cell and spawn the enemy when it is done.
+- Generator: `tools/art/make_elite_frames.py`. Wiring into the mechanics session's files is left to that session.

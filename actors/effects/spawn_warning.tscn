@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://actors/effects/spawn_warning.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/spawn_warning.png" id="2"]
+
+[node name="SpawnWarning" type="Sprite2D"]
+texture = ExtResource("2")
+hframes = 8
+script = ExtResource("1")

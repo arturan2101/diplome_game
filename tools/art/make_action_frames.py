@@ -164,7 +164,7 @@ def write_frames(folder, actor, res_path):
     entries = []
     for path in files:
         anim = os.path.basename(path)[len(actor) + 1:-4]
-        if anim.endswith("sample") or not re.match(r"^[a-z_]+$", anim):
+        if not re.match(r"^(idle|walk|attack|hurt|death)(_[a-z]+)?$", anim):
             continue
         count = Image.open(path).width // F
         entries.append((anim, os.path.basename(path), count))
@@ -197,6 +197,7 @@ def build(folder, actor, death):
     write_frames(folder, actor, os.path.join(folder, f"{actor}_frames.tres"))
 
 
-build("assets/art/enemies", "skeleton", skeleton_death)
-build("assets/art/characters", "player", player_death)
-print("action frames written")
+if __name__ == "__main__":
+    build("assets/art/enemies", "skeleton", skeleton_death)
+    build("assets/art/characters", "player", player_death)
+    print("action frames written")
