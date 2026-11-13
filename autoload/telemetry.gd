@@ -107,6 +107,7 @@ func end_section(died: bool) -> Dictionary:
 	var result: float = estimator.section_result(damage_total, max_hp, _time, _reference_time, kills_ratio, died,
 			_plan.budget, _depth_multiplier(_plan.depth))
 	var skill: float = estimator.update(result)
+	var in_hand: WeaponData = _weapon_in_hand()
 	var record: Dictionary = {
 		"session": session_id,
 		"run": run_number,
@@ -126,6 +127,8 @@ func end_section(died: bool) -> Dictionary:
 		"hp_exit": hp_exit,
 		"kills_ratio": snappedf(kills_ratio, SHARE_STEP),
 		"weapon_use": _weapon_shares(),
+		"weapon_rarity": String(in_hand.get_rarity().id) if in_hand != null else "",
+		"weapon_multiplier": in_hand.get_damage_multiplier() if in_hand != null else 1.0,
 		"skill_uses": _skill_uses,
 		"accuracy": snappedf(_accuracy(), SHARE_STEP),
 		"idle_time": snappedf(_idle_time, TIME_STEP),
@@ -139,6 +142,13 @@ func end_section(died: bool) -> Dictionary:
 		_append_line(JSON.stringify(record))
 	section_logged.emit(record)
 	return record
+
+
+## Data of the weapon the player holds (null if there is no player or no weapon).
+func _weapon_in_hand() -> WeaponData:
+	if not is_instance_valid(_player) or _player.weapon == null:
+		return null
+	return _player.weapon.data
 
 
 ## How much stronger enemies are at this depth: their HP multiplier times their damage

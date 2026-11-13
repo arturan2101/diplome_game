@@ -329,12 +329,21 @@ func _move(_player: Player, direction: Vector2) -> void:
 		Input.action_press(&"move_down", direction.y)
 
 
-## Presses interact for one frame when a weapon lies near and a slot is free.
+## Presses interact for one frame when a weapon lies near and either a slot is free
+## or it hits harder than the weapon in hand (a rarer one).
 func _handle_interact(player: Player) -> void:
 	if Input.is_action_pressed(&"interact"):
 		Input.action_release(&"interact")
-	elif player.interaction_target != null and player.get_weapon_slots().size() < Player.WEAPON_SLOT_COUNT:
+	elif player.interaction_target != null and _wants(player, player.interaction_target.weapon_data):
 		Input.action_press(&"interact")
+
+
+func _wants(player: Player, lying: WeaponData) -> bool:
+	if lying == null:
+		return false
+	if player.get_weapon_slots().size() < Player.WEAPON_SLOT_COUNT:
+		return true
+	return player.weapon != null and lying.get_damage_multiplier() > player.weapon.data.get_damage_multiplier()
 
 
 func _set_attack(pressed: bool) -> void:

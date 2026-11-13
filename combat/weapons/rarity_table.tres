@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="RarityTable" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://combat/weapons/rarity_table.gd" id="1"]
+[ext_resource type="Script" path="res://combat/weapons/weapon_rarity.gd" id="2"]
+[ext_resource type="Resource" path="res://combat/weapons/rarity/common.tres" id="3"]
+[ext_resource type="Resource" path="res://combat/weapons/rarity/rare.tres" id="4"]
+[ext_resource type="Resource" path="res://combat/weapons/rarity/legendary.tres" id="5"]
+
+[resource]
+script = ExtResource("1")
+rarities = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5")])
+weights_by_depth = Array[PackedFloat32Array]([PackedFloat32Array(85, 14, 1), PackedFloat32Array(75, 21, 4), PackedFloat32Array(65, 28, 7), PackedFloat32Array(55, 34, 11), PackedFloat32Array(45, 40, 15)])

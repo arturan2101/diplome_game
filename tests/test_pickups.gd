@@ -66,7 +66,8 @@ func run() -> void:
 	check(player.get_weapon_slots().size() == 1 and player.interaction_target == lying_bow
 			and _interaction_events == ([lying_bow] as Array[WeaponPickup]),
 			"standing on a weapon does not take it; it becomes the interaction target")
-	check(lying_bow.get_prompt() == "Take Bow", "the hint names the weapon")
+	check(lying_bow.get_prompt() == "Take [color=#%s]Common Bow[/color]" % WeaponData.COMMON_RARITY.color.to_html(false),
+			"the hint names the weapon with its rarity, in the rarity colour")
 	await _press_interact()
 	check(player.get_weapon_slots() == ([load(SWORD), bow_data] as Array[WeaponData]) and player.weapon.data.id == &"sword"
 			and not is_instance_valid(lying_bow), "interact puts the weapon into the free slot and removes it from the floor")

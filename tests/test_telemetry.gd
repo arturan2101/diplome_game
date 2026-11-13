@@ -10,7 +10,7 @@ const RUN_SEED: int = 99
 const REQUIRED_KEYS: Array[String] = [
 	"session", "run", "mode", "seed", "section", "depth", "phase", "budget", "enemies", "time",
 	"t_ref", "damage", "damage_total", "blocked_damage", "hp_exit", "kills_ratio", "weapon_use",
-	"skill_uses", "accuracy", "idle_time", "coins", "died", "p", "skill",
+	"weapon_rarity", "weapon_multiplier", "skill_uses", "accuracy", "idle_time", "coins", "died", "p", "skill",
 ]
 
 
@@ -101,6 +101,8 @@ func _test_section_record() -> void:
 	check(is_equal_approx(record["kills_ratio"], 0.75), "kills_ratio = 3 of 4")
 	check(record["weapon_use"] == {"sword": 1.0} and is_equal_approx(record["accuracy"], 0.75),
 			"weapon use and accuracy come from attack_performed (3 of 4 attacks hit)")
+	check(record["weapon_rarity"] == "common" and is_equal_approx(record["weapon_multiplier"], 1.0),
+			"the starting sword is logged as common, damage multiplier 1")
 	check(record["skill_uses"] == 1 and record["coins"] == 5 and record["died"] == false, "skill uses, coins and death flag")
 	check(record["time"] >= 0.9 and record["time"] <= 1.2 and record["idle_time"] >= 0.9 and is_equal_approx(record["t_ref"], 30.0),
 			"time and idle time are measured in game seconds")

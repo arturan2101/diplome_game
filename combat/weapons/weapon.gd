@@ -19,8 +19,10 @@ var wielder: Node2D = null
 var source_id: StringName = &""
 ## False while the weapon is in the other slot.
 var is_active: bool = true
-## Multiplies the damage of every hit (enemy depth scaling, later weapon rarity).
+## Multiplies the damage of every hit: the weapon's rarity, or for enemies the depth.
 var damage_multiplier: float = 1.0
+## Attacks take this many times less time (weapon rarity).
+var attack_speed_multiplier: float = 1.0
 
 
 ## Called by the wielder right after creating the weapon, before adding it to the tree.
@@ -29,6 +31,9 @@ func setup(weapon_data: WeaponData, weapon_wielder: Node2D, damage_source_id: St
 	data = weapon_data
 	wielder = weapon_wielder
 	source_id = damage_source_id if damage_source_id != &"" else weapon_data.id
+	# A rare weapon hits harder and a little faster; the base numbers stay in the data.
+	damage_multiplier = weapon_data.get_damage_multiplier()
+	attack_speed_multiplier = weapon_data.get_attack_speed_multiplier()
 
 
 ## Called when the attack button is pressed. direction is the aim at that moment.

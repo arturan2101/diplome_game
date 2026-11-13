@@ -52,7 +52,7 @@ func _on_attack_released(direction: Vector2) -> void:
 	if _cooldown_left > 0.0 or direction.is_zero_approx():
 		return
 	_shoot(direction, roundi(_damage_for_hold(hold) * damage_multiplier))
-	_cooldown_left = _stats.cooldown
+	_cooldown_left = _stats.cooldown / attack_speed_multiplier
 
 
 func get_move_speed_multiplier() -> float:
@@ -88,7 +88,8 @@ func _draw_progress_for(hold: float) -> float:
 		return 0.0
 	if _stats.draw_time <= 0.0:
 		return 1.0
-	return clampf((hold - _stats.tap_threshold) / _stats.draw_time, 0.0, 1.0)
+	# A faster (rarer) bow draws in less time; the tap threshold stays, it is about input.
+	return clampf((hold - _stats.tap_threshold) * attack_speed_multiplier / _stats.draw_time, 0.0, 1.0)
 
 
 func _damage_for_hold(hold: float) -> int:

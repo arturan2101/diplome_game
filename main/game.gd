@@ -16,6 +16,7 @@ const ENEMY_SCENE: PackedScene = preload("res://actors/enemies/enemy.tscn")
 const WEAPON_PICKUP_SCENE: PackedScene = preload("res://actors/pickups/weapon_pickup.tscn")
 const COIN_SCENE: PackedScene = preload("res://actors/pickups/coin.tscn")
 const DEFAULT_CHEST_WEAPONS: WeaponPool = preload("res://combat/weapons/chest_weapons.tres")
+const DEFAULT_RARITY_TABLE: RarityTable = preload("res://combat/weapons/rarity_table.tres")
 const GATE_SCENE: PackedScene = preload("res://level/gate.tscn")
 const ITEM_SCENES: Dictionary = {
 	SectionLayout.ITEM_HEALTH_PACK: preload("res://actors/pickups/health_pack.tscn"),
@@ -40,6 +41,9 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 @export var death_screen_enabled: bool = true
 ## Weapons chests can hold. Empty = combat/weapons/chest_weapons.tres.
 @export var chest_weapons: WeaponPool
+## Chances of common, rare and legendary chest weapons by depth.
+## Empty = combat/weapons/rarity_table.tres.
+@export var rarity_table: RarityTable
 ## How many coins fall out of a chest.
 @export var chest_coins_min: int = 3
 @export var chest_coins_max: int = 6
@@ -65,6 +69,8 @@ var _loot_rng: RandomNumberGenerator = null
 func _ready() -> void:
 	if chest_weapons == null:
 		chest_weapons = DEFAULT_CHEST_WEAPONS
+	if rarity_table == null:
+		rarity_table = DEFAULT_RARITY_TABLE
 	_director = GameManager.make_director()
 	if OS.is_debug_build() and ResourceLoader.exists(DEBUG_ZOOM_SCRIPT):
 		var zoom: Node = (load(DEBUG_ZOOM_SCRIPT) as GDScript).new()
@@ -159,6 +165,9 @@ func _make_player_state() -> PlayerState:
 	state.depth = GameManager.depth
 	state.hp_fraction = float(player.health.hp) / float(player.health.max_hp)
 	state.weapon_count = player.get_weapon_slots().size()
+	if player.weapon != null:
+		state.weapon_rarity = player.weapon.data.get_rarity().id
+		state.weapon_multiplier = player.weapon.data.get_damage_multiplier()
 	state.is_depth_end = GameManager.is_last_section_of_depth()
 	state.rng = GameManager.make_director_rng(GameManager.section_index)
 	state.skill = Telemetry.estimator.skill
@@ -194,7 +203,7 @@ func _spawn_items() -> void:
 		var chest: Chest = pickup as Chest
 		if chest != null:
 			# Loot is decided now, in spawn order, so the same seed gives the same chests.
-			chest.loot_weapon = chest_weapons.pick(_loot_rng)
+			chest.loot_weapon = _roll_chest_weapon()
 			chest.loot_coins = _loot_rng.randi_range(chest_coins_min, chest_coins_max)
 			chest.opened.connect(_on_chest_opened)
 		_contents.add_child(pickup)
@@ -236,6 +245,15 @@ func _on_enemy_defeated(_enemy: Enemy) -> void:
 	_enemies_left -= 1
 	if _is_arena_sealed and _enemies_left <= 0:
 		_advance_arena()
+
+
+## A random weapon from the chest pool with a random rarity for the current depth.
+func _roll_chest_weapon() -> WeaponData:
+	var base: WeaponData = chest_weapons.pick(_loot_rng)
+	if base == null:
+		return null
+	var rarity: WeaponRarity = rarity_table.pick(GameManager.depth, _loot_rng)
+	return base.with_rarity(rarity) if rarity != null else base
 
 
 ## The weapon falls next to the opened chest (taken with the interact button),

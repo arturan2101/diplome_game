@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="WeaponRarity" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://combat/weapons/weapon_rarity.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"common"
+display_name = "Common"
+color = Color(0.78, 0.78, 0.78, 1)
+damage_multiplier = 1.0
+attack_speed_multiplier = 1.0

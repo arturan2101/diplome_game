@@ -19,9 +19,9 @@ extends CanvasLayer
 @export var attack_button_icon: Sprite2D
 @export var swap_button_icon: Sprite2D
 @export var skill_button_icon: Sprite2D
-## Hint above the Take button ("Take Bow") and the button itself; both appear only
-## while there is something to take.
-@export var interact_prompt: Label
+## Hint above the Take button ("Take Rare Bow", the name in the rarity colour) and the
+## button itself; both appear only while there is something to take.
+@export var interact_prompt: RichTextLabel
 @export var interact_button: TouchScreenButton
 ## Text over the screen for a moment (the arena locking, the gate opening).
 @export var banner: Label
@@ -32,8 +32,13 @@ extends CanvasLayer
 @export var fade_time: float = 0.25
 ## Tint of the weapon slot that is not in hand.
 @export var inactive_slot_color: Color = Color(1.0, 1.0, 1.0, 0.35)
+## Bar under each weapon slot in the colour of the weapon's rarity: height and gap, pixels.
+@export var rarity_bar_height: float = 2.0
+@export var rarity_bar_gap: float = 1.0
 
 var _player: Player = null
+## One rarity bar per weapon icon, same order.
+var _rarity_bars: Array[ColorRect] = []
 
 
 func _ready() -> void:
@@ -46,6 +51,7 @@ func _ready() -> void:
 	_on_interaction_changed(null)
 	if banner != null:
 		banner.visible = false
+	_make_rarity_bars()
 
 
 func _process(_delta: float) -> void:
@@ -87,7 +93,8 @@ func _on_interaction_changed(target: WeaponPickup) -> void:
 	if interact_prompt != null:
 		interact_prompt.visible = target != null
 		if target != null:
-			interact_prompt.text = "%s  [E]" % target.get_prompt()
+			# [lb] and [rb] are BBCode for literal brackets.
+			interact_prompt.text = "%s  [lb]E[rb]" % target.get_prompt()
 	if interact_button != null:
 		interact_button.visible = target != null
 
@@ -115,12 +122,30 @@ func _refresh_weapons() -> void:
 	for i in weapon_icons.size():
 		weapon_icons[i].texture = slots[i].icon if i < slots.size() else null
 		weapon_icons[i].modulate = Color.WHITE if i == active else inactive_slot_color
+		if i < _rarity_bars.size():
+			_rarity_bars[i].visible = i < slots.size()
+			if i < slots.size():
+				_rarity_bars[i].color = slots[i].get_rarity().color
 	if attack_button_icon != null:
 		attack_button_icon.texture = slots[active].icon if active < slots.size() else null
 	if swap_button_icon != null:
 		# The swap button shows what the player would switch to.
 		var other: int = (active + 1) % maxi(slots.size(), 1)
 		swap_button_icon.texture = slots[other].icon if slots.size() > 1 else null
+
+
+## A thin bar under every weapon icon; children of the icon, so the slot that is not in
+## hand dims it too.
+func _make_rarity_bars() -> void:
+	for icon: TextureRect in weapon_icons:
+		var bar: ColorRect = ColorRect.new()
+		bar.name = "RarityBar"
+		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		bar.position = Vector2(0.0, icon.size.y + rarity_bar_gap)
+		bar.size = Vector2(icon.size.x, rarity_bar_height)
+		bar.visible = false
+		icon.add_child(bar)
+		_rarity_bars.append(bar)
 
 
 func _on_weapon_changed(_slot: int, _data: WeaponData) -> void:

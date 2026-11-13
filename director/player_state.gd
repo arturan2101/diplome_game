@@ -11,6 +11,10 @@ var depth: int = 0
 var hp_fraction: float = 1.0
 ## How many weapons the player carries.
 var weapon_count: int = 1
+## Rarity (&"common", &"rare", &"legendary") and damage multiplier of the weapon in hand:
+## how strong the player's gear is.
+var weapon_rarity: StringName = &"common"
+var weapon_multiplier: float = 1.0
 ## True if this is the last section of its depth: it ends with the locked arena.
 var is_depth_end: bool = false
 ## Generator for the director's own random choices about this section

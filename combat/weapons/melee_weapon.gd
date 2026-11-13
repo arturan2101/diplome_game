@@ -112,10 +112,10 @@ func _start_step(direction: Vector2) -> void:
 	var is_last_step: bool = _step_index == _stats.combo.size() - 1
 	_next_step_index = 0 if is_last_step else _step_index + 1
 	_swing_direction = direction.normalized()
-	_active_left = _step.duration
-	_busy_left = _step.duration + _step.recovery
+	_active_left = _step.duration / attack_speed_multiplier
+	_busy_left = (_step.duration + _step.recovery) / attack_speed_multiplier
 	if is_last_step:
-		_busy_left += _stats.combo_end_cooldown
+		_busy_left += _stats.combo_end_cooldown / attack_speed_multiplier
 	_idle_time = 0.0
 	_reach_shape.radius = _step.reach
 	_hit_this_step.clear()
