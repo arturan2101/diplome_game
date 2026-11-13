@@ -117,6 +117,8 @@ func end_section(died: bool) -> Dictionary:
 		"session": session_id,
 		"run": run_number,
 		"mode": GameManager.get_mode_name(),
+		"series": GameManager.config.series,
+		"config": GameManager.config.to_dictionary(),
 		"bot": bot_profile,
 		"seed": GameManager.run_seed,
 		"section": _plan.section_index,

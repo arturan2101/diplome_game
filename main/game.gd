@@ -250,7 +250,7 @@ func _spawn_items() -> void:
 			# Loot is decided now, in spawn order, so the same seed gives the same chests.
 			chest.loot_weapon = _roll_chest_weapon()
 			chest.loot_coins = _loot_rng.randi_range(chest_coins_min, chest_coins_max)
-			if _loot_rng.randf() < chest_spell_chance:
+			if GameManager.config.spells_enabled and _loot_rng.randf() < chest_spell_chance:
 				chest.loot_spell = spell_pool.pick(_loot_rng)
 			chest.opened.connect(_on_chest_opened)
 		var shrine: Shrine = item as Shrine
@@ -353,7 +353,7 @@ func _on_boss_defeated() -> void:
 	_servants.clear()
 	hud.hide_boss()
 	hud.show_banner("The Guardian has fallen")
-	if _bot == null:
+	if _bot == null and GameManager.config.spells_enabled:
 		spell_choice.open_offers.call_deferred(spell_pool.offer(shrine_offer_count, _loot_rng), player.spell_book)
 
 
@@ -383,8 +383,8 @@ func _on_spell_choice_closed(learned: SpellData) -> void:
 ## A random weapon from the chest pool with a random rarity for the current depth.
 func _roll_chest_weapon() -> WeaponData:
 	var base: WeaponData = chest_weapons.pick(_loot_rng)
-	if base == null:
-		return null
+	if base == null or not GameManager.config.rarity_enabled:
+		return base
 	var rarity: WeaponRarity = rarity_table.pick(GameManager.depth, _loot_rng)
 	return base.with_rarity(rarity) if rarity != null else base
 

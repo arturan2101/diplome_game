@@ -58,7 +58,8 @@ func _ready() -> void:
 	if log_dir != "":
 		Telemetry.log_directory = SIM_LOGS_ROOT.path_join(log_dir)
 	SimulationSpeed.set_factor(_int_argument(SPEED_ARG, DEFAULT_SPEED))
-	print("Simulating %d runs, bot %s, mode %s, log %s" % [_runs, _profile.id, GameManager.get_mode_name(), Telemetry.get_log_path()])
+	print("Simulating %d runs, bot %s, mode %s, series %s, log %s" % [_runs, _profile.id, GameManager.get_mode_name(),
+			GameManager.config.series, Telemetry.get_log_path()])
 	var total_sections: int = 0
 	var deaths: int = 0
 	for i in _runs:

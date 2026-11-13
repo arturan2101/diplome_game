@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ExperimentConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://experiment/experiment_config.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+series = "full"
+boss_enabled = true
+spells_enabled = true
+rarity_enabled = true

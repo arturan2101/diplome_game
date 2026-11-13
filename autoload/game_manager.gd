@@ -20,6 +20,11 @@ enum DirectorMode { RANDOM, RULES, LEARNED }
 const MODE_ARG_PREFIX: String = "--mode="
 ## Launch argument that fixes the seed, e.g. `--seed=12345`.
 const SEED_ARG_PREFIX: String = "--seed="
+## Launch argument that picks the experiment series, e.g. `--config=clean`
+## (a name in CONFIG_DIR or a full res:// path).
+const CONFIG_ARG_PREFIX: String = "--config="
+const CONFIG_DIR: String = "res://experiment"
+const DEFAULT_CONFIG: ExperimentConfig = preload("res://experiment/full.tres")
 ## Pass this to start_run() to pick a random seed.
 const RANDOM_SEED: int = -1
 ## Random seeds are picked below this value, so they stay short to type and log.
@@ -34,6 +39,8 @@ const DEFAULT_SKILL: SkillData = preload("res://combat/skills/dash.tres")
 
 ## Director mode of the next runs (debug menu or --mode=).
 var director_mode: DirectorMode = DirectorMode.RULES
+## Which parts of the game the runs include (--config=); the whole game by default.
+var config: ExperimentConfig = DEFAULT_CONFIG
 ## Seed for the next runs: from --seed= or the debug menu. RANDOM_SEED = a new random
 ## seed for every run.
 var forced_seed: int = RANDOM_SEED
@@ -62,17 +69,47 @@ var _sections_into_depth: int = 0
 func _ready() -> void:
 	director_mode = _mode_from_command_line()
 	forced_seed = _seed_from_command_line()
+	config = _config_from_command_line()
 	start_run()
 
 
 ## A new director for the current mode. The game asks for one per run.
 func make_director() -> Director:
+	var director: Director = null
 	match director_mode:
 		DirectorMode.RANDOM:
-			return RandomDirector.new()
+			director = RandomDirector.new()
 		DirectorMode.LEARNED:
-			return LearnedDirector.new()
-	return RuleDirector.new()
+			director = LearnedDirector.new()
+		_:
+			director = RuleDirector.new()
+	_apply_config(director)
+	return director
+
+
+## The experiment series as the director sees it: no boss arenas and no shrines when
+## they are switched off. Works on a copy, the shared settings resource stays as is.
+func _apply_config(director: Director) -> void:
+	if config.boss_enabled and config.spells_enabled:
+		return
+	director.settings = director.settings.duplicate() as DirectorSettings
+	if not config.boss_enabled:
+		director.settings.boss_every_depths = 0
+	if not config.spells_enabled:
+		director.settings.shrine_chance = 0.0
+
+
+## An experiment config by name ("clean" means CONFIG_DIR/clean.tres) or by path;
+## the default config if there is no such file.
+func load_config(name_or_path: String) -> ExperimentConfig:
+	var path: String = name_or_path
+	if not path.begins_with("res://"):
+		path = CONFIG_DIR.path_join(name_or_path + ".tres")
+	var loaded: ExperimentConfig = load(path) as ExperimentConfig if ResourceLoader.exists(path) else null
+	if loaded == null:
+		push_warning("No experiment config %s, using %s" % [name_or_path, DEFAULT_CONFIG.series])
+		return DEFAULT_CONFIG
+	return loaded
 
 
 ## Name of the director mode as written to the log: RANDOM, RULES or LEARNED.
@@ -189,6 +226,14 @@ func make_director_rng(index: int) -> RandomNumberGenerator:
 	var director_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	director_rng.seed = hash([run_seed, "director", index])
 	return director_rng
+
+
+## Reads --config=<name or path> from the launch arguments; the default config if absent.
+func _config_from_command_line() -> ExperimentConfig:
+	for arg: String in OS.get_cmdline_user_args() + OS.get_cmdline_args():
+		if arg.begins_with(CONFIG_ARG_PREFIX):
+			return load_config(arg.trim_prefix(CONFIG_ARG_PREFIX))
+	return DEFAULT_CONFIG
 
 
 ## Reads --mode=random|rules|learned from the launch arguments; RULES if absent.
