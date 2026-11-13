@@ -155,7 +155,7 @@ func _movement_direction(player: Player, enemy: Enemy, delta: float, stand_still
 	var goal: Vector2 = _choose_goal(player, enemy)
 	_check_progress(player, goal, delta)
 	# A bow user that likes distance steps back from a close enemy.
-	if enemy != null and player.weapon is BowWeapon and profile.bow_keep_distance > 0.0 \
+	if enemy != null and not enemy.is_dormant and player.weapon is BowWeapon and profile.bow_keep_distance > 0.0 \
 			and player.global_position.distance_to(enemy.global_position) < profile.bow_keep_distance:
 		return enemy.global_position.direction_to(player.global_position)
 	return _jitter(_direction_along_path(player, goal, delta), delta)
@@ -264,7 +264,8 @@ func _dodge(player: Player, enemy: Enemy) -> void:
 ## Presses or releases the attack action. Returns true if the bot should stand still
 ## (drawing the bow).
 func _handle_attack(player: Player, enemy: Enemy, delta: float) -> bool:
-	if enemy == null or player.weapon == null or _block_time_left > 0.0:
+	# A sleeping boss is only walked to (that seals its arena), never hit.
+	if enemy == null or enemy.is_dormant or player.weapon == null or _block_time_left > 0.0:
 		_set_attack(false)
 		return false
 	var distance: float = player.global_position.distance_to(enemy.global_position)

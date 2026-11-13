@@ -281,10 +281,14 @@ func _spawn_enemy(entry: Dictionary) -> void:
 		entry["cell"] = level.nearest_floor_cell(entry["cell"])
 	var enemy_data: EnemyData = _director.catalog.get_by_id(entry["id"])
 	var cell: Vector2i = entry["cell"]
-	if enemy_data.is_boss and layout.arena_room >= 0:
+	var sleeps: bool = enemy_data.is_boss and layout.arena_room >= 0
+	if sleeps:
 		# The boss waits in the middle of its arena, clear of the walls.
 		cell = level.nearest_floor_cell(layout.room_rects[layout.arena_room].get_center())
 	var enemy: Enemy = _create_enemy(enemy_data, cell)
+	if sleeps:
+		# Asleep until the doors seal: it cannot be lured out or hurt from the doorway.
+		enemy.make_dormant()
 	var guardian: Guardian = enemy as Guardian
 	if guardian != null:
 		guardian.summon_requested.connect(_on_summon_requested)
@@ -434,6 +438,7 @@ func _seal_arena() -> void:
 			enemy.global_position = level.cell_center(enemy.get_meta(SPAWN_CELL_META, layout.exit))
 	var boss: Guardian = _find_boss()
 	if boss != null:
+		boss.awaken()
 		hud.show_boss(boss)
 		hud.show_banner("The Guardian of the Ruins awakens")
 	else:

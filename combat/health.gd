@@ -91,10 +91,15 @@ func make_invulnerable(seconds: float) -> void:
 		invulnerability_changed.emit(true)
 
 
+## Ends invulnerability at once (a sleeping boss wakes up).
+func end_invulnerability() -> void:
+	if is_invulnerable():
+		_invulnerable_left = 0.0
+		invulnerability_changed.emit(false)
+
+
 ## Restores full health and ends invulnerability (restored dummy, new run).
 func reset() -> void:
 	hp = max_hp
 	hp_changed.emit(hp, max_hp)
-	if is_invulnerable():
-		_invulnerable_left = 0.0
-		invulnerability_changed.emit(false)
+	end_invulnerability()

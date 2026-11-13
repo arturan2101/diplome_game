@@ -337,7 +337,8 @@ func _find_aim_target(radius: float = -1.0) -> Hurtbox:
 	var nearest_distance: float = INF
 	for result: Dictionary in space.intersect_shape(_aim_query):
 		var candidate: Hurtbox = result["collider"] as Hurtbox
-		if candidate == null or (candidate.health != null and candidate.health.is_dead()):
+		# Not a target if it cannot be hurt now: dead, or a boss still asleep.
+		if candidate == null or (candidate.health != null and (candidate.health.is_dead() or candidate.health.is_invulnerable())):
 			continue
 		var distance: float = global_position.distance_to(candidate.global_position)
 		if distance >= nearest_distance:

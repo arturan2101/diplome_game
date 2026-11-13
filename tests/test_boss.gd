@@ -2,7 +2,8 @@ extends TestCase
 ## Headless test for the boss, the Guardian of the Ruins: plans (boss arenas on every
 ## second depth, an escort from the rest of the budget, never bought as an ordinary
 ## enemy), its attacks and phases in a small room (slam, thrown stone, second phase
-## with servants and shockwave, no knockback), and the boss arena in the game.
+## with servants and shockwave, no knockback), sleeping until its arena seals, and the
+## boss arena in the game.
 
 const GAME_SCENE: String = "res://main/main.tscn"
 const GUARDIAN: String = "res://actors/enemies/guardian.tres"
@@ -30,6 +31,7 @@ func run() -> void:
 	await _test_slam()
 	await _test_throw()
 	await _test_second_phase()
+	await _test_sleep()
 	await _test_boss_arena()
 
 
@@ -129,6 +131,37 @@ func _test_second_phase() -> void:
 	await physics_frames(2)
 
 
+## A dormant Guardian stands still next to the player, takes no damage and is no
+## target for the auto-aim; awake, it fights as usual.
+func _test_sleep() -> void:
+	var level: Level = _add_level()
+	var player: Player = _add_player(level, Vector2i(4, 5))
+	var guardian: Guardian = _data.scene.instantiate() as Guardian
+	guardian.data = _data
+	guardian.make_dormant()
+	add_child(guardian)
+	guardian.global_position = level.cell_center(Vector2i(7, 5))
+	var start: Vector2 = guardian.global_position
+	await physics_frames(30)
+	check(guardian.is_dormant and guardian.state == Enemy.State.IDLE and guardian.global_position.is_equal_approx(start)
+			and player.health.hp == BIG_HP, "a sleeping Guardian ignores the player next to it")
+	var hp_before: int = guardian.health.hp
+	var accepted: bool = guardian.hurtbox.receive_hit(DamageInfo.new(10, player, &"sword", Vector2(200.0, 0.0)))
+	check(not accepted and guardian.health.hp == hp_before and guardian.state == Enemy.State.IDLE,
+			"a sleeping Guardian takes no damage and does not wake up from a hit")
+	# The Guardian stands to the right; facing left shows whether the aim turned to it.
+	player.facing = Vector2.LEFT
+	check(player.aim_direction(200.0).is_equal_approx(Vector2.LEFT), "the auto-aim skips a sleeping Guardian")
+	guardian.awaken()
+	await physics_frames(3)
+	check(not guardian.is_dormant and guardian.state != Enemy.State.IDLE
+			and guardian.hurtbox.receive_hit(DamageInfo.new(10, player, &"sword")) and guardian.health.hp == hp_before - 10,
+			"awake, it goes for the player and can be hurt")
+	for node: Node in [guardian, player, level]:
+		node.queue_free()
+	await physics_frames(2)
+
+
 func _test_boss_arena() -> void:
 	GameManager.start_run(RUN_SEED)
 	while not (GameManager.depth == 1 and GameManager.is_last_section_of_depth()):
@@ -150,9 +183,14 @@ func _test_boss_arena() -> void:
 		game.queue_free()
 		await physics_frames(2)
 		return
+	var boss_cell: Vector2i = game.level.cell_at(boss.global_position)
+	await physics_frames(10)
+	check(boss.is_dormant and game.level.cell_at(boss.global_position) == boss_cell and not game.is_arena_sealed(),
+			"before the doors seal the Guardian sleeps in the middle of its arena")
 	game.player.teleport(game.level.cell_center(game.level.nearest_floor_cell(arena.get_center() + Vector2i(0, 3))))
 	await physics_frames(3)
-	check(game.is_arena_sealed() and game.hud.boss_bar.visible, "entering the arena seals it and shows the boss bar")
+	check(game.is_arena_sealed() and game.hud.boss_bar.visible and not boss.is_dormant,
+			"entering the arena seals it, wakes the Guardian and shows the boss bar")
 	boss.health.take_damage(DamageInfo.new(boss.health.max_hp / 2 + 1, null, &"test"))
 	await physics_frames(2)
 	check(_servants(game) == _data.summon_count, "the second phase brings %d servants" % _data.summon_count)

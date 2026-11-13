@@ -34,8 +34,14 @@ enum State { IDLE, CHASE, RETREAT, WINDUP, RECOVER, STAGGER, FALLING }
 @export var stagger_end_speed: float = 10.0
 ## A path waypoint closer than this counts as reached, in pixels.
 @export var waypoint_reach: float = 4.0
+## Tint of a dormant enemy: a sleeping boss looks like stone.
+@export var dormant_color: Color = Color(0.55, 0.58, 0.68)
 
 var state: State = State.IDLE
+## A dormant enemy stands still, does not notice the player and takes no damage until
+## awaken(): the boss sleeps in the middle of its arena until the doors seal, so it
+## cannot be lured out of the room or worn down from the doorway.
+var is_dormant: bool = false
 var weapon: Weapon = null
 ## Set by the game before the enemy enters the tree: deeper ruins, tougher enemies.
 var hp_multiplier: float = 1.0
@@ -71,9 +77,13 @@ func _ready() -> void:
 		hazards.fall_ended.connect(_on_fall_ended)
 	_apply_look()
 	_create_weapon()
+	if is_dormant:
+		_fall_asleep()
 
 
 func _physics_process(delta: float) -> void:
+	if is_dormant:
+		return
 	_retreat_cooldown_left = maxf(_retreat_cooldown_left - delta, 0.0)
 	match state:
 		State.IDLE:
@@ -102,6 +112,32 @@ func get_windup_reach() -> float:
 ## True if the attack being wound up flies along a line (step across it, not back).
 func is_windup_ranged() -> bool:
 	return data.preferred_distance > 0.0
+
+
+## Puts the enemy to sleep until awaken(); works before and after it enters the tree.
+func make_dormant() -> void:
+	is_dormant = true
+	if is_inside_tree():
+		_fall_asleep()
+
+
+## Wakes a dormant enemy: it can be hurt again and goes straight for the player.
+func awaken() -> void:
+	if not is_dormant:
+		return
+	is_dormant = false
+	health.end_invulnerability()
+	_target = get_tree().get_first_node_in_group(Player.GROUP) as Node2D
+	_enter(State.CHASE if _target != null else State.IDLE)
+
+
+func _fall_asleep() -> void:
+	if weapon != null:
+		weapon.cancel_attack()
+	_enter(State.IDLE)
+	# Only Health makes anything invulnerable; this lasts until awaken().
+	health.make_invulnerable(INF)
+	visual.modulate = dormant_color
 
 
 ## Pushes the enemy with the given velocity and interrupts what it was doing.

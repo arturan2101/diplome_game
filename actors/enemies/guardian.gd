@@ -50,6 +50,8 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if is_dormant:
+		return
 	_throw_cooldown_left = maxf(_throw_cooldown_left - delta, 0.0)
 	if phase == 2:
 		_summon_left -= delta
