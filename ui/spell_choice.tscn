@@ -1,0 +1,50 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/spell_choice.gd" id="1"]
+
+[node name="SpellChoice" type="CanvasLayer" node_paths=PackedStringArray("panel", "title", "choices", "back_button")]
+layer = 20
+script = ExtResource("1")
+panel = NodePath("Panel")
+title = NodePath("Panel/Center/Box/Title")
+choices = NodePath("Panel/Center/Box/Choices")
+back_button = NodePath("Panel/Center/Box/BackButton")
+
+[node name="Panel" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.75)
+
+[node name="Center" type="CenterContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Box" type="VBoxContainer" parent="Panel/Center"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Panel/Center/Box"]
+custom_minimum_size = Vector2(470, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Choose a spell"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Choices" type="HBoxContainer" parent="Panel/Center/Box"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="BackButton" type="Button" parent="Panel/Center/Box"]
+custom_minimum_size = Vector2(160, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Skip"

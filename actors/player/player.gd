@@ -8,7 +8,7 @@ extends CharacterBody2D
 ## For the HUD and telemetry (weapon usage).
 signal weapon_changed(slot: int, data: WeaponData)
 ## Emitted when the thing the interact button would use changes (null = nothing near).
-signal interaction_changed(target: WeaponPickup)
+signal interaction_changed(target: Interactable)
 
 ## How many weapons the player can carry.
 const WEAPON_SLOT_COUNT: int = 2
@@ -49,7 +49,12 @@ var skill: Skill = null
 ## True while a skill carries the player over the ground (dash): hazards are ignored.
 var is_airborne: bool = false
 ## What the interact button would use now, or null.
-var interaction_target: WeaponPickup = null
+var interaction_target: Interactable = null
+## The two spell slots (created in _ready; spells come from shrines and scrolls).
+var spell_book: SpellBook = null
+## Instance id of interaction_target, 0 = none. A freed object compares equal to null,
+## so only the id notices that the target was taken or used up and is gone.
+var _interaction_target_id: int = 0
 
 ## Weapon nodes by slot. Only the active one is visible and gets input;
 ## the other one's cooldown keeps running.
@@ -78,6 +83,10 @@ func _ready() -> void:
 		add_weapon(weapon_data)
 	if starting_skill != null:
 		set_skill(starting_skill)
+	spell_book = SpellBook.new()
+	spell_book.name = "SpellBook"
+	spell_book.setup(self)
+	add_child(spell_book)
 	update_camera_limits()
 
 
@@ -87,9 +96,10 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("swap_weapon"):
 		swap_weapon()
 	_update_interaction()
-	if Input.is_action_just_pressed("interact") and interaction_target != null:
+	if Input.is_action_just_pressed("interact") and is_instance_valid(interaction_target):
 		interaction_target.interact(self)
 	_handle_attack_input()
+	_handle_spell_input()
 
 
 ## Takes a weapon from the floor. With a free slot it goes there and nothing is
@@ -161,17 +171,19 @@ func _create_weapon(weapon_data: WeaponData) -> Weapon:
 
 ## Finds the nearest thing to interact with and reports when it changes.
 func _update_interaction() -> void:
-	var nearest: WeaponPickup = null
+	var nearest: Interactable = null
 	var nearest_distance: float = interact_radius
-	for node: Node in get_tree().get_nodes_in_group(WeaponPickup.GROUP):
-		var pickup: WeaponPickup = node as WeaponPickup
-		if pickup == null or pickup.is_queued_for_deletion():
+	for node: Node in get_tree().get_nodes_in_group(Interactable.GROUP):
+		var thing: Interactable = node as Interactable
+		if thing == null or thing.is_queued_for_deletion() or not thing.can_interact(self):
 			continue
-		var distance: float = global_position.distance_to(pickup.global_position)
+		var distance: float = global_position.distance_to(thing.global_position)
 		if distance <= nearest_distance:
-			nearest = pickup
+			nearest = thing
 			nearest_distance = distance
-	if nearest != interaction_target:
+	var nearest_id: int = nearest.get_instance_id() if nearest != null else 0
+	if nearest_id != _interaction_target_id:
+		_interaction_target_id = nearest_id
 		interaction_target = nearest
 		interaction_changed.emit(nearest)
 
@@ -195,6 +207,15 @@ func set_skill(skill_data: SkillData) -> void:
 	skill = skill_data.skill_scene.instantiate() as Skill
 	skill.setup(skill_data, self)
 	add_child(skill)
+
+
+## Direction to the nearest visible enemy within radius, or where the player faces.
+## Spells aim with their own radius; radius 0 means "where the player faces".
+func aim_direction(radius: float) -> Vector2:
+	var target: Hurtbox = _find_aim_target(radius)
+	if target == null:
+		return facing
+	return global_position.direction_to(target.global_position)
 
 
 ## Where attacks, shots and the shield point: at the nearest visible enemy within the
@@ -293,13 +314,24 @@ func _handle_attack_input() -> void:
 		weapon.release_attack(get_look_direction())
 
 
-## Nearest enemy hurtbox within the active weapon's auto-aim radius that is not
-## behind a wall, or null.
-func _find_aim_target() -> Hurtbox:
-	if weapon == null or weapon.data.auto_aim_radius <= 0.0 or not is_inside_tree():
+## Spells follow the same rule as attacks: not while the shield is up.
+func _handle_spell_input() -> void:
+	if spell_book == null or (skill != null and skill.blocks_attacks()):
+		return
+	for slot in SpellBook.SLOT_COUNT:
+		if Input.is_action_just_pressed(SpellBook.SLOT_ACTIONS[slot]):
+			spell_book.cast(slot)
+
+
+## Nearest enemy hurtbox within radius (by default the active weapon's auto-aim
+## radius) that is not behind a wall, or null.
+func _find_aim_target(radius: float = -1.0) -> Hurtbox:
+	if radius < 0.0:
+		radius = weapon.data.auto_aim_radius if weapon != null else 0.0
+	if radius <= 0.0 or not is_inside_tree():
 		return null
 	var space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
-	_aim_shape.radius = weapon.data.auto_aim_radius
+	_aim_shape.radius = radius
 	_aim_query.transform = Transform2D(0.0, global_position)
 	var nearest: Hurtbox = null
 	var nearest_distance: float = INF
@@ -336,7 +368,8 @@ func _on_fall_ended() -> void:
 
 ## Freezes the player: no movement, attacks or skill (death, falling into a pit).
 func _stop_acting() -> void:
-	if interaction_target != null:
+	if _interaction_target_id != 0:
+		_interaction_target_id = 0
 		interaction_target = null
 		interaction_changed.emit(null)
 	set_physics_process(false)
@@ -345,6 +378,8 @@ func _stop_acting() -> void:
 		weapon.cancel_attack()
 	if skill != null:
 		skill.cancel()
+	if spell_book != null:
+		spell_book.cancel_all()
 
 
 func _activate_slot(slot: int) -> void:

@@ -122,6 +122,7 @@ func _build_once(plan: SectionPlan, rng: RandomNumberGenerator) -> SectionLayout
 	_place_cover(layout, rooms, plan, rng, taken)
 	_place_enemies(layout, path, branches, plan, rng, taken)
 	_place_chests(layout, path, branches, plan, rng, taken)
+	_place_shrines(layout, path, plan, rng, taken)
 	_place_items(layout, path, branches, plan, rng, taken)
 	return layout
 
@@ -437,6 +438,28 @@ func _place_chests(layout: SectionLayout, path: Array[PlacedRoom], branches: Arr
 		if not chest_slots.is_empty() and not taken.has(chest_slots[0]):
 			cell = chest_slots[0]
 		layout.items.append({"id": SectionLayout.ITEM_CHEST, "cell": cell, "room": room.index})
+		taken[cell] = true
+
+
+## A shrine stands in a room of the path other than the first, a quiet room if there
+## is one (choosing a spell in the middle of a fight is no fun).
+func _place_shrines(layout: SectionLayout, path: Array[PlacedRoom], plan: SectionPlan,
+		rng: RandomNumberGenerator, taken: Dictionary) -> void:
+	if plan.shrines <= 0:
+		return
+	var later: Array[PlacedRoom] = path.slice(1)
+	_shuffle(later, rng)
+	var rooms: Array[PlacedRoom] = []
+	for room: PlacedRoom in later:
+		if not _has_enemies(layout, room):
+			rooms.append(room)
+	for room: PlacedRoom in later:
+		if _has_enemies(layout, room):
+			rooms.append(room)
+	for i in mini(plan.shrines, rooms.size()):
+		var room: PlacedRoom = rooms[i]
+		var cell: Vector2i = _item_slot(layout.grid, room, rng, taken)
+		layout.items.append({"id": SectionLayout.ITEM_SHRINE, "cell": cell, "room": room.index})
 		taken[cell] = true
 
 

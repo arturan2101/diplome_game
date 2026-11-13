@@ -26,6 +26,8 @@ var room_count: int = 3
 var side_branches: int = 0
 ## Chests in the section, 0-2. They go into the side branches first.
 var chests: int = 0
+## Shrines with a spell choice (0 or 1).
+var shrines: int = 0
 ## Last section of a depth: the doors of the final room lock behind the player and
 ## the gate opens only when every wave is dead.
 var is_arena: bool = false
@@ -65,6 +67,7 @@ func to_dictionary() -> Dictionary:
 		"rooms": room_count,
 		"side_branches": side_branches,
 		"chests": chests,
+		"shrines": shrines,
 		"arena": is_arena,
 		"waves": waves,
 		"corridor_width": corridor_width,

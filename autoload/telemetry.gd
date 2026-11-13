@@ -48,6 +48,9 @@ var _blocked_damage: int = 0
 var _attacks: Dictionary = {}
 var _attacks_that_hit: int = 0
 var _skill_uses: int = 0
+## Spell casts and spell damage by spell id, apart from weapon attacks.
+var _spell_uses: Dictionary = {}
+var _spell_damage: Dictionary = {}
 var _coins_at_start: int = 0
 
 
@@ -82,6 +85,8 @@ func begin_section(plan: SectionPlan, layout: SectionLayout, player: Player) -> 
 	_attacks = {}
 	_attacks_that_hit = 0
 	_skill_uses = 0
+	_spell_uses = {}
+	_spell_damage = {}
 	_coins_at_start = GameManager.coins
 	_is_section_active = true
 
@@ -130,6 +135,8 @@ func end_section(died: bool) -> Dictionary:
 		"weapon_rarity": String(in_hand.get_rarity().id) if in_hand != null else "",
 		"weapon_multiplier": in_hand.get_damage_multiplier() if in_hand != null else 1.0,
 		"skill_uses": _skill_uses,
+		"spell_uses": _string_keys(_spell_uses),
+		"spell_damage": _string_keys(_spell_damage),
 		"accuracy": snappedf(_accuracy(), SHARE_STEP),
 		"idle_time": snappedf(_idle_time, TIME_STEP),
 		"coins": GameManager.coins - _coins_at_start,
@@ -193,6 +200,9 @@ func _track(player: Player) -> void:
 	player.weapon_changed.connect(_on_weapon_changed)
 	if player.skill != null:
 		player.skill.used.connect(_on_skill_used)
+	if player.spell_book != null:
+		player.spell_book.spell_cast.connect(_on_spell_cast)
+		player.spell_book.spell_damage_dealt.connect(_on_spell_damage)
 	_connect_weapons()
 
 
@@ -232,6 +242,16 @@ func _on_attack_performed(_step_index: int, hits: int, weapon_id: StringName) ->
 func _on_skill_used() -> void:
 	if _is_section_active:
 		_skill_uses += 1
+
+
+func _on_spell_cast(spell_id: StringName) -> void:
+	if _is_section_active:
+		_spell_uses[spell_id] = int(_spell_uses.get(spell_id, 0)) + 1
+
+
+func _on_spell_damage(spell_id: StringName, amount: int) -> void:
+	if _is_section_active:
+		_spell_damage[spell_id] = int(_spell_damage.get(spell_id, 0)) + amount
 
 
 func _attack_total() -> int:

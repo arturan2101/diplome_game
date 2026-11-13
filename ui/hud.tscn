@@ -20,7 +20,7 @@ bg_color = Color(0.85, 0.22, 0.22, 1)
 [sub_resource type="StyleBoxFlat" id="hp_back"]
 bg_color = Color(0.1, 0.08, 0.12, 0.85)
 
-[node name="HUD" type="CanvasLayer" node_paths=PackedStringArray("hp_bar", "hp_label", "coins_label", "depth_label", "weapon_icons", "skill_icon", "skill_cooldown", "attack_button_icon", "swap_button_icon", "skill_button_icon", "interact_prompt", "interact_button", "banner", "fade")]
+[node name="HUD" type="CanvasLayer" node_paths=PackedStringArray("hp_bar", "hp_label", "coins_label", "depth_label", "weapon_icons", "skill_icon", "skill_cooldown", "attack_button_icon", "swap_button_icon", "skill_button_icon", "spell_icons", "spell_cooldowns", "spell_levels", "spell_buttons", "spell_button_icons", "interact_prompt", "interact_button", "banner", "fade")]
 script = ExtResource("1")
 hp_bar = NodePath("Info/HpBar")
 hp_label = NodePath("Info/HpLabel")
@@ -32,6 +32,11 @@ skill_cooldown = NodePath("Info/Skill/Cooldown")
 attack_button_icon = NodePath("AttackButton/Icon")
 swap_button_icon = NodePath("SwapButton/Icon")
 skill_button_icon = NodePath("SkillButton/Icon")
+spell_icons = [NodePath("Info/Spell1"), NodePath("Info/Spell2")]
+spell_cooldowns = [NodePath("Info/Spell1/Cooldown"), NodePath("Info/Spell2/Cooldown")]
+spell_levels = [NodePath("Info/Spell1/Level"), NodePath("Info/Spell2/Level")]
+spell_buttons = [NodePath("Spell1Button"), NodePath("Spell2Button")]
+spell_button_icons = [NodePath("Spell1Button/Icon"), NodePath("Spell2Button/Icon")]
 interact_prompt = NodePath("Info/InteractPrompt")
 interact_button = NodePath("TakeButton")
 banner = NodePath("Info/Banner")
@@ -135,6 +140,36 @@ text = "Take"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="Spell1Button" type="TouchScreenButton" parent="."]
+position = Vector2(508, 176)
+shape = SubResource("small_shape")
+action = "spell_1"
+visibility_mode = 1
+
+[node name="PlaceholderShape" type="Node2D" parent="Spell1Button"]
+script = ExtResource("3")
+size = Vector2(40, 40)
+color = Color(0.85, 0.6, 1, 0.3)
+
+[node name="Icon" type="Sprite2D" parent="Spell1Button"]
+modulate = Color(1, 1, 1, 0.85)
+scale = Vector2(1.5, 1.5)
+
+[node name="Spell2Button" type="TouchScreenButton" parent="."]
+position = Vector2(572, 152)
+shape = SubResource("small_shape")
+action = "spell_2"
+visibility_mode = 1
+
+[node name="PlaceholderShape" type="Node2D" parent="Spell2Button"]
+script = ExtResource("3")
+size = Vector2(40, 40)
+color = Color(0.85, 0.6, 1, 0.3)
+
+[node name="Icon" type="Sprite2D" parent="Spell2Button"]
+modulate = Color(1, 1, 1, 0.85)
+scale = Vector2(1.5, 1.5)
+
 [node name="Info" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 15
@@ -205,6 +240,80 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0.65)
+
+[node name="Spell1" type="TextureRect" parent="Info"]
+layout_mode = 0
+offset_left = 104.0
+offset_top = 26.0
+offset_right = 128.0
+offset_bottom = 50.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Cooldown" type="ColorRect" parent="Info/Spell1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.65)
+
+[node name="Level" type="Label" parent="Info/Spell1"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -10.0
+offset_top = -12.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 2
+
+[node name="Spell2" type="TextureRect" parent="Info"]
+layout_mode = 0
+offset_left = 132.0
+offset_top = 26.0
+offset_right = 156.0
+offset_bottom = 50.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Cooldown" type="ColorRect" parent="Info/Spell2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.65)
+
+[node name="Level" type="Label" parent="Info/Spell2"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -10.0
+offset_top = -12.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 2
 
 [node name="DepthLabel" type="Label" parent="Info"]
 layout_mode = 1

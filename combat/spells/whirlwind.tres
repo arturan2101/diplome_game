@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WhirlwindData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/whirlwind_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/whirlwind_icon.tres" id="2"]
+[ext_resource type="PackedScene" path="res://combat/spells/whirlwind_spell.tscn" id="3"]
+
+[resource]
+script = ExtResource("1")
+id = &"whirlwind"
+display_name = "Whirlwind"
+description = "hurts and pushes away"
+icon = ExtResource("2")
+color = Color(0.8, 1, 0.85, 1)
+cooldown = PackedFloat32Array(10, 9, 8)
+spell_scene = ExtResource("3")
+damage = PackedInt32Array(4, 5, 6)
+radius = PackedFloat32Array(32, 38, 44)
+duration = PackedFloat32Array(2, 2.5, 3)
+tick_interval = 0.25
+knockback = 120.0

@@ -1,7 +1,8 @@
 class_name Chest
 extends Pickup
 ## Opens when the player touches it and stays open. The game then puts the loot next
-## to it: a weapon lying on the floor (taken with the interact button) and a few coins.
+## to it: a weapon lying on the floor (taken with the interact button), a few coins
+## and sometimes a spell scroll.
 ## What a chest holds is decided by the game when the section is built.
 
 ## Emitted once, when the chest opens.
@@ -14,6 +15,8 @@ signal opened(chest: Chest)
 var loot_weapon: WeaponData = null
 ## How many coins fall out, set by the game.
 var loot_coins: int = 0
+## The spell scroll inside, or null (most chests have none).
+var loot_spell: SpellData = null
 var is_open: bool = false
 
 

@@ -33,7 +33,7 @@ func choose_next(state: PlayerState) -> SectionPlan:
 
 
 ## A plan with the parts every mode fills the same way: indexes, layout size,
-## chests and side branches, and the arena that ends every depth.
+## chests and side branches, a shrine now and then, and the arena that ends every depth.
 func new_plan(state: PlayerState) -> SectionPlan:
 	var plan: SectionPlan = SectionPlan.new()
 	plan.section_index = state.section_index
@@ -47,6 +47,8 @@ func new_plan(state: PlayerState) -> SectionPlan:
 		plan.is_arena = true
 		plan.phase = SectionPlan.PHASE_ARENA
 		plan.room_count = settings.arena_rooms
+	elif state.rng.randf() < settings.shrine_chance:
+		plan.shrines = 1
 	return plan
 
 

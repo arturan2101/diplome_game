@@ -19,6 +19,15 @@ extends CanvasLayer
 @export var attack_button_icon: Sprite2D
 @export var swap_button_icon: Sprite2D
 @export var skill_button_icon: Sprite2D
+## Spell slots, in slot order: icons in the top panel (with a cooldown overlay and the
+## spell level) and the touch buttons with their icons. Empty slots are hidden.
+@export var spell_icons: Array[TextureRect] = []
+@export var spell_cooldowns: Array[Control] = []
+@export var spell_levels: Array[Label] = []
+@export var spell_buttons: Array[TouchScreenButton] = []
+@export var spell_button_icons: Array[Sprite2D] = []
+## Alpha of a spell button's icon while the spell cools down.
+@export var cooling_spell_alpha: float = 0.35
 ## Hint above the Take button ("Take Rare Bow", the name in the rarity colour) and the
 ## button itself; both appear only while there is something to take.
 @export var interact_prompt: RichTextLabel
@@ -55,10 +64,12 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	if skill_cooldown == null or not is_instance_valid(_player) or _player.skill == null:
+	if not is_instance_valid(_player):
 		return
-	# The overlay covers the bottom part of the icon in proportion to the cooldown left.
-	skill_cooldown.anchor_top = 1.0 - _player.skill.get_cooldown_fraction()
+	if skill_cooldown != null and _player.skill != null:
+		# The overlay covers the bottom part of the icon in proportion to the cooldown left.
+		skill_cooldown.anchor_top = 1.0 - _player.skill.get_cooldown_fraction()
+	_update_spell_cooldowns()
 
 
 ## Shows the health, weapons and skill of this player from now on.
@@ -74,6 +85,10 @@ func bind_player(player: Player) -> void:
 		skill_icon.texture = skill_texture
 	if skill_button_icon != null:
 		skill_button_icon.texture = skill_texture
+	if player.spell_book != null:
+		player.spell_book.spells_changed.connect(_refresh_spells)
+		player.spell_book.spell_learned.connect(_on_spell_learned)
+	_refresh_spells()
 
 
 ## Shows a short message in the middle of the screen.
@@ -89,7 +104,7 @@ func show_banner(text: String) -> void:
 	tween.tween_callback(banner.hide)
 
 
-func _on_interaction_changed(target: WeaponPickup) -> void:
+func _on_interaction_changed(target: Interactable) -> void:
 	if interact_prompt != null:
 		interact_prompt.visible = target != null
 		if target != null:
@@ -146,6 +161,45 @@ func _make_rarity_bars() -> void:
 		bar.visible = false
 		icon.add_child(bar)
 		_rarity_bars.append(bar)
+
+
+## Icons, levels and buttons of the spell slots; empty slots are hidden.
+func _refresh_spells() -> void:
+	for slot in SpellBook.SLOT_COUNT:
+		var spell: Spell = _spell_in(slot)
+		if slot < spell_icons.size():
+			spell_icons[slot].texture = spell.data.icon if spell != null else null
+			spell_icons[slot].visible = spell != null
+		if slot < spell_levels.size():
+			spell_levels[slot].text = str(spell.level) if spell != null else ""
+		if slot < spell_buttons.size():
+			spell_buttons[slot].visible = spell != null
+		if slot < spell_button_icons.size():
+			spell_button_icons[slot].texture = spell.data.icon if spell != null else null
+
+
+func _update_spell_cooldowns() -> void:
+	for slot in SpellBook.SLOT_COUNT:
+		var spell: Spell = _spell_in(slot)
+		if spell == null:
+			continue
+		if slot < spell_cooldowns.size():
+			spell_cooldowns[slot].anchor_top = 1.0 - spell.get_cooldown_fraction()
+		if slot < spell_button_icons.size():
+			spell_button_icons[slot].modulate.a = 1.0 if spell.is_ready() else cooling_spell_alpha
+
+
+func _spell_in(slot: int) -> Spell:
+	if not is_instance_valid(_player) or _player.spell_book == null:
+		return null
+	return _player.spell_book.get_spell(slot)
+
+
+func _on_spell_learned(spell_data: SpellData, level: int) -> void:
+	if level <= 1:
+		show_banner("%s learned" % spell_data.display_name)
+	else:
+		show_banner("%s: level %d" % [spell_data.display_name, level])
 
 
 func _on_weapon_changed(_slot: int, _data: WeaponData) -> void:

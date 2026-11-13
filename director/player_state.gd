@@ -15,6 +15,8 @@ var weapon_count: int = 1
 ## how strong the player's gear is.
 var weapon_rarity: StringName = &"common"
 var weapon_multiplier: float = 1.0
+## Known spells and their levels: {spell id: level}.
+var spells: Dictionary = {}
 ## True if this is the last section of its depth: it ends with the locked arena.
 var is_depth_end: bool = false
 ## Generator for the director's own random choices about this section

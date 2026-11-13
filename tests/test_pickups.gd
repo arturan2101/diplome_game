@@ -15,7 +15,7 @@ const FAR_AWAY: Vector2 = Vector2(400.0, 400.0)
 
 var _gate_entries: int = 0
 var _chest_openings: int = 0
-var _interaction_events: Array[WeaponPickup] = []
+var _interaction_events: Array[Interactable] = []
 
 
 func run() -> void:
@@ -61,10 +61,10 @@ func run() -> void:
 	var bow_data: WeaponData = load(BOW) as WeaponData
 	var lying_bow: WeaponPickup = _spawn(WEAPON_PICKUP_SCENE) as WeaponPickup
 	lying_bow.weapon_data = bow_data
-	player.interaction_changed.connect(func(target: WeaponPickup) -> void: _interaction_events.append(target))
+	player.interaction_changed.connect(func(target: Interactable) -> void: _interaction_events.append(target))
 	await _step_on(player)
 	check(player.get_weapon_slots().size() == 1 and player.interaction_target == lying_bow
-			and _interaction_events == ([lying_bow] as Array[WeaponPickup]),
+			and _interaction_events == ([lying_bow] as Array[Interactable]),
 			"standing on a weapon does not take it; it becomes the interaction target")
 	check(lying_bow.get_prompt() == "Take [color=#%s]Common Bow[/color]" % WeaponData.COMMON_RARITY.color.to_html(false),
 			"the hint names the weapon with its rarity, in the rarity colour")
@@ -72,7 +72,10 @@ func run() -> void:
 	check(player.get_weapon_slots() == ([load(SWORD), bow_data] as Array[WeaponData]) and player.weapon.data.id == &"sword"
 			and not is_instance_valid(lying_bow), "interact puts the weapon into the free slot and removes it from the floor")
 	await physics_frames(2)
-	check(player.interaction_target == null, "with nothing near, there is nothing to interact with")
+	# A freed object compares equal to null, so the event count is what tells the change apart.
+	check(player.interaction_target == null and _interaction_events.size() == 2 and _interaction_events[1] == null,
+			"once the weapon is taken there is nothing to interact with, and the HUD is told so (%d events)"
+			% _interaction_events.size())
 	await _step_off(player)
 
 	# Both slots full: the taken weapon replaces the one in hand, the old one stays on the floor.

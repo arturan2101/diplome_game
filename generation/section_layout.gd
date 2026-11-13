@@ -6,6 +6,7 @@ extends RefCounted
 const ITEM_HEALTH_PACK: StringName = &"health_pack"
 const ITEM_COIN: StringName = &"coin"
 const ITEM_CHEST: StringName = &"chest"
+const ITEM_SHRINE: StringName = &"shrine"
 
 var grid: LevelGrid = null
 ## Cell where the player starts.

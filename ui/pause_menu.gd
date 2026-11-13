@@ -31,6 +31,9 @@ func _notification(what: int) -> void:
 
 
 func toggle() -> void:
+	# Paused by another screen (the spell choice): that screen decides when to resume.
+	if get_tree().paused and not panel.visible:
+		return
 	set_paused(not get_tree().paused)
 
 

@@ -1,5 +1,5 @@
 class_name WeaponPickup
-extends Area2D
+extends Interactable
 ## A weapon lying on the floor. It is not taken by walking over it: the player stands
 ## next to it and presses the interact button (E or the "Take" touch button).
 ## If both slots are full, the taken weapon replaces the one in hand and the old one
@@ -7,8 +7,6 @@ extends Area2D
 ## Its rarity shows as an outline (grey, blue, gold) and as the colour of its name in
 ## the hint.
 
-## Group of everything the player can interact with; the player looks for the nearest.
-const GROUP: StringName = &"interactables"
 const OUTLINE_SHADER: Shader = preload("res://actors/pickups/rarity_outline.gdshader")
 const OUTLINE_DIRECTIONS: Array[Vector2] = [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]
 
@@ -27,9 +25,7 @@ var _outline_material: ShaderMaterial = null
 
 
 func _ready() -> void:
-	add_to_group(GROUP)
-	collision_layer = 0
-	collision_mask = 0
+	super()
 	_make_outline()
 	_refresh()
 

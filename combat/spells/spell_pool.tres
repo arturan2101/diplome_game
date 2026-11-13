@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SpellPool" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/spell_pool.gd" id="1"]
+[ext_resource type="Script" path="res://combat/spells/spell_data.gd" id="2"]
+[ext_resource type="Resource" path="res://combat/spells/fireball.tres" id="3"]
+[ext_resource type="Resource" path="res://combat/spells/ice_wall.tres" id="4"]
+[ext_resource type="Resource" path="res://combat/spells/whirlwind.tres" id="5"]
+
+[resource]
+script = ExtResource("1")
+spells = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5")])

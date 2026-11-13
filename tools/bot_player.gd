@@ -334,10 +334,12 @@ func _move(_player: Player, direction: Vector2) -> void:
 func _handle_interact(player: Player) -> void:
 	if Input.is_action_pressed(&"interact"):
 		Input.action_release(&"interact")
-	elif player.interaction_target != null and _wants(player, player.interaction_target.weapon_data):
+	elif is_instance_valid(player.interaction_target) and player.interaction_target is WeaponPickup \
+			and _wants(player, (player.interaction_target as WeaponPickup).weapon_data):
 		Input.action_press(&"interact")
 
 
+## The bot only takes weapons (no scrolls or shrines): a free slot, or a harder hitter.
 func _wants(player: Player, lying: WeaponData) -> bool:
 	if lying == null:
 		return false

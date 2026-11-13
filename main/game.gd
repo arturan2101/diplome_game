@@ -17,11 +17,15 @@ const WEAPON_PICKUP_SCENE: PackedScene = preload("res://actors/pickups/weapon_pi
 const COIN_SCENE: PackedScene = preload("res://actors/pickups/coin.tscn")
 const DEFAULT_CHEST_WEAPONS: WeaponPool = preload("res://combat/weapons/chest_weapons.tres")
 const DEFAULT_RARITY_TABLE: RarityTable = preload("res://combat/weapons/rarity_table.tres")
+const DEFAULT_SPELL_POOL: SpellPool = preload("res://combat/spells/spell_pool.tres")
+const SPELL_PICKUP_SCENE: PackedScene = preload("res://actors/pickups/spell_pickup.tscn")
+const SPELL_CHOICE_SCENE: PackedScene = preload("res://ui/spell_choice.tscn")
 const GATE_SCENE: PackedScene = preload("res://level/gate.tscn")
 const ITEM_SCENES: Dictionary = {
 	SectionLayout.ITEM_HEALTH_PACK: preload("res://actors/pickups/health_pack.tscn"),
 	SectionLayout.ITEM_COIN: preload("res://actors/pickups/coin.tscn"),
 	SectionLayout.ITEM_CHEST: preload("res://actors/pickups/chest.tscn"),
+	SectionLayout.ITEM_SHRINE: preload("res://actors/pickups/shrine.tscn"),
 }
 ## How many past sections the director looks at for "who hurts the player".
 const RECENT_SECTIONS: int = 3
@@ -47,6 +51,14 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 ## How many coins fall out of a chest.
 @export var chest_coins_min: int = 3
 @export var chest_coins_max: int = 6
+## Spells of shrines and chest scrolls. Empty = combat/spells/spell_pool.tres.
+@export var spell_pool: SpellPool
+## Chance that a chest also holds a spell scroll.
+@export_range(0.0, 1.0) var chest_spell_chance: float = 0.25
+## How many spells a shrine offers.
+@export var shrine_offer_count: int = 3
+## Screen for choosing spells. Empty = one is created from ui/spell_choice.tscn.
+@export var spell_choice: SpellChoice
 
 var plan: SectionPlan = null
 var layout: SectionLayout = null
@@ -64,6 +76,8 @@ var _is_arena_sealed: bool = false
 var _is_arena_cleared: bool = false
 ## Generator for what chests hold in the current section.
 var _loot_rng: RandomNumberGenerator = null
+## Scroll whose spell waits for the player to choose a slot.
+var _pending_scroll: SpellPickup = null
 
 
 func _ready() -> void:
@@ -71,6 +85,12 @@ func _ready() -> void:
 		chest_weapons = DEFAULT_CHEST_WEAPONS
 	if rarity_table == null:
 		rarity_table = DEFAULT_RARITY_TABLE
+	if spell_pool == null:
+		spell_pool = DEFAULT_SPELL_POOL
+	if spell_choice == null:
+		spell_choice = SPELL_CHOICE_SCENE.instantiate() as SpellChoice
+		add_child(spell_choice)
+	spell_choice.closed.connect(_on_spell_choice_closed)
 	_director = GameManager.make_director()
 	if OS.is_debug_build() and ResourceLoader.exists(DEBUG_ZOOM_SCRIPT):
 		var zoom: Node = (load(DEBUG_ZOOM_SCRIPT) as GDScript).new()
@@ -138,6 +158,18 @@ func get_pickups() -> Array[Pickup]:
 	return pickups
 
 
+## Shrines of the current section, used or not.
+func get_shrines() -> Array[Shrine]:
+	var shrines: Array[Shrine] = []
+	if _contents == null:
+		return shrines
+	for child: Node in _contents.get_children():
+		var shrine: Shrine = child as Shrine
+		if shrine != null and not shrine.is_queued_for_deletion():
+			shrines.append(shrine)
+	return shrines
+
+
 func _start_section() -> void:
 	plan = _director.choose_next(_make_player_state())
 	layout = _builder.build(plan, GameManager.make_section_rng(GameManager.section_index))
@@ -165,6 +197,8 @@ func _make_player_state() -> PlayerState:
 	state.depth = GameManager.depth
 	state.hp_fraction = float(player.health.hp) / float(player.health.max_hp)
 	state.weapon_count = player.get_weapon_slots().size()
+	if player.spell_book != null:
+		state.spells = player.spell_book.to_dictionary()
 	if player.weapon != null:
 		state.weapon_rarity = player.weapon.data.get_rarity().id
 		state.weapon_multiplier = player.weapon.data.get_damage_multiplier()
@@ -184,9 +218,11 @@ func _clear_section() -> void:
 	if _contents != null:
 		_contents.queue_free()
 		_contents = null
-	# Arrows still in flight belong to the old section.
+	# Arrows still in flight, fireballs and ice belong to the old section.
 	for projectile: Node in get_tree().get_nodes_in_group(Arrow.GROUP):
 		projectile.queue_free()
+	if player != null and player.spell_book != null:
+		player.spell_book.cancel_all()
 
 
 func _spawn_gate() -> void:
@@ -198,15 +234,20 @@ func _spawn_gate() -> void:
 
 func _spawn_items() -> void:
 	for entry: Dictionary in layout.items:
-		var pickup: Pickup = (ITEM_SCENES[entry["id"]] as PackedScene).instantiate() as Pickup
-		pickup.position = level.to_local(level.cell_center(entry["cell"]))
-		var chest: Chest = pickup as Chest
+		var item: Node2D = (ITEM_SCENES[entry["id"]] as PackedScene).instantiate() as Node2D
+		item.position = level.to_local(level.cell_center(entry["cell"]))
+		var chest: Chest = item as Chest
 		if chest != null:
 			# Loot is decided now, in spawn order, so the same seed gives the same chests.
 			chest.loot_weapon = _roll_chest_weapon()
 			chest.loot_coins = _loot_rng.randi_range(chest_coins_min, chest_coins_max)
+			if _loot_rng.randf() < chest_spell_chance:
+				chest.loot_spell = spell_pool.pick(_loot_rng)
 			chest.opened.connect(_on_chest_opened)
-		_contents.add_child(pickup)
+		var shrine: Shrine = item as Shrine
+		if shrine != null:
+			shrine.activated.connect(_on_shrine_activated)
+		_contents.add_child(item)
 
 
 ## Spawns the first wave; later waves (arena only) wait in _pending_waves.
@@ -247,6 +288,24 @@ func _on_enemy_defeated(_enemy: Enemy) -> void:
 		_advance_arena()
 
 
+## The player used a shrine: choose one of a few random spells.
+func _on_shrine_activated(_shrine: Shrine) -> void:
+	spell_choice.open_offers(spell_pool.offer(shrine_offer_count, _loot_rng), player.spell_book)
+
+
+## A scroll was taken with both spell slots full: ask which spell to forget.
+func _on_scroll_slots_full(scroll: SpellPickup) -> void:
+	_pending_scroll = scroll
+	spell_choice.open_replace(scroll.spell_data, player.spell_book)
+
+
+## The scroll is used up once its spell is learned; kept if the player changed their mind.
+func _on_spell_choice_closed(learned: SpellData) -> void:
+	if learned != null and is_instance_valid(_pending_scroll) and _pending_scroll.spell_data == learned:
+		_pending_scroll.queue_free()
+	_pending_scroll = null
+
+
 ## A random weapon from the chest pool with a random rarity for the current depth.
 func _roll_chest_weapon() -> WeaponData:
 	var base: WeaponData = chest_weapons.pick(_loot_rng)
@@ -256,10 +315,11 @@ func _roll_chest_weapon() -> WeaponData:
 	return base.with_rarity(rarity) if rarity != null else base
 
 
-## The weapon falls next to the opened chest (taken with the interact button),
-## and the coins around it.
+## The weapon falls next to the opened chest (taken with the interact button), then
+## the spell scroll if there is one, and the coins around them.
 func _on_chest_opened(chest: Chest) -> void:
-	var cells: Array[Vector2i] = level.free_floor_cells_near(chest.global_position, chest.loot_coins + 1)
+	var scrolls: int = 1 if chest.loot_spell != null else 0
+	var cells: Array[Vector2i] = level.free_floor_cells_near(chest.global_position, chest.loot_coins + 1 + scrolls)
 	if cells.is_empty():
 		return
 	if chest.loot_weapon != null:
@@ -267,7 +327,15 @@ func _on_chest_opened(chest: Chest) -> void:
 		weapon_pickup.weapon_data = chest.loot_weapon
 		weapon_pickup.position = level.to_local(level.cell_center(cells[0]))
 		_contents.add_child.call_deferred(weapon_pickup)
-	for i in range(1, cells.size()):
+	var first_coin: int = 1
+	if chest.loot_spell != null and cells.size() > 1:
+		var scroll: SpellPickup = SPELL_PICKUP_SCENE.instantiate() as SpellPickup
+		scroll.spell_data = chest.loot_spell
+		scroll.position = level.to_local(level.cell_center(cells[1]))
+		scroll.slots_full.connect(_on_scroll_slots_full)
+		_contents.add_child.call_deferred(scroll)
+		first_coin = 2
+	for i in range(first_coin, cells.size()):
 		var coin: Coin = COIN_SCENE.instantiate() as Coin
 		coin.position = level.to_local(level.cell_center(cells[i]))
 		# Deferred: adding areas while a physics callback runs is not allowed.

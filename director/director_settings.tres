@@ -38,5 +38,6 @@ chest_count_weights = Array[float]([0.15, 0.65, 0.2])
 chest_branch_chance = 0.75
 arena_rooms = 3
 arena_two_waves_budget = 12
+shrine_chance = 0.3
 random_budget_min = 8
 random_budget_max = 20

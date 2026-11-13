@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="IceWallData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/ice_wall_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ice_wall_icon.tres" id="2"]
+[ext_resource type="PackedScene" path="res://combat/spells/ice_wall_spell.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://combat/spells/ice_block.tscn" id="4"]
+
+[resource]
+script = ExtResource("1")
+id = &"ice_wall"
+display_name = "Ice Wall"
+description = "blocks enemies and arrows"
+icon = ExtResource("2")
+color = Color(0.6, 0.85, 1, 1)
+cooldown = PackedFloat32Array(10, 9, 8)
+auto_aim_radius = 96.0
+spell_scene = ExtResource("3")
+blocks = PackedInt32Array(3, 4, 5)
+duration = PackedFloat32Array(4, 5, 6)
+distance = 32.0
+block_scene = ExtResource("4")

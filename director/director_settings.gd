@@ -70,6 +70,10 @@ extends Resource
 ## From this budget on, the arena comes in two waves.
 @export var arena_two_waves_budget: int = 12
 
+@export_group("Spells")
+## Chance that an ordinary (not arena) section has a shrine with a spell choice.
+@export_range(0.0, 1.0) var shrine_chance: float = 0.3
+
 @export_group("Random mode")
 ## RandomDirector picks the budget uniformly from this range (plus depth growth).
 @export var random_budget_min: int = 8

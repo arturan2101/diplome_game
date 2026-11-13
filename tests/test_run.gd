@@ -32,7 +32,8 @@ func _test_gate_and_next_section() -> void:
 			"the player starts at the entrance")
 	check(game.get_enemies().size() == first_layout.enemies.size() and not first_layout.enemies.is_empty(),
 			"every enemy of the layout is spawned")
-	check(game.get_pickups().size() == first_layout.items.size(), "every item of the layout is spawned")
+	check(game.get_pickups().size() + game.get_shrines().size() == first_layout.items.size(),
+			"every item of the layout is spawned (pickups and shrines)")
 	check(game.player.weapon != null and game.player.weapon.data == GameManager.starting_weapon
 			and game.player.skill != null, "the player gets the loadout from GameManager")
 
