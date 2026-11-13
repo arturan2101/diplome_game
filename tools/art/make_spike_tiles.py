@@ -1,7 +1,7 @@
 """Spike sprites (16x16, palette of docs/art-style.md).
-Sharp cones, not rods: each spike has a wide base that narrows to a one-pixel point,
-a lit left face and a dark right face (light from the top-left), a bright tip and a
-black outline, so it reads as a blade even at 1x.
+Sharp cones that sit inside the floor tile: a slab in the floor's own colours (no
+frame), four small spikes with a margin from the tile edges, muted steel (lit left
+face, shaded right face, pale tip) and no outline, like every other tile.
 Static spikes: slot 1 of assets/art/tiles/ruins_hazards.png (always raised).
 Retractable spikes: strips assets/art/tiles/spikes_timed_<state>.png for the states
 hidden, warn, rise, up, retract, and assets/art/tiles/spikes_timed_frames.tres with
@@ -16,8 +16,8 @@ COL = {
     "e": "#4c4e5f", "t": "#5d6072", "g": "#9aa2ad", "G": "#d8d4c4", "W": "#f4f0e0",
 }
 # Base centre (x, y) of each spike; the back row first, so the front row covers it.
-SLOTS = [(4, 7), (11, 7), (7, 13), (13, 14), (2, 14)]
-FULL = 7
+SLOTS = [(4, 7), (11, 7), (4, 13), (11, 13)]
+FULL = 5
 
 
 def rgb(key):
@@ -30,8 +30,9 @@ def plate(dx=0):
     img = Image.new("RGBA", (T, T))
     for y in range(T):
         for x in range(T):
-            edge = x in (0, T - 1) or y in (0, T - 1)
-            key = "s" if edge else ("e" if x == 1 or y == 1 else ("f" if x == T - 2 or y == T - 2 else "F"))
+            # The floor's base with a faint seam around the slab, nothing brighter.
+            seam = x in (1, T - 2) or y in (1, T - 2)
+            key = "s" if seam else "f"
             img.putpixel((x, y), rgb(key))
     px = img.load()
     for cx, by in SLOTS:
@@ -53,19 +54,17 @@ def cone(img, cx, by, height):
             if not (0 <= x < T and 0 <= y < T):
                 continue
             if h == height - 1:
-                key = "W"
-            elif x < cx:
                 key = "G"
-            elif x == cx:
+            elif x < cx:
                 key = "g"
-            else:
+            elif x == cx:
                 key = "t"
+            else:
+                key = "e"
             px[x, y] = rgb(key)
-        for x in (cx - half - 1, cx + half + 1):
-            if 0 <= x < T and 0 <= y < T:
-                px[x, y] = rgb("o")
-    if 0 <= by - height < T:
-        px[cx, by - height] = rgb("o")
+    # A small shadow at the base on the right (light from the top-left).
+    if 0 <= cx + 2 < T and 0 <= by < T:
+        px[cx + 2, by] = rgb("k")
 
 
 def raised(height):
@@ -81,7 +80,7 @@ def warn(frame):
     px = img.load()
     for i, (cx, by) in enumerate(SLOTS):
         if (i + frame) % 2 == 0:
-            px[cx + frame % 2, by] = rgb("W")
+            px[cx + frame % 2, by] = rgb("G")
             px[cx - 1 + frame % 2, by] = rgb("g")
     return img
 
@@ -89,9 +88,9 @@ def warn(frame):
 STATES = {
     "hidden": ([plate()], 2.0, True),
     "warn": ([warn(i) for i in range(4)], 12.0, True),
-    "rise": ([raised(3), raised(5)], 20.0, False),
+    "rise": ([raised(2), raised(4)], 20.0, False),
     "up": ([raised(FULL), raised(FULL)], 4.0, True),
-    "retract": ([raised(5), raised(2), plate()], 15.0, False),
+    "retract": ([raised(4), raised(2), plate()], 15.0, False),
 }
 
 
