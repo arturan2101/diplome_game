@@ -116,8 +116,9 @@ func _test_line_of_sight() -> void:
 
 func _test_real_resources() -> void:
 	var catalog: EnemyCatalog = load(CATALOG_PATH) as EnemyCatalog
-	check(catalog != null and catalog.get_ids() == ([&"skeleton", &"archer", &"beetle", &"guardian"] as Array[StringName]),
-			"enemy catalog lists skeleton, archer, beetle and the boss")
+	check(catalog != null and catalog.get_ids() == ([&"skeleton", &"archer", &"beetle", &"guardian", &"skeleton_shield",
+			&"archer_triple"] as Array[StringName]),
+			"enemy catalog lists skeleton, archer, beetle, the boss and the two elites (last, so plans without elites stay the same)")
 	if catalog == null:
 		return
 	var beetle: EnemyData = catalog.get_by_id(&"beetle")

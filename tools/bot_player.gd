@@ -32,6 +32,10 @@ const DODGE_SAFETY_MARGIN: float = 8.0
 const KEEP_GOAL_MARGIN: float = 16.0
 ## Timed spikes: the bot decides at most this far (pixels) before the first spiked cell,
 ## and keeps this much time (seconds) clear before and after its crossing.
+## A shield skeleton is attacked from the side: the bot walks this far beside it when it
+## stands within SHIELD_FRONT_DEGREES of where the shield faces.
+const FLANK_DISTANCE: float = 20.0
+const SHIELD_FRONT_DEGREES: float = 70.0
 const SPIKE_LOOKAHEAD: float = 24.0
 const SPIKE_SAFETY: float = 0.1
 
@@ -202,8 +206,22 @@ func _choose_goal(player: Player, enemy: Enemy) -> Vector2:
 		if _pack_goal != null:
 			return _pack_goal.global_position
 	if enemy != null:
-		return enemy.global_position
+		return _approach_point(player, enemy)
 	return game.gate.global_position if game.gate != null else player.global_position
+
+
+## Where to walk to fight an enemy: at it, or past a shield to the skeleton's side.
+func _approach_point(player: Player, enemy: Enemy) -> Vector2:
+	var shielded: ShieldSkeleton = enemy as ShieldSkeleton
+	if shielded == null:
+		return enemy.global_position
+	var from_enemy: Vector2 = enemy.global_position.direction_to(player.global_position)
+	if absf(shielded.shield_direction.angle_to(from_enemy)) > deg_to_rad(SHIELD_FRONT_DEGREES):
+		return enemy.global_position
+	var side: Vector2 = shielded.shield_direction.orthogonal()
+	if side.dot(from_enemy) < 0.0:
+		side = -side
+	return enemy.global_position + side * FLANK_DISTANCE
 
 
 ## Dodging telegraphed attacks: each windup is decided once, after the reaction time.

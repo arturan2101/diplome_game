@@ -109,6 +109,23 @@ extends Resource
 ## At most this many trap groups in one section.
 @export var max_trap_groups: int = 2
 
+@export_group("Combat rooms")
+## Chance that a section has a combat room (its doors lock, its enemies come in waves),
+## by phase: more often at a peak, never in rest or arena sections. The random mode has
+## no phases and uses its own chance. All zero = off (ExperimentConfig.combat_rooms).
+@export_range(0.0, 1.0) var combat_room_chance_peak: float = 0.6
+@export_range(0.0, 1.0) var combat_room_chance_build: float = 0.3
+@export_range(0.0, 1.0) var combat_room_chance_random: float = 0.35
+## Waves of a combat room (least, most) by phase.
+@export var combat_waves_peak: Vector2i = Vector2i(2, 3)
+@export var combat_waves_build: Vector2i = Vector2i(1, 2)
+@export var combat_waves_random: Vector2i = Vector2i(1, 3)
+
+@export_group("Elite enemies")
+## Elite types (EnemyData.is_elite) may be bought, each from its min_depth on
+## (ExperimentConfig.elite_enemies switches them off).
+@export var elites_enabled: bool = true
+
 @export_group("Random mode")
 ## RandomDirector picks the budget uniformly from this range (plus depth growth).
 @export var random_budget_min: int = 8

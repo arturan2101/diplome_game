@@ -523,6 +523,11 @@ func _place_enemies(layout: SectionLayout, path: Array[PlacedRoom], branches: Ar
 		var guarded: Array[PlacedRoom] = branches.duplicate()
 		_shuffle(guarded, rng)
 		targets.append_array(guarded)
+	# A combat room gets a double share of the spawns: it comes twice in the round.
+	var combat: PlacedRoom = null
+	if not plan.is_arena and plan.combat_rooms > 0 and path.size() > 1:
+		combat = path[rng.randi_range(1, path.size() - 1)]
+		targets.insert(targets.find(combat) + 1, combat)
 	var slots: Dictionary = {}
 	for room: PlacedRoom in targets:
 		var room_slots: Array[Vector2i] = room.to_section_cells(room.template.enemy_slots)
@@ -536,6 +541,7 @@ func _place_enemies(layout: SectionLayout, path: Array[PlacedRoom], branches: Ar
 			spawns.append(id)
 	_shuffle(spawns, rng)
 	var waves: int = maxi(1, plan.waves) if plan.is_arena else 1
+	var combat_spawns: int = 0
 	for i in spawns.size():
 		var data: EnemyData = _catalog.get_by_id(spawns[i])
 		if data == null:
@@ -545,10 +551,19 @@ func _place_enemies(layout: SectionLayout, path: Array[PlacedRoom], branches: Ar
 		var room_slots: Array[Vector2i] = slots[room.index]
 		var slot: Vector2i = room_slots.pop_back() if not room_slots.is_empty() else _random_free_cell(layout.grid, room, rng, taken)
 		var pack_size: int = rng.randi_range(data.pack_min, maxi(data.pack_min, data.pack_max))
+		var wave: int = i % waves
+		if room == combat:
+			wave = combat_spawns % maxi(1, plan.combat_waves)
+			combat_spawns += 1
 		# A pack stays inside its room: not in a doorway (an arena walls those up) nor in a tunnel.
 		for cell: Vector2i in _free_cells_near(layout.grid, slot, pack_size, taken, room.get_rect().grow(-1)):
-			layout.enemies.append({"id": data.id, "cell": cell, "room": room.index, "wave": i % waves})
+			layout.enemies.append({"id": data.id, "cell": cell, "room": room.index, "wave": wave})
 			taken[cell] = true
+	if combat != null and combat_spawns > 0:
+		var doors: Array[Vector2i] = []
+		for side: RoomTemplate.DoorSide in combat.used_doors:
+			doors.append_array(combat.door_cells(side))
+		layout.combat_rooms.append({"room": combat.index, "doors": doors, "waves": mini(maxi(1, plan.combat_waves), combat_spawns)})
 
 
 ## Chests go into the side branches first, then into rooms of the path that have no

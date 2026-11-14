@@ -66,6 +66,7 @@ static func apply(director: Director, plan: SectionPlan, state: PlayerState, ind
 		plan.phase = action["type"]
 	plan.budget = settings.bandit_budget_levels[action["level"]] + roundi(settings.budget_depth_factor * state.depth)
 	var enemy_budget: int = director.buy_traps(plan, state.rng)
-	plan.enemy_mix = director.buy_enemies(enemy_budget, state.rng, {action["enemy"]: settings.bandit_dominant_weight})
+	plan.enemy_mix = director.buy_enemies(enemy_budget, state.rng, {action["enemy"]: settings.bandit_dominant_weight}, state.depth)
 	director.fill_contents(plan, state)
+	director.plan_combat_rooms(plan, state.rng)
 	director.finish_arena(plan, state.rng)

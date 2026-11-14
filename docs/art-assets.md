@@ -65,8 +65,12 @@ Assets the code already uses with placeholders; integration = repointing the res
 
 | P | Asset | File | Size | Frames | Code hook | Status |
 |---|---|---|---|---|---|---|
-| C | Static spikes (always up), ruins style; replaces the "Spikes" row below | assets/art/tiles/spikes_static.png | 16x16 | 1 | `level/ruins_theme.tres`: `hazard_texture` + `spikes_tile` (now the placeholder atlas) | todo |
-| C | Timed spikes, one cell: animations `hidden` (flush with the floor, holes), `warn` (0.5 s warning: glint or dust in the holes), `rise`, `up` (fully out, hurts), `retract` | assets/art/tiles/spikes_timed.png (one strip per animation or one sheet) | 16x16 | any count per animation; the code picks the frame from the phase progress (hidden 1.6 s, warn 0.5 s, rise 0.1 s, up 0.8 s, retract 0.2 s) | `assets/sprites/spikes_timed_frames.tres` (SpriteFrames with exactly these 5 animation names) | todo (placeholder: assets/placeholder/spikes_timed.png) |
+| C | Static spikes (always up), ruins style; replaces the "Spikes" row below | assets/art/tiles/ruins_hazards.png (slot 1) | 16x16 | 1 | `level/ruins_theme.tres`: `hazard_texture` + `spikes_tile` | integrated |
+| C | Timed spikes, one cell: animations `hidden`, `warn` (0.5 s warning), `rise`, `up` (hurts), `retract` | assets/art/tiles/spikes_timed_frames.tres | 16x16 | any count per animation; the code picks the frame from the phase progress (hidden 1.6 s, warn 0.5 s, rise 0.1 s, up 0.8 s, retract 0.2 s) | `level/spikes_timed.tres`: `frames` | integrated |
+| C | Elite shield skeleton (all skeleton animations, shield on the leading side) | assets/art/enemies/skeleton_elite_frames.tres | 24x24 | as the skeleton | `actors/enemies/skeleton_shield.tres`: `sprite_frames` | integrated; the side the shield really blocks is shown by a faint arc drawn in code |
+| C | Elite triple-shot archer | assets/art/enemies/archer_elite.png | 16x16 | 1 (still, like the archer) | `actors/enemies/archer_triple.tres`: `sprite` | integrated |
+| C | Spawn warning ring (combat-room waves) | actors/effects/spawn_warning.tscn | 32x32 | 8 | `actors/enemies/spawn_marker.gd`: `look_scene` | integrated; the marker sets the ring's `z_index` to 0 after it is ready (at -1 the ring was drawn under the floor tiles) and puts itself first among the section's nodes, so the ring is above the floor and below the actors |
+| N | Animation of the triple-shot archer (idle, walk, shoot), like the other enemies | assets/art/enemies/archer_elite_frames.tres | 24x24 | as the skeleton | `actors/enemies/archer_triple.tres`: `sprite_frames` | todo |
 
 Check spike sprites with `tests/manual/spikes_preview.tscn` (saves the five phases side by side).
 

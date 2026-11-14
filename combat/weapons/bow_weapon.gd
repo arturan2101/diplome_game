@@ -96,14 +96,19 @@ func _damage_for_hold(hold: float) -> int:
 	return roundi(lerpf(_stats.min_damage, _stats.max_damage, _draw_progress_for(hold)))
 
 
+## One arrow, or a fan of arrow_count arrows over spread_degrees around the direction.
 func _shoot(direction: Vector2, damage: int) -> void:
-	var arrow: Arrow = _stats.arrow_scene.instantiate() as Arrow
-	arrow.setup(DamageInfo.new(damage, wielder, source_id), direction, _stats.arrow_speed, _stats.arrow_range)
-	# The arrow only emits a signal and knows nothing about the bow. If the bow is freed
-	# while the arrow flies, Godot drops this connection and the arrow still works.
-	arrow.landed.connect(_on_arrow_landed)
-	_projectile_parent().add_child(arrow)
-	arrow.global_position = global_position
+	var count: int = maxi(1, _stats.arrow_count)
+	var spread: float = deg_to_rad(_stats.spread_degrees)
+	for i in count:
+		var angle: float = 0.0 if count == 1 else lerpf(-spread * 0.5, spread * 0.5, float(i) / float(count - 1))
+		var arrow: Arrow = _stats.arrow_scene.instantiate() as Arrow
+		arrow.setup(DamageInfo.new(damage, wielder, source_id), direction.rotated(angle), _stats.arrow_speed, _stats.arrow_range)
+		# The arrow only emits a signal and knows nothing about the bow. If the bow is freed
+		# while the arrow flies, Godot drops this connection and the arrow still works.
+		arrow.landed.connect(_on_arrow_landed)
+		_projectile_parent().add_child(arrow)
+		arrow.global_position = global_position
 
 
 ## Arrows live in the level, not in the wielder, so they do not move with the player.

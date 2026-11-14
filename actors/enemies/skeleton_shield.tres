@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ShieldSkeletonData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/shield_skeleton_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/skeleton.tres" id="2"]
+[ext_resource type="Resource" path="res://actors/enemies/skeleton_weapon.tres" id="3"]
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/skeleton_elite_frames.tres" id="4"]
+[ext_resource type="PackedScene" path="res://actors/enemies/shield_skeleton.tscn" id="5"]
+
+[resource]
+script = ExtResource("1")
+sprite = ExtResource("2")
+weapon = ExtResource("3")
+id = &"skeleton_shield"
+display_name = "Shield skeleton"
+danger_cost = 4
+max_hp = 55
+move_speed = 38.0
+detection_range = 160.0
+attack_range = 18.0
+windup = 0.6
+recovery = 0.7
+scene = ExtResource("5")
+sprite_frames = ExtResource("4")
+is_elite = true
+min_depth = 1
+shield_arc_degrees = 120.0
+shield_turn_speed = 2.5

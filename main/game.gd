@@ -81,6 +81,8 @@ var _is_arena_cleared: bool = false
 var _loot_rng: RandomNumberGenerator = null
 ## Scroll whose spell waits for the player to choose a slot.
 var _pending_scroll: SpellPickup = null
+## Combat rooms of the current section (doors lock, waves with spawn warnings).
+var _combat: CombatRoomTracker = null
 ## The bot playing this run, if any (simulations skip the boss's spell reward).
 var _bot: BotPlayer = null
 ## Servants the boss called that are still alive, including ones not yet added to the
@@ -99,6 +101,13 @@ func _ready() -> void:
 		spell_choice = SPELL_CHOICE_SCENE.instantiate() as SpellChoice
 		add_child(spell_choice)
 	spell_choice.closed.connect(_on_spell_choice_closed)
+	_combat = CombatRoomTracker.new()
+	_combat.name = "CombatRooms"
+	_combat.game = self
+	_combat.room_sealed.connect(_on_combat_room_sealed)
+	_combat.wave_started.connect(_on_combat_wave_started)
+	_combat.room_cleared.connect(_on_combat_room_cleared)
+	add_child(_combat)
 	_director = GameManager.make_director()
 	if OS.is_debug_build() and ResourceLoader.exists(DEBUG_ZOOM_SCRIPT):
 		var zoom: Node = (load(DEBUG_ZOOM_SCRIPT) as GDScript).new()
@@ -130,6 +139,29 @@ func is_arena() -> bool:
 
 func is_arena_sealed() -> bool:
 	return _is_arena_sealed
+
+
+## The combat rooms of the current section.
+func get_combat_rooms() -> CombatRoomTracker:
+	return _combat
+
+
+## Enemy data by type id (from the director's catalog).
+func get_enemy_data(id: StringName) -> EnemyData:
+	return _director.catalog.get_by_id(id)
+
+
+## Adds a node to the current section; it is freed with the section.
+func add_section_node(node: Node) -> void:
+	_contents.add_child(node)
+
+
+## An enemy of this type on this cell, added to the section and counted like the
+## planned ones (combat-room waves come in this way).
+func spawn_enemy(enemy_data: EnemyData, cell: Vector2i) -> Enemy:
+	var enemy: Enemy = _create_enemy(enemy_data, cell)
+	_contents.add_child(enemy)
+	return enemy
 
 
 ## Lets a bot play this run (headless simulations and tests). Without a profile it
@@ -193,6 +225,7 @@ func _start_section() -> void:
 	level.add_child(_contents)
 	_spawn_gate()
 	_spawn_items()
+	_combat.setup(layout)
 	_spawn_enemies()
 	player.teleport(level.cell_center(layout.entrance))
 	Telemetry.begin_section(plan, layout, player)
@@ -268,6 +301,9 @@ func _spawn_enemies() -> void:
 	for _wave in range(1, layout.wave_count()):
 		_pending_waves.append([])
 	for entry: Dictionary in layout.enemies:
+		# Enemies of a combat room wait until the player walks in.
+		if _combat.owns(entry):
+			continue
 		if int(entry["wave"]) == 0:
 			_spawn_enemy(entry)
 		else:
@@ -445,6 +481,19 @@ func _seal_arena() -> void:
 		hud.show_banner("The doors are sealed")
 	if _enemies_left <= 0:
 		_advance_arena()
+
+
+func _on_combat_room_sealed(_room: CombatRoom) -> void:
+	hud.show_banner("The doors are sealed")
+
+
+func _on_combat_wave_started(_room: CombatRoom, wave: int) -> void:
+	if wave > 0:
+		hud.show_banner("Another wave!")
+
+
+func _on_combat_room_cleared(_room: CombatRoom) -> void:
+	hud.show_banner("The way is open")
 
 
 func _find_boss() -> Guardian:

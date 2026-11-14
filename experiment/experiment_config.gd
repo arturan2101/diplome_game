@@ -18,6 +18,12 @@ extends Resource
 ## waves). Off in the clean series and the playtest, so their results stay comparable;
 ## the spikes drawn into room maps are always there.
 @export var spike_traps: bool = true
+## Combat rooms: a room of an ordinary section locks its doors and sends its enemies in
+## waves (stage 23). Off in the clean series and the playtest.
+@export var combat_rooms: bool = true
+## Elite enemies (shield skeleton, triple-shot archer) from the second depth on.
+## Off in the clean series and the playtest.
+@export var elite_enemies: bool = true
 ## Soft tension waves of the rules director: a peak of x1.15 and a rest of x0.5
 ## (DirectorSettings.soft_peak_multiplier, soft_rest_multiplier) instead of x1.3 and
 ## x0.3. The other modes have no wave and do not change.
@@ -27,4 +33,4 @@ extends Resource
 ## The switches as plain data for the log.
 func to_dictionary() -> Dictionary:
 	return {"boss": boss_enabled, "spells": spells_enabled, "rarity": rarity_enabled, "soft_waves": soft_waves,
-			"spike_traps": spike_traps}
+			"spike_traps": spike_traps, "combat_rooms": combat_rooms, "elite_enemies": elite_enemies}

@@ -105,7 +105,7 @@ func finish_arena(plan: SectionPlan, rng: RandomNumberGenerator) -> void:
 		return
 	var boss: EnemyData = catalog.get_by_id(settings.boss_id) if plan.is_boss else null
 	if boss != null:
-		plan.enemy_mix = buy_enemies(maxi(0, plan.budget - boss.danger_cost), rng)
+		plan.enemy_mix = buy_enemies(maxi(0, plan.budget - boss.danger_cost), rng, {}, plan.depth)
 		plan.enemy_mix[boss.id] = 1
 		plan.waves = 1
 		return
@@ -128,8 +128,9 @@ func pick_weighted(weights: Array[float], rng: RandomNumberGenerator) -> int:
 
 ## Spends a danger budget on enemies: picks random affordable types until nothing
 ## fits. weights (type id -> number) make some types more or less likely; a type
-## without a weight counts as 1. Returns type id -> number of spawns.
-func buy_enemies(budget: int, rng: RandomNumberGenerator, weights: Dictionary = {}) -> Dictionary:
+## without a weight counts as 1. Elite types join only when they are on and the depth
+## has reached theirs (no depth = no elites). Returns type id -> number of spawns.
+func buy_enemies(budget: int, rng: RandomNumberGenerator, weights: Dictionary = {}, depth: int = -1) -> Dictionary:
 	var mix: Dictionary = {}
 	var left: int = budget
 	while true:
@@ -137,7 +138,7 @@ func buy_enemies(budget: int, rng: RandomNumberGenerator, weights: Dictionary = 
 		var total_weight: float = 0.0
 		for enemy_data: EnemyData in catalog.enemies:
 			var weight: float = float(weights.get(enemy_data.id, 1.0))
-			if not enemy_data.is_boss and enemy_data.danger_cost <= left and weight > 0.0:
+			if not enemy_data.is_boss and enemy_data.danger_cost <= left and weight > 0.0 and _can_buy(enemy_data, depth):
 				affordable.append(enemy_data)
 				total_weight += weight
 		if affordable.is_empty():
@@ -181,6 +182,33 @@ func buy_traps(plan: SectionPlan, rng: RandomNumberGenerator) -> int:
 		left -= chosen.danger_cost
 		groups += 1
 	return plan.budget - trap_cost(plan.traps)
+
+
+func _can_buy(enemy_data: EnemyData, depth: int) -> bool:
+	return not enemy_data.is_elite or (settings.elites_enabled and depth >= enemy_data.min_depth)
+
+
+## Combat rooms, the same rule in every mode: with the phase's chance (DirectorSettings,
+## more often at a peak) one room of an ordinary section locks its doors when the
+## player walks in, and its enemies come in waves. Never in rest or arena sections, and
+## not without at least two spawns. Draws nothing when combat rooms are off.
+func plan_combat_rooms(plan: SectionPlan, rng: RandomNumberGenerator) -> void:
+	plan.combat_rooms = 0
+	plan.combat_waves = 0
+	if plan.is_arena or plan.phase == SectionPlan.PHASE_REST or plan.get_spawn_count() < 2:
+		return
+	var chance: float = settings.combat_room_chance_build
+	var waves: Vector2i = settings.combat_waves_build
+	if plan.phase == SectionPlan.PHASE_PEAK:
+		chance = settings.combat_room_chance_peak
+		waves = settings.combat_waves_peak
+	elif plan.phase == SectionPlan.PHASE_RANDOM:
+		chance = settings.combat_room_chance_random
+		waves = settings.combat_waves_random
+	if chance <= 0.0 or rng.randf() >= chance:
+		return
+	plan.combat_rooms = 1
+	plan.combat_waves = rng.randi_range(waves.x, waves.y)
 
 
 ## Danger cost of the traps of a plan (trap id -> number of groups).

@@ -21,3 +21,6 @@ extends WeaponData
 @export var arrow_range: float = 240.0
 ## Scene of the projectile (root node is an Arrow).
 @export var arrow_scene: PackedScene
+## Arrows per shot, spread evenly over spread_degrees (the elite archer's triple shot).
+@export var arrow_count: int = 1
+@export var spread_degrees: float = 0.0

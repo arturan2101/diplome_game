@@ -29,6 +29,9 @@ var path_room_count: int = 0
 var arena_room: int = -1
 ## Door cells of the arena room that are walled up while the fight goes on.
 var arena_doors: Array[Vector2i] = []
+## Combat rooms: {"room": index in room_rects, "doors": Array[Vector2i], "waves": int}.
+## Their enemies (the entries with that room) wait until the player walks in.
+var combat_rooms: Array[Dictionary] = []
 ## Spike traps actually placed: trap id -> number of groups (a trap that found no
 ## place is skipped).
 var traps: Dictionary = {}

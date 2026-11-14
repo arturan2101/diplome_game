@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="SpikeTrapData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://level/spike_trap_data.gd" id="1"]
-[ext_resource type="SpriteFrames" path="res://assets/sprites/spikes_timed_frames.tres" id="2"]
+[ext_resource type="SpriteFrames" path="res://assets/art/tiles/spikes_timed_frames.tres" id="2"]
 
 [resource]
 script = ExtResource("1")

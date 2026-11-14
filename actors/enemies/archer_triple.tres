@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/enemy_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/enemies/archer_elite.png" id="2"]
+[ext_resource type="Resource" path="res://actors/enemies/archer_triple_bow.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+sprite = ExtResource("2")
+weapon = ExtResource("3")
+id = &"archer_triple"
+display_name = "Elite archer"
+danger_cost = 5
+max_hp = 34
+move_speed = 40.0
+detection_range = 190.0
+attack_range = 140.0
+windup = 0.65
+recovery = 1.1
+preferred_distance = 80.0
+retreat_time = 0.6
+retreat_cooldown = 2.0
+is_elite = true
+min_depth = 1

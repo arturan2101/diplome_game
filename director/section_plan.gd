@@ -22,6 +22,10 @@ var budget: int = 4
 var enemy_mix: Dictionary = {&"skeleton": 2}
 ## Spike traps bought from the budget: trap id (SpikeTrapData.id) -> number of groups.
 var traps: Dictionary = {}
+## Combat rooms (0 or 1): a room of the path whose doors lock when the player walks
+## in, its enemies coming in combat_waves waves.
+var combat_rooms: int = 0
+var combat_waves: int = 0
 ## Rooms on the main path from the entrance to the gate, 3-5 (an arena has 2).
 var room_count: int = 3
 ## Side branches: dead-end treasure rooms hanging off the main path, 0-2.
@@ -73,6 +77,8 @@ func to_dictionary() -> Dictionary:
 		"budget": budget,
 		"enemies": enemy_mix.duplicate(),
 		"traps": traps.duplicate(),
+		"combat_rooms": combat_rooms,
+		"combat_waves": combat_waves,
 		"rooms": room_count,
 		"side_branches": side_branches,
 		"chests": chests,

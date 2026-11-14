@@ -29,9 +29,10 @@ func choose_next(state: PlayerState) -> SectionPlan:
 	var enemy_budget: int = plan.budget
 	if not (problem in HAZARD_SOURCES and state.skill < settings.weak_player_below):
 		enemy_budget = buy_traps(plan, state.rng)
-	plan.enemy_mix = buy_enemies(enemy_budget, state.rng, _enemy_weights(state, problem))
+	plan.enemy_mix = buy_enemies(enemy_budget, state.rng, _enemy_weights(state, problem), state.depth)
 	fill_contents(plan, state)
 	_help_with_problem(plan, state, problem)
+	plan_combat_rooms(plan, state.rng)
 	finish_arena(plan, state.rng)
 	return plan
 
