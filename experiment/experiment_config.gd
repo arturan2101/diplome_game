@@ -24,6 +24,10 @@ extends Resource
 ## Elite enemies (shield skeleton, triple-shot archer) from the second depth on.
 ## Off in the clean series and the playtest.
 @export var elite_enemies: bool = true
+## The merchant's glade after every arena (stage 25); spells are then bought there: no
+## shrines, no spell after the boss, scrolls only in secret chests. Off in the clean
+## series and the playtest.
+@export var merchant_glade: bool = true
 ## Secret rooms behind cracked walls (stage 24). Off in the clean series and the playtest.
 @export var secret_rooms: bool = true
 ## Soft tension waves of the rules director: a peak of x1.15 and a rest of x0.5
@@ -36,4 +40,4 @@ extends Resource
 func to_dictionary() -> Dictionary:
 	return {"boss": boss_enabled, "spells": spells_enabled, "rarity": rarity_enabled, "soft_waves": soft_waves,
 			"spike_traps": spike_traps, "combat_rooms": combat_rooms, "elite_enemies": elite_enemies,
-			"secret_rooms": secret_rooms}
+			"secret_rooms": secret_rooms, "merchant_glade": merchant_glade}

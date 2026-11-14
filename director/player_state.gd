@@ -32,3 +32,7 @@ var phases: Array[StringName] = []
 var recent_damage: Dictionary = {}
 ## Share of attacks made with each weapon id in the last finished section.
 var weapon_use: Dictionary = {}
+## Coins the player has, and what they bought at the last glade for how many coins.
+var coins: int = 0
+var glade_purchases: Array[String] = []
+var glade_coins_spent: int = 0

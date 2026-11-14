@@ -9,7 +9,10 @@ const GROUP: StringName = &"level"
 const DEFAULT_THEME: TileTheme = preload("res://level/ruins_theme.tres")
 const DEFAULT_HAZARDS: HazardData = preload("res://level/hazards.tres")
 ## Tile themes of parts of a level (LevelGrid.theme_regions) when none are set.
-const DEFAULT_REGION_THEMES: Dictionary = {&"nature": preload("res://level/nature_theme.tres")}
+const DEFAULT_REGION_THEMES: Dictionary = {
+	&"nature": preload("res://level/nature_theme.tres"),
+	&"glade": preload("res://level/glade_theme.tres"),
+}
 ## Atlas ids of the region themes start here, two per theme (tiles and hazards).
 const REGION_SOURCE_BASE: int = 2
 ## Ids of the two atlases inside the generated TileSet.
@@ -223,7 +226,13 @@ func _paint_cell(cell: Vector2i) -> void:
 	match grid.get_cell(cell):
 		LevelGrid.Cell.FLOOR:
 			var sunlit: bool = grid.sunlit.has(cell) and look.sunlit_floor_tile.x >= 0
-			_ground.set_cell(cell, main, look.sunlit_floor_tile if sunlit else _floor_tile(cell, look))
+			var paved: bool = grid.paved.has(cell) and not look.paved_floor_tiles.is_empty()
+			var tile: Vector2i = _floor_tile(cell, look)
+			if sunlit:
+				tile = look.sunlit_floor_tile
+			elif paved:
+				tile = look.paved_floor_tiles[_cell_hash(cell) % look.paved_floor_tiles.size()]
+			_ground.set_cell(cell, main, tile)
 		LevelGrid.Cell.WALL:
 			# Solid rock that touches nothing walkable gets no tile and no collision:
 			# big sections stay cheap to draw and to simulate.
@@ -250,6 +259,12 @@ func _draw_crack(cell: Vector2i, main: int, look: TileTheme) -> void:
 	var tile: Vector2i = look.cracked_wall_tile if front else look.cracked_wall_top_tile
 	if tile.x >= 0:
 		_ground.set_cell(cell, main, tile)
+
+
+## Atlas id of a region theme's tiles (LevelGrid.theme_regions), -1 if there is none.
+func region_source_id(theme_name: StringName) -> int:
+	var index: int = _region_names.find(theme_name)
+	return REGION_SOURCE_BASE + 2 * index if index >= 0 else -1
 
 
 ## True if this theme draws cracks itself (so nothing else has to draw them).
@@ -333,6 +348,8 @@ func _add_theme_sources(tile_set: TileSet, look: TileTheme, main_id: int, hazard
 			_add_tile(main, coords, true)
 	if look.sunlit_floor_tile.x >= 0:
 		_add_tile(main, look.sunlit_floor_tile, false)
+	for coords: Vector2i in look.paved_floor_tiles:
+		_add_tile(main, coords, false)
 	var hazards: TileSetAtlasSource = _make_source(tile_set, hazard_id, look.hazard_texture)
 	_add_tile(hazards, look.pit_tile, false)
 	_add_tile(hazards, look.pit_inner_tile, false)

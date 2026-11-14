@@ -26,7 +26,7 @@ func _test_files() -> void:
 			"the clean series has boss, spells and rarity off")
 	check(GameManager.load_config("res://experiment/clean.tres") == clean, "a config also loads by its path")
 	check(GameManager.load_config("no_such_series") == GameManager.DEFAULT_CONFIG, "an unknown name falls back to the full game")
-	check(clean.to_dictionary() == {"boss": false, "spells": false, "rarity": false, "soft_waves": false, "spike_traps": false, "combat_rooms": false, "elite_enemies": false, "secret_rooms": false},
+	check(clean.to_dictionary() == {"boss": false, "spells": false, "rarity": false, "soft_waves": false, "spike_traps": false, "combat_rooms": false, "elite_enemies": false, "secret_rooms": false, "merchant_glade": false},
 			"the switches go to the log as a dictionary")
 	var soft: ExperimentConfig = GameManager.load_config("clean_soft")
 	check(soft.series == "clean" and soft.soft_waves and not soft.boss_enabled and not soft.spells_enabled
@@ -38,9 +38,12 @@ func _test_director() -> void:
 	var clean_director: Director = GameManager.make_director()
 	GameManager.config = GameManager.DEFAULT_CONFIG
 	var full_director: Director = GameManager.make_director()
+	var shared_settings: DirectorSettings = load(Director.SETTINGS_PATH) as DirectorSettings
 	check(clean_director.settings.boss_every_depths == 0 and is_zero_approx(clean_director.settings.shrine_chance)
-			and full_director.settings.boss_every_depths > 0 and full_director.settings.shrine_chance > 0.0,
+			and full_director.settings.boss_every_depths > 0 and shared_settings.shrine_chance > 0.0,
 			"the clean series turns boss arenas and shrines off on a copy of the director settings")
+	check(is_zero_approx(full_director.settings.shrine_chance),
+			"the full game has no shrines: spells are bought at the merchant's glade")
 	var bosses: int = 0
 	var shrines: int = 0
 	for i in PLANS:
@@ -102,5 +105,5 @@ func _test_game_and_log() -> void:
 	GameManager.config = GameManager.DEFAULT_CONFIG
 	check(chests > 0 and rare == 0 and scrolls == 0,
 			"in the clean series chests hold common weapons and no scrolls (%d chests)" % chests)
-	check(record.get("series") == "clean" and record.get("config") == {"boss": false, "spells": false, "rarity": false, "soft_waves": false, "spike_traps": false, "combat_rooms": false, "elite_enemies": false, "secret_rooms": false},
+	check(record.get("series") == "clean" and record.get("config") == {"boss": false, "spells": false, "rarity": false, "soft_waves": false, "spike_traps": false, "combat_rooms": false, "elite_enemies": false, "secret_rooms": false, "merchant_glade": false},
 			"every log line names the series and its switches")

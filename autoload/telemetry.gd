@@ -11,6 +11,8 @@ extends Node
 signal section_logged(record: Dictionary)
 ## Emitted after a playtest survey is recorded.
 signal survey_logged(record: Dictionary)
+## Emitted after the line of a glade between depths is recorded.
+signal glade_logged(record: Dictionary)
 
 const SETTINGS_PATH: String = "res://director/director_settings.tres"
 const LOG_EXTENSION: String = "jsonl"
@@ -67,6 +69,16 @@ var _secret: bool = false
 var _secret_found: bool = false
 var _purchases: Array[String] = []
 var _coins_spent: int = 0
+## The glade between depths: not a section, it gets a line of its own.
+var _is_glade_active: bool = false
+var _glade_depth: int = 0
+var _glade_time: float = 0.0
+var _glade_coins: int = 0
+var _glade_purchases: Array[String] = []
+var _glade_spent: int = 0
+## What the player bought at the last glade, and for how many coins (the director sees it).
+var last_glade_purchases: Array[String] = []
+var last_glade_spent: int = 0
 
 
 func _ready() -> void:
@@ -78,6 +90,8 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if _is_glade_active:
+		_glade_time += delta
 	if not _is_section_active or not is_instance_valid(_player):
 		return
 	_time += delta
@@ -119,11 +133,55 @@ func record_secret_found() -> void:
 		_secret_found = true
 
 
-## Called by the game for every purchase from a merchant.
+## Called by the game for every purchase from a merchant: on a section, or on a glade.
 func record_purchase(offer_id: String, price: int) -> void:
-	if _is_section_active:
+	if _is_glade_active:
+		_glade_purchases.append(offer_id)
+		_glade_spent += price
+	elif _is_section_active:
 		_purchases.append(offer_id)
 		_coins_spent += price
+
+
+## The player walks onto the glade after a depth.
+func begin_glade(depth: int) -> void:
+	_is_glade_active = true
+	_glade_depth = depth
+	_glade_time = 0.0
+	_glade_coins = GameManager.coins
+	_glade_purchases = []
+	_glade_spent = 0
+
+
+## The player leaves the glade: one line of type "glade" with what was bought. Section
+## analysis skips it. Returns the record.
+func end_glade() -> Dictionary:
+	if not _is_glade_active:
+		return {}
+	_is_glade_active = false
+	last_glade_purchases = _glade_purchases.duplicate()
+	last_glade_spent = _glade_spent
+	var record: Dictionary = {
+		"type": "glade",
+		"session": session_id,
+		"run": run_number,
+		"mode": GameManager.get_mode_name(),
+		"series": GameManager.config.series,
+		"config": GameManager.config.to_dictionary(),
+		"player": playtest_player,
+		"block": playtest_block,
+		"bot": bot_profile,
+		"seed": GameManager.run_seed,
+		"depth": _glade_depth,
+		"time": snappedf(_glade_time, TIME_STEP),
+		"coins": _glade_coins,
+		"purchases": _glade_purchases.duplicate(),
+		"coins_spent": _glade_spent,
+	}
+	if write_enabled:
+		_append_line(JSON.stringify(record))
+	glade_logged.emit(record)
+	return record
 
 
 ## Called by the game for every enemy the player kills.
@@ -283,6 +341,9 @@ func _on_run_started() -> void:
 	run_number += 1
 	history.clear()
 	_is_section_active = false
+	_is_glade_active = false
+	last_glade_purchases = []
+	last_glade_spent = 0
 	if estimator != null:
 		estimator.reset()
 

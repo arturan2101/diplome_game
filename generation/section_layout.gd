@@ -36,6 +36,8 @@ var arena_doors: Array[Vector2i] = []
 ## of the path it hides behind}. Its items are in items with "secret": true; they appear
 ## when the room opens, and the way through the section never needs them.
 var secret: Dictionary = {}
+## Props without collision (the glade): {"prop": index into GladeData.props, "cell": Vector2i}.
+var decor: Array[Dictionary] = []
 ## Combat rooms: {"room": index in room_rects, "doors": Array[Vector2i], "waves": int}.
 ## Their enemies (the entries with that room) wait until the player walks in.
 var combat_rooms: Array[Dictionary] = []

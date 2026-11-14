@@ -27,6 +27,8 @@ var spike_phase: Dictionary = {}
 var cracked: Dictionary = {}
 ## Floor cells in a patch of light from above, as a set.
 var sunlit: Dictionary = {}
+## Floor cells paved with old slabs on purpose (around the glade's sunlit patch), as a set.
+var paved: Dictionary = {}
 ## Parts of the grid drawn with another tile theme (a secret room's overgrown ruins):
 ## {"rect": Rect2i, "theme": StringName (a key of Level.region_themes)}.
 var theme_regions: Array[Dictionary] = []

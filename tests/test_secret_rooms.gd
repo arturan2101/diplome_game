@@ -86,7 +86,7 @@ func _test_theme() -> void:
 	add_child(level)
 	level.build(grid)
 	var ground: TileMapLayer = level.get_node("Ground") as TileMapLayer
-	check(ground.get_cell_source_id(Vector2i(8, 2)) == Level.REGION_SOURCE_BASE and ground.get_cell_source_id(Vector2i(3, 2)) == Level.MAIN_SOURCE,
+	check(ground.get_cell_source_id(Vector2i(8, 2)) == level.region_source_id(&"nature") and ground.get_cell_source_id(Vector2i(3, 2)) == Level.MAIN_SOURCE,
 			"the secret room's region is drawn with the nature theme, the rest with the ruins")
 	level.queue_free()
 

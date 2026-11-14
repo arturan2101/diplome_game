@@ -1,15 +1,27 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://ui/shop_screen.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/trade_panel.png" id="2"]
+
+[sub_resource type="StyleBoxTexture" id="frame"]
+texture = ExtResource("2")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 12.0
 
 [node name="ShopScreen" type="CanvasLayer" node_paths=PackedStringArray("panel", "title", "coins_label", "choices", "leave_button")]
 layer = 20
 script = ExtResource("1")
 panel = NodePath("Panel")
-title = NodePath("Panel/Center/Box/Title")
-coins_label = NodePath("Panel/Center/Box/Coins")
-choices = NodePath("Panel/Center/Box/Choices")
-leave_button = NodePath("Panel/Center/Box/LeaveButton")
+title = NodePath("Panel/Center/Frame/Box/Title")
+coins_label = NodePath("Panel/Center/Frame/Box/Coins")
+choices = NodePath("Panel/Center/Frame/Box/Choices")
+leave_button = NodePath("Panel/Center/Frame/Box/LeaveButton")
 
 [node name="Panel" type="ColorRect" parent="."]
 anchors_preset = 15
@@ -27,28 +39,32 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Box" type="VBoxContainer" parent="Panel/Center"]
+[node name="Frame" type="PanelContainer" parent="Panel/Center"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("frame")
+
+[node name="Box" type="VBoxContainer" parent="Panel/Center/Frame"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Title" type="Label" parent="Panel/Center/Box"]
+[node name="Title" type="Label" parent="Panel/Center/Frame/Box"]
 custom_minimum_size = Vector2(500, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "Merchant"
 horizontal_alignment = 1
 
-[node name="Coins" type="Label" parent="Panel/Center/Box"]
+[node name="Coins" type="Label" parent="Panel/Center/Frame/Box"]
 layout_mode = 2
 text = "Coins: 0"
 horizontal_alignment = 1
 
-[node name="Choices" type="HBoxContainer" parent="Panel/Center/Box"]
+[node name="Choices" type="HBoxContainer" parent="Panel/Center/Frame/Box"]
 layout_mode = 2
 alignment = 1
 theme_override_constants/separation = 8
 
-[node name="LeaveButton" type="Button" parent="Panel/Center/Box"]
+[node name="LeaveButton" type="Button" parent="Panel/Center/Frame/Box"]
 custom_minimum_size = Vector2(120, 36)
 layout_mode = 2
 size_flags_horizontal = 4

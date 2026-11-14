@@ -95,12 +95,13 @@ func make_director() -> Director:
 ## copy, the shared settings resource stays as is.
 func _apply_config(director: Director) -> void:
 	if config.boss_enabled and config.spells_enabled and config.spike_traps and config.combat_rooms \
-			and config.elite_enemies and config.secret_rooms and not config.soft_waves:
+			and config.elite_enemies and config.secret_rooms and not config.merchant_glade and not config.soft_waves:
 		return
 	director.settings = director.settings.duplicate() as DirectorSettings
 	if not config.boss_enabled:
 		director.settings.boss_every_depths = 0
-	if not config.spells_enabled:
+	# With the glade's merchant, spells are bought: no shrines.
+	if not config.spells_enabled or config.merchant_glade:
 		director.settings.shrine_chance = 0.0
 	if not config.spike_traps:
 		director.settings.trap_chance = 0.0
@@ -224,6 +225,13 @@ func spend_coins(amount: int) -> bool:
 	coins -= amount
 	coins_changed.emit(coins)
 	return true
+
+
+## Returns a new generator for the glade after a depth (its layout, then its stock).
+func make_glade_rng(depth_index: int) -> RandomNumberGenerator:
+	var glade_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	glade_rng.seed = hash([run_seed, "glade", depth_index])
+	return glade_rng
 
 
 ## Returns a new generator for what the merchants of one section sell.

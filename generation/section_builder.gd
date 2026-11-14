@@ -381,6 +381,58 @@ func _free_spot(grid: LevelGrid, room: PlacedRoom, taken: Dictionary) -> Vector2
 
 # --- contents ------------------------------------------------------------
 
+## The merchant's glade between depths (stage 25): one open clearing with rocky bumps
+## along its top and bottom edges, the entrance on the west and the gate on the east, a
+## sunlit patch in the middle, the merchant above it and props along the edges. No
+## enemies. All randomness from rng (GameManager.make_glade_rng).
+func build_glade(data: GladeData, rng: RandomNumberGenerator) -> SectionLayout:
+	var layout: SectionLayout = SectionLayout.new()
+	var inner: Rect2i = Rect2i(Vector2i(MARGIN + 1, MARGIN + 1), data.size)
+	layout.grid = LevelGrid.new(data.size.x + (MARGIN + 1) * 2, data.size.y + (MARGIN + 1) * 2)
+	layout.grid.fill_rect(inner, LevelGrid.Cell.FLOOR)
+	var middle: Vector2i = inner.get_center()
+	# Bumps of rock eat into the top and bottom rows, never into the middle band.
+	for _i in data.bumps:
+		var x: int = rng.randi_range(inner.position.x + 2, inner.end.x - 3)
+		var top: bool = rng.randf() < 0.5
+		var depth: int = rng.randi_range(1, 2)
+		for k in depth:
+			var y: int = inner.position.y + k if top else inner.end.y - 1 - k
+			layout.grid.set_cell(Vector2i(x, y), LevelGrid.Cell.WALL)
+			layout.grid.set_cell(Vector2i(x + 1, y), LevelGrid.Cell.WALL)
+	layout.entrance = Vector2i(inner.position.x + 1, middle.y)
+	layout.exit = Vector2i(inner.end.x - 2, middle.y)
+	layout.room_rects.append(inner.grow(1))
+	layout.room_names.append(&"glade")
+	layout.path_room_count = 1
+	layout.grid.theme_regions.append({"rect": Rect2i(Vector2i.ZERO, Vector2i(layout.grid.width, layout.grid.height)), "theme": data.theme})
+	# A sunlit patch in the middle, old slabs around it.
+	var patch: Rect2i = Rect2i(middle - data.sunlit_size / 2, data.sunlit_size)
+	var ring: Rect2i = patch.grow(data.paved_ring)
+	for y in range(ring.position.y, ring.end.y):
+		for x in range(ring.position.x, ring.end.x):
+			var cell: Vector2i = Vector2i(x, y)
+			if patch.has_point(cell):
+				layout.grid.sunlit[cell] = true
+			elif layout.grid.is_floor(cell):
+				layout.grid.paved[cell] = true
+	var merchant: Vector2i = middle + data.merchant_offset
+	layout.grid.set_cell(merchant, LevelGrid.Cell.FLOOR)
+	layout.items.append({"id": SectionLayout.ITEM_MERCHANT, "cell": merchant, "room": 0})
+	# Props stand on the floor cells of the top and bottom rows, away from the middle.
+	var spots: Array[Vector2i] = []
+	for x in range(inner.position.x + 2, inner.end.x - 2):
+		for y in [inner.position.y, inner.end.y - 1]:
+			var cell: Vector2i = Vector2i(x, y)
+			if layout.grid.is_floor(cell) and absi(x - middle.x) > data.sunlit_size.x:
+				spots.append(cell)
+	if not data.props.is_empty():
+		for _i in mini(data.prop_count, spots.size()):
+			var cell: Vector2i = spots.pop_at(rng.randi_range(0, spots.size() - 1))
+			layout.decor.append({"prop": rng.randi_range(0, data.props.size() - 1), "cell": cell})
+	return layout
+
+
 ## A secret room behind a wall of a room of the path, in solid rock: an ordinary wall
 ## cell with floor in front is the crack, the room lies right behind it. The grid is not
 ## changed at all: the room stays rock (nothing shows it, not even the shape of the walls

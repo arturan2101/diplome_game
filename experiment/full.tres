@@ -9,6 +9,7 @@ boss_enabled = true
 spells_enabled = true
 combat_rooms = true
 elite_enemies = true
+merchant_glade = true
 secret_rooms = true
 spike_traps = true
 rarity_enabled = true

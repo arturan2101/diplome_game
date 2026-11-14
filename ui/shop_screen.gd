@@ -17,6 +17,10 @@ signal closed
 @export var choices: Container
 @export var leave_button: Button
 @export var choice_size: Vector2 = Vector2(120.0, 72.0)
+## Frame of an offer (a 9-patch with gold edges), and how the button looks when it is off.
+@export var slot_texture: Texture2D = preload("res://assets/art/ui/trade_slot.png")
+@export var slot_margin: float = 4.0
+@export var disabled_tint: Color = Color(0.55, 0.55, 0.6)
 
 var merchant: Merchant = null
 var _coins: int = 0
@@ -61,8 +65,22 @@ func refresh(coins: int) -> void:
 		button.custom_minimum_size = choice_size
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		button.disabled = offer.sold or offer.price > coins
+		if slot_texture != null:
+			for state: String in ["normal", "hover", "pressed", "focus"]:
+				button.add_theme_stylebox_override(state, _slot_style(Color.WHITE))
+			button.add_theme_stylebox_override("disabled", _slot_style(disabled_tint))
 		button.pressed.connect(_on_offer_pressed.bind(offer))
 		choices.add_child(button)
+
+
+func _slot_style(tint: Color) -> StyleBoxTexture:
+	var style: StyleBoxTexture = StyleBoxTexture.new()
+	style.texture = slot_texture
+	style.modulate_color = tint
+	for side: int in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+		style.set_texture_margin(side, slot_margin)
+		style.set_content_margin(side, slot_margin + 4.0)
+	return style
 
 
 ## The buttons of the offers, in offer order (for tests and the bot).

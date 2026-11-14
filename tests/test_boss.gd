@@ -201,8 +201,9 @@ func _test_boss_arena() -> void:
 	boss.health.take_damage(DamageInfo.new(BIG_HP, null, &"test", Vector2.ZERO))
 	await physics_frames(2)
 	check(_servants(game) == 0 and not game.hud.boss_bar.visible, "when the boss falls its servants crumble")
-	check(game.spell_choice.is_open() and get_tree().paused, "beating the boss offers a spell")
-	game.spell_choice.back_button.pressed.emit()
+	# The full game sells spells at the merchant's glade (stage 25): no spell after the boss.
+	check(not game.spell_choice.is_open() and not get_tree().paused,
+			"beating the boss offers no spell: the glade's merchant sells them")
 	for enemy: Enemy in game.get_enemies():
 		enemy.health.take_damage(DamageInfo.new(BIG_HP, null, &"test"))
 	await physics_frames(3)

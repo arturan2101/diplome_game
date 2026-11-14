@@ -29,6 +29,7 @@ const ITEM_SCENES: Dictionary = {
 	SectionLayout.ITEM_MERCHANT: preload("res://actors/npc/merchant.tscn"),
 }
 const DEFAULT_SHOP: ShopData = preload("res://shop/shop.tres")
+const DEFAULT_GLADE: GladeData = preload("res://generation/glade.tres")
 const SHOP_SCREEN_SCENE: PackedScene = preload("res://ui/shop_screen.tscn")
 ## How many past sections the director looks at for "who hurts the player".
 const RECENT_SECTIONS: int = 3
@@ -69,6 +70,11 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 @export var shop_data: ShopData
 ## The shop screen. Empty = one is created from ui/shop_screen.tscn.
 @export var shop_screen: ShopScreen
+## The merchant's glade between depths. Empty = generation/glade.tres.
+@export var glade_data: GladeData
+## With the glade (spells are bought there), a secret room's chest holds a spell
+## scroll with this chance, as a reward for finding it; other chests hold none.
+@export_range(0.0, 1.0) var secret_chest_spell_chance: float = 0.25
 
 var plan: SectionPlan = null
 var layout: SectionLayout = null
@@ -90,6 +96,8 @@ var _loot_rng: RandomNumberGenerator = null
 var _pending_scroll: SpellPickup = null
 ## Combat rooms of the current section (doors lock, waves with spawn warnings).
 var _combat: CombatRoomTracker = null
+## True while the player is on the glade between depths (not a section).
+var _in_glade: bool = false
 ## The bot playing this run, if any (simulations skip the boss's spell reward).
 var _bot: BotPlayer = null
 ## Servants the boss called that are still alive, including ones not yet added to the
@@ -110,6 +118,8 @@ func _ready() -> void:
 	spell_choice.closed.connect(_on_spell_choice_closed)
 	if shop_data == null:
 		shop_data = DEFAULT_SHOP
+	if glade_data == null:
+		glade_data = DEFAULT_GLADE
 	if shop_screen == null:
 		shop_screen = SHOP_SCREEN_SCENE.instantiate() as ShopScreen
 		add_child(shop_screen)
@@ -157,6 +167,11 @@ func is_arena_sealed() -> bool:
 ## The combat rooms of the current section.
 func get_combat_rooms() -> CombatRoomTracker:
 	return _combat
+
+
+## True while the player is on the merchant's glade between depths.
+func is_in_glade() -> bool:
+	return _in_glade
 
 
 ## Enemy data by type id (from the director's catalog).
@@ -248,8 +263,41 @@ func _start_section() -> void:
 		gate.open()
 
 
+## The merchant's glade between depths: a quiet clearing with the merchant, props and
+## the gate; no enemies. Not a section: the section counters and lines do not change.
+func _start_glade() -> void:
+	_in_glade = true
+	var rng: RandomNumberGenerator = GameManager.make_glade_rng(GameManager.depth)
+	layout = _builder.build_glade(glade_data, rng)
+	_is_arena_sealed = false
+	_is_arena_cleared = false
+	_clear_section()
+	level.build(layout.grid)
+	_contents = Node2D.new()
+	_contents.name = "Contents"
+	level.add_child(_contents)
+	_spawn_gate()
+	gate.open()
+	_combat.setup(layout)
+	for entry: Dictionary in layout.items:
+		_spawn_item(entry, rng)
+	for entry: Dictionary in layout.decor:
+		var prop: Sprite2D = Sprite2D.new()
+		prop.texture = glade_data.props[int(entry["prop"])]
+		# The bottom of the picture stands on the bottom of its cell.
+		prop.offset = Vector2(0.0, 8.0 - prop.texture.get_height() * 0.5)
+		prop.position = level.to_local(level.cell_center(entry["cell"]))
+		_contents.add_child(prop)
+	player.teleport(level.cell_center(layout.entrance))
+	Telemetry.begin_glade(GameManager.depth)
+	hud.show_banner("A quiet glade")
+
+
 func _make_player_state() -> PlayerState:
 	var state: PlayerState = PlayerState.new()
+	state.coins = GameManager.coins
+	state.glade_purchases = Telemetry.last_glade_purchases.duplicate()
+	state.glade_coins_spent = Telemetry.last_glade_spent
 	state.section_index = GameManager.section_index
 	state.depth = GameManager.depth
 	state.hp_fraction = float(player.health.hp) / float(player.health.max_hp)
@@ -296,7 +344,8 @@ func _spawn_items() -> void:
 			_spawn_item(entry)
 
 
-func _spawn_item(entry: Dictionary) -> void:
+## shop_rng: where a merchant's stock comes from (default: the section's shop stream).
+func _spawn_item(entry: Dictionary, shop_rng: RandomNumberGenerator = null) -> void:
 	var item: Node2D = (ITEM_SCENES[entry["id"]] as PackedScene).instantiate() as Node2D
 	item.position = level.to_local(level.cell_center(entry["cell"]))
 	var chest: Chest = item as Chest
@@ -304,7 +353,7 @@ func _spawn_item(entry: Dictionary) -> void:
 		# Loot is decided now, in spawn order, so the same seed gives the same chests.
 		chest.loot_weapon = _roll_chest_weapon()
 		chest.loot_coins = _loot_rng.randi_range(chest_coins_min, chest_coins_max)
-		if GameManager.config.spells_enabled and _loot_rng.randf() < chest_spell_chance:
+		if GameManager.config.spells_enabled and _loot_rng.randf() < _chest_spell_chance(entry):
 			chest.loot_spell = spell_pool.pick(_loot_rng)
 		chest.opened.connect(_on_chest_opened)
 	var shrine: Shrine = item as Shrine
@@ -313,11 +362,20 @@ func _spawn_item(entry: Dictionary) -> void:
 	var merchant: Merchant = item as Merchant
 	if merchant != null:
 		merchant.wandering = entry.get("secret", false)
-		merchant.offers = ShopStock.make_offers(shop_data, GameManager.depth, GameManager.make_shop_rng(GameManager.section_index),
+		var stock_rng: RandomNumberGenerator = shop_rng if shop_rng != null else GameManager.make_shop_rng(GameManager.section_index)
+		merchant.offers = ShopStock.make_offers(shop_data, GameManager.depth, stock_rng,
 				chest_weapons, rarity_table if GameManager.config.rarity_enabled else null,
 				spell_pool if GameManager.config.spells_enabled else null, player.spell_book, merchant.wandering)
 		merchant.shop_requested.connect(_on_shop_requested)
 	_contents.add_child(item)
+
+
+## Chance of a spell scroll in this chest. With the glade, spells are bought: only a
+## secret room's chest holds one, now and then, as a reward for finding it.
+func _chest_spell_chance(entry: Dictionary) -> float:
+	if not GameManager.config.merchant_glade:
+		return chest_spell_chance
+	return secret_chest_spell_chance if entry.get("secret", false) else 0.0
 
 
 ## The cracked wall in front of the secret room, if the section has one.
@@ -491,7 +549,8 @@ func _on_boss_defeated() -> void:
 	_servants.clear()
 	hud.hide_boss()
 	hud.show_banner("The Guardian has fallen")
-	if _bot == null and GameManager.config.spells_enabled:
+	# With the glade, spells are bought from its merchant instead.
+	if _bot == null and GameManager.config.spells_enabled and not GameManager.config.merchant_glade:
 		spell_choice.open_offers.call_deferred(spell_pool.offer(shrine_offer_count, _loot_rng), player.spell_book)
 
 
@@ -621,14 +680,25 @@ func _on_gate_entered(_player: Player) -> void:
 	_is_changing_section = true
 	player.set_controls_enabled(false)
 	await hud.fade_out()
-	Telemetry.end_section(false)
-	section_finished.emit(plan, layout)
-	if Playtest.is_block_over():
-		# A playtest block ends at the first gate after its time: survey instead of a new section.
-		Playtest.finish_block()
-		return
-	GameManager.advance_section()
-	_start_section()
+	if _in_glade:
+		# Off the glade into the first section of the new depth (already counted).
+		Telemetry.end_glade()
+		_in_glade = false
+		_start_section()
+	else:
+		var after_arena: bool = is_arena()
+		Telemetry.end_section(false)
+		section_finished.emit(plan, layout)
+		if Playtest.is_block_over():
+			# A playtest block ends at the first gate after its time: survey instead of a new section.
+			Playtest.finish_block()
+			return
+		GameManager.advance_section()
+		# Between depths: the merchant's glade.
+		if after_arena and GameManager.config.merchant_glade:
+			_start_glade()
+		else:
+			_start_section()
 	await hud.fade_in()
 	player.set_controls_enabled(true)
 	_is_changing_section = false

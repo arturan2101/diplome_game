@@ -76,7 +76,8 @@ Assets the code already uses with placeholders; integration = repointing the res
 | C | Nature theme (secret rooms, the glade) with the sunlit floor | level/nature_theme.tres | 16x16 | - | `level/level.gd`: `DEFAULT_REGION_THEMES` (`&"nature"`); `sunlit_floor_tile` (slot 6) under the light from above | integrated |
 | C | Merchant and wandering merchant (idle), goods carpet | assets/art/characters/merchant_frames.tres, merchant_wander_frames.tres, assets/art/props/merchant_carpet.png | 24x24, 32x16 | idle 4 | `actors/npc/merchant.gd`: `frames`, `wandering_frames`, `carpet` | integrated |
 | N | Light shaft from above (soft warm beam, bottom centre on the node) | assets/art/fx/light_shaft.png | about 32x48 | 1 | `level/light_shaft.gd`: `texture` | todo (drawn in code) |
-| N | Shop screen: panel frame, item slots, icons | assets/art/ui/trade_panel.png, trade_slot.png, shop_icons.png | 24x24, 20x20, 16x16 | 1 | `ui/shop_screen.tscn` | art ready; wired in stage 25 (the glade) |
+| N | Shop screen: panel frame, item slots, healing icon | assets/art/ui/trade_panel.png, trade_slot.png, shop_icons.png (slot 0) | 24x24, 20x20, 16x16 | 1 | `ui/shop_screen.tscn` (frame), `ui/shop_screen.gd` (`slot_texture`), `assets/sprites/shop_heal_icon.tres` | integrated |
+| C | Glade: open grass, sunlit patch with old slabs around it, props | nature_tiles_atlas.png slots (7, 0), (6, 0), (0-2, 0); assets/art/props/big_tree.png, broken_column.png | 16x16, 32x26, 16x24 | 1 | `level/glade_theme.tres` (`floor_tiles`, `sunlit_floor_tile`, `paved_floor_tiles`), `generation/glade.tres` (`props`) | integrated |
 
 Check spike sprites with `tests/manual/spikes_preview.tscn` (saves the five phases side by side).
 

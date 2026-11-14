@@ -5,7 +5,7 @@ extends RefCounted
 
 enum Kind { HEAL, WEAPON, SPELL, SPELL_LEVEL }
 
-const HEAL_ICON: Texture2D = preload("res://assets/sprites/health_potion.tres")
+const HEAL_ICON: Texture2D = preload("res://assets/sprites/shop_heal_icon.tres")
 
 var kind: Kind = Kind.HEAL
 var price: int = 0

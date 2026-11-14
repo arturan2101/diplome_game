@@ -23,6 +23,9 @@ extends Resource
 ## and wall_top_tiles. (-1, -1) = the crack wall looks like any wall.
 @export var cracked_wall_tile: Vector2i = Vector2i(-1, -1)
 @export var cracked_wall_top_tile: Vector2i = Vector2i(-1, -1)
+## Old slabs laid on purpose (around the glade's sunlit patch), picked per cell; empty =
+## ordinary floor there.
+@export var paved_floor_tiles: Array[Vector2i] = []
 ## Floor in a patch of light from above (placed on purpose, never a random variant).
 ## (-1, -1) = none.
 @export var sunlit_floor_tile: Vector2i = Vector2i(-1, -1)
