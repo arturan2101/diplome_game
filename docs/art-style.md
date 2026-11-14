@@ -141,4 +141,4 @@ Ruins that nature broke into: the same pixel art, 16x16 tiles, 1 px #08070b outl
 - Wall front: the same dark bricks with roots crossing them and moss in the mortar; the top strip is grass over warm stone.
 - Wall top: grass (#5a8a4a) with a few stones showing through, always much lighter than the floor.
 - Light from above: never a random floor variant; a whole sunlit patch (a lighter, warmer floor area, no dynamic light) placed on purpose, e.g. in the middle of the glade.
-- Files: `assets/art/tiles/nature_tiles_atlas.png` (slots 0-2 floor, 3 wall front, 4 wall top, 5 cover: a mossy stump, 6 sunlit floor), theme `level/nature_theme.tres`, generator `tools/art/make_nature_tiles.py`, preview `tests/manual/theme_preview.tscn`.
+- Files: `assets/art/tiles/nature_tiles_atlas.png` (slots 0-2 floor, 3 wall front, 4 wall top, 5 cover: a small tree, 6 sunlit floor), theme `level/nature_theme.tres`, generator `tools/art/make_nature_tiles.py`, preview `tests/manual/theme_preview.tscn`.
