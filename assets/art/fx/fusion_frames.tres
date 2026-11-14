@@ -1,0 +1,373 @@
+[gd_resource type="SpriteFrames" load_steps=55 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/fx/firestorm_l1.png" id="firestorm_l1"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/firestorm_l2.png" id="firestorm_l2"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/firestorm_l3.png" id="firestorm_l3"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/blizzard_l1.png" id="blizzard_l1"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/blizzard_l2.png" id="blizzard_l2"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/blizzard_l3.png" id="blizzard_l3"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/steam_l1.png" id="steam_l1"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/steam_l2.png" id="steam_l2"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/steam_l3.png" id="steam_l3"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/merge.png" id="merge"]
+
+[sub_resource type="AtlasTexture" id="firestorm_l1_0"]
+atlas = ExtResource("firestorm_l1")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="firestorm_l1_1"]
+atlas = ExtResource("firestorm_l1")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="firestorm_l1_2"]
+atlas = ExtResource("firestorm_l1")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="firestorm_l1_3"]
+atlas = ExtResource("firestorm_l1")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="firestorm_l2_0"]
+atlas = ExtResource("firestorm_l2")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="firestorm_l2_1"]
+atlas = ExtResource("firestorm_l2")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="firestorm_l2_2"]
+atlas = ExtResource("firestorm_l2")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="firestorm_l2_3"]
+atlas = ExtResource("firestorm_l2")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="firestorm_l3_0"]
+atlas = ExtResource("firestorm_l3")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="firestorm_l3_1"]
+atlas = ExtResource("firestorm_l3")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="firestorm_l3_2"]
+atlas = ExtResource("firestorm_l3")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="firestorm_l3_3"]
+atlas = ExtResource("firestorm_l3")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="blizzard_l1_0"]
+atlas = ExtResource("blizzard_l1")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="blizzard_l1_1"]
+atlas = ExtResource("blizzard_l1")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="blizzard_l1_2"]
+atlas = ExtResource("blizzard_l1")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="blizzard_l1_3"]
+atlas = ExtResource("blizzard_l1")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="blizzard_l2_0"]
+atlas = ExtResource("blizzard_l2")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="blizzard_l2_1"]
+atlas = ExtResource("blizzard_l2")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="blizzard_l2_2"]
+atlas = ExtResource("blizzard_l2")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="blizzard_l2_3"]
+atlas = ExtResource("blizzard_l2")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="blizzard_l3_0"]
+atlas = ExtResource("blizzard_l3")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="blizzard_l3_1"]
+atlas = ExtResource("blizzard_l3")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="blizzard_l3_2"]
+atlas = ExtResource("blizzard_l3")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="blizzard_l3_3"]
+atlas = ExtResource("blizzard_l3")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="steam_l1_0"]
+atlas = ExtResource("steam_l1")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="steam_l1_1"]
+atlas = ExtResource("steam_l1")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="steam_l1_2"]
+atlas = ExtResource("steam_l1")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="steam_l1_3"]
+atlas = ExtResource("steam_l1")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="steam_l2_0"]
+atlas = ExtResource("steam_l2")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="steam_l2_1"]
+atlas = ExtResource("steam_l2")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="steam_l2_2"]
+atlas = ExtResource("steam_l2")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="steam_l2_3"]
+atlas = ExtResource("steam_l2")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="steam_l3_0"]
+atlas = ExtResource("steam_l3")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="steam_l3_1"]
+atlas = ExtResource("steam_l3")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="steam_l3_2"]
+atlas = ExtResource("steam_l3")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="steam_l3_3"]
+atlas = ExtResource("steam_l3")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="merge_0"]
+atlas = ExtResource("merge")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="merge_1"]
+atlas = ExtResource("merge")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="merge_2"]
+atlas = ExtResource("merge")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="merge_3"]
+atlas = ExtResource("merge")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="merge_4"]
+atlas = ExtResource("merge")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="merge_5"]
+atlas = ExtResource("merge")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="merge_6"]
+atlas = ExtResource("merge")
+region = Rect2(192, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="merge_7"]
+atlas = ExtResource("merge")
+region = Rect2(224, 0, 32, 32)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("firestorm_l1_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("firestorm_l1_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("firestorm_l1_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("firestorm_l1_3")
+}],
+"loop": true,
+"name": &"firestorm_l1",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("firestorm_l2_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("firestorm_l2_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("firestorm_l2_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("firestorm_l2_3")
+}],
+"loop": true,
+"name": &"firestorm_l2",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("firestorm_l3_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("firestorm_l3_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("firestorm_l3_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("firestorm_l3_3")
+}],
+"loop": true,
+"name": &"firestorm_l3",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("blizzard_l1_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("blizzard_l1_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("blizzard_l1_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("blizzard_l1_3")
+}],
+"loop": true,
+"name": &"blizzard_l1",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("blizzard_l2_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("blizzard_l2_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("blizzard_l2_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("blizzard_l2_3")
+}],
+"loop": true,
+"name": &"blizzard_l2",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("blizzard_l3_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("blizzard_l3_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("blizzard_l3_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("blizzard_l3_3")
+}],
+"loop": true,
+"name": &"blizzard_l3",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("steam_l1_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("steam_l1_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("steam_l1_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("steam_l1_3")
+}],
+"loop": true,
+"name": &"steam_l1",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("steam_l2_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("steam_l2_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("steam_l2_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("steam_l2_3")
+}],
+"loop": true,
+"name": &"steam_l2",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("steam_l3_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("steam_l3_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("steam_l3_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("steam_l3_3")
+}],
+"loop": true,
+"name": &"steam_l3",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("merge_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("merge_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("merge_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("merge_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("merge_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("merge_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("merge_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("merge_7")
+}],
+"loop": false,
+"name": &"merge",
+"speed": 16.0
+}]

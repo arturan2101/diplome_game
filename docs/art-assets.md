@@ -238,3 +238,11 @@ Each element has 3 levels: bigger, brighter, more particles; level 3 adds a new 
 - Wind (the whirlwind ring): `wind_l1..3` in `element_frames.tres` (48x48, 4 frames, 12 fps, flat on the ground; more rings each level, level 3 carries stones and leaves).
 - HUD: `element_icons.png` (16x16: fire, ice, wind) and `level_pips.png` (16x4 each, level 1, 2, 3: gold marks under the icon).
 - Wiring by level is for the session that owns the spells (pick the animation or texture by the spell's level).
+
+## Fused elements (art, 2026-11-14)
+
+Pairs follow docs/design.md; each has 3 levels and looks stronger than the plain elements even on level 1 (more rings, a dense glowing core, two colour families). Files in assets/art/fx/, generator tools/art/make_fusion_frames.py, all in fusion_frames.tres (48x48, 4 frames, 12 fps, loop):
+- firestorm_l1..3 = fire + wind (a burning whirlwind), blizzard_l1..3 = ice + wind (snow and ice shards), steam_l1..3 = fire + ice (a boiling cloud with hot drops). Level 3 adds a second, faster swarm on the outer ring.
+- merge (32x32, 8 frames, 16 fps, plays once): two coloured sparks spiral in, a flash, the new element bursts out. Play it where the two spells merge.
+- HUD icons: fusion_icons.png (16x16: firestorm, blizzard, steam); the level marks are the same level_pips.png as for the plain elements.
+- If the combination table gets other pairs, add them to PAIRS in the generator (two colour ramps and a spark colour).
