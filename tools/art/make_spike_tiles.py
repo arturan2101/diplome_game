@@ -16,10 +16,9 @@ COL = {
     "e": "#4c4e5f", "t": "#5d6072", "g": "#9aa2ad", "G": "#d8d4c4", "W": "#f4f0e0",
 }
 # Base centre (x, y) of each spike; the back row first, so the front row covers it.
-SLOTS = [(3, 8), (7, 8), (11, 8), (5, 14), (9, 14), (13, 14)]
-FULL = 7
+SLOTS = [(4, 5), (11, 5), (7, 9), (4, 13), (11, 13)]
+FULL = 3
 # Half-width of a spike at its base: 1 = three pixels wide, a slim blade.
-BASE_HALF = 1
 
 
 def rgb(key):
@@ -45,29 +44,23 @@ def plate(dx=0):
 
 
 def cone(img, cx, by, height):
-    """A spike growing up from (cx, by): width shrinks to a point at the top."""
+    """A squat pyramid growing up from (cx, by), seen from above at 3/4: a lit left
+    face, a dark right face and a grey ridge up the middle to the point. Its base is
+    2 * height - 1 pixels wide, so the whole field stays inside the tile."""
     if height <= 0:
         return
     px = img.load()
     for h in range(height):
         y = by - h
-        # Wide only at the base, then a long thin point: a blade, not a rod.
-        half = BASE_HALF if h < max(1, height // 3) else 0
+        half = height - 1 - h
         for x in range(cx - half, cx + half + 1):
-            if not (0 <= x < T and 0 <= y < T):
-                continue
-            if h == height - 1:
-                key = "t"  # the point in the same steel as the shaft, no highlight
-            elif x < cx:
-                key = "g"
-            elif x == cx:
-                key = "t"
-            else:
-                key = "e"
-            px[x, y] = rgb(key)
+            if 0 <= x < T and 0 <= y < T:
+                px[x, y] = rgb("g" if x == cx else ("t" if x < cx else "e"))
+    if 0 <= by - height < T:
+        px[cx, by - height] = rgb("g")
     # A small shadow at the base on the right (light from the top-left).
-    if 0 <= cx + 2 < T and 0 <= by < T:
-        px[cx + 2, by] = rgb("k")
+    if 0 <= cx + height < T and 0 <= by < T:
+        px[cx + height, by] = rgb("k")
 
 
 def raised(height):
@@ -83,17 +76,17 @@ def warn(frame):
     px = img.load()
     for i, (cx, by) in enumerate(SLOTS):
         if (i + frame) % 2 == 0:
-            px[cx + frame % 2, by] = rgb("G")
-            px[cx - 1 + frame % 2, by] = rgb("g")
+            px[cx + frame % 2, by] = rgb("g")
+            px[cx - 1 + frame % 2, by] = rgb("t")
     return img
 
 
 STATES = {
     "hidden": ([plate()], 2.0, True),
     "warn": ([warn(i) for i in range(4)], 12.0, True),
-    "rise": ([raised(3), raised(5)], 20.0, False),
+    "rise": ([raised(1), raised(2)], 20.0, False),
     "up": ([raised(FULL), raised(FULL)], 4.0, True),
-    "retract": ([raised(5), raised(2), plate()], 15.0, False),
+    "retract": ([raised(2), raised(1), plate()], 15.0, False),
 }
 
 
