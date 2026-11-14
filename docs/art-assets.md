@@ -210,3 +210,7 @@ Tiles (hand-drawn in Aseprite, no AI):
 - Cracked wall tiles in `assets/art/tiles/ruins_tiles_atlas.png`: slot (6, 0) brick front with a thin crack, slot (7, 0) wall top with a crack. They look like ordinary walls from afar; up close the dark zig-zag with a lit lip is visible. To use: the level draws a secret wall cell with these instead of `wall_tiles` / `wall_top_tiles` (needs a theme field and a line in the level code, mechanics session).
 - Collapse: `actors/effects/wall_collapse.tscn` (`WallCollapse`): put it at the centre of the wall cell when the wall opens; it plays `assets/art/fx/wall_collapse.png` (6 frames 16x24: crack spreads, blocks fall, rubble), throws dust and stone chips, leaves the rubble about 3 s and frees itself.
 - Generator: `tools/art/make_secret_wall.py`.
+
+## Nature theme (art, 2026-11-14)
+
+- `level/nature_theme.tres` (TileTheme): give it to a Level (its `theme`) for a secret room or the glade; hazards use the ruins hazard atlas. Sunlit floor tile: slot (6, 0) of `assets/art/tiles/nature_tiles_atlas.png`, for a placed light patch, not a random variant. Style: docs/art-style.md, "Nature theme".

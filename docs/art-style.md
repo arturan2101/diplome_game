@@ -131,3 +131,14 @@ Palette: only the 32-color Ruins palette (docs/art-style.md), ramps: <ramps>
 Style: dark ruins pixel art, 1 px #08070b outline, 1 px top-left rim light, 3-tone shading, must read at 1x on dark grey-blue stone floor
 Avoid: anti-aliasing, dithering, gradients, semi-transparent pixels, off-palette colors, background, text, pillow shading, warm/sandy environment colors
 ```
+
+## Nature theme (secret rooms, the merchant's glade)
+
+Ruins that nature broke into: the same pixel art, 16x16 tiles, 1 px #08070b outline on actors and objects (none on tiles), light from the top-left, 3 tones per material. The palette is warmer and greener than the dark ruins, so these places feel like a reward and a breather.
+
+- Extra colors for this theme only (on top of the 32-color palette): grass #5a8a4a, grass highlight #8ac060, warm lit stone #8a8466 / #6a6656, sunlit stone #9a9470 / #c8c088. Moss #263a32 / #3b5a45, bark #4a2f22 / #7a4a2c and flowers #e0a070 / #ffd860 / #e85a3a come from the main palette.
+- Floor: the same old slabs (#3f4050 / #343442, seams #2a2935) with grass and moss growing in the seams and a few small flowers. Values stay in the floor range, so actors still pop.
+- Wall front: the same dark bricks with roots crossing them and moss in the mortar; the top strip is grass over warm stone.
+- Wall top: grass (#5a8a4a) with a few stones showing through, always much lighter than the floor.
+- Light from above: never a random floor variant; a whole sunlit patch (a lighter, warmer floor area, no dynamic light) placed on purpose, e.g. in the middle of the glade.
+- Files: `assets/art/tiles/nature_tiles_atlas.png` (slots 0-2 floor, 3 wall front, 4 wall top, 5 cover: a mossy stump, 6 sunlit floor), theme `level/nature_theme.tres`, generator `tools/art/make_nature_tiles.py`, preview `tests/manual/theme_preview.tscn`.
