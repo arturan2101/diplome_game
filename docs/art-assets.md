@@ -204,3 +204,9 @@ Tiles (hand-drawn in Aseprite, no AI):
 - Triple-shot archer: `assets/art/enemies/archer_elite.png` (16x16 still, like the ordinary archer: dark red cloth, three arrow heads above). To use: `sprite` of `actors/enemies/archer_triple.tres`.
 - Wave / elite spawn warning: `actors/effects/spawn_warning.tscn` (`SpawnWarning`, a flat ring on the floor that grows and turns brighter for `duration` seconds, 0.8 by default, then frees itself; strip `assets/art/fx/spawn_warning.png`, 8 frames 32x32). Add it at the spawn cell and spawn the enemy when it is done.
 - Generator: `tools/art/make_elite_frames.py`. Wiring into the mechanics session's files is left to that session.
+
+## Secret wall (art, 2026-11-14)
+
+- Cracked wall tiles in `assets/art/tiles/ruins_tiles_atlas.png`: slot (6, 0) brick front with a thin crack, slot (7, 0) wall top with a crack. They look like ordinary walls from afar; up close the dark zig-zag with a lit lip is visible. To use: the level draws a secret wall cell with these instead of `wall_tiles` / `wall_top_tiles` (needs a theme field and a line in the level code, mechanics session).
+- Collapse: `actors/effects/wall_collapse.tscn` (`WallCollapse`): put it at the centre of the wall cell when the wall opens; it plays `assets/art/fx/wall_collapse.png` (6 frames 16x24: crack spreads, blocks fall, rubble), throws dust and stone chips, leaves the rubble about 3 s and frees itself.
+- Generator: `tools/art/make_secret_wall.py`.
