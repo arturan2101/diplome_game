@@ -71,6 +71,12 @@ Assets the code already uses with placeholders; integration = repointing the res
 | C | Elite triple-shot archer | assets/art/enemies/archer_elite.png | 16x16 | 1 (still, like the archer) | `actors/enemies/archer_triple.tres`: `sprite` | integrated |
 | C | Spawn warning ring (combat-room waves) | actors/effects/spawn_warning.tscn | 32x32 | 8 | `actors/enemies/spawn_marker.gd`: `look_scene` | integrated; the marker sets the ring's `z_index` to 0 after it is ready (at -1 the ring was drawn under the floor tiles) and puts itself first among the section's nodes, so the ring is above the floor and below the actors |
 | N | Animation of the triple-shot archer (idle, walk, shoot), like the other enemies | assets/art/enemies/archer_elite_frames.tres | 24x24 | as the skeleton | `actors/enemies/archer_triple.tres`: `sprite_frames` | todo |
+| C | Cracked wall (front and top) | assets/art/tiles/ruins_tiles_atlas.png slots (6, 0), (7, 0) | 16x16 | 1 each | `level/ruins_theme.tres`: `cracked_wall_tile`, `cracked_wall_top_tile` (the level draws `LevelGrid.cracked` cells with them) | integrated |
+| C | Wall collapse | actors/effects/wall_collapse.tscn | 16x24 | 6 | `level/breakable_wall.gd`: `collapse_scene` | integrated |
+| C | Nature theme (secret rooms, the glade) with the sunlit floor | level/nature_theme.tres | 16x16 | - | `level/level.gd`: `DEFAULT_REGION_THEMES` (`&"nature"`); `sunlit_floor_tile` (slot 6) under the light from above | integrated |
+| C | Merchant and wandering merchant (idle), goods carpet | assets/art/characters/merchant_frames.tres, merchant_wander_frames.tres, assets/art/props/merchant_carpet.png | 24x24, 32x16 | idle 4 | `actors/npc/merchant.gd`: `frames`, `wandering_frames`, `carpet` | integrated |
+| N | Light shaft from above (soft warm beam, bottom centre on the node) | assets/art/fx/light_shaft.png | about 32x48 | 1 | `level/light_shaft.gd`: `texture` | todo (drawn in code) |
+| N | Shop screen: panel frame, item slots, icons | assets/art/ui/trade_panel.png, trade_slot.png, shop_icons.png | 24x24, 20x20, 16x16 | 1 | `ui/shop_screen.tscn` | art ready; wired in stage 25 (the glade) |
 
 Check spike sprites with `tests/manual/spikes_preview.tscn` (saves the five phases side by side).
 
@@ -223,3 +229,12 @@ Tiles (hand-drawn in Aseprite, no AI):
 - Trade window: `assets/art/ui/trade_panel.png` (24x24, NinePatchRect / StyleBoxTexture with 8 px margins) and `trade_slot.png` (20x20 item frame with a gold edge).
 - Glade: ground = slot (7, 0) of `nature_tiles_atlas.png` (open grass), a sunlit patch of slot (6, 0) in the middle with old slabs (slots 0-2) around it; props `assets/art/props/broken_column.png` (16x24) and `big_tree.png` (32x26) around the edges, no collision in the sprites.
 - Generator: `tools/art/make_merchant.py`.
+
+## Elements by level (art, 2026-11-14)
+
+Each element has 3 levels: bigger, brighter, more particles; level 3 adds a new detail. Files in `assets/art/fx/`, generator `tools/art/make_element_frames.py`.
+- Fire (the fireball): `fire_l1..3` in `element_frames.tres` (4 frames, 12 fps; level 1-2 16x16, level 3 24x24 with a long flame tail), flies to the right (rotate to the direction). Level 3 also leaves `fire_trail` (16x16, 4 frames, burning ground).
+- Ice (a block of the ice wall): `ice_l1.png`, `ice_l2.png`, `ice_l3.png` (16x16; taller and shinier each level, level 3 with a frost rim on the floor).
+- Wind (the whirlwind ring): `wind_l1..3` in `element_frames.tres` (48x48, 4 frames, 12 fps, flat on the ground; more rings each level, level 3 carries stones and leaves).
+- HUD: `element_icons.png` (16x16: fire, ice, wind) and `level_pips.png` (16x4 each, level 1, 2, 3: gold marks under the icon).
+- Wiring by level is for the session that owns the spells (pick the animation or texture by the spell's level).

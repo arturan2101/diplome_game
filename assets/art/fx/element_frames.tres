@@ -1,0 +1,243 @@
+[gd_resource type="SpriteFrames" load_steps=36 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/fx/fire_l1.png" id="fire_l1"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/fire_l2.png" id="fire_l2"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/fire_l3.png" id="fire_l3"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/fire_trail.png" id="fire_trail"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/wind_l1.png" id="wind_l1"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/wind_l2.png" id="wind_l2"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/wind_l3.png" id="wind_l3"]
+
+[sub_resource type="AtlasTexture" id="fire_l1_0"]
+atlas = ExtResource("fire_l1")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="fire_l1_1"]
+atlas = ExtResource("fire_l1")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="fire_l1_2"]
+atlas = ExtResource("fire_l1")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="fire_l1_3"]
+atlas = ExtResource("fire_l1")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="fire_l2_0"]
+atlas = ExtResource("fire_l2")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="fire_l2_1"]
+atlas = ExtResource("fire_l2")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="fire_l2_2"]
+atlas = ExtResource("fire_l2")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="fire_l2_3"]
+atlas = ExtResource("fire_l2")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="fire_l3_0"]
+atlas = ExtResource("fire_l3")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="fire_l3_1"]
+atlas = ExtResource("fire_l3")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="fire_l3_2"]
+atlas = ExtResource("fire_l3")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="fire_l3_3"]
+atlas = ExtResource("fire_l3")
+region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="fire_trail_0"]
+atlas = ExtResource("fire_trail")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="fire_trail_1"]
+atlas = ExtResource("fire_trail")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="fire_trail_2"]
+atlas = ExtResource("fire_trail")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="fire_trail_3"]
+atlas = ExtResource("fire_trail")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="wind_l1_0"]
+atlas = ExtResource("wind_l1")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="wind_l1_1"]
+atlas = ExtResource("wind_l1")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="wind_l1_2"]
+atlas = ExtResource("wind_l1")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="wind_l1_3"]
+atlas = ExtResource("wind_l1")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="wind_l2_0"]
+atlas = ExtResource("wind_l2")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="wind_l2_1"]
+atlas = ExtResource("wind_l2")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="wind_l2_2"]
+atlas = ExtResource("wind_l2")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="wind_l2_3"]
+atlas = ExtResource("wind_l2")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="wind_l3_0"]
+atlas = ExtResource("wind_l3")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="wind_l3_1"]
+atlas = ExtResource("wind_l3")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="wind_l3_2"]
+atlas = ExtResource("wind_l3")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="wind_l3_3"]
+atlas = ExtResource("wind_l3")
+region = Rect2(144, 0, 48, 48)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("fire_l1_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("fire_l1_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("fire_l1_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("fire_l1_3")
+}],
+"loop": true,
+"name": &"fire_l1",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("fire_l2_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("fire_l2_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("fire_l2_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("fire_l2_3")
+}],
+"loop": true,
+"name": &"fire_l2",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("fire_l3_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("fire_l3_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("fire_l3_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("fire_l3_3")
+}],
+"loop": true,
+"name": &"fire_l3",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("fire_trail_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("fire_trail_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("fire_trail_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("fire_trail_3")
+}],
+"loop": true,
+"name": &"fire_trail",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("wind_l1_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("wind_l1_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("wind_l1_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("wind_l1_3")
+}],
+"loop": true,
+"name": &"wind_l1",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("wind_l2_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("wind_l2_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("wind_l2_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("wind_l2_3")
+}],
+"loop": true,
+"name": &"wind_l2",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("wind_l3_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("wind_l3_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("wind_l3_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("wind_l3_3")
+}],
+"loop": true,
+"name": &"wind_l3",
+"speed": 12.0
+}]
