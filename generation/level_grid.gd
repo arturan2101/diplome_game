@@ -23,6 +23,13 @@ var height: int = 0
 ## Phase shift in seconds of every timed spike cell (cell -> seconds): where in its
 ## cycle the cell is when the section starts.
 var spike_phase: Dictionary = {}
+## Wall cells drawn with a crack (the way into a secret room), as a set.
+var cracked: Dictionary = {}
+## Floor cells in a patch of light from above, as a set.
+var sunlit: Dictionary = {}
+## Parts of the grid drawn with another tile theme (a secret room's overgrown ruins):
+## {"rect": Rect2i, "theme": StringName (a key of Level.region_themes)}.
+var theme_regions: Array[Dictionary] = []
 
 var _cells: PackedByteArray = PackedByteArray()
 

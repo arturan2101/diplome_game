@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ShopData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://shop/shop_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+min_offers = 3
+max_offers = 4
+heal_weight = 1.0
+weapon_weight = 1.0
+spell_weight = 1.0
+heal_amount = 40
+heal_price = 8
+weapon_price = 14
+spell_price = 18
+spell_level_price = 14
+rarity_price = {
+&"common": 1.0,
+&"legendary": 3.0,
+&"rare": 1.8
+}
+price_growth_per_depth = 0.2
+wandering_discount = 0.7

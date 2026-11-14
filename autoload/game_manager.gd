@@ -95,7 +95,7 @@ func make_director() -> Director:
 ## copy, the shared settings resource stays as is.
 func _apply_config(director: Director) -> void:
 	if config.boss_enabled and config.spells_enabled and config.spike_traps and config.combat_rooms \
-			and config.elite_enemies and not config.soft_waves:
+			and config.elite_enemies and config.secret_rooms and not config.soft_waves:
 		return
 	director.settings = director.settings.duplicate() as DirectorSettings
 	if not config.boss_enabled:
@@ -110,6 +110,8 @@ func _apply_config(director: Director) -> void:
 		director.settings.combat_room_chance_random = 0.0
 	if not config.elite_enemies:
 		director.settings.elites_enabled = false
+	if not config.secret_rooms:
+		director.settings.secret_room = null
 	if config.soft_waves:
 		director.settings.peak_multiplier = director.settings.soft_peak_multiplier
 		director.settings.rest_multiplier = director.settings.soft_rest_multiplier
@@ -213,6 +215,23 @@ func make_loot_rng(index: int) -> RandomNumberGenerator:
 func add_coins(amount: int) -> void:
 	coins += amount
 	coins_changed.emit(coins)
+
+
+## Takes coins if there are enough (a purchase). Returns false and takes none otherwise.
+func spend_coins(amount: int) -> bool:
+	if amount < 0 or amount > coins:
+		return false
+	coins -= amount
+	coins_changed.emit(coins)
+	return true
+
+
+## Returns a new generator for what the merchants of one section sell.
+## Separate from the loot of chests, so a merchant does not change the chests.
+func make_shop_rng(index: int) -> RandomNumberGenerator:
+	var shop_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	shop_rng.seed = hash([run_seed, "shop", index])
+	return shop_rng
 
 
 func add_kill() -> void:

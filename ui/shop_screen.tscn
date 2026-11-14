@@ -1,0 +1,55 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/shop_screen.gd" id="1"]
+
+[node name="ShopScreen" type="CanvasLayer" node_paths=PackedStringArray("panel", "title", "coins_label", "choices", "leave_button")]
+layer = 20
+script = ExtResource("1")
+panel = NodePath("Panel")
+title = NodePath("Panel/Center/Box/Title")
+coins_label = NodePath("Panel/Center/Box/Coins")
+choices = NodePath("Panel/Center/Box/Choices")
+leave_button = NodePath("Panel/Center/Box/LeaveButton")
+
+[node name="Panel" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.75)
+
+[node name="Center" type="CenterContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Box" type="VBoxContainer" parent="Panel/Center"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Panel/Center/Box"]
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Merchant"
+horizontal_alignment = 1
+
+[node name="Coins" type="Label" parent="Panel/Center/Box"]
+layout_mode = 2
+text = "Coins: 0"
+horizontal_alignment = 1
+
+[node name="Choices" type="HBoxContainer" parent="Panel/Center/Box"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="LeaveButton" type="Button" parent="Panel/Center/Box"]
+custom_minimum_size = Vector2(120, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Leave"

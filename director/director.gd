@@ -50,6 +50,7 @@ func new_plan(state: PlayerState) -> SectionPlan:
 			plan.side_branches += 1
 	# What the learned director sees; logged for every mode.
 	plan.context = BanditContext.features(state)
+	plan.secret_room = settings.secret_room
 	if state.is_depth_end:
 		plan.is_arena = true
 		plan.phase = SectionPlan.PHASE_ARENA

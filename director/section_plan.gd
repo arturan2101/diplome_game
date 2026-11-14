@@ -26,6 +26,9 @@ var traps: Dictionary = {}
 ## in, its enemies coming in combat_waves waves.
 var combat_rooms: int = 0
 var combat_waves: int = 0
+## How the generator may hide a secret room in this section (null = it may not).
+## Not a decision of the director: the generator rolls for it with the section's RNG.
+var secret_room: SecretRoomData = null
 ## Rooms on the main path from the entrance to the gate, 3-5 (an arena has 2).
 var room_count: int = 3
 ## Side branches: dead-end treasure rooms hanging off the main path, 0-2.

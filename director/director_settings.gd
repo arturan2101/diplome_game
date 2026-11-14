@@ -121,6 +121,11 @@ extends Resource
 @export var combat_waves_build: Vector2i = Vector2i(1, 2)
 @export var combat_waves_random: Vector2i = Vector2i(1, 3)
 
+@export_group("Secret rooms")
+## The generator's secret rooms (chance, size, merchant); null = none
+## (ExperimentConfig.secret_rooms switches them off).
+@export var secret_room: SecretRoomData
+
 @export_group("Elite enemies")
 ## Elite types (EnemyData.is_elite) may be bought, each from its min_depth on
 ## (ExperimentConfig.elite_enemies switches them off).

@@ -19,6 +19,13 @@ extends Resource
 ## Wall-top tiles (top face only) for walls with no open cell directly south.
 ## Empty: every wall uses wall_tiles.
 @export var wall_top_tiles: Array[Vector2i] = []
+## Wall with a faint crack (the way into a secret room): front and top, like wall_tiles
+## and wall_top_tiles. (-1, -1) = the crack wall looks like any wall.
+@export var cracked_wall_tile: Vector2i = Vector2i(-1, -1)
+@export var cracked_wall_top_tile: Vector2i = Vector2i(-1, -1)
+## Floor in a patch of light from above (placed on purpose, never a random variant).
+## (-1, -1) = none.
+@export var sunlit_floor_tile: Vector2i = Vector2i(-1, -1)
 ## Cover object in the main atlas, drawn over a floor tile.
 @export var cover_tile: Vector2i = Vector2i.ZERO
 ## Pit and spikes tiles in the hazard atlas. pit_tile has a rim and is used at the

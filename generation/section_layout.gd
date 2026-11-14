@@ -7,6 +7,7 @@ const ITEM_HEALTH_PACK: StringName = &"health_pack"
 const ITEM_COIN: StringName = &"coin"
 const ITEM_CHEST: StringName = &"chest"
 const ITEM_SHRINE: StringName = &"shrine"
+const ITEM_MERCHANT: StringName = &"merchant"
 
 var grid: LevelGrid = null
 ## Cell where the player starts.
@@ -29,6 +30,12 @@ var path_room_count: int = 0
 var arena_room: int = -1
 ## Door cells of the arena room that are walled up while the fight goes on.
 var arena_doors: Array[Vector2i] = []
+## The secret room, or empty: {"crack": the wall cell to break (Vector2i), "front": unit
+## vector from the crack towards the room of the path (Vector2i), "rect": its floor
+## (Rect2i, still rock in the grid until the crack is broken), "room": index of the room
+## of the path it hides behind}. Its items are in items with "secret": true; they appear
+## when the room opens, and the way through the section never needs them.
+var secret: Dictionary = {}
 ## Combat rooms: {"room": index in room_rects, "doors": Array[Vector2i], "waves": int}.
 ## Their enemies (the entries with that room) wait until the player walks in.
 var combat_rooms: Array[Dictionary] = []

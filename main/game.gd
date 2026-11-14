@@ -26,7 +26,10 @@ const ITEM_SCENES: Dictionary = {
 	SectionLayout.ITEM_COIN: preload("res://actors/pickups/coin.tscn"),
 	SectionLayout.ITEM_CHEST: preload("res://actors/pickups/chest.tscn"),
 	SectionLayout.ITEM_SHRINE: preload("res://actors/pickups/shrine.tscn"),
+	SectionLayout.ITEM_MERCHANT: preload("res://actors/npc/merchant.tscn"),
 }
+const DEFAULT_SHOP: ShopData = preload("res://shop/shop.tres")
+const SHOP_SCREEN_SCENE: PackedScene = preload("res://ui/shop_screen.tscn")
 ## How many past sections the director looks at for "who hurts the player".
 const RECENT_SECTIONS: int = 3
 ## The arena seals when the player is this many tiles inside its last room.
@@ -62,6 +65,10 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 @export var shrine_offer_count: int = 3
 ## Screen for choosing spells. Empty = one is created from ui/spell_choice.tscn.
 @export var spell_choice: SpellChoice
+## What merchants sell and for how much. Empty = shop/shop.tres.
+@export var shop_data: ShopData
+## The shop screen. Empty = one is created from ui/shop_screen.tscn.
+@export var shop_screen: ShopScreen
 
 var plan: SectionPlan = null
 var layout: SectionLayout = null
@@ -101,6 +108,12 @@ func _ready() -> void:
 		spell_choice = SPELL_CHOICE_SCENE.instantiate() as SpellChoice
 		add_child(spell_choice)
 	spell_choice.closed.connect(_on_spell_choice_closed)
+	if shop_data == null:
+		shop_data = DEFAULT_SHOP
+	if shop_screen == null:
+		shop_screen = SHOP_SCREEN_SCENE.instantiate() as ShopScreen
+		add_child(shop_screen)
+	shop_screen.bought.connect(_on_shop_bought)
 	_combat = CombatRoomTracker.new()
 	_combat.name = "CombatRooms"
 	_combat.game = self
@@ -225,6 +238,7 @@ func _start_section() -> void:
 	level.add_child(_contents)
 	_spawn_gate()
 	_spawn_items()
+	_spawn_secret()
 	_combat.setup(layout)
 	_spawn_enemies()
 	player.teleport(level.cell_center(layout.entrance))
@@ -277,20 +291,103 @@ func _spawn_gate() -> void:
 
 func _spawn_items() -> void:
 	for entry: Dictionary in layout.items:
-		var item: Node2D = (ITEM_SCENES[entry["id"]] as PackedScene).instantiate() as Node2D
-		item.position = level.to_local(level.cell_center(entry["cell"]))
-		var chest: Chest = item as Chest
-		if chest != null:
-			# Loot is decided now, in spawn order, so the same seed gives the same chests.
-			chest.loot_weapon = _roll_chest_weapon()
-			chest.loot_coins = _loot_rng.randi_range(chest_coins_min, chest_coins_max)
-			if GameManager.config.spells_enabled and _loot_rng.randf() < chest_spell_chance:
-				chest.loot_spell = spell_pool.pick(_loot_rng)
-			chest.opened.connect(_on_chest_opened)
-		var shrine: Shrine = item as Shrine
-		if shrine != null:
-			shrine.activated.connect(_on_shrine_activated)
-		_contents.add_child(item)
+		# The secret room's things appear when it opens.
+		if not entry.get("secret", false):
+			_spawn_item(entry)
+
+
+func _spawn_item(entry: Dictionary) -> void:
+	var item: Node2D = (ITEM_SCENES[entry["id"]] as PackedScene).instantiate() as Node2D
+	item.position = level.to_local(level.cell_center(entry["cell"]))
+	var chest: Chest = item as Chest
+	if chest != null:
+		# Loot is decided now, in spawn order, so the same seed gives the same chests.
+		chest.loot_weapon = _roll_chest_weapon()
+		chest.loot_coins = _loot_rng.randi_range(chest_coins_min, chest_coins_max)
+		if GameManager.config.spells_enabled and _loot_rng.randf() < chest_spell_chance:
+			chest.loot_spell = spell_pool.pick(_loot_rng)
+		chest.opened.connect(_on_chest_opened)
+	var shrine: Shrine = item as Shrine
+	if shrine != null:
+		shrine.activated.connect(_on_shrine_activated)
+	var merchant: Merchant = item as Merchant
+	if merchant != null:
+		merchant.wandering = entry.get("secret", false)
+		merchant.offers = ShopStock.make_offers(shop_data, GameManager.depth, GameManager.make_shop_rng(GameManager.section_index),
+				chest_weapons, rarity_table if GameManager.config.rarity_enabled else null,
+				spell_pool if GameManager.config.spells_enabled else null, player.spell_book, merchant.wandering)
+		merchant.shop_requested.connect(_on_shop_requested)
+	_contents.add_child(item)
+
+
+## The cracked wall in front of the secret room, if the section has one.
+func _spawn_secret() -> void:
+	if layout.secret.is_empty():
+		return
+	var wall: BreakableWall = BreakableWall.new()
+	wall.setup(layout.secret["crack"], layout.secret["front"])
+	# The level's tiles show the crack when its theme has them.
+	wall.draw_crack = not level.draws_cracks()
+	wall.position = level.to_local(level.cell_center(layout.secret["crack"]))
+	wall.broken.connect(_on_secret_wall_broken)
+	_contents.add_child(wall)
+
+
+func _on_secret_wall_broken(_wall: BreakableWall) -> void:
+	Telemetry.record_secret_found()
+	hud.show_banner("A hidden room!")
+	# Deferred: the hit comes in the middle of the sword's physics query.
+	_open_secret.call_deferred()
+
+
+## The crack and the room become floor (drawn with the room's theme), then its things
+## appear, and light falls in through a hole in the ceiling.
+func _open_secret() -> void:
+	var room: Rect2i = layout.secret["rect"]
+	var cells: Array[Vector2i] = [layout.secret["crack"]]
+	for y in range(room.position.y, room.end.y):
+		for x in range(room.position.x, room.end.x):
+			cells.append(Vector2i(x, y))
+	level.grid.cracked.erase(layout.secret["crack"])
+	# A patch of light from above in the middle of the room.
+	var middle: Vector2i = room.position + room.size / 2
+	for cell: Vector2i in [middle, middle + Vector2i.LEFT, middle + Vector2i.UP, middle + Vector2i(-1, -1)]:
+		if room.has_point(cell):
+			level.grid.sunlit[cell] = true
+	level.set_cells(cells, LevelGrid.Cell.FLOOR)
+	for entry: Dictionary in layout.items:
+		if entry.get("secret", false):
+			_spawn_item(entry)
+	var light: LightShaft = LightShaft.new()
+	light.position = level.to_local((level.cell_center(room.position) + level.cell_center(room.end - Vector2i.ONE)) * 0.5)
+	_contents.add_child(light)
+
+
+## Bots do not trade: the shop would pause their run.
+func _on_shop_requested(merchant: Merchant) -> void:
+	if _bot != null or shop_screen.is_open():
+		return
+	shop_screen.open(merchant, GameManager.coins)
+
+
+func _on_shop_bought(offer: ShopOffer) -> void:
+	if offer.sold or not GameManager.spend_coins(offer.price):
+		return
+	offer.sold = true
+	match offer.kind:
+		ShopOffer.Kind.HEAL:
+			player.health.heal(offer.heal_amount)
+		ShopOffer.Kind.WEAPON:
+			var cells: Array[Vector2i] = level.free_floor_cells_near(shop_screen.merchant.global_position, 1)
+			var weapon_pickup: WeaponPickup = WEAPON_PICKUP_SCENE.instantiate() as WeaponPickup
+			weapon_pickup.weapon_data = offer.weapon
+			var cell: Vector2i = cells[0] if not cells.is_empty() else level.cell_at(player.global_position)
+			weapon_pickup.position = level.to_local(level.cell_center(cell))
+			_contents.add_child(weapon_pickup)
+		ShopOffer.Kind.SPELL, ShopOffer.Kind.SPELL_LEVEL:
+			player.spell_book.learn(offer.spell)
+	Telemetry.record_purchase(offer.get_id(), offer.price)
+	shop_screen.refresh(GameManager.coins)
 
 
 ## Spawns the first wave; later waves (arena only) wait in _pending_waves.

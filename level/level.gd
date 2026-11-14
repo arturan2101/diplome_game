@@ -8,6 +8,10 @@ extends Node2D
 const GROUP: StringName = &"level"
 const DEFAULT_THEME: TileTheme = preload("res://level/ruins_theme.tres")
 const DEFAULT_HAZARDS: HazardData = preload("res://level/hazards.tres")
+## Tile themes of parts of a level (LevelGrid.theme_regions) when none are set.
+const DEFAULT_REGION_THEMES: Dictionary = {&"nature": preload("res://level/nature_theme.tres")}
+## Atlas ids of the region themes start here, two per theme (tiles and hazards).
+const REGION_SOURCE_BASE: int = 2
 ## Ids of the two atlases inside the generated TileSet.
 const MAIN_SOURCE: int = 0
 const HAZARD_SOURCE: int = 1
@@ -20,6 +24,9 @@ const NEAREST_FLOOR_RADIUS: int = 6
 @export_multiline var debug_map: String = ""
 ## Hazard numbers; the timed spikes' cycle and look come from here. Empty = default.
 @export var hazards: HazardData
+## Tile themes of parts of the level by name (LevelGrid.theme_regions): nature broke
+## into the secret rooms. Empty = DEFAULT_REGION_THEMES.
+@export var region_themes: Dictionary = {}
 ## Path cost of a timed spike cell for enemies and the bot: they walk around a wave
 ## when there is a way around, and cross it (in rhythm) when there is not.
 @export var timed_spikes_path_weight: float = 8.0
@@ -29,6 +36,8 @@ var grid: LevelGrid = null
 ## grows by the physics step, so a section replays the same way for the same seed.
 var section_time: float = 0.0
 var timed_spikes: TimedSpikeField = null
+## Names of the region themes in atlas order.
+var _region_names: Array[StringName] = []
 
 var _ground: TileMapLayer = null
 var _props: TileMapLayer = null
@@ -39,6 +48,11 @@ func _ready() -> void:
 	add_to_group(GROUP)
 	if theme == null:
 		theme = DEFAULT_THEME
+	if region_themes.is_empty():
+		region_themes = DEFAULT_REGION_THEMES.duplicate()
+	for region_name: StringName in region_themes:
+		_region_names.append(region_name)
+	_region_names.sort()
 	_ground = TileMapLayer.new()
 	_ground.name = "Ground"
 	add_child(_ground)
@@ -201,25 +215,54 @@ func get_bounds() -> Rect2:
 
 
 func _paint_cell(cell: Vector2i) -> void:
+	# A cell inside a theme region is drawn with that theme's atlases.
+	var region: int = _region_index(cell)
+	var look: TileTheme = theme if region < 0 else region_themes[_region_names[region]] as TileTheme
+	var main: int = MAIN_SOURCE if region < 0 else REGION_SOURCE_BASE + 2 * region
+	var hazard: int = HAZARD_SOURCE if region < 0 else REGION_SOURCE_BASE + 2 * region + 1
 	match grid.get_cell(cell):
 		LevelGrid.Cell.FLOOR:
-			_ground.set_cell(cell, MAIN_SOURCE, _floor_tile(cell))
+			var sunlit: bool = grid.sunlit.has(cell) and look.sunlit_floor_tile.x >= 0
+			_ground.set_cell(cell, main, look.sunlit_floor_tile if sunlit else _floor_tile(cell, look))
 		LevelGrid.Cell.WALL:
 			# Solid rock that touches nothing walkable gets no tile and no collision:
 			# big sections stay cheap to draw and to simulate.
 			if _touches_open_cell(cell):
-				_ground.set_cell(cell, MAIN_SOURCE, _wall_tile(cell))
+				_ground.set_cell(cell, main, _wall_tile(cell, look))
+				if grid.cracked.has(cell):
+					_draw_crack(cell, main, look)
 		LevelGrid.Cell.PIT:
 			var below_pit: bool = grid.get_cell(cell + Vector2i.UP) == LevelGrid.Cell.PIT
-			_ground.set_cell(cell, HAZARD_SOURCE, theme.pit_inner_tile if below_pit else theme.pit_tile)
+			_ground.set_cell(cell, hazard, look.pit_inner_tile if below_pit else look.pit_tile)
 		LevelGrid.Cell.SPIKES:
-			_ground.set_cell(cell, HAZARD_SOURCE, theme.spikes_tile)
+			_ground.set_cell(cell, hazard, look.spikes_tile)
 		LevelGrid.Cell.SPIKES_TIMED:
 			# Floor under the spikes' own sprite (TimedSpikeField).
-			_ground.set_cell(cell, MAIN_SOURCE, _floor_tile(cell))
+			_ground.set_cell(cell, main, _floor_tile(cell, look))
 		LevelGrid.Cell.COVER:
-			_ground.set_cell(cell, MAIN_SOURCE, _floor_tile(cell))
-			_props.set_cell(cell, MAIN_SOURCE, theme.cover_tile)
+			_ground.set_cell(cell, main, _floor_tile(cell, look))
+			_props.set_cell(cell, main, look.cover_tile)
+
+
+## The theme's cracked wall tile over a crack cell (front or top, like the wall itself).
+func _draw_crack(cell: Vector2i, main: int, look: TileTheme) -> void:
+	var front: bool = grid.get_cell(cell + Vector2i.DOWN) != LevelGrid.Cell.WALL
+	var tile: Vector2i = look.cracked_wall_tile if front else look.cracked_wall_top_tile
+	if tile.x >= 0:
+		_ground.set_cell(cell, main, tile)
+
+
+## True if this theme draws cracks itself (so nothing else has to draw them).
+func draws_cracks() -> bool:
+	return theme.cracked_wall_tile.x >= 0 and theme.cracked_wall_top_tile.x >= 0
+
+
+## Index of the region theme that draws this cell (in _region_names), or -1.
+func _region_index(cell: Vector2i) -> int:
+	for region: Dictionary in grid.theme_regions:
+		if (region["rect"] as Rect2i).has_point(cell):
+			return _region_names.find(region["theme"])
+	return -1
 
 
 ## Paths go over plain floor and, at a cost, over timed spikes; walls, cover, pits and
@@ -242,21 +285,21 @@ func _touches_open_cell(cell: Vector2i) -> bool:
 ## Wall tile for a cell. A wall with an open cell directly south shows its front
 ## face (wall_tiles); any other wall shows only its top (wall_top_tiles), so side
 ## walls do not repeat the brick face. Without wall_top_tiles all walls use wall_tiles.
-func _wall_tile(cell: Vector2i) -> Vector2i:
-	var tiles: Array[Vector2i] = theme.wall_tiles
+func _wall_tile(cell: Vector2i, look: TileTheme) -> Vector2i:
+	var tiles: Array[Vector2i] = look.wall_tiles
 	var open_south: bool = grid.get_cell(cell + Vector2i.DOWN) != LevelGrid.Cell.WALL
-	if not open_south and not theme.wall_top_tiles.is_empty():
-		tiles = theme.wall_top_tiles
+	if not open_south and not look.wall_top_tiles.is_empty():
+		tiles = look.wall_top_tiles
 	return tiles[_cell_hash(cell) % tiles.size()]
 
 
 ## Floor tile for a cell. Variants are picked from the cell coordinates, not from
 ## a random generator, so the same grid always looks the same.
-func _floor_tile(cell: Vector2i) -> Vector2i:
+func _floor_tile(cell: Vector2i, look: TileTheme) -> Vector2i:
 	var roll: int = _cell_hash(cell)
-	if theme.floor_tiles.size() > 1 and (roll % 100) < int(theme.floor_variant_chance * 100.0):
-		return theme.floor_tiles[1 + (roll / 100) % (theme.floor_tiles.size() - 1)]
-	return theme.floor_tiles[0]
+	if look.floor_tiles.size() > 1 and (roll % 100) < int(look.floor_variant_chance * 100.0):
+		return look.floor_tiles[1 + (roll / 100) % (look.floor_tiles.size() - 1)]
+	return look.floor_tiles[0]
 
 
 func _cell_hash(cell: Vector2i) -> int:
@@ -269,19 +312,31 @@ func _make_tile_set() -> TileSet:
 	tile_set.add_physics_layer()
 	tile_set.set_physics_layer_collision_layer(0, theme.solid_collision_layer)
 	tile_set.set_physics_layer_collision_mask(0, 0)
-	var main: TileSetAtlasSource = _make_source(tile_set, MAIN_SOURCE, theme.texture)
-	for coords: Vector2i in theme.floor_tiles:
-		_add_tile(main, coords, false)
-	for coords: Vector2i in theme.wall_tiles:
-		_add_tile(main, coords, true)
-	for coords: Vector2i in theme.wall_top_tiles:
-		_add_tile(main, coords, true)
-	_add_tile(main, theme.cover_tile, true)
-	var hazards: TileSetAtlasSource = _make_source(tile_set, HAZARD_SOURCE, theme.hazard_texture)
-	_add_tile(hazards, theme.pit_tile, false)
-	_add_tile(hazards, theme.pit_inner_tile, false)
-	_add_tile(hazards, theme.spikes_tile, false)
+	_add_theme_sources(tile_set, theme, MAIN_SOURCE, HAZARD_SOURCE)
+	for i in _region_names.size():
+		_add_theme_sources(tile_set, region_themes[_region_names[i]] as TileTheme,
+				REGION_SOURCE_BASE + 2 * i, REGION_SOURCE_BASE + 2 * i + 1)
 	return tile_set
+
+
+func _add_theme_sources(tile_set: TileSet, look: TileTheme, main_id: int, hazard_id: int) -> void:
+	var main: TileSetAtlasSource = _make_source(tile_set, main_id, look.texture)
+	for coords: Vector2i in look.floor_tiles:
+		_add_tile(main, coords, false)
+	for coords: Vector2i in look.wall_tiles:
+		_add_tile(main, coords, true)
+	for coords: Vector2i in look.wall_top_tiles:
+		_add_tile(main, coords, true)
+	_add_tile(main, look.cover_tile, true)
+	for coords: Vector2i in [look.cracked_wall_tile, look.cracked_wall_top_tile]:
+		if coords.x >= 0:
+			_add_tile(main, coords, true)
+	if look.sunlit_floor_tile.x >= 0:
+		_add_tile(main, look.sunlit_floor_tile, false)
+	var hazards: TileSetAtlasSource = _make_source(tile_set, hazard_id, look.hazard_texture)
+	_add_tile(hazards, look.pit_tile, false)
+	_add_tile(hazards, look.pit_inner_tile, false)
+	_add_tile(hazards, look.spikes_tile, false)
 
 
 func _make_source(tile_set: TileSet, source_id: int, texture: Texture2D) -> TileSetAtlasSource:

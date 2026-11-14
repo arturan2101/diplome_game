@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="DirectorSettings" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="DirectorSettings" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://director/director_settings.gd" id="1"]
 [ext_resource type="Script" path="res://level/spike_trap_data.gd" id="2"]
 [ext_resource type="Resource" path="res://level/spikes_static.tres" id="3"]
 [ext_resource type="Resource" path="res://level/spikes_timed.tres" id="4"]
+[ext_resource type="Resource" path="res://generation/secret_room.tres" id="5"]
 
 [resource]
 script = ExtResource("1")
@@ -60,6 +61,7 @@ combat_room_chance_random = 0.35
 combat_waves_peak = Vector2i(2, 3)
 combat_waves_build = Vector2i(1, 2)
 combat_waves_random = Vector2i(1, 3)
+secret_room = ExtResource("5")
 elites_enabled = true
 random_budget_min = 8
 random_budget_max = 20

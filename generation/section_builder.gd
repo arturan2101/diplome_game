@@ -10,8 +10,11 @@ extends RefCounted
 ##    coins, so that hardly any room is empty,
 ## 4. puts the spike traps of the plan: a timed wave across a tunnel of the main path,
 ##    a static patch on free floor of a room,
-## 5. checks that the gate and every placed thing can be reached from the entrance
+## 5. sometimes hides a secret room behind a cracked wall (last, so it changes nothing
+##    else in the section),
+## 6. checks that the gate and every placed thing can be reached from the entrance
 ##    over plain floor and timed spikes (no pits, no static spikes); if not, builds again.
+##    The secret room's things are not part of this: they wait behind the crack.
 ## All randomness comes from the generator passed to build(), so the same seed,
 ## section index and plan always give the same section.
 
@@ -85,7 +88,7 @@ static func is_passable(layout: SectionLayout) -> bool:
 	if not reached.has(layout.exit):
 		return false
 	for entry: Dictionary in layout.enemies + layout.items:
-		if not reached.has(entry["cell"]):
+		if not entry.get("secret", false) and not reached.has(entry["cell"]):
 			return false
 	return true
 
@@ -134,6 +137,7 @@ func _build_once(plan: SectionPlan, rng: RandomNumberGenerator) -> SectionLayout
 	_place_shrines(layout, path, plan, rng, taken)
 	_place_items(layout, path, branches, plan, rng, taken)
 	_place_traps(layout, path, plan, rng, taken)
+	_place_secret(layout, path, plan, rng)
 	return layout
 
 
@@ -376,6 +380,80 @@ func _free_spot(grid: LevelGrid, room: PlacedRoom, taken: Dictionary) -> Vector2
 
 
 # --- contents ------------------------------------------------------------
+
+## A secret room behind a wall of a room of the path, in solid rock: an ordinary wall
+## cell with floor in front is the crack, the room lies right behind it. The grid is not
+## changed at all: the room stays rock (nothing shows it, not even the shape of the walls
+## around) until the game breaks the crack and turns the crack and the room into floor.
+## A chest inside, and with merchant_chance a wandering merchant; drawn with the data's
+## tile theme.
+func _place_secret(layout: SectionLayout, path: Array[PlacedRoom], plan: SectionPlan,
+		rng: RandomNumberGenerator) -> void:
+	var data: SecretRoomData = plan.secret_room
+	if data == null or plan.is_arena or rng.randf() >= data.chance:
+		return
+	var directions: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
+	for _try in data.tries:
+		var host: PlacedRoom = path[rng.randi_range(0, path.size() - 1)]
+		var out: Vector2i = directions[rng.randi_range(0, directions.size() - 1)]
+		var size: Vector2i = Vector2i(rng.randi_range(data.min_size.x, data.max_size.x),
+				rng.randi_range(data.min_size.y, data.max_size.y))
+		var room: Rect2i = host.get_rect()
+		var crack: Vector2i = Vector2i.ZERO
+		var interior: Rect2i = Rect2i()
+		if out.x != 0:
+			crack = Vector2i(room.position.x if out.x < 0 else room.end.x - 1, rng.randi_range(room.position.y + 1, room.end.y - 2))
+			var top: int = crack.y - rng.randi_range(0, size.y - 1)
+			interior = Rect2i(crack.x + 1 if out.x > 0 else crack.x - size.x, top, size.x, size.y)
+		else:
+			crack = Vector2i(rng.randi_range(room.position.x + 1, room.end.x - 2), room.position.y if out.y < 0 else room.end.y - 1)
+			var left: int = crack.x - rng.randi_range(0, size.x - 1)
+			interior = Rect2i(left, crack.y + 1 if out.y > 0 else crack.y - size.y, size.x, size.y)
+		if not _secret_fits(layout, crack, out, interior):
+			continue
+		layout.secret = {"crack": crack, "front": -out, "rect": interior, "room": host.index}
+		layout.grid.cracked[crack] = true
+		# The theme covers the room and its own walls, not the wall it shares with the host.
+		var region: Rect2i = interior.grow(1)
+		if out.x > 0:
+			region = region.grow_side(SIDE_LEFT, -1)
+		elif out.x < 0:
+			region = region.grow_side(SIDE_RIGHT, -1)
+		elif out.y > 0:
+			region = region.grow_side(SIDE_TOP, -1)
+		else:
+			region = region.grow_side(SIDE_BOTTOM, -1)
+		layout.grid.theme_regions.append({"rect": region, "theme": data.theme})
+		var far: Vector2i = crack + out * interior.size[0 if out.x != 0 else 1]
+		var chest_cell: Vector2i = Vector2i(clampi(far.x, interior.position.x, interior.end.x - 1),
+				clampi(far.y, interior.position.y, interior.end.y - 1))
+		layout.items.append({"id": SectionLayout.ITEM_CHEST, "cell": chest_cell, "room": -1, "secret": true})
+		if rng.randf() < data.merchant_chance:
+			var side: Vector2i = Vector2i(absi(out.y), absi(out.x))
+			var merchant_cell: Vector2i = chest_cell + side if interior.has_point(chest_cell + side) else chest_cell - side
+			if interior.has_point(merchant_cell):
+				layout.items.append({"id": SectionLayout.ITEM_MERCHANT, "cell": merchant_cell, "room": -1, "secret": true})
+		return
+
+
+## True if the crack is a plain wall cell of the room with floor in front of it, and the
+## room behind it plus its walls is solid rock outside every room, inside the grid.
+func _secret_fits(layout: SectionLayout, crack: Vector2i, out: Vector2i, interior: Rect2i) -> bool:
+	var grid: LevelGrid = layout.grid
+	if grid.get_cell(crack) != LevelGrid.Cell.WALL or not grid.is_floor(crack - out):
+		return false
+	var block: Rect2i = interior.grow(1)
+	if not Rect2i(Vector2i.ZERO, Vector2i(grid.width, grid.height)).grow(-1).encloses(block):
+		return false
+	for y in range(block.position.y, block.end.y):
+		for x in range(block.position.x, block.end.x):
+			var cell: Vector2i = Vector2i(x, y)
+			if grid.get_cell(cell) != LevelGrid.Cell.WALL:
+				return false
+			if interior.has_point(cell) and _in_any_room(layout, cell):
+				return false
+	return true
+
 
 ## The plan's spike traps, timed waves first (they need a tunnel), then static patches.
 func _place_traps(layout: SectionLayout, path: Array[PlacedRoom], plan: SectionPlan,

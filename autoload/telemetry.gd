@@ -60,6 +60,13 @@ var _skill_uses: int = 0
 var _spell_uses: Dictionary = {}
 var _spell_damage: Dictionary = {}
 var _coins_at_start: int = 0
+var _traps: Dictionary = {}
+var _combat_rooms: int = 0
+var _combat_waves: int = 0
+var _secret: bool = false
+var _secret_found: bool = false
+var _purchases: Array[String] = []
+var _coins_spent: int = 0
 
 
 func _ready() -> void:
@@ -96,7 +103,27 @@ func begin_section(plan: SectionPlan, layout: SectionLayout, player: Player) -> 
 	_spell_uses = {}
 	_spell_damage = {}
 	_coins_at_start = GameManager.coins
+	_traps = layout.traps.duplicate()
+	_combat_rooms = layout.combat_rooms.size()
+	_combat_waves = plan.combat_waves if _combat_rooms > 0 else 0
+	_secret = not layout.secret.is_empty()
+	_secret_found = false
+	_purchases = []
+	_coins_spent = 0
 	_is_section_active = true
+
+
+## Called by the game when the player breaks into the section's secret room.
+func record_secret_found() -> void:
+	if _is_section_active:
+		_secret_found = true
+
+
+## Called by the game for every purchase from a merchant.
+func record_purchase(offer_id: String, price: int) -> void:
+	if _is_section_active:
+		_purchases.append(offer_id)
+		_coins_spent += price
 
 
 ## Called by the game for every enemy the player kills.
@@ -154,6 +181,13 @@ func end_section(died: bool) -> Dictionary:
 		"accuracy": snappedf(_accuracy(), SHARE_STEP),
 		"idle_time": snappedf(_idle_time, TIME_STEP),
 		"coins": GameManager.coins - _coins_at_start,
+		"traps": _string_keys(_traps),
+		"combat_rooms": _combat_rooms,
+		"combat_waves": _combat_waves,
+		"secret": _secret,
+		"secret_found": _secret_found,
+		"purchases": _purchases.duplicate(),
+		"coins_spent": _coins_spent,
 		"died": died,
 		"p": snappedf(result, SHARE_STEP),
 		"skill": snappedf(skill, SHARE_STEP),

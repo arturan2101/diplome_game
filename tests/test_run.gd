@@ -30,10 +30,19 @@ func _test_gate_and_next_section() -> void:
 	check(first_layout != null and SectionBuilder.is_passable(first_layout), "the game builds a passable first section")
 	check(game.player.global_position.distance_to(game.level.cell_center(first_layout.entrance)) < 2.0,
 			"the player starts at the entrance")
-	check(game.get_enemies().size() == first_layout.enemies.size() and not first_layout.enemies.is_empty(),
-			"every enemy of the layout is spawned")
-	check(game.get_pickups().size() + game.get_shrines().size() == first_layout.items.size(),
-			"every item of the layout is spawned (pickups and shrines)")
+	# A combat room's enemies wait for the player, a secret room's things for the crack to break.
+	var waiting: int = 0
+	for entry: Dictionary in first_layout.enemies:
+		if game.get_combat_rooms().owns(entry):
+			waiting += 1
+	var hidden: int = 0
+	for entry: Dictionary in first_layout.items:
+		if entry.get("secret", false):
+			hidden += 1
+	check(game.get_enemies().size() == first_layout.enemies.size() - waiting and not first_layout.enemies.is_empty(),
+			"every enemy of the layout is spawned (but those of a combat room)")
+	check(game.get_pickups().size() + game.get_shrines().size() == first_layout.items.size() - hidden,
+			"every item of the layout is spawned (pickups and shrines; not those of a secret room)")
 	check(game.player.weapon != null and game.player.weapon.data == GameManager.starting_weapon
 			and game.player.skill != null, "the player gets the loadout from GameManager")
 
