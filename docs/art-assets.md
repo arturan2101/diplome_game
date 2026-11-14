@@ -214,3 +214,12 @@ Tiles (hand-drawn in Aseprite, no AI):
 ## Nature theme (art, 2026-11-14)
 
 - `level/nature_theme.tres` (TileTheme): give it to a Level (its `theme`) for a secret room or the glade; hazards use the ruins hazard atlas. Sunlit floor tile: slot (6, 0) of `assets/art/tiles/nature_tiles_atlas.png`, for a placed light patch, not a random variant. Style: docs/art-style.md, "Nature theme".
+
+## Merchant and glade (art, 2026-11-14)
+
+- Merchant (24x24): `assets/art/characters/merchant_frames.tres`, animation `idle_down` (4 frames, 4 fps: breathing, the lantern flickers). An old man in a deep purple hood with a white beard and a glowing lantern. Wandering merchant (secret rooms): `merchant_wander_frames.tres`, the same man in a green hood with a travel pack. Use an AnimatedSprite2D with offset (0, -4) like the other 24x24 actors.
+- Goods carpet 32x16: `assets/art/props/merchant_carpet.png`, drawn in front of the merchant.
+- Shop icons 16x16, strip `assets/art/ui/shop_icons.png` in this order: health potion, sword, bow, scroll, shield, key, coin pouch, gem (region x = index * 16).
+- Trade window: `assets/art/ui/trade_panel.png` (24x24, NinePatchRect / StyleBoxTexture with 8 px margins) and `trade_slot.png` (20x20 item frame with a gold edge).
+- Glade: ground = slot (7, 0) of `nature_tiles_atlas.png` (open grass), a sunlit patch of slot (6, 0) in the middle with old slabs (slots 0-2) around it; props `assets/art/props/broken_column.png` (16x24) and `big_tree.png` (32x26) around the edges, no collision in the sprites.
+- Generator: `tools/art/make_merchant.py`.

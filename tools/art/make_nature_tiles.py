@@ -2,7 +2,8 @@
 Same layout as the ruins atlas, so a TileTheme can use it as is:
   0-2 floor (slabs with grass in the seams, moss, small flowers), 3 wall front (bricks
   with roots and moss), 4 wall top (stone grown over with grass), 5 cover (a small
-  tree), 6 floor in light from above (a sunlit patch, lighter and warmer).
+  tree), 6 floor in light from above (a sunlit patch, lighter and warmer), 7 open grass
+  (the glade's ground, no seams).
 Warmer, greener palette (docs/art-style.md, "Nature theme"); same pixel style.
 Run from the project root: python tools/art/make_nature_tiles.py
 """
@@ -136,6 +137,23 @@ llllllllllGLGlll
 llllllllllldllll
 llllllllllldllll
 llllllllllldllll""",
+    """
+GGGGGGGGGGGGGGGG
+GGGGgGGGGGGGGLGG
+GGGGGGGGGGGGGGGG
+GLGGGGGGGgGGGGGG
+GGGGGGGGGGGGGGGG
+GGGGGGGLGGGGGGGG
+GGgGGGGGGGGGGGgG
+GGGGGGGGGGGGGGGG
+GGGGGGGGGGfGGGGG
+GGGGGLGGGGGGGGGG
+GGGGGGGGGGGGGGGG
+GgGGGGGGGGGGGLGG
+GGGGGGGGgGGGGGGG
+GGGGGGGGGGGGGGGG
+GGGLGGGGGGGGGGGG
+GGGGGGGGGGGGgGGG""",
 ]
 
 
