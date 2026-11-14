@@ -37,8 +37,11 @@ enum State { IDLE, CHASE, RETREAT, WINDUP, RECOVER, STAGGER, FALLING }
 @export var waypoint_reach: float = 4.0
 ## Tint of a dormant enemy: a sleeping boss looks like stone.
 @export var dormant_color: Color = Color(0.55, 0.58, 0.68)
-## Drawing offset of animated 24x24 art, so the feet stand on the body's origin.
-@export var animated_offset: Vector2 = Vector2(0, -4)
+## Tint of an enemy frozen by the blizzard.
+@export var frozen_color: Color = Color(0.55, 0.8, 1.0)
+## Animated art has the feet on the second-to-last row of its square frame; it is
+## drawn so the feet sit this many pixels below the body's centre.
+@export var feet_below_centre: float = 6.0
 
 var state: State = State.IDLE
 ## A dormant enemy stands still, does not notice the player and takes no damage until
@@ -60,6 +63,8 @@ var _path: PackedVector2Array = PackedVector2Array()
 var _path_index: int = 0
 var _repath_time_left: float = 0.0
 var _flash_tween: Tween = null
+## Seconds left in the ice (freeze()).
+var _frozen_left: float = 0.0
 
 
 func _ready() -> void:
@@ -86,6 +91,11 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if is_dormant:
+		return
+	if is_frozen():
+		_frozen_left -= delta
+		if not is_frozen():
+			_thaw()
 		return
 	_retreat_cooldown_left = maxf(_retreat_cooldown_left - delta, 0.0)
 	match state:
@@ -143,10 +153,39 @@ func _fall_asleep() -> void:
 	visual.modulate = dormant_color
 
 
+## Holds the enemy in ice for this many seconds (the blizzard): it does not move,
+## attack or get pushed, and its animation stops. Freezing again extends the time to
+## the longer one. Bosses, sleeping and falling enemies do not freeze.
+func freeze(seconds: float) -> void:
+	if seconds <= 0.0 or data == null or data.is_boss or is_dormant or state == State.FALLING:
+		return
+	if not is_frozen():
+		if weapon != null:
+			weapon.cancel_attack()
+		_enter(State.IDLE)
+		visual.modulate = frozen_color
+		var animated: AnimatedSprite2D = visual as AnimatedSprite2D
+		if animated != null:
+			animated.speed_scale = 0.0
+	_frozen_left = maxf(_frozen_left, seconds)
+
+
+func is_frozen() -> bool:
+	return _frozen_left > 0.0
+
+
+func _thaw() -> void:
+	_frozen_left = 0.0
+	var animated: AnimatedSprite2D = visual as AnimatedSprite2D
+	if animated != null:
+		animated.speed_scale = 1.0
+	_enter(State.CHASE)
+
+
 ## Pushes the enemy with the given velocity and interrupts what it was doing.
-## Called for hits with knockback and by the player's shield.
+## Called for hits with knockback and by the player's shield. A frozen enemy stays put.
 func apply_knockback(knockback_velocity: Vector2) -> void:
-	if state == State.FALLING:
+	if state == State.FALLING or is_frozen():
 		return
 	if weapon != null:
 		weapon.cancel_attack()
@@ -278,7 +317,10 @@ func _apply_look() -> void:
 	if animated != null:
 		if data.sprite_frames != null:
 			animated.sprite_frames = data.sprite_frames
-			animated.offset = animated_offset
+			# Drawn at its own size (sprite_scale is for the old still pictures).
+			animated.scale = Vector2.ONE
+			var frame_height: float = float(_frame_height(data.sprite_frames))
+			animated.offset = Vector2(0.0, feet_below_centre * data.body_radius / 6.0 - (frame_height * 0.5 - 2.0))
 		elif data.sprite != null:
 			# No animations yet: the old still picture as a one-frame placeholder.
 			var still: SpriteFrames = SpriteFrames.new()
@@ -296,6 +338,13 @@ func _apply_look() -> void:
 		var hurtbox_circle: CircleShape2D = CircleShape2D.new()
 		hurtbox_circle.radius = data.body_radius + 1.0
 		hurtbox_shape.shape = hurtbox_circle
+
+
+static func _frame_height(frames: SpriteFrames) -> int:
+	for anim: StringName in frames.get_animation_names():
+		if frames.get_frame_count(anim) > 0:
+			return frames.get_frame_texture(anim, 0).get_height()
+	return 0
 
 
 func _create_weapon() -> void:

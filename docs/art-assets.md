@@ -247,3 +247,11 @@ Pairs follow docs/design.md; each has 3 levels and looks stronger than the plain
 - merge (32x32, 8 frames, 16 fps, plays once): two coloured sparks spiral in, a flash, the new element bursts out. Play it where the two spells merge.
 - HUD icons: fusion_icons.png (16x16: firestorm, blizzard, steam); the level marks are the same level_pips.png as for the plain elements.
 - If the combination table gets other pairs, add them to PAIRS in the generator (two colour ramps and a spark colour).
+
+## Archer, beetle, Guardian (art, 2026-11-14)
+
+PixelLab create_character (standard, 4 directions, high top-down, black outline), the same settings as the player and the skeleton; animations breathing-idle / idle and walking. Imported with `tools/art/import_pixellab.py` (palette snap, one box per strip, feet on the second-to-last row, attack / hurt / death made from the idle frames).
+- Archer `a8d07376-4736-415d-86aa-b3bc3255f101`: a skeleton in a red hood and cloak with a bow and a quiver, 24x24, `archer_frames.tres`.
+- Beetle `c0db1c8a-9c7c-43a4-87fb-1259f9e3a844`: a teal cave beetle, 16x16, `beetle_frames.tres`.
+- Guardian `260f114c-e575-4167-974b-a405682eb00c`: a stone golem knight with glowing orange eyes and cracks, 64x64 canvas, `guardian_frames.tres`; `guardian.tscn` now uses an AnimatedSprite2D like the other enemies.
+- In the game: `sprite_frames` of archer.tres, beetle.tres and guardian.tres. Animated art is drawn at its own size (sprite_scale is only for the old still pictures) with the feet just below the body's centre.

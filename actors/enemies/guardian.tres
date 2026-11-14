@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="GuardianData" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="GuardianData" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://actors/enemies/guardian_data.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/guardian.tres" id="2"]
@@ -6,11 +6,14 @@
 [ext_resource type="PackedScene" path="res://actors/enemies/guardian.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://actors/projectiles/stone.tscn" id="5"]
 
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/guardian_frames.tres" id="frames"]
+
 [resource]
 script = ExtResource("1")
 id = &"guardian"
 display_name = "Guardian of the Ruins"
 sprite = ExtResource("2")
+sprite_frames = ExtResource("frames")
 sprite_scale = 2.0
 body_radius = 11.0
 danger_cost = 16

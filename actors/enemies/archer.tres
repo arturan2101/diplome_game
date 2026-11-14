@@ -1,12 +1,15 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://actors/enemies/enemy_data.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/archer.tres" id="2"]
 [ext_resource type="Resource" path="res://actors/enemies/archer_bow.tres" id="3"]
 
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/archer_frames.tres" id="frames"]
+
 [resource]
 script = ExtResource("1")
 sprite = ExtResource("2")
+sprite_frames = ExtResource("frames")
 weapon = ExtResource("3")
 id = &"archer"
 display_name = "Archer"
