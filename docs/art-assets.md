@@ -13,9 +13,9 @@ Frames notation: idle4/walk4/attack5/hit2/death5 = rows of one sheet.
 | S | Player idle sample (1 static frame, facing right) | assets/art/characters/player_idle_sample.png | 24x24 | 1 | - | generated |
 | C | Player (adventurer) full sheet | assets/art/characters/player.png | 24x24 (body ~16x20) | idle4/walk4/attack5/hit2/death5 | sprites/player.tres | todo (idle + walk done as separate strips, see round 4) |
 | C | Player idle/walk, 4 directions | assets/art/characters/player_{idle,walk}_{down,up,left,right}.png | 24x24 per frame, horizontal strip | idle4, walk6 | sprites/player.tres | generated |
-| C | Player bow draw | assets/art/characters/player_bow.png | 24x24 | draw4 (last held)/release2 | - | todo |
-| C | Player shield block | assets/art/characters/player_block.png | 24x24 | raise2/hold1 | - | todo |
-| C | Player dash | assets/art/characters/player_dash.png | 24x24 | 3 | - | todo |
+| C | Player bow draw | assets/art/characters/player_bow_<dir>.png | 24x24 | 6: draw 4 (frame 3 = held), release 2 | - | generated 2026-11-17 (PixelLab, tools/art/import_player_actions.py) |
+| C | Player shield block | assets/art/characters/player_block_<dir>.png | 24x24 | 4: raise 2, hold 2 | - | generated 2026-11-17 (PixelLab, tools/art/import_player_actions.py) |
+| C | Player dash | assets/art/characters/player_dash_<dir>.png | 24x24 | 4 | - | generated 2026-11-17 (PixelLab, tools/art/import_player_actions.py) |
 | S | Skeleton idle sample (1 static frame, facing right) | assets/art/enemies/skeleton_idle_sample.png | 24x24 | 1 | - | generated |
 | C | Skeleton guard full sheet | assets/art/enemies/skeleton.png | 24x24 (body ~16x20) | idle4/walk4/attack6 (windup 2)/hit2/death5 | sprites/skeleton.tres | todo (idle + walk done as separate strips, see round 4) |
 | C | Skeleton idle/walk, 4 directions | assets/art/enemies/skeleton_{idle,walk}_{down,up,left,right}.png | 24x24 per frame, horizontal strip | idle4, walk6 | sprites/skeleton.tres | generated |
@@ -24,7 +24,7 @@ Frames notation: idle4/walk4/attack5/hit2/death5 = rows of one sheet.
 | N | Stone golem | assets/art/enemies/golem.png | 48x48 (body ~32x40) | idle4/walk4/attack6/hit2/death6 | - | todo |
 | N | Ghost | assets/art/enemies/ghost.png | 24x32 (body ~16x26) | idle4/move4/attack5/hit2/death5 | - | todo |
 | N | Boss: Guardian of the Ruins | assets/art/enemies/guardian.png | 64x64 (body ~52x56) | idle4/walk6/attack6 x2/summon6/hit2/death6 | - | todo |
-| C | Training dummy | assets/art/enemies/training_dummy.png | 24x24 | idle1/hit2 | - | todo |
+| C | Training dummy | assets/art/enemies/training_dummy.png | 24x24 | idle1/hit2 (one strip of 3) | - | generated 2026-11-17 (tools/art/make_world_props.py) |
 
 Actor sizes per docs/art-style.md rev 3: collisions in code are unchanged; sprites are centered on the existing origin.
 
@@ -43,21 +43,21 @@ Actor sizes per docs/art-style.md rev 3: collisions in code are unchanged; sprit
 
 | P | Asset | File | Size | Frames | Replaces | Status |
 |---|---|---|---|---|---|---|
-| C | Chest closed | assets/art/pickups/chest.png (frame 0) | 16x16 | 1 | sprites/chest_closed.tres | todo |
-| C | Chest open | assets/art/pickups/chest.png (frames 1-3) | 16x16 | 3 (opening) | sprites/chest_open.tres | todo |
-| C | Coin | assets/art/pickups/coin.png | 16x16 (coin 6x6) | 4 spin | sprites/coin.tres | todo |
-| C | Medkit / health potion | assets/art/pickups/health_pack.png | 16x16 | 1 | sprites/health_potion.tres | todo |
+| C | Chest closed | assets/art/pickups/chest.png (frame 0) | 16x16 | 1 | sprites/chest_closed.tres | generated 2026-11-17 |
+| C | Chest open | assets/art/pickups/chest.png (frames 1-3) | 16x16 | 3 (opening) | sprites/chest_open.tres | generated 2026-11-17 |
+| C | Coin | assets/art/pickups/coin.png | 16x16 (coin 6x8) | 4 spin | sprites/coin.tres | generated 2026-11-17 |
+| C | Medkit / health potion | assets/art/pickups/health_pack.png | 16x16 | 1 | sprites/health_potion.tres | generated 2026-11-17 |
 | C | Gravestone (cover) | assets/art/tiles/cover_gravestone.png | 16x16 | 1 | sprites/gravestone.tres, ruins_theme cover_tile | todo |
-| C | Gate with portal closed | assets/art/level/gate_closed.png | 48x32 | 1 | sprites/portal_closed.tres | todo |
-| C | Gate with portal open | assets/art/level/gate_open.png | 48x32 | 4 loop | sprites/portal_open.tres | todo |
-| C | Portal open burst | assets/art/fx/portal_open.png | 32x32 | 5 | - | todo |
-| C | Arena door seal (rubble) | assets/art/tiles/door_seal.png | 16x16 | 1 | - | todo |
-| N | Spell shrine | assets/art/level/shrine.png | 16x24 | 4 glow | - | todo |
+| C | Gate with portal closed | assets/art/level/gate_closed.png | 48x32 | 1 | sprites/portal_closed.tres | generated 2026-11-17 (the placeholder is 16x16: the gate scene needs resizing) |
+| C | Gate with portal open | assets/art/level/gate_open.png | 48x32 | 4 loop | sprites/portal_open.tres | generated 2026-11-17 |
+| C | Portal open burst | assets/art/fx/portal_open.png | 32x32 | 5 | - | generated 2026-11-17 |
+| C | Arena door seal (rubble) | assets/art/tiles/door_seal.png | 16x16 | 1 | - | generated 2026-11-17 |
+| N | Spell shrine | assets/art/level/shrine.png, shrine_used.png | 16x24 | 4 glow; used 1 | sprites/shrine.tres, shrine_used.tres | generated 2026-11-17 |
 | N | Falling-stone trap (shadow warning + rock + rubble) | assets/art/level/falling_stone.png | 16x16 | warn2/fall3/rubble1 | - | todo |
-| N | Pillar (column hall template) | assets/art/level/pillar.png | 16x32 | 1 | - | todo |
-| N | Crypt props (sarcophagus, broken statue, bones) | assets/art/level/props.png | 16x16 / 32x16 | 1 each | - | todo |
+| N | Pillar (column hall template) | assets/art/level/pillar.png | 16x32 | 1 | - | generated 2026-11-17 |
+| N | Crypt props (sarcophagus, broken statue, bones) | assets/art/level/sarcophagus.png, statue.png, bones.png | 32x16 / 16x24 / 16x16 | 1 each | - | generated 2026-11-17 |
 | L | Skill-tree altar (hub before ruins) | assets/art/level/altar.png | 32x32 | 4 glow | - | todo |
-| C | Wall torch (light accent, decorative) | assets/art/level/torch.png | 16x16 | 4 flicker | - | todo |
+| C | Wall torch (light accent, decorative) | assets/art/level/torch.png | 16x16 | 4 flicker | - | generated 2026-11-17 |
 
 ## Requested by gameplay code
 
