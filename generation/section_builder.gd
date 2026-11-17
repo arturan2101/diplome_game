@@ -654,9 +654,17 @@ func _place_enemies(layout: SectionLayout, path: Array[PlacedRoom], branches: Ar
 		_shuffle(guarded, rng)
 		targets.append_array(guarded)
 	# A combat room gets a double share of the spawns: it comes twice in the round.
+	# It is a room without pits when the path has one: with the doors locked and the
+	# waves all around, enemy hits would knock the player into them (stage 27).
 	var combat: PlacedRoom = null
 	if not plan.is_arena and plan.combat_rooms > 0 and path.size() > 1:
-		combat = path[rng.randi_range(1, path.size() - 1)]
+		var candidates: Array[PlacedRoom] = []
+		for room: PlacedRoom in path.slice(1):
+			if not _has_pit(layout.grid, room):
+				candidates.append(room)
+		if candidates.is_empty():
+			candidates = path.slice(1)
+		combat = candidates[rng.randi_range(0, candidates.size() - 1)]
 		targets.insert(targets.find(combat) + 1, combat)
 	var slots: Dictionary = {}
 	for room: PlacedRoom in targets:
@@ -694,6 +702,16 @@ func _place_enemies(layout: SectionLayout, path: Array[PlacedRoom], branches: Ar
 		for side: RoomTemplate.DoorSide in combat.used_doors:
 			doors.append_array(combat.door_cells(side))
 		layout.combat_rooms.append({"room": combat.index, "doors": doors, "waves": mini(maxi(1, plan.combat_waves), combat_spawns)})
+
+
+## True if a pit cell lies inside the room.
+static func _has_pit(grid: LevelGrid, room: PlacedRoom) -> bool:
+	var rect: Rect2i = room.get_rect()
+	for y in range(rect.position.y, rect.end.y):
+		for x in range(rect.position.x, rect.end.x):
+			if grid.get_cell(Vector2i(x, y)) == LevelGrid.Cell.PIT:
+				return true
+	return false
 
 
 ## Chests go into the side branches first, then into rooms of the path that have no

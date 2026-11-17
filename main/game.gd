@@ -81,6 +81,10 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 ## With the glade (spells are bought there), a secret room's chest holds a spell
 ## scroll with this chance, as a reward for finding it; other chests hold none.
 @export_range(0.0, 1.0) var secret_chest_spell_chance: float = 0.25
+## While the arena is sealed, this often (seconds) an enemy that ended up outside it
+## (knocked through a door in the moment it closed) is put back where it started;
+## otherwise nobody could reach it and the arena would never open.
+@export var arena_stray_check_interval: float = 1.0
 
 var plan: SectionPlan = null
 var layout: SectionLayout = null
@@ -96,6 +100,7 @@ var _is_changing_section: bool = false
 var _pending_waves: Array[Array] = []
 var _is_arena_sealed: bool = false
 var _is_arena_cleared: bool = false
+var _stray_check_left: float = 0.0
 ## Generator for what chests hold in the current section.
 var _loot_rng: RandomNumberGenerator = null
 ## Scroll whose spell waits for the player to choose a slot.
@@ -106,6 +111,10 @@ var _combat: CombatRoomTracker = null
 var _in_glade: bool = false
 ## Two spells merged in the shop: the flash plays when the shop closes.
 var _merge_pending: bool = false
+## A new spell bought with both slots full waits for the player to choose a slot; the
+## shop opens again afterwards. Paid only when a slot was chosen.
+var _swap_offer: ShopOffer = null
+var _swap_merchant: Merchant = null
 ## The bot playing this run, if any (simulations skip the boss's spell reward).
 var _bot: BotPlayer = null
 ## Servants the boss called that are still alive, including ones not yet added to the
@@ -164,6 +173,11 @@ func _physics_process(delta: float) -> void:
 		Playtest.add_play_time(delta)
 	if is_arena() and not _is_arena_sealed and not _is_arena_cleared and _is_player_inside_arena():
 		_seal_arena()
+	elif _is_arena_sealed:
+		_stray_check_left -= delta
+		if _stray_check_left <= 0.0:
+			_stray_check_left = arena_stray_check_interval
+			_return_arena_strays(false)
 
 
 ## True if the current section ends with a locked arena.
@@ -301,6 +315,7 @@ func _start_glade() -> void:
 		_contents.add_child(prop)
 	player.teleport(level.cell_center(layout.entrance))
 	Telemetry.begin_glade(GameManager.depth)
+	hud.show_glade(GameManager.depth)
 	hud.show_banner("A quiet glade")
 
 
@@ -448,7 +463,16 @@ func _on_shop_requested(merchant: Merchant) -> void:
 
 
 func _on_shop_bought(offer: ShopOffer) -> void:
-	if offer.sold or not offer.is_available(player.spell_book) or not GameManager.spend_coins(offer.price):
+	if offer.sold or not offer.is_available(player.spell_book) or offer.price > GameManager.coins:
+		return
+	if offer.kind == ShopOffer.Kind.SPELL and player.spell_book.check_learn(offer.spell) == SpellBook.LearnResult.SLOTS_FULL:
+		# Which spell to forget: the shop steps aside for the choice screen.
+		_swap_offer = offer
+		_swap_merchant = shop_screen.merchant
+		shop_screen.close()
+		spell_choice.open_replace(offer.spell, player.spell_book)
+		return
+	if not GameManager.spend_coins(offer.price):
 		return
 	offer.sold = true
 	match offer.kind:
@@ -600,7 +624,19 @@ func _on_scroll_slots_full(scroll: SpellPickup) -> void:
 
 
 ## The scroll is used up once its spell is learned; kept if the player changed their mind.
+## A spell from the shop is paid once its slot was chosen, then the shop opens again.
 func _on_spell_choice_closed(learned: SpellData) -> void:
+	if _swap_offer != null:
+		var offer: ShopOffer = _swap_offer
+		var merchant: Merchant = _swap_merchant
+		_swap_offer = null
+		_swap_merchant = null
+		if learned == offer.spell and GameManager.spend_coins(offer.price):
+			offer.sold = true
+			Telemetry.record_purchase(offer.get_id(), offer.price)
+		if is_instance_valid(merchant):
+			shop_screen.open(merchant, GameManager.coins, player.spell_book)
+		return
 	if learned != null and is_instance_valid(_pending_scroll) and _pending_scroll.spell_data == learned:
 		_pending_scroll.queue_free()
 	_pending_scroll = null
@@ -650,13 +686,8 @@ func _is_player_inside_arena() -> bool:
 func _seal_arena() -> void:
 	_is_arena_sealed = true
 	level.set_cells(layout.arena_doors, LevelGrid.Cell.WALL)
-	# An arena enemy that chased the player out (or stands in a doorway) would be shut
-	# out for good: put it back where it started, inside the room.
-	var inside: Rect2i = layout.room_rects[layout.arena_room].grow(-1)
-	for enemy: Enemy in get_enemies():
-		var cell: Vector2i = level.cell_at(enemy.global_position)
-		if not inside.has_point(cell) or not level.grid.is_floor(cell):
-			enemy.global_position = level.cell_center(enemy.get_meta(SPAWN_CELL_META, layout.exit))
+	_return_arena_strays(true)
+	_stray_check_left = arena_stray_check_interval
 	var boss: Guardian = _find_boss()
 	if boss != null:
 		boss.awaken()
@@ -666,6 +697,20 @@ func _seal_arena() -> void:
 		hud.show_banner("The doors are sealed")
 	if _enemies_left <= 0:
 		_advance_arena()
+
+
+## An arena enemy that chased the player out (or stands in a doorway) would be shut out
+## for good: put it back where it started, inside the room. on_floor_too: also one that
+## stands inside on something other than plain floor (only at the moment of sealing, so
+## the later checks never move an enemy that is merely on spikes inside).
+func _return_arena_strays(on_floor_too: bool) -> void:
+	var inside: Rect2i = layout.room_rects[layout.arena_room].grow(-1)
+	for enemy: Enemy in get_enemies():
+		if not on_floor_too and enemy.state == Enemy.State.FALLING:
+			continue
+		var cell: Vector2i = level.cell_at(enemy.global_position)
+		if not inside.has_point(cell) or (on_floor_too and not level.grid.is_floor(cell)):
+			enemy.global_position = level.cell_center(enemy.get_meta(SPAWN_CELL_META, layout.exit))
 
 
 func _on_combat_room_sealed(_room: CombatRoom) -> void:
@@ -713,6 +758,7 @@ func _on_gate_entered(_player: Player) -> void:
 		# Off the glade into the first section of the new depth (already counted).
 		Telemetry.end_glade()
 		_in_glade = false
+		hud.show_section(GameManager.section_index, GameManager.depth)
 		_start_section()
 	else:
 		var after_arena: bool = is_arena()

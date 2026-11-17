@@ -292,5 +292,16 @@ func _on_coins_changed(coins: int) -> void:
 
 
 func _on_section_changed(section_index: int, depth: int) -> void:
+	show_section(section_index, depth)
+
+
+## "Depth 2  -  Section 4" in the top line.
+func show_section(section_index: int, depth: int) -> void:
 	if depth_label != null:
 		depth_label.text = "Depth %d  -  Section %d" % [depth + 1, section_index + 1]
+
+
+## "Depth 2  -  Glade" while the player is on the merchant's glade (not a section).
+func show_glade(depth: int) -> void:
+	if depth_label != null:
+		depth_label.text = "Depth %d  -  Glade" % (depth + 1)

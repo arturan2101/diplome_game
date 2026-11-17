@@ -107,6 +107,7 @@ func _test_buying() -> void:
 	check(not screen.is_open() and not get_tree().paused, "leaving the shop goes on with the game")
 	var record: Dictionary = Telemetry.end_section(false)
 	check(record.get("purchases") == ["heal"] and record.get("coins_spent") == 5, "the log lists the purchases and the coins spent")
+	await _test_swap(game, merchant)
 	game.add_bot(BotPlayer.load_profile("mid"))
 	merchant.interact(game.player)
 	check(not screen.is_open(), "a bot does not trade (the shop would pause its run)")
@@ -114,6 +115,52 @@ func _test_buying() -> void:
 	GameManager.config = GameManager.DEFAULT_CONFIG
 	Telemetry.write_enabled = write_was
 	await physics_frames(3)
+
+
+## Both spell slots full: a new spell is still sold ("swap"); buying it asks which spell
+## to forget, and it is paid only when a slot is chosen; then the shop opens again.
+func _test_swap(game: Game, merchant: Merchant) -> void:
+	var book: SpellBook = game.player.spell_book
+	var spells: SpellPool = load(SPELLS) as SpellPool
+	book.learn(spells.spells[0])
+	book.learn(spells.spells[1])
+	var fresh: SpellData = spells.spells[2]
+	var stock: Array[ShopOffer] = []
+	for i in SEEDS:
+		stock.append_array(ShopStock.make_offers(load(SHOP) as ShopData, 0, _rng(i), null, null, spells, book, false))
+	var swaps: bool = false
+	for offer: ShopOffer in stock:
+		if offer.kind == ShopOffer.Kind.SPELL and offer.replaces and offer.spell == fresh:
+			swaps = true
+	check(swaps, "with both slots full the merchant still sells a new spell, as a swap")
+	var swap: ShopOffer = ShopOffer.new()
+	swap.kind = ShopOffer.Kind.SPELL
+	swap.spell = fresh
+	swap.replaces = true
+	swap.price = 3
+	merchant.offers = [swap] as Array[ShopOffer]
+	var coins: int = GameManager.coins
+	Telemetry.begin_section(game.plan, game.layout, game.player)
+	merchant.interact(game.player)
+	var screen: ShopScreen = game.shop_screen
+	check(not screen.get_offer_buttons()[0].disabled and swap.get_title().ends_with("(swap)"), "the swap can be bought")
+	screen.get_offer_buttons()[0].pressed.emit()
+	check(not screen.is_open() and game.spell_choice.is_open() and GameManager.coins == coins,
+			"buying it asks which spell to forget, nothing is paid yet")
+	game.spell_choice.back_button.pressed.emit()
+	check(screen.is_open() and not swap.sold and GameManager.coins == coins and book.level_of(fresh.id) == 0,
+			"keeping the old spells costs nothing and goes back to the shop")
+	screen.get_offer_buttons()[0].pressed.emit()
+	var slots: Array[Button] = []
+	for child: Node in game.spell_choice.choices.get_children():
+		if child is Button and not child.is_queued_for_deletion():
+			slots.append(child)
+	slots[0].pressed.emit()
+	check(book.get_spell(0).data == fresh and swap.sold and GameManager.coins == coins - swap.price and screen.is_open(),
+			"choosing a slot swaps the spell and takes the coins; the shop opens again")
+	screen.close()
+	var record: Dictionary = Telemetry.end_section(false)
+	check(record.get("purchases") == [swap.get_id()], "the swap is logged as a purchase (%s)" % [record.get("purchases")])
 
 
 func _rng(rng_seed: int) -> RandomNumberGenerator:

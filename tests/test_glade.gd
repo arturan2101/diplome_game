@@ -67,6 +67,7 @@ func _test_flow() -> void:
 	var merchants: Array[Node] = game.level.find_children("*", "Merchant", true, false)
 	check(game.is_in_glade() and GameManager.depth == 1 and game.get_enemies().is_empty() and merchants.size() == 1
 			and game.gate.is_open, "after the first arena comes the glade of the next depth: the merchant, an open gate, no enemies")
+	check(game.hud.depth_label.text == "Depth 2  -  Glade", "the HUD says the player is on the glade (%s)" % game.hud.depth_label.text)
 	var section_before: int = GameManager.section_index
 	var bought: Array[String] = []
 	if merchants.size() == 1:
@@ -85,6 +86,8 @@ func _test_flow() -> void:
 	var line: Dictionary = _glade_lines.back() if not _glade_lines.is_empty() else {}
 	check(not game.is_in_glade() and GameManager.section_index == section_before and game.layout.arena_room < 0
 			and not game.get_enemies().is_empty(), "the glade's gate leads on to the first section of the depth")
+	check(game.hud.depth_label.text == "Depth 2  -  Section %d" % (GameManager.section_index + 1),
+			"off the glade the HUD shows the section again (%s)" % game.hud.depth_label.text)
 	check(line.get("type") == "glade" and line.get("depth") == 1 and line.get("purchases") == bought and bought.size() == 1
 			and int(line.get("coins_spent", 0)) > 0, "the glade gets its own log line with what was bought and the coins spent")
 	var state: PlayerState = game._make_player_state()

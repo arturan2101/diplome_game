@@ -102,6 +102,14 @@ func _test_arena() -> void:
 		if game.level.grid.get_cell(cell) != LevelGrid.Cell.WALL:
 			doors_are_walls = false
 	check(sealed and doors_are_walls, "walking into the arena seals its doors")
+	# An enemy that ends up outside the sealed arena (knocked through a closing door) is
+	# put back inside within the check interval; nobody could reach it otherwise.
+	var stray: Enemy = game.get_enemies()[0]
+	var outside: Vector2i = game.layout.entrance
+	stray.global_position = game.level.cell_center(outside)
+	await physics_frames(int(game.arena_stray_check_interval * 60.0) + 5)
+	check(room.grow(-1).has_point(game.level.cell_at(stray.global_position)),
+			"an enemy shut out of the sealed arena is put back inside")
 	var waves_seen: int = 0
 	for _round in 4:
 		var enemies: Array[Enemy] = game.get_enemies()

@@ -17,6 +17,8 @@ var spell: SpellData = null
 var spell_level: int = 1
 ## The two spells that merge and what they become (fusion offers).
 var recipe: FusionRecipe = null
+## A new spell while both slots are full: buying it asks which spell to forget.
+var replaces: bool = false
 var sold: bool = false
 
 
@@ -37,7 +39,7 @@ func get_title() -> String:
 		Kind.WEAPON:
 			return weapon.get_full_name()
 		Kind.SPELL:
-			return spell.display_name
+			return "%s (swap)" % spell.display_name if replaces else spell.display_name
 		Kind.SPELL_LEVEL:
 			return "%s, level %d" % [spell.display_name, spell_level]
 		Kind.FUSION:
@@ -56,13 +58,17 @@ func get_icon() -> Texture2D:
 	return HEAL_ICON
 
 
-## False while the player cannot take it (both slots full for a new spell, the spell
-## not at the level below any more, the two spells of a merge no longer at the top).
+## False while the player cannot take it (a new spell the player already has, the spell
+## not at the level below any more, the two spells of a merge no longer at the top). A
+## new spell with both slots full can be taken: it replaces one (the game asks which).
 ## book = null: no spells known, both slots free (as in ShopStock).
 func is_available(book: SpellBook) -> bool:
 	match kind:
 		Kind.SPELL:
-			return book == null or book.check_learn(spell) == SpellBook.LearnResult.LEARNED
+			if book == null:
+				return true
+			var result: SpellBook.LearnResult = book.check_learn(spell)
+			return result == SpellBook.LearnResult.LEARNED or result == SpellBook.LearnResult.SLOTS_FULL
 		Kind.SPELL_LEVEL:
 			return book != null and book.level_of(spell.id) == spell_level - 1
 		Kind.FUSION:

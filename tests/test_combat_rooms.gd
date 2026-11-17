@@ -13,6 +13,8 @@ const BIG_HP: int = 100000
 const PLANS: int = 300
 const SEEDS: int = 40
 const RUN_SEED: int = 23
+## Runs tried for a combat room with both planned waves.
+const SEED_ATTEMPTS: int = 10
 
 
 func run() -> void:
@@ -63,6 +65,8 @@ func _test_director() -> void:
 func _test_generation() -> void:
 	var builder: SectionBuilder = SectionBuilder.new()
 	var good: int = 0
+	var pit_rooms: int = 0
+	var forced: int = 0
 	for i in SEEDS:
 		var plan: SectionPlan = SectionPlan.new()
 		plan.room_count = 4
@@ -74,6 +78,15 @@ func _test_generation() -> void:
 			continue
 		var entry: Dictionary = layout.combat_rooms[0]
 		var room: int = int(entry["room"])
+		if _rect_has_pit(layout.grid, layout.room_rects[room]):
+			pit_rooms += 1
+			# Allowed only when every room but the first has pits.
+			var all_pits: bool = true
+			for other in range(1, layout.room_rects.size()):
+				if not _rect_has_pit(layout.grid, layout.room_rects[other]):
+					all_pits = false
+			if all_pits:
+				forced += 1
 		var inside: int = 0
 		var waves_seen: Dictionary = {}
 		var others: int = 0
@@ -88,6 +101,15 @@ func _test_generation() -> void:
 			good += 1
 	check(good == SEEDS, "the combat room is a later room of the path, with a double share of enemies in its waves (%d of %d)"
 			% [good, SEEDS])
+	check(pit_rooms == forced, "the combat room has no pits unless every room has (%d with pits, %d forced)" % [pit_rooms, forced])
+
+
+static func _rect_has_pit(grid: LevelGrid, rect: Rect2i) -> bool:
+	for y in range(rect.position.y, rect.end.y):
+		for x in range(rect.position.x, rect.end.x):
+			if grid.get_cell(Vector2i(x, y)) == LevelGrid.Cell.PIT:
+				return true
+	return false
 
 
 func _test_fight() -> void:
@@ -102,8 +124,14 @@ func _test_fight() -> void:
 	director.settings.combat_room_chance_build = 1.0
 	director.settings.combat_waves_build = Vector2i(2, 2)
 	director.settings.trap_chance = 0.0
-	game._start_section()
-	await physics_frames(2)
+	# A run whose combat room has both planned waves (a room may get too few enemies).
+	for attempt in SEED_ATTEMPTS:
+		GameManager.start_run(RUN_SEED + attempt)
+		game._start_section()
+		await physics_frames(2)
+		var rooms: Array[CombatRoom] = game.get_combat_rooms().rooms
+		if not rooms.is_empty() and rooms[0].waves.size() == 2:
+			break
 	game.player.health.max_hp = BIG_HP
 	game.player.health.reset()
 	var tracker: CombatRoomTracker = game.get_combat_rooms()

@@ -169,8 +169,8 @@ func _test_shop() -> void:
 	var fresh: ShopOffer = ShopOffer.new()
 	fresh.kind = ShopOffer.Kind.SPELL
 	fresh.spell = _fireball
-	check(not fresh.is_available(book) and not offers[0].is_available(book),
-			"offers the player cannot take now are off (no free slot, the merge already done)")
+	check(fresh.is_available(book) and not offers[0].is_available(book),
+			"a new spell with both slots full can still be taken (as a swap); a merge already done is off")
 	player.queue_free()
 	await physics_frames(2)
 

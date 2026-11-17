@@ -3,8 +3,8 @@ extends RefCounted
 ## Picks what a merchant sells (stage 24). All choices come from the given generator,
 ## so the same seed and section give the same stock for the same player.
 ## Spell offers raise a spell the player has (below the top level) or bring a new one
-## while a slot is free; without spells in the series, or with nothing to offer, the
-## slot becomes healing. With a fusion table (stage 26) every merge the player can do
+## (with both slots full it replaces one of them: stage 27); without spells in the
+## series, or with nothing to offer, the slot becomes healing. With a fusion table (stage 26) every merge the player can do
 ## now comes first, outside the random offers (it draws nothing from the generator), and
 ## spells made by merging can be raised like the others (they are never sold new).
 
@@ -51,8 +51,8 @@ static func make_offers(data: ShopData, depth: int, rng: RandomNumberGenerator, 
 	return offers
 
 
-## A level for a spell the player has (below the top), else a new spell for a free slot.
-## Merged spells (results of the fusion table) can only be raised.
+## A level for a spell the player has (below the top), else a new spell (for a free slot,
+## or to replace one). Merged spells (results of the fusion table) can only be raised.
 static func _choose_spell(offer: ShopOffer, spells: SpellPool, book: SpellBook, offered: Dictionary,
 		rng: RandomNumberGenerator, fusions: FusionTable = null) -> bool:
 	var raise: Array[SpellData] = []
@@ -68,7 +68,7 @@ static func _choose_spell(offer: ShopOffer, spells: SpellPool, book: SpellBook, 
 		var level: int = book.level_of(spell_data.id) if book != null else 0
 		if level > 0 and level < SpellData.MAX_LEVEL:
 			raise.append(spell_data)
-		elif level == 0 and spells.spells.has(spell_data) and (book == null or book.has_free_slot()):
+		elif level == 0 and spells.spells.has(spell_data):
 			fresh.append(spell_data)
 	var pool: Array[SpellData] = raise if not raise.is_empty() else fresh
 	if pool.is_empty():
@@ -77,6 +77,7 @@ static func _choose_spell(offer: ShopOffer, spells: SpellPool, book: SpellBook, 
 	var known: int = book.level_of(offer.spell.id) if book != null else 0
 	offer.spell_level = known + 1
 	offer.kind = ShopOffer.Kind.SPELL_LEVEL if known > 0 else ShopOffer.Kind.SPELL
+	offer.replaces = known == 0 and book != null and not book.has_free_slot()
 	return true
 
 
