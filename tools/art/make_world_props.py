@@ -17,6 +17,12 @@ pixel maps like make_merchant.py.
 - Generic effects, 16x16 strips: hit spark (3), dust puff for dash and landing (4),
   death poof (4), falling into a pit (3): assets/art/fx/hit_spark.png, dust_puff.png,
   death_poof.png, pit_fall.png
+- Sword slash, pointing right (0 rad), centred on the wielder: normal 48x48 (reach 24,
+  arc 120 deg) and heavy 64x64 (reach 28, arc 160 deg, gold), 3 frames each (wind-up,
+  full arc, fading): assets/art/fx/slash.png, slash_heavy.png. Flip vertically for the
+  swing back.
+- Arrows 16x16 pointing right, tip at (14, 8): player (blue fletching) and enemy (red
+  fletching): assets/art/weapons/arrow.png, enemy_arrow.png
 Run from the project root: python tools/art/make_world_props.py
 """
 import os
@@ -737,6 +743,87 @@ def pit_fall():
     ])
 
 
+def slash(size, reach, arc_deg, max_thick, keys):
+    """3 frames of a crescent swung clockwise around the canvas centre, facing right.
+    keys: (edge, middle, inner) colours."""
+    import math
+    edge, middle, inner = keys
+    half = math.radians(arc_deg) / 2.0
+    spans = [(0.0, 0.45, 1.0), (0.0, 1.0, 1.0), (0.55, 1.0, 0.6)]
+    img = Image.new("RGBA", (size * 3, size))
+    c = size / 2.0
+    for i, (tail, head, strength) in enumerate(spans):
+        g = Grid(size, size)
+        a0, a1 = -half + 2 * half * tail, -half + 2 * half * head
+        for y in range(size):
+            for x in range(size):
+                dx, dy = x + 0.5 - c, y + 0.5 - c
+                r = math.hypot(dx, dy)
+                ang = math.atan2(dy, dx)
+                if not (a0 <= ang <= a1) or r > reach:
+                    continue
+                u = (ang - a0) / max(a1 - a0, 1e-6)
+                thick = max_thick * strength * (0.35 + 0.65 * (u if i < 2 else 1.0 - u))
+                if r < reach - thick:
+                    continue
+                if i == 2:
+                    g.set(x, y, middle if r > reach - 1.2 else inner)
+                else:
+                    g.set(x, y, edge if r > reach - 1.3 else middle if r > reach - thick * 0.6 else inner)
+        img.paste(g.image(), (size * i, 0))
+    return img
+
+
+PLAYER_ARROW = """
+................
+................
+................
+................
+................
+................
+.lL.........m...
+.LlBBBBBBBBBmU..
+.lL.........m...
+................
+................
+................
+................
+................
+................
+................
+"""
+
+ENEMY_ARROW = """
+................
+................
+................
+................
+................
+................
+.Rq.........m...
+.qRbbbbbbbbbmU..
+.Rq.........m...
+................
+................
+................
+................
+................
+................
+................
+"""
+
+
+def arrow(rows):
+    """An arrow with a 1 px outline around it."""
+    g = Grid(16, 16)
+    for y, line in enumerate(rows.strip("\n").splitlines()):
+        for x, key in enumerate(line):
+            if key != ".":
+                g.set(x, y, key)
+    g.outline()
+    return g.image()
+
+
 def main():
     for folder in ("assets/art/pickups", "assets/art/level"):
         os.makedirs(folder, exist_ok=True)
@@ -766,6 +853,11 @@ def main():
     dust_puff().save("assets/art/fx/dust_puff.png")
     death_poof().save("assets/art/fx/death_poof.png")
     pit_fall().save("assets/art/fx/pit_fall.png")
+    slash(48, 23.5, 120, 6.0, ("U", "L", "l")).save("assets/art/fx/slash.png")
+    slash(64, 28.5, 160, 8.0, ("U", "Z", "Y")).save("assets/art/fx/slash_heavy.png")
+    os.makedirs("assets/art/weapons", exist_ok=True)
+    arrow(PLAYER_ARROW).save("assets/art/weapons/arrow.png")
+    arrow(ENEMY_ARROW).save("assets/art/weapons/enemy_arrow.png")
 
 
 if __name__ == "__main__":

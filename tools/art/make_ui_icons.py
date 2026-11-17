@@ -7,6 +7,8 @@ helpers of make_world_props.py:
 - HP bar 64x8: assets/art/ui/hp_bar_frame.png (frame, dark inside) and
   hp_bar_fill.png (the red fill alone, inside the frame's 62x6 hole).
 - Rarity frames 18x18, common / rare / legendary in one strip: assets/art/ui/rarity_frame.png
+- Weapons 16x16 by rarity (common steel, rare blue, legendary gold), for pickups,
+  chests and the HUD: assets/art/weapons/{sword,bow}_{common,rare,legendary}.png
 - 9-slice panel 16x16 (margins 4): assets/art/ui/panel.png; button 16x16, normal and
   pressed in one strip (margins 4): assets/art/ui/button.png
 Run from the project root: python tools/art/make_ui_icons.py
@@ -51,33 +53,37 @@ def disc(g, cx, cy, r, shade):
                 g.set(x, y, shade(dx, dy, d))
 
 
-def sword():
+def sword(guard=("Y", "Z"), grip=("B", "b"), blade=("U", "m"), pommel=("Y", "y")):
     g = Grid(16, 16)
-    line(g, 6, 9, 12, 3, "U")
-    line(g, 7, 9, 13, 3, "m")
-    line(g, 7, 10, 13, 4, "m")
-    g.set(13, 2, "U")
-    g.set(14, 2, "m")
-    line(g, 3, 7, 8, 12, "Y")
-    line(g, 4, 7, 8, 11, "Z")
-    line(g, 3, 12, 5, 10, "B")
-    line(g, 4, 12, 6, 10, "b")
-    g.set(2, 13, "Y")
-    g.set(3, 13, "y")
-    g.set(2, 14, "y")
+    line(g, 6, 9, 12, 3, blade[0])
+    line(g, 7, 9, 13, 3, blade[1])
+    line(g, 7, 10, 13, 4, blade[1])
+    g.set(13, 2, blade[0])
+    g.set(14, 2, blade[1])
+    line(g, 3, 7, 8, 12, guard[0])
+    line(g, 4, 7, 8, 11, guard[1])
+    line(g, 3, 12, 5, 10, grip[0])
+    line(g, 4, 12, 6, 10, grip[1])
+    g.set(2, 13, pommel[0])
+    g.set(3, 13, pommel[1])
+    g.set(2, 14, pommel[1])
     g.outline()
     return g
 
 
-def bow():
+def bow(limb=("c", "B", "b"), string="W", wrap=None):
     g = Grid(16, 16)
     # Arc bulging right, string on the left, an arrow pointing right.
     for y in range(2, 15):
         t = (y - 8) / 6.0
         x = 5 + int(round(6 * math.sqrt(max(0.0, 1 - t * t))))
-        g.set(x, y, "c" if y < 8 else "B")
-        g.set(x - 1, y, "B" if y < 8 else "b")
-    line(g, 5, 2, 5, 14, "W")
+        g.set(x, y, limb[0] if y < 8 else limb[1])
+        g.set(x - 1, y, limb[1] if y < 8 else limb[2])
+    if wrap:
+        for y in (7, 8, 9):
+            g.set(11, y, wrap[0])
+            g.set(10, y, wrap[1])
+    line(g, 5, 2, 5, 14, string)
     line(g, 3, 8, 12, 8, "B")
     g.set(13, 8, "U")
     g.set(14, 8, "m")
@@ -89,6 +95,19 @@ def bow():
     g.set(3, 9, "R")
     g.outline()
     return g
+
+
+# Rarity looks of the weapons (accents: common steel, rare blue, legendary gold).
+SWORDS = {
+    "common": dict(guard=("m", "U"), grip=("B", "b"), blade=("U", "m"), pommel=("m", "S")),
+    "rare": dict(guard=("l", "L"), grip=("j", "l"), blade=("U", "m"), pommel=("L", "l")),
+    "legendary": dict(guard=("Y", "Z"), grip=("r", "R"), blade=("U", "Z"), pommel=("Z", "Y")),
+}
+BOWS = {
+    "common": dict(limb=("c", "B", "b"), string="W", wrap=("m", "S")),
+    "rare": dict(limb=("c", "B", "b"), string="L", wrap=("L", "l")),
+    "legendary": dict(limb=("Z", "Y", "y"), string="U", wrap=("q", "R")),
+}
 
 
 def dash():
@@ -326,6 +345,11 @@ def main():
     for name, make in (("sword", sword), ("bow", bow), ("dash", dash), ("block", block), ("coin", coin),
                        ("hp", heart), ("swap", swap), ("pause", pause), ("take", take), ("depth", depth)):
         make().image().save(f"{UI}/icon_{name}.png")
+    os.makedirs("assets/art/weapons", exist_ok=True)
+    for rarity, look in SWORDS.items():
+        sword(**look).image().save(f"assets/art/weapons/sword_{rarity}.png")
+    for rarity, look in BOWS.items():
+        bow(**look).image().save(f"assets/art/weapons/bow_{rarity}.png")
     joystick_base().image().save(f"{UI}/joystick.png")
     joystick_knob().image().save(f"{UI}/joystick_knob.png")
     frame, fill = hp_bar()

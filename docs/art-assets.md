@@ -32,11 +32,11 @@ Actor sizes per docs/art-style.md rev 3: collisions in code are unchanged; sprit
 
 | P | Asset | File | Size | Frames | Status |
 |---|---|---|---|---|---|
-| C | Sword common / rare / legendary | assets/art/weapons/sword_{common,rare,legendary}.png | 16x16 | 1 | todo |
-| C | Bow common / rare / legendary | assets/art/weapons/bow_{common,rare,legendary}.png | 16x16 | 1 | todo |
-| C | Sword slash arc | assets/art/fx/slash.png | 32x32 | 3 (+ heavy 3rd hit variant) | todo |
-| C | Player arrow | assets/art/weapons/arrow.png (replaces sprites/arrow.tres) | 16x16 | 1 | todo |
-| C | Enemy arrow (red fletching) | assets/art/weapons/enemy_arrow.png | 16x16 | 1 | todo |
+| C | Sword common / rare / legendary | assets/art/weapons/sword_{common,rare,legendary}.png | 16x16 | 1 | generated 2026-11-17 (tools/art/make_ui_icons.py) |
+| C | Bow common / rare / legendary | assets/art/weapons/bow_{common,rare,legendary}.png | 16x16 | 1 | generated 2026-11-17 (tools/art/make_ui_icons.py) |
+| C | Sword slash arc | assets/art/fx/slash.png (48x48, reach 24, 120 deg), slash_heavy.png (64x64, reach 28, 160 deg, gold) | 48x48 / 64x64, centred on the wielder, pointing right | 3 each (wind-up, full arc, fading; flip vertically for the swing back) | generated 2026-11-17 (replaces the polygon of melee_weapon.gd _draw) |
+| C | Player arrow | assets/art/weapons/arrow.png (replaces sprites/arrow.tres) | 16x16, pointing right, tip at (14, 8) | 1 | generated 2026-11-17 (replaces the line of arrow.gd _draw) |
+| C | Enemy arrow (red fletching) | assets/art/weapons/enemy_arrow.png | 16x16, pointing right, tip at (14, 8) | 1 | generated 2026-11-17 |
 | L | Spear, axe, crossbow, staff x3 rarities | assets/art/weapons/<name>_<rarity>.png | 16x16 | 1 | todo |
 
 ## Pickups and level objects
