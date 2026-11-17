@@ -14,6 +14,9 @@ pixel maps like make_merchant.py.
   assets/art/level/shrine.png, shrine_used.png
 - Arena door seal (rubble on the floor), 16x16 tile: assets/art/tiles/door_seal.png
 - Training dummy 24x24, 3 frames (idle, hit, hit): assets/art/enemies/training_dummy.png
+- Generic effects, 16x16 strips: hit spark (3), dust puff for dash and landing (4),
+  death poof (4), falling into a pit (3): assets/art/fx/hit_spark.png, dust_puff.png,
+  death_poof.png, pit_fall.png
 Run from the project root: python tools/art/make_world_props.py
 """
 import os
@@ -661,6 +664,79 @@ def dummy_frames():
     return img
 
 
+def _ring_frames(specs):
+    """16x16 frames of round puffs. specs: per frame a list of (cx, cy, r, key, hollow)."""
+    import math
+    img = Image.new("RGBA", (16 * len(specs), 16))
+    for i, blobs in enumerate(specs):
+        g = Grid(16, 16)
+        for cx, cy, r, key, hollow in blobs:
+            for y in range(16):
+                for x in range(16):
+                    d = math.hypot(x + 0.5 - cx, y + 0.5 - cy)
+                    if d <= r and not (hollow and d < r - 1.2):
+                        g.set(x, y, key)
+        img.paste(g.image(), (16 * i, 0))
+    return img
+
+
+def hit_spark():
+    """A star of light where a hit lands: small flash, eight rays, scattered sparks."""
+    frames = []
+    rays = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (1, -1), (-1, 1)]
+    for i in range(3):
+        g = Grid(16, 16)
+        if i == 0:
+            for dx, dy in rays[:4]:
+                g.set(8 + dx, 8 + dy, "Z")
+            g.set(8, 8, "U")
+        elif i == 1:
+            for dx, dy in rays:
+                for k in range(1, 5 if dx == 0 or dy == 0 else 4):
+                    g.set(8 + dx * k, 8 + dy * k, "U" if k == 1 else "Z" if k < 3 else "Y")
+            g.set(8, 8, "U")
+        else:
+            for dx, dy in rays:
+                k = 5 if dx == 0 or dy == 0 else 4
+                g.set(8 + dx * k, 8 + dy * k, "Y")
+                g.set(8 + dx * (k - 1), 8 + dy * (k - 1), "q" if (dx + dy) % 2 else "Y")
+        frames.append(g.image())
+    img = Image.new("RGBA", (48, 16))
+    for i, f in enumerate(frames):
+        img.paste(f, (16 * i, 0))
+    return img
+
+
+def dust_puff():
+    """Stone dust kicked up by a dash or a landing: puffs that spread and thin out."""
+    return _ring_frames([
+        [(8, 12, 2.6, "W", False), (5, 13, 1.8, "m", False), (11, 13, 1.8, "m", False)],
+        [(7, 11, 3.2, "W", False), (4, 12, 2.4, "m", False), (12, 12, 2.4, "m", False), (8, 13, 1.6, "T", False)],
+        [(7, 10, 2.4, "m", False), (3, 11, 2.0, "T", False), (13, 11, 2.0, "T", False), (9, 8, 1.4, "W", False)],
+        [(4, 9, 1.5, "T", False), (12, 9, 1.5, "T", False), (8, 7, 1.0, "m", False)],
+    ])
+
+
+def death_poof():
+    """A puff of pale smoke with a violet core where an enemy vanishes."""
+    return _ring_frames([
+        [(8, 9, 3.0, "U", False), (8, 9, 1.4, "H", False)],
+        [(8, 9, 5.0, "W", False), (8, 9, 3.2, "U", False), (8, 9, 1.4, "H", False)],
+        [(8, 8, 6.2, "W", True), (2, 2, 1.6, "U", False), (14, 3, 1.6, "U", False), (3, 14, 1.6, "U", False),
+         (13, 13, 1.6, "U", False)],
+        [(3, 4, 1.4, "m", False), (13, 5, 1.4, "m", False), (8, 2, 1.0, "W", False), (7, 13, 1.2, "m", False)],
+    ])
+
+
+def pit_fall():
+    """Dust swirling down into a pit: a ring that shrinks into the dark."""
+    return _ring_frames([
+        [(8, 8, 6.0, "W", True), (8, 8, 4.6, "k", False)],
+        [(8, 8, 4.2, "m", True), (8, 8, 3.0, "o", False)],
+        [(8, 8, 2.2, "T", True), (8, 8, 1.0, "o", False)],
+    ])
+
+
 def main():
     for folder in ("assets/art/pickups", "assets/art/level"):
         os.makedirs(folder, exist_ok=True)
@@ -686,6 +762,10 @@ def main():
     shrine(None).save("assets/art/level/shrine_used.png")
     door_seal().save("assets/art/tiles/door_seal.png")
     dummy_frames().save("assets/art/enemies/training_dummy.png")
+    hit_spark().save("assets/art/fx/hit_spark.png")
+    dust_puff().save("assets/art/fx/dust_puff.png")
+    death_poof().save("assets/art/fx/death_poof.png")
+    pit_fall().save("assets/art/fx/pit_fall.png")
 
 
 if __name__ == "__main__":

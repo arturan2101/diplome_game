@@ -134,7 +134,7 @@ Biome 1 "Sandstone ruins" (core). Later biomes reuse the same layout: flooded ru
 | L | Ice fortress (combo) | assets/art/fx/ice_fortress.png | 32x32 | 6 | todo |
 | L | Spell icons x7 | assets/art/ui/spell_<name>.png | 16x16 | 1 | todo |
 
-Generic FX (C): hit spark 16x16 x3, dust puff (dash/land) 16x16 x4, death poof 16x16 x4, pit fall 16x16 x3.
+Generic FX (C): hit spark 16x16 x3, dust puff (dash/land) 16x16 x4, death poof 16x16 x4, pit fall 16x16 x3. Generated 2026-11-17: assets/art/fx/hit_spark.png, dust_puff.png, death_poof.png, pit_fall.png (16x16 strips, tools/art/make_world_props.py).
 
 ---
 
