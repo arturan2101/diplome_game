@@ -19,6 +19,8 @@ extends Resource
 @export var weapon_price: int = 14
 @export var spell_price: int = 18
 @export var spell_level_price: int = 14
+## Merging two spells at the top level into a new one (stage 26).
+@export var fusion_price: int = 30
 ## Weapon prices by rarity id (common, rare, legendary).
 @export var rarity_price: Dictionary = {&"common": 1.0, &"rare": 1.8, &"legendary": 3.0}
 ## Every depth after the first adds this share of the price (0.2 = +20% per depth).

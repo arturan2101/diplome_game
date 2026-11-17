@@ -24,6 +24,8 @@ signal closed
 
 var merchant: Merchant = null
 var _coins: int = 0
+## The player's spells: spell offers the player cannot take now are off.
+var _book: SpellBook = null
 
 
 func _ready() -> void:
@@ -42,8 +44,9 @@ func _exit_tree() -> void:
 		get_tree().paused = false
 
 
-func open(shop_merchant: Merchant, coins: int) -> void:
+func open(shop_merchant: Merchant, coins: int, book: SpellBook = null) -> void:
 	merchant = shop_merchant
+	_book = book
 	title.text = "Wandering merchant" if merchant.wandering else "Merchant"
 	get_tree().paused = true
 	panel.visible = true
@@ -64,7 +67,7 @@ func refresh(coins: int) -> void:
 		button.expand_icon = false
 		button.custom_minimum_size = choice_size
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		button.disabled = offer.sold or offer.price > coins
+		button.disabled = not _can_buy(offer, coins)
 		if slot_texture != null:
 			for state: String in ["normal", "hover", "pressed", "focus"]:
 				button.add_theme_stylebox_override(state, _slot_style(Color.WHITE))
@@ -101,9 +104,13 @@ func close() -> void:
 
 
 func _on_offer_pressed(offer: ShopOffer) -> void:
-	if offer.sold or offer.price > _coins:
+	if not _can_buy(offer, _coins):
 		return
 	bought.emit(offer)
+
+
+func _can_buy(offer: ShopOffer, coins: int) -> bool:
+	return not offer.sold and offer.price <= coins and offer.is_available(_book)
 
 
 func _unhandled_input(event: InputEvent) -> void:

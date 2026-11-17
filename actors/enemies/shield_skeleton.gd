@@ -32,7 +32,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	super(delta)
-	if is_dormant or _stats == null:
+	if is_dormant or is_frozen() or _stats == null:
 		return
 	_flash_left = maxf(_flash_left - delta, 0.0)
 	var holding: bool = state == State.WINDUP or state == State.RECOVER or state == State.STAGGER
@@ -45,9 +45,9 @@ func _physics_process(delta: float) -> void:
 
 
 ## True if the shield stops this hit: it comes from the shield's arc and does not
-## knock back, and the skeleton is not staggered.
+## knock back, and the skeleton is not staggered or frozen.
 func blocks(info: DamageInfo) -> bool:
-	if _stats == null or state == State.STAGGER or not info.knockback.is_zero_approx():
+	if _stats == null or state == State.STAGGER or is_frozen() or not info.knockback.is_zero_approx():
 		return false
 	var incoming: Vector2 = -info.direction
 	var attacker: Node2D = info.source as Node2D

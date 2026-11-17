@@ -3,12 +3,16 @@ extends Node2D
 ## The player's spells: SLOT_COUNT slots, each holding a Spell node (a child of this
 ## node). Learning a spell the player already has raises its level, up to
 ## SpellData.MAX_LEVEL; a new spell goes into a free slot; with both slots full the
-## caller has to choose a slot for replace(). Created by the player in code.
+## caller has to choose a slot for replace(). Two spells at the top level can merge by a
+## FusionRecipe (fuse(), at the merchant): the new spell comes at level 1 into the first
+## one's slot and the other slot is freed. Created by the player in code.
 
 ## Slots or levels changed (for the HUD).
 signal spells_changed
 ## A spell was learned (level 1) or levelled up.
 signal spell_learned(spell_data: SpellData, level: int)
+## Two spells merged into recipe.result (sent after its spell_learned).
+signal spell_fused(recipe: FusionRecipe)
 ## Re-sent from the spells, for telemetry.
 signal spell_cast(spell_id: StringName)
 signal spell_damage_dealt(spell_id: StringName, amount: int)
@@ -76,6 +80,39 @@ func learn(spell_data: SpellData) -> LearnResult:
 func replace(slot: int, spell_data: SpellData) -> void:
 	if slot >= 0 and slot < SLOT_COUNT:
 		_put(slot, spell_data)
+
+
+## True if the recipe can be done now: both spells are known at the top level and its
+## result is not known yet.
+func can_fuse(recipe: FusionRecipe) -> bool:
+	if recipe == null or recipe.first == null or recipe.second == null or recipe.result == null:
+		return false
+	return (level_of(recipe.first.id) >= SpellData.MAX_LEVEL and level_of(recipe.second.id) >= SpellData.MAX_LEVEL
+			and level_of(recipe.result.id) == 0)
+
+
+## Merges the two spells of the recipe: the result (level 1) takes the first one's slot,
+## the second one's slot becomes free. Returns false (and changes nothing) if
+## can_fuse() is false.
+func fuse(recipe: FusionRecipe) -> bool:
+	if not can_fuse(recipe):
+		return false
+	var first_slot: int = _slots.find(_find(recipe.first.id))
+	var second_slot: int = _slots.find(_find(recipe.second.id))
+	_slots[second_slot].queue_free()
+	_slots[second_slot] = null
+	_put(first_slot, recipe.result)
+	spell_fused.emit(recipe)
+	return true
+
+
+## The spells in the slots, in slot order, without empty slots.
+func get_known() -> Array[SpellData]:
+	var known: Array[SpellData] = []
+	for spell: Spell in _slots:
+		if spell != null:
+			known.append(spell.data)
+	return known
 
 
 ## Casts the spell of a slot towards the player's aim. Returns true if it was cast.

@@ -4,15 +4,26 @@ extends RefCounted
 ## so the same seed and section give the same stock for the same player.
 ## Spell offers raise a spell the player has (below the top level) or bring a new one
 ## while a slot is free; without spells in the series, or with nothing to offer, the
-## slot becomes healing.
+## slot becomes healing. With a fusion table (stage 26) every merge the player can do
+## now comes first, outside the random offers (it draws nothing from the generator), and
+## spells made by merging can be raised like the others (they are never sold new).
 
 
 ## min_offers..max_offers offers. spells = null: the series has no spells.
 ## book: the player's spells (null = none known, both slots free).
+## fusions = null: no merging in the series.
 static func make_offers(data: ShopData, depth: int, rng: RandomNumberGenerator, weapons: WeaponPool,
-		rarity_table: RarityTable, spells: SpellPool, book: SpellBook, wandering: bool) -> Array[ShopOffer]:
+		rarity_table: RarityTable, spells: SpellPool, book: SpellBook, wandering: bool,
+		fusions: FusionTable = null) -> Array[ShopOffer]:
 	var offers: Array[ShopOffer] = []
 	var offered_spells: Dictionary = {}
+	if fusions != null:
+		for recipe: FusionRecipe in fusions.available(book):
+			var fusion: ShopOffer = ShopOffer.new()
+			fusion.kind = ShopOffer.Kind.FUSION
+			fusion.recipe = recipe
+			fusion.price = data.price_for(data.fusion_price, depth, wandering)
+			offers.append(fusion)
 	var kinds: Array[ShopOffer.Kind] = [ShopOffer.Kind.HEAL, ShopOffer.Kind.WEAPON]
 	var weights: Array[float] = [data.heal_weight, data.weapon_weight]
 	if spells != null and not spells.spells.is_empty():
@@ -27,7 +38,7 @@ static func make_offers(data: ShopData, depth: int, rng: RandomNumberGenerator, 
 			var weapon: WeaponData = weapons.pick(rng)
 			offer.weapon = weapon.with_rarity(rarity) if rarity != null else weapon
 			base = data.weapon_price * float(data.rarity_price.get(offer.weapon.get_rarity().id, 1.0))
-		elif offer.kind == ShopOffer.Kind.SPELL and _choose_spell(offer, spells, book, offered_spells, rng):
+		elif offer.kind == ShopOffer.Kind.SPELL and _choose_spell(offer, spells, book, offered_spells, rng, fusions):
 			base = data.spell_level_price * (offer.spell_level - 1) if offer.kind == ShopOffer.Kind.SPELL_LEVEL else data.spell_price
 			offered_spells[offer.spell.id] = true
 		else:
@@ -41,17 +52,23 @@ static func make_offers(data: ShopData, depth: int, rng: RandomNumberGenerator, 
 
 
 ## A level for a spell the player has (below the top), else a new spell for a free slot.
+## Merged spells (results of the fusion table) can only be raised.
 static func _choose_spell(offer: ShopOffer, spells: SpellPool, book: SpellBook, offered: Dictionary,
-		rng: RandomNumberGenerator) -> bool:
+		rng: RandomNumberGenerator, fusions: FusionTable = null) -> bool:
 	var raise: Array[SpellData] = []
 	var fresh: Array[SpellData] = []
-	for spell_data: SpellData in spells.spells:
+	var candidates: Array[SpellData] = spells.spells.duplicate()
+	if fusions != null:
+		for result: SpellData in fusions.results():
+			if not candidates.has(result):
+				candidates.append(result)
+	for spell_data: SpellData in candidates:
 		if offered.has(spell_data.id):
 			continue
 		var level: int = book.level_of(spell_data.id) if book != null else 0
 		if level > 0 and level < SpellData.MAX_LEVEL:
 			raise.append(spell_data)
-		elif level == 0 and (book == null or book.has_free_slot()):
+		elif level == 0 and spells.spells.has(spell_data) and (book == null or book.has_free_slot()):
 			fresh.append(spell_data)
 	var pool: Array[SpellData] = raise if not raise.is_empty() else fresh
 	if pool.is_empty():

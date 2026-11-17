@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="FireballData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/fireball_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/steam_icon.tres" id="2"]
+[ext_resource type="PackedScene" path="res://combat/spells/fireball_spell.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://combat/spells/fireball.tscn" id="4"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/fusion_frames.tres" id="5"]
+
+[resource]
+script = ExtResource("1")
+id = &"steam"
+display_name = "Steam Burst"
+description = "a cloud of boiling steam bursts on impact (fire + ice)"
+icon = ExtResource("2")
+color = Color(0.92, 0.95, 1, 1)
+cooldown = PackedFloat32Array(4.5, 4.25, 4)
+auto_aim_radius = 160.0
+spell_scene = ExtResource("3")
+frames = ExtResource("5")
+level_animations = Array[StringName]([&"steam_l1", &"steam_l2", &"steam_l3"])
+damage = PackedInt32Array(44, 54, 64)
+radius = PackedFloat32Array(40, 46, 52)
+speed = 160.0
+max_range = 180.0
+knockback = 220.0
+projectile_scene = ExtResource("4")
+blast_time = 0.5
+rotate_look = false
+look_scale = 0.5
+blast_look = true

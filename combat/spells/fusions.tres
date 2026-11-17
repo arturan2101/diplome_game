@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="FusionTable" load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/fusion_table.gd" id="1"]
+[ext_resource type="Script" path="res://combat/spells/fusion_recipe.gd" id="2"]
+[ext_resource type="Resource" path="res://combat/spells/fireball.tres" id="3"]
+[ext_resource type="Resource" path="res://combat/spells/whirlwind.tres" id="4"]
+[ext_resource type="Resource" path="res://combat/spells/ice_wall.tres" id="5"]
+[ext_resource type="Resource" path="res://combat/spells/firestorm.tres" id="6"]
+[ext_resource type="Resource" path="res://combat/spells/blizzard.tres" id="7"]
+[ext_resource type="Resource" path="res://combat/spells/steam.tres" id="8"]
+
+[sub_resource type="Resource" id="firestorm"]
+script = ExtResource("2")
+first = ExtResource("3")
+second = ExtResource("4")
+result = ExtResource("6")
+
+[sub_resource type="Resource" id="blizzard"]
+script = ExtResource("2")
+first = ExtResource("5")
+second = ExtResource("4")
+result = ExtResource("7")
+
+[sub_resource type="Resource" id="steam"]
+script = ExtResource("2")
+first = ExtResource("3")
+second = ExtResource("5")
+result = ExtResource("8")
+
+[resource]
+script = ExtResource("1")
+recipes = Array[ExtResource("2")]([SubResource("firestorm"), SubResource("blizzard"), SubResource("steam")])

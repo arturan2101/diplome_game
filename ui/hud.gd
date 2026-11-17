@@ -28,6 +28,11 @@ extends CanvasLayer
 @export var spell_button_icons: Array[Sprite2D] = []
 ## Alpha of a spell button's icon while the spell cools down.
 @export var cooling_spell_alpha: float = 0.35
+## Gold marks of the spell level under each spell icon: a strip with one mark picture
+## per level (art). Without it the level is written as a number.
+@export var level_pips: Texture2D = preload("res://assets/art/fx/level_pips.png")
+@export var level_pip_size: Vector2 = Vector2(16.0, 4.0)
+@export var level_pip_gap: float = 1.0
 ## Hint above the Take button ("Take Rare Bow", the name in the rarity colour) and the
 ## button itself; both appear only while there is something to take.
 @export var interact_prompt: RichTextLabel
@@ -51,6 +56,8 @@ extends CanvasLayer
 var _player: Player = null
 ## One rarity bar per weapon icon, same order.
 var _rarity_bars: Array[ColorRect] = []
+## Level marks under the spell icons, in slot order (empty without level_pips).
+var _spell_pips: Array[TextureRect] = []
 
 
 func _ready() -> void:
@@ -66,6 +73,7 @@ func _ready() -> void:
 	if boss_bar != null:
 		boss_bar.visible = false
 	_make_rarity_bars()
+	_make_spell_pips()
 
 
 func _process(_delta: float) -> void:
@@ -93,6 +101,7 @@ func bind_player(player: Player) -> void:
 	if player.spell_book != null:
 		player.spell_book.spells_changed.connect(_refresh_spells)
 		player.spell_book.spell_learned.connect(_on_spell_learned)
+		player.spell_book.spell_fused.connect(_on_spell_fused)
 	_refresh_spells()
 
 
@@ -201,7 +210,12 @@ func _refresh_spells() -> void:
 			spell_icons[slot].texture = spell.data.icon if spell != null else null
 			spell_icons[slot].visible = spell != null
 		if slot < spell_levels.size():
-			spell_levels[slot].text = str(spell.level) if spell != null else ""
+			spell_levels[slot].text = str(spell.level) if spell != null and _spell_pips.is_empty() else ""
+		if slot < _spell_pips.size():
+			_spell_pips[slot].visible = spell != null
+			if spell != null:
+				(_spell_pips[slot].texture as AtlasTexture).region = Rect2(
+						Vector2(level_pip_size.x * (spell.level - 1), 0.0), level_pip_size)
 		if slot < spell_buttons.size():
 			spell_buttons[slot].visible = spell != null
 		if slot < spell_button_icons.size():
@@ -230,6 +244,34 @@ func _on_spell_learned(spell_data: SpellData, level: int) -> void:
 		show_banner("%s learned" % spell_data.display_name)
 	else:
 		show_banner("%s: level %d" % [spell_data.display_name, level])
+
+
+func _on_spell_fused(recipe: FusionRecipe) -> void:
+	show_banner("%s + %s = %s" % [recipe.first.display_name, recipe.second.display_name, recipe.result.display_name])
+
+
+## The level marks of a spell slot (for tests), or null.
+func get_spell_pips(slot: int) -> TextureRect:
+	return _spell_pips[slot] if slot < _spell_pips.size() else null
+
+
+## A strip of level marks under every spell icon; the region shows the level.
+func _make_spell_pips() -> void:
+	if level_pips == null:
+		return
+	for icon: TextureRect in spell_icons:
+		var pips: TextureRect = TextureRect.new()
+		pips.name = "LevelPips"
+		pips.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var strip: AtlasTexture = AtlasTexture.new()
+		strip.atlas = level_pips
+		strip.region = Rect2(Vector2.ZERO, level_pip_size)
+		pips.texture = strip
+		pips.position = Vector2((icon.size.x - level_pip_size.x) * 0.5, icon.size.y + level_pip_gap)
+		pips.size = level_pip_size
+		pips.visible = false
+		icon.add_child(pips)
+		_spell_pips.append(pips)
 
 
 func _on_weapon_changed(_slot: int, _data: WeaponData) -> void:

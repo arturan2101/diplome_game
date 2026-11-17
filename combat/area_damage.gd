@@ -6,9 +6,11 @@ extends RefCounted
 
 
 ## Hits every hurtbox of target_mask inside the circle once. Returns the damage dealt
-## (absorbed hits, e.g. by an invulnerable target, do not count).
+## (absorbed hits, e.g. by an invulnerable target, do not count). on_hit, if given, is
+## called with every hurtbox that took the hit (the blizzard freezes its owner).
 static func hit(space: PhysicsDirectSpaceState2D, center: Vector2, radius: float, damage: int, source: Node,
-		source_id: StringName, knockback: float, target_mask: int, wall_mask: int) -> int:
+		source_id: StringName, knockback: float, target_mask: int, wall_mask: int,
+		on_hit: Callable = Callable()) -> int:
 	var circle: CircleShape2D = CircleShape2D.new()
 	circle.radius = radius
 	var query: PhysicsShapeQueryParameters2D = PhysicsShapeQueryParameters2D.new()
@@ -32,4 +34,6 @@ static func hit(space: PhysicsDirectSpaceState2D, center: Vector2, radius: float
 		info.direction = away
 		if hurtbox.receive_hit(info):
 			dealt += damage
+			if on_hit.is_valid():
+				on_hit.call(hurtbox)
 	return dealt

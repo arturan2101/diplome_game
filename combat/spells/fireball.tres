@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="FireballData" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="FireballData" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://combat/spells/fireball_data.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/fireball_icon.tres" id="2"]
 [ext_resource type="PackedScene" path="res://combat/spells/fireball_spell.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://combat/spells/fireball.tscn" id="4"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/element_frames.tres" id="9"]
 
 [resource]
 script = ExtResource("1")
@@ -21,3 +22,6 @@ speed = 220.0
 max_range = 200.0
 knockback = 150.0
 projectile_scene = ExtResource("4")
+frames = ExtResource("9")
+level_animations = Array[StringName]([&"fire_l1", &"fire_l2", &"fire_l3"])
+trail_animation = &"fire_trail"

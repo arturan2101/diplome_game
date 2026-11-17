@@ -3,6 +3,8 @@ extends StaticBody2D
 ## One block of the ice wall: a solid tile on the world layer, so it stops enemies,
 ## the player and arrows like a wall does (enemy paths do not know about it, so
 ## enemies push against it). Melts after its lifetime: fades out, then disappears.
+## Its look is the picture of the spell's level (set by the spell before the block
+## enters the scene); without one a placeholder square is drawn.
 
 ## Seconds the block stands, set by the spell; the last melt_time seconds it fades.
 @export var lifetime: float = 4.0
@@ -10,11 +12,18 @@ extends StaticBody2D
 ## Placeholder look: a square of this size and colour.
 @export var size: float = 16.0
 @export var color: Color = Color(0.6, 0.85, 1.0)
+## Picture of the block (the level's art); null = the placeholder square.
+@export var texture: Texture2D
 
 
 func _ready() -> void:
 	# Cleared between sections together with arrows and fireballs.
 	add_to_group(Arrow.GROUP)
+	if texture != null:
+		var sprite: Sprite2D = Sprite2D.new()
+		sprite.name = "Look"
+		sprite.texture = texture
+		add_child(sprite)
 
 
 func _physics_process(delta: float) -> void:
@@ -28,6 +37,8 @@ func _physics_process(delta: float) -> void:
 
 
 func _draw() -> void:
+	if texture != null:
+		return
 	var rect: Rect2 = Rect2(Vector2(-size, -size) * 0.5, Vector2(size, size))
 	draw_rect(rect, Color(color, 0.85))
 	draw_rect(rect.grow(-1.0), Color(1.0, 1.0, 1.0, 0.6), false, 1.0)

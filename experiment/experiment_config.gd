@@ -30,6 +30,9 @@ extends Resource
 @export var merchant_glade: bool = true
 ## Secret rooms behind cracked walls (stage 24). Off in the clean series and the playtest.
 @export var secret_rooms: bool = true
+## Merging two spells at the top level into a new one at the merchant (stage 26).
+## Needs spells. Off in the clean series and the playtest.
+@export var spell_fusion: bool = true
 ## Soft tension waves of the rules director: a peak of x1.15 and a rest of x0.5
 ## (DirectorSettings.soft_peak_multiplier, soft_rest_multiplier) instead of x1.3 and
 ## x0.3. The other modes have no wave and do not change.
@@ -40,4 +43,4 @@ extends Resource
 func to_dictionary() -> Dictionary:
 	return {"boss": boss_enabled, "spells": spells_enabled, "rarity": rarity_enabled, "soft_waves": soft_waves,
 			"spike_traps": spike_traps, "combat_rooms": combat_rooms, "elite_enemies": elite_enemies,
-			"secret_rooms": secret_rooms, "merchant_glade": merchant_glade}
+			"secret_rooms": secret_rooms, "merchant_glade": merchant_glade, "spell_fusion": spell_fusion}

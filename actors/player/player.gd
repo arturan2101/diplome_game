@@ -86,6 +86,8 @@ func _ready() -> void:
 	spell_book = SpellBook.new()
 	spell_book.name = "SpellBook"
 	spell_book.setup(self)
+	# Effects around the player (the ring of the whirlwind) lie on the ground, under the player.
+	spell_book.show_behind_parent = true
 	add_child(spell_book)
 	update_camera_limits()
 

@@ -1,13 +1,19 @@
 extends Node
 ## Manual preview of the merchant's glade: the real game in the full series, walked
-## through its gates until the glade after the first arena. Saves the glade
-## (glade.png) and its shop (glade_shop.png), then quits. Not part of the test suite.
+## through its gates until the glade after the first arena. The player knows the
+## fireball and the whirlwind at level 3, so the shop offers their merge (stage 26).
+## Saves the glade (glade.png), its shop (glade_shop.png), the flash of the merge
+## (glade_merge.png) and the HUD after it (glade_merged.png), then quits.
+## Not part of the test suite.
 ## Usage: godot --path . res://tests/manual/glade_preview.tscn -- <folder>
 
 const GAME_SCENE: PackedScene = preload("res://main/main.tscn")
 const RUN_SEED: int = 25
 const MAX_GATES: int = 6
 const SETTLE_FRAMES: int = 30
+const MERGE_SHOT_FRAMES: int = 12
+const FIREBALL: SpellData = preload("res://combat/spells/fireball.tres")
+const WHIRLWIND: SpellData = preload("res://combat/spells/whirlwind.tres")
 
 var _out_dir: String = "user://glade_preview"
 
@@ -26,6 +32,9 @@ func _ready() -> void:
 	await _frames(2)
 	game.player.health.max_hp = 100000
 	game.player.health.reset()
+	for _level in SpellData.MAX_LEVEL:
+		game.player.spell_book.learn(FIREBALL)
+		game.player.spell_book.learn(WHIRLWIND)
 	for _gate in MAX_GATES:
 		if game.is_in_glade():
 			break
@@ -43,7 +52,14 @@ func _ready() -> void:
 	if not merchants.is_empty():
 		(merchants[0] as Merchant).interact(game.player)
 	await _save("glade_shop.png")
+	for button: Button in game.shop_screen.get_offer_buttons():
+		if button.text.begins_with("Merge") and not button.disabled:
+			button.pressed.emit()
 	game.shop_screen.close()
+	await _frames(MERGE_SHOT_FRAMES)
+	await _save("glade_merge.png")
+	await _frames(SETTLE_FRAMES)
+	await _save("glade_merged.png")
 	GameManager.config = GameManager.DEFAULT_CONFIG
 	get_tree().quit()
 

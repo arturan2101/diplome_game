@@ -1,9 +1,12 @@
-[gd_resource type="Resource" script_class="IceWallData" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="IceWallData" load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://combat/spells/ice_wall_data.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ice_wall_icon.tres" id="2"]
 [ext_resource type="PackedScene" path="res://combat/spells/ice_wall_spell.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://combat/spells/ice_block.tscn" id="4"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/ice_l1.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/ice_l2.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/ice_l3.png" id="7"]
 
 [resource]
 script = ExtResource("1")
@@ -19,3 +22,4 @@ blocks = PackedInt32Array(3, 4, 5)
 duration = PackedFloat32Array(4, 5, 6)
 distance = 32.0
 block_scene = ExtResource("4")
+level_textures = Array[Texture2D]([ExtResource("5"), ExtResource("6"), ExtResource("7")])

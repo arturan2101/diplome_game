@@ -239,6 +239,7 @@ Each element has 3 levels: bigger, brighter, more particles; level 3 adds a new 
 - Wind (the whirlwind ring): `wind_l1..3` in `element_frames.tres` (48x48, 4 frames, 12 fps, flat on the ground; more rings each level, level 3 carries stones and leaves).
 - HUD: `element_icons.png` (16x16: fire, ice, wind) and `level_pips.png` (16x4 each, level 1, 2, 3: gold marks under the icon).
 - Wiring by level is for the session that owns the spells (pick the animation or texture by the spell's level).
+- Integrated in stage 26: `SpellData.frames` / `level_animations` / `level_textures` in `combat/spells/fireball.tres`, `whirlwind.tres`, `ice_wall.tres` (`fire_trail` from level 3: `FireballData.trail_animation`); spell icons `assets/sprites/*_icon.tres` are now regions of `element_icons.png`; level marks under the HUD spell icons (`Hud.level_pips`).
 
 ## Fused elements (art, 2026-11-14)
 
@@ -247,6 +248,7 @@ Pairs follow docs/design.md; each has 3 levels and looks stronger than the plain
 - merge (32x32, 8 frames, 16 fps, plays once): two coloured sparks spiral in, a flash, the new element bursts out. Play it where the two spells merge.
 - HUD icons: fusion_icons.png (16x16: firestorm, blizzard, steam); the level marks are the same level_pips.png as for the plain elements.
 - If the combination table gets other pairs, add them to PAIRS in the generator (two colour ramps and a spark colour).
+- Integrated in stage 26: `combat/spells/firestorm.tres`, `blizzard.tres`, `steam.tres` (frames and level animations; steam flies at half size and grows into its blast), icons `assets/sprites/firestorm_icon.tres`, `blizzard_icon.tres`, `steam_icon.tres` (regions of `fusion_icons.png`); `merge` plays on the player when the shop closes after a merge (`Game.MERGE_FRAMES`).
 
 ## Archer, beetle, Guardian (art, 2026-11-14)
 

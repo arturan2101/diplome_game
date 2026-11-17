@@ -30,6 +30,7 @@ func _cast(direction: Vector2) -> void:
 		var block: IceBlock = stats.block_scene.instantiate() as IceBlock
 		block.lifetime = duration
 		block.color = stats.color
+		block.texture = stats.texture_at(level)
 		_effect_parent().add_child(block)
 		block.global_position = at
 

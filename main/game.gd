@@ -29,6 +29,10 @@ const ITEM_SCENES: Dictionary = {
 	SectionLayout.ITEM_MERCHANT: preload("res://actors/npc/merchant.tscn"),
 }
 const DEFAULT_SHOP: ShopData = preload("res://shop/shop.tres")
+const DEFAULT_FUSIONS: FusionTable = preload("res://combat/spells/fusions.tres")
+## The flash where two spells merge (art: assets/art/fx/fusion_frames.tres).
+const MERGE_FRAMES: SpriteFrames = preload("res://assets/art/fx/fusion_frames.tres")
+const MERGE_ANIMATION: StringName = &"merge"
 const DEFAULT_GLADE: GladeData = preload("res://generation/glade.tres")
 const SHOP_SCREEN_SCENE: PackedScene = preload("res://ui/shop_screen.tscn")
 ## How many past sections the director looks at for "who hurts the player".
@@ -70,6 +74,8 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 @export var shop_data: ShopData
 ## The shop screen. Empty = one is created from ui/shop_screen.tscn.
 @export var shop_screen: ShopScreen
+## Which spells merge into which (stage 26). Empty = combat/spells/fusions.tres.
+@export var fusion_table: FusionTable
 ## The merchant's glade between depths. Empty = generation/glade.tres.
 @export var glade_data: GladeData
 ## With the glade (spells are bought there), a secret room's chest holds a spell
@@ -98,6 +104,8 @@ var _pending_scroll: SpellPickup = null
 var _combat: CombatRoomTracker = null
 ## True while the player is on the glade between depths (not a section).
 var _in_glade: bool = false
+## Two spells merged in the shop: the flash plays when the shop closes.
+var _merge_pending: bool = false
 ## The bot playing this run, if any (simulations skip the boss's spell reward).
 var _bot: BotPlayer = null
 ## Servants the boss called that are still alive, including ones not yet added to the
@@ -118,12 +126,15 @@ func _ready() -> void:
 	spell_choice.closed.connect(_on_spell_choice_closed)
 	if shop_data == null:
 		shop_data = DEFAULT_SHOP
+	if fusion_table == null:
+		fusion_table = DEFAULT_FUSIONS
 	if glade_data == null:
 		glade_data = DEFAULT_GLADE
 	if shop_screen == null:
 		shop_screen = SHOP_SCREEN_SCENE.instantiate() as ShopScreen
 		add_child(shop_screen)
 	shop_screen.bought.connect(_on_shop_bought)
+	shop_screen.closed.connect(_on_shop_closed)
 	_combat = CombatRoomTracker.new()
 	_combat.name = "CombatRooms"
 	_combat.game = self
@@ -365,7 +376,8 @@ func _spawn_item(entry: Dictionary, shop_rng: RandomNumberGenerator = null) -> v
 		var stock_rng: RandomNumberGenerator = shop_rng if shop_rng != null else GameManager.make_shop_rng(GameManager.section_index)
 		merchant.offers = ShopStock.make_offers(shop_data, GameManager.depth, stock_rng,
 				chest_weapons, rarity_table if GameManager.config.rarity_enabled else null,
-				spell_pool if GameManager.config.spells_enabled else null, player.spell_book, merchant.wandering)
+				spell_pool if GameManager.config.spells_enabled else null, player.spell_book, merchant.wandering,
+				get_shop_fusions())
 		merchant.shop_requested.connect(_on_shop_requested)
 	_contents.add_child(item)
 
@@ -421,15 +433,22 @@ func _open_secret() -> void:
 	_contents.add_child(light)
 
 
+## The fusion table merchants use, or null when the series has no merging.
+func get_shop_fusions() -> FusionTable:
+	if GameManager.config.spells_enabled and GameManager.config.spell_fusion:
+		return fusion_table
+	return null
+
+
 ## Bots do not trade: the shop would pause their run.
 func _on_shop_requested(merchant: Merchant) -> void:
 	if _bot != null or shop_screen.is_open():
 		return
-	shop_screen.open(merchant, GameManager.coins)
+	shop_screen.open(merchant, GameManager.coins, player.spell_book)
 
 
 func _on_shop_bought(offer: ShopOffer) -> void:
-	if offer.sold or not GameManager.spend_coins(offer.price):
+	if offer.sold or not offer.is_available(player.spell_book) or not GameManager.spend_coins(offer.price):
 		return
 	offer.sold = true
 	match offer.kind:
@@ -444,8 +463,18 @@ func _on_shop_bought(offer: ShopOffer) -> void:
 			_contents.add_child(weapon_pickup)
 		ShopOffer.Kind.SPELL, ShopOffer.Kind.SPELL_LEVEL:
 			player.spell_book.learn(offer.spell)
+		ShopOffer.Kind.FUSION:
+			_merge_pending = player.spell_book.fuse(offer.recipe) or _merge_pending
 	Telemetry.record_purchase(offer.get_id(), offer.price)
 	shop_screen.refresh(GameManager.coins)
+
+
+## After a merge the flash plays on the player once the game runs again.
+func _on_shop_closed() -> void:
+	if not _merge_pending:
+		return
+	_merge_pending = false
+	EffectSprite.spawn(_contents if _contents != null else self, player.global_position, MERGE_FRAMES, MERGE_ANIMATION)
 
 
 ## Spawns the first wave; later waves (arena only) wait in _pending_waves.

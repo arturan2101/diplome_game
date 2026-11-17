@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="WhirlwindData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/whirlwind_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/firestorm_icon.tres" id="2"]
+[ext_resource type="PackedScene" path="res://combat/spells/whirlwind_spell.tscn" id="3"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/fusion_frames.tres" id="4"]
+
+[resource]
+script = ExtResource("1")
+id = &"firestorm"
+display_name = "Firestorm"
+description = "a burning whirlwind (fire + wind)"
+icon = ExtResource("2")
+color = Color(1, 0.45, 0.15, 1)
+cooldown = PackedFloat32Array(8, 7.5, 7)
+spell_scene = ExtResource("3")
+frames = ExtResource("4")
+level_animations = Array[StringName]([&"firestorm_l1", &"firestorm_l2", &"firestorm_l3"])
+damage = PackedInt32Array(7, 8, 9)
+radius = PackedFloat32Array(44, 50, 56)
+duration = PackedFloat32Array(3, 3.25, 3.5)
+tick_interval = 0.25
+knockback = 100.0

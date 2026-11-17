@@ -3,6 +3,12 @@ extends Spell
 ## A ring of wind around the caster for a few seconds: every tick it hurts the
 ## enemies inside and pushes them out (AreaDamage). The spell node is a child of the
 ## caster, so the wind moves with it. The first tick comes at once.
+## The look is the level's animation of the spell, stretched to the radius; without
+## one a placeholder is drawn. The firestorm and the blizzard (fused spells) use this
+## script too; the blizzard's ticks also freeze the enemies they hit.
+
+## Search depth from a hurtbox up to the enemy that owns it.
+const OWNER_SEARCH_DEPTH: int = 4
 
 ## Placeholder look: how fast the wind lines turn, radians per second.
 @export var spin_speed: float = 9.0
@@ -11,6 +17,8 @@ extends Spell
 var _active_left: float = 0.0
 var _tick_left: float = 0.0
 var _spin: float = 0.0
+## Art of the ring (created at the first cast when the spell has a look).
+var _look: AnimatedSprite2D = null
 
 
 func is_active() -> bool:
@@ -19,7 +27,13 @@ func is_active() -> bool:
 
 func cancel() -> void:
 	_active_left = 0.0
+	_hide_look()
 	queue_redraw()
+
+
+## The art of the ring, or null (no look, or not cast yet).
+func get_look() -> AnimatedSprite2D:
+	return _look
 
 
 func _cast(_direction: Vector2) -> void:
@@ -28,6 +42,7 @@ func _cast(_direction: Vector2) -> void:
 		return
 	_active_left = SpellData.float_at(stats.duration, level)
 	_tick_left = 0.0
+	_show_look()
 
 
 func _physics_process(delta: float) -> void:
@@ -40,10 +55,48 @@ func _physics_process(delta: float) -> void:
 	_tick_left -= delta
 	if _tick_left <= 0.0:
 		_tick_left += stats.tick_interval
+		var freeze: float = SpellData.float_at(stats.freeze_time, level)
+		var on_hit: Callable = _freeze_owner.bind(freeze) if freeze > 0.0 else Callable()
 		_report_damage(AreaDamage.hit(get_world_2d().direct_space_state, caster.global_position,
 				_radius(), SpellData.int_at(stats.damage, level), caster, stats.id, stats.knockback,
-				target_mask, wall_mask))
+				target_mask, wall_mask, on_hit))
+	if not is_active():
+		_hide_look()
 	queue_redraw()
+
+
+## The blizzard: the enemy whose hurtbox took the tick freezes.
+func _freeze_owner(hurtbox: Hurtbox, seconds: float) -> void:
+	var node: Node = hurtbox
+	for _i in OWNER_SEARCH_DEPTH:
+		if node == null or node is Enemy:
+			break
+		node = node.get_parent()
+	var enemy: Enemy = node as Enemy
+	if enemy != null and is_instance_valid(enemy):
+		enemy.freeze(seconds)
+
+
+## Starts the level's animation, stretched so the ring's art covers the radius.
+func _show_look() -> void:
+	var animation: StringName = data.animation_at(level)
+	if animation == &"":
+		return
+	if _look == null:
+		_look = AnimatedSprite2D.new()
+		_look.name = "Look"
+		_look.sprite_frames = data.frames
+		add_child(_look)
+	var size: Vector2 = SpellData.frame_size(data.frames, animation)
+	_look.scale = Vector2.ONE * (_radius() * 2.0 / maxf(size.x, 1.0))
+	_look.visible = true
+	_look.play(animation)
+
+
+func _hide_look() -> void:
+	if _look != null and _look.visible:
+		_look.visible = false
+		_look.stop()
 
 
 func _radius() -> float:
@@ -51,7 +104,7 @@ func _radius() -> float:
 
 
 func _draw() -> void:
-	if not is_active():
+	if not is_active() or _look != null:
 		return
 	var radius: float = _radius()
 	draw_circle(Vector2.ZERO, radius, Color(data.color, 0.15))
