@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=88 format=3]
+[gd_resource type="SpriteFrames" load_steps=90 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/art/enemies/skeleton_attack_down.png" id="attack_down"]
 [ext_resource type="Texture2D" path="res://assets/art/enemies/skeleton_attack_left.png" id="attack_left"]
@@ -12,6 +12,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/enemies/skeleton_idle_down.png" id="idle_down"]
 [ext_resource type="Texture2D" path="res://assets/art/enemies/skeleton_idle_left.png" id="idle_left"]
 [ext_resource type="Texture2D" path="res://assets/art/enemies/skeleton_idle_right.png" id="idle_right"]
+[ext_resource type="Texture2D" path="res://assets/art/enemies/skeleton_idle_sample.png" id="idle_sample"]
 [ext_resource type="Texture2D" path="res://assets/art/enemies/skeleton_idle_up.png" id="idle_up"]
 [ext_resource type="Texture2D" path="res://assets/art/enemies/skeleton_walk_down.png" id="walk_down"]
 [ext_resource type="Texture2D" path="res://assets/art/enemies/skeleton_walk_left.png" id="walk_left"]
@@ -185,6 +186,10 @@ region = Rect2(48, 0, 24, 24)
 [sub_resource type="AtlasTexture" id="idle_right_3"]
 atlas = ExtResource("idle_right")
 region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="idle_sample_0"]
+atlas = ExtResource("idle_sample")
+region = Rect2(0, 0, 24, 24)
 
 [sub_resource type="AtlasTexture" id="idle_up_0"]
 atlas = ExtResource("idle_up")
@@ -484,6 +489,14 @@ animations = [{
 }],
 "loop": true,
 "name": &"idle_right",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("idle_sample_0")
+}],
+"loop": true,
+"name": &"idle_sample",
 "speed": 6.0
 }, {
 "frames": [{

@@ -121,7 +121,7 @@ def archer_elite():
 
 for path in sorted(glob.glob(os.path.join(SRC, "skeleton_*.png"))):
     name = os.path.basename(path)
-    if "sample" in name:
+    if "sample" in name or name.startswith("skeleton_elite"):
         continue
     elite_strip(path, os.path.join(SRC, name.replace("skeleton_", "skeleton_elite_")))
 actions.write_frames(SRC, "skeleton_elite", os.path.join(SRC, "skeleton_elite_frames.tres"))
