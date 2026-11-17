@@ -21,8 +21,8 @@ Frames notation: idle4/walk4/attack5/hit2/death5 = rows of one sheet.
 | C | Skeleton idle/walk, 4 directions | assets/art/enemies/skeleton_{idle,walk}_{down,up,left,right}.png | 24x24 per frame, horizontal strip | idle4, walk6 | sprites/skeleton.tres | generated |
 | C | Archer | assets/art/enemies/archer.png | 24x24 (body ~16x20) | idle4/walk4/attack5 (windup 2)/hit2/death5 | sprites/archer.tres | todo |
 | C | Beetle | assets/art/enemies/beetle.png | 16x16 (body ~10x8) | idle2/walk4/attack4 (windup 1)/hit2/death4 | sprites/beetle.tres | todo |
-| N | Stone golem | assets/art/enemies/golem.png | 48x48 (body ~32x40) | idle4/walk4/attack6/hit2/death6 | - | todo |
-| N | Ghost | assets/art/enemies/ghost.png | 24x32 (body ~16x26) | idle4/move4/attack5/hit2/death5 | - | todo |
+| N | Stone golem | assets/art/enemies/golem_<anim>_<dir>.png, golem_frames.tres | 48x48 (body ~34x40) | idle4/walk4, attack/hurt/death from the importer | - | generated 2026-11-17 (see "Golem and ghost" below) |
+| N | Ghost | assets/art/enemies/ghost_<anim>_<dir>.png, ghost_frames.tres | 32x32 frames (body ~18x31; square like the other strips) | idle4/move4 (as walk), attack/hurt from the importer, own death 4 | - | generated 2026-11-17 (see "Golem and ghost" below) |
 | N | Boss: Guardian of the Ruins | assets/art/enemies/guardian.png | 64x64 (body ~52x56) | idle4/walk6/attack6 x2/summon6/hit2/death6 | - | todo |
 | C | Training dummy | assets/art/enemies/training_dummy.png | 24x24 | idle1/hit2 (one strip of 3) | - | generated 2026-11-17 (tools/art/make_world_props.py) |
 
@@ -257,3 +257,9 @@ PixelLab create_character (standard, 4 directions, high top-down, black outline)
 - Beetle `c0db1c8a-9c7c-43a4-87fb-1259f9e3a844`: a teal cave beetle, 16x16, `beetle_frames.tres`.
 - Guardian `260f114c-e575-4167-974b-a405682eb00c`: a stone golem knight with glowing orange eyes and cracks, 64x64 canvas, `guardian_frames.tres`; `guardian.tscn` now uses an AnimatedSprite2D like the other enemies.
 - In the game: `sprite_frames` of archer.tres, beetle.tres and guardian.tres. Animated art is drawn at its own size (sprite_scale is only for the old still pictures) with the feet just below the body's centre.
+
+## Golem and ghost (art, 2026-11-17)
+
+- Golem: PixelLab text prompts gave a dark robot and a white armoured figure (main mass in the floor's value range, or not a golem), so the front view was drawn in code from separate boulders (`tools/art/make_golem.py`, `assets/art/enemies/golem_reference.png`: light stone #d8d4c4 / #9aa2ad / #767a8c, moss on top, orange eye slits and core crack) and given to PixelLab v3 as the reference: character `9a0bd775-f2fa-4a67-88d7-a8bc64153934` "ruins_stone_golem_ref", 4 directions, 48x48; animations breathing-idle and walking-4-frames. Imported with `tools/art/import_pixellab.py <zip> golem assets/art/enemies 48 idle walk`.
+- Ghost: PixelLab standard character `b78f55a6-efff-4075-b475-580f5ffb2e0b` "ruins_ghost" (4 directions, high top-down), animations breathing-idle (idle) and a v3 custom float (move). Imported with `tools/art/import_pixellab.py <zip> ghost assets/art/enemies 32 idle move`, then `tools/art/finish_ghost.py`: one teal body (the source's two pale tones had snapped to teal and bone) and its own death (white flash, rises and melts).
+- Neither enemy exists in the game code yet (nice to have).
