@@ -263,3 +263,16 @@ PixelLab create_character (standard, 4 directions, high top-down, black outline)
 - Golem: PixelLab text prompts gave a dark robot and a white armoured figure (main mass in the floor's value range, or not a golem), so the front view was drawn in code from separate boulders (`tools/art/make_golem.py`, `assets/art/enemies/golem_reference.png`: light stone #d8d4c4 / #9aa2ad / #767a8c, moss on top, orange eye slits and core crack) and given to PixelLab v3 as the reference: character `9a0bd775-f2fa-4a67-88d7-a8bc64153934` "ruins_stone_golem_ref", 4 directions, 48x48; animations breathing-idle and walking-4-frames. Imported with `tools/art/import_pixellab.py <zip> golem assets/art/enemies 48 idle walk`. Then, once, `tools/art/finish_golem.py` (author's request): the golem is overgrown with grass, a grass strip on top of every stone and in the joints, blades over the outline on the head and shoulders, in the nature theme's greens (#8ac060 / #5a8a4a / #3b5a45).
 - Ghost: PixelLab standard character `b78f55a6-efff-4075-b475-580f5ffb2e0b` "ruins_ghost" (4 directions, high top-down), animations breathing-idle (idle) and a v3 custom float (move). Imported with `tools/art/import_pixellab.py <zip> ghost assets/art/enemies 32 idle move`, then `tools/art/finish_ghost.py`: one teal body (the source's two pale tones had snapped to teal and bone) and its own death (white flash, rises and melts).
 - Neither enemy exists in the game code yet (nice to have).
+
+## Floor decals and lights (art, 2026-11-17)
+
+| P | Asset | File | Size | Frames | Code hook | Status |
+|---|---|---|---|---|---|---|
+| C | Floor decals: pebbles, rubble, long crack, branching crack, puddle, moss, old bones, broken slab | assets/art/tiles/floor_decals.png (slots 0-7) | 16x16 each, transparent, no outline | 1 each | none yet: scatter a few per room on floor cells from the section RNG (purely visual, no collision) | generated |
+| C | Light, stepped rings (the hero, bright magic) | assets/art/fx/light_banded.png | 128x128, white | 1 | none yet: PointLight2D texture; colour and energy in code | generated |
+| C | Light for torches and the shrine | assets/art/fx/light_torch.png | 64x64, white, stepped | 1 | PointLight2D on assets/art/level/torch.png (warm colour, slight flicker) | generated |
+| N | Smooth light, to compare | assets/art/fx/light_smooth.png | 128x128, white | 1 | - | generated |
+
+- Decals use only floor-range colours (plus dim bone #767a8c and moss), so actors still pop. Drawn in `tools/art/make_world_props.py`.
+- The lights are the only art with partial alpha (lights need a falloff); the stepped rings keep the pixel look.
+- Readability with lights: in a mock-up with CanvasModulate about (0.32, 0.32, 0.42) an enemy outside the light almost disappears. Keep the ambient brighter, or keep actors readable another way (for example a light mask that leaves actors unshaded), and check on the phone that 60 FPS holds with a few lights.
