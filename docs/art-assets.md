@@ -70,7 +70,7 @@ Assets the code already uses with placeholders; integration = repointing the res
 | C | Elite shield skeleton (all skeleton animations, shield on the leading side) | assets/art/enemies/skeleton_elite_frames.tres | 24x24 | as the skeleton | `actors/enemies/skeleton_shield.tres`: `sprite_frames` | integrated; the side the shield really blocks is shown by a faint arc drawn in code |
 | C | Elite triple-shot archer | assets/art/enemies/archer_elite.png | 16x16 | 1 (still, like the archer) | `actors/enemies/archer_triple.tres`: `sprite` | integrated |
 | C | Spawn warning ring (combat-room waves) | actors/effects/spawn_warning.tscn | 32x32 | 8 | `actors/enemies/spawn_marker.gd`: `look_scene` | integrated; the marker sets the ring's `z_index` to 0 after it is ready (at -1 the ring was drawn under the floor tiles) and puts itself first among the section's nodes, so the ring is above the floor and below the actors |
-| N | Animation of the triple-shot archer (idle, walk, shoot), like the other enemies | assets/art/enemies/archer_elite_frames.tres | 24x24 | as the skeleton | `actors/enemies/archer_triple.tres`: `sprite_frames` | todo |
+| N | Animation of the triple-shot archer (idle, walk, shoot), like the other enemies | assets/art/enemies/archer_elite_frames.tres | 24x24 | as the skeleton | `actors/enemies/archer_triple.tres`: `sprite_frames` | generated 2026-11-17 (archer strips recoloured: purple hood, gold eyes; tools/art/make_archer_elite.py) |
 | C | Cracked wall (front and top) | assets/art/tiles/ruins_tiles_atlas.png slots (6, 0), (7, 0) | 16x16 | 1 each | `level/ruins_theme.tres`: `cracked_wall_tile`, `cracked_wall_top_tile` (the level draws `LevelGrid.cracked` cells with them) | integrated |
 | C | Wall collapse | actors/effects/wall_collapse.tscn | 16x24 | 6 | `level/breakable_wall.gd`: `collapse_scene` | integrated |
 | C | Nature theme (secret rooms, the glade) with the sunlit floor | level/nature_theme.tres | 16x16 | - | `level/level.gd`: `DEFAULT_REGION_THEMES` (`&"nature"`); `sunlit_floor_tile` (slot 6) under the light from above | integrated |
@@ -105,20 +105,20 @@ Biome 1 "Sandstone ruins" (core). Later biomes reuse the same layout: flooded ru
 
 | P | Asset | File | Size | Frames | Replaces | Status |
 |---|---|---|---|---|---|---|
-| C | Sword icon | assets/art/ui/icon_sword.png | 16x16 | 1 | sprites/sword_icon.tres | todo |
-| C | Bow icon | assets/art/ui/icon_bow.png | 16x16 | 1 | sprites/bow_icon.tres | todo |
-| C | Dash icon | assets/art/ui/icon_dash.png | 16x16 | 1 | sprites/dash_icon.tres | todo |
-| C | Shield/block icon | assets/art/ui/icon_block.png | 16x16 | 1 | sprites/shield_icon.tres | todo |
-| C | Coin icon (HUD) | assets/art/ui/icon_coin.png | 16x16 | 1 | - | todo |
-| C | Heart / HP icon | assets/art/ui/icon_hp.png | 16x16 | 1 | - | todo |
-| C | Weapon swap icon | assets/art/ui/icon_swap.png | 16x16 | 1 | - | todo |
-| C | Pause icon | assets/art/ui/icon_pause.png | 16x16 | 1 | - | todo |
-| C | Take / interact icon | assets/art/ui/icon_take.png | 16x16 | 1 | - | todo |
-| C | Joystick base + knob | assets/art/ui/joystick.png | 48x48 + 16x16 | 1 | - | todo |
-| C | HP bar frame + fill | assets/art/ui/hp_bar.png | 64x8 | 1 | - | todo |
-| C | Rarity frames (common/rare/legendary) | assets/art/ui/rarity_frame.png | 18x18 x3 | 1 | - | todo |
-| C | Menu/death-screen panel and button (9-slice) | assets/art/ui/panel.png, button.png | 16x16 9-slice each | 1 (button: normal/pressed) | - | todo |
-| C | Depth/section icon | assets/art/ui/icon_depth.png | 16x16 | 1 | - | todo |
+| C | Sword icon | assets/art/ui/icon_sword.png | 16x16 | 1 | sprites/sword_icon.tres | generated 2026-11-17 (tools/art/make_ui_icons.py) |
+| C | Bow icon | assets/art/ui/icon_bow.png | 16x16 | 1 | sprites/bow_icon.tres | generated 2026-11-17 (tools/art/make_ui_icons.py) |
+| C | Dash icon | assets/art/ui/icon_dash.png | 16x16 | 1 | sprites/dash_icon.tres | generated 2026-11-17 (tools/art/make_ui_icons.py) |
+| C | Shield/block icon | assets/art/ui/icon_block.png | 16x16 | 1 | sprites/shield_icon.tres | generated 2026-11-17 (tools/art/make_ui_icons.py) |
+| C | Coin icon (HUD) | assets/art/ui/icon_coin.png | 16x16 | 1 | - | generated 2026-11-17 (tools/art/make_ui_icons.py) |
+| C | Heart / HP icon | assets/art/ui/icon_hp.png | 16x16 | 1 | - | generated 2026-11-17 (tools/art/make_ui_icons.py) |
+| C | Weapon swap icon | assets/art/ui/icon_swap.png | 16x16 | 1 | - | generated 2026-11-17 (tools/art/make_ui_icons.py) |
+| C | Pause icon | assets/art/ui/icon_pause.png | 16x16 | 1 | - | generated 2026-11-17 (tools/art/make_ui_icons.py) |
+| C | Take / interact icon | assets/art/ui/icon_take.png | 16x16 | 1 | - | generated 2026-11-17 (tools/art/make_ui_icons.py) |
+| C | Joystick base + knob | assets/art/ui/joystick.png | 48x48 + 16x16 | 1 | - | generated 2026-11-17 (joystick.png 48x48, joystick_knob.png; opaque, fade with modulate) |
+| C | HP bar frame + fill | assets/art/ui/hp_bar.png | 64x8 | 1 | - | generated 2026-11-17 (hp_bar_frame.png + hp_bar_fill.png, both 64x8) |
+| C | Rarity frames (common/rare/legendary) | assets/art/ui/rarity_frame.png | 18x18 x3 | 1 | - | generated 2026-11-17 (tools/art/make_ui_icons.py) |
+| C | Menu/death-screen panel and button (9-slice) | assets/art/ui/panel.png, button.png | 16x16 9-slice each | 1 (button: normal/pressed) | - | generated 2026-11-17 (panel margins 4; button strip: normal, pressed) |
+| C | Depth/section icon | assets/art/ui/icon_depth.png | 16x16 | 1 | - | generated 2026-11-17 (tools/art/make_ui_icons.py) |
 | N | Parry, teleport skill icons | assets/art/ui/icon_{parry,teleport}.png | 16x16 | 1 | - | todo |
 
 ## Spell effects (later)
