@@ -6,24 +6,35 @@ Current placeholders are listed in `assets/sprites/*.tres` (Kenney Tiny Dungeon 
 
 Frames notation: idle4/walk4/attack5/hit2/death5 = rows of one sheet.
 
+## Ready to wire in (generated, not in the game yet; checked 2026-11-18)
+
+Details, sizes and hooks are in the tables below.
+- Player: bow draw, shield block, dash strips (`characters/player_{bow,block,dash}_<dir>.png`), not in `player_frames.tres` yet.
+- Enemies: elite archer animation (`enemies/archer_elite_frames.tres`), stone golem (`golem_frames.tres`), ghost (`ghost_frames.tres`), training dummy (`training_dummy.png`).
+- Pickups and level: chest, coin, health potion (`pickups/`), gate with portal 48x32 and its opening burst, torch, column, sarcophagus, bones, statue, shrine and used shrine (`level/`), arena door rubble and floor decals (`tiles/`).
+- Combat: sword slash and heavy slash (`fx/slash*.png`), player and enemy arrows, swords and bows in three rarities (`weapons/`).
+- Effects and light: hit spark, dust puff, death poof, pit fall, light textures (`fx/`).
+- UI: HUD icons, joystick, HP bar, rarity frames, panel and button (`ui/`).
+- Still Kenney or placeholder in `assets/sprites/*.tres`: arrow, bow / sword / dash / shield icons, chest, coin, gravestone, health potion, portal, shrine, and the still archer / beetle / guardian pictures.
+
 ## Characters and enemies
 
 | P | Asset | File | Size | Frames | Replaces | Status |
 |---|---|---|---|---|---|---|
 | S | Player idle sample (1 static frame, facing right) | assets/art/characters/player_idle_sample.png | 24x24 | 1 | - | generated |
-| C | Player (adventurer) full sheet | assets/art/characters/player.png | 24x24 (body ~16x20) | idle4/walk4/attack5/hit2/death5 | sprites/player.tres | todo (idle + walk done as separate strips, see round 4) |
+| C | Player (adventurer) full sheet | assets/art/characters/player.png | 24x24 (body ~16x20) | idle4/walk4/attack5/hit2/death5 | sprites/player.tres | integrated: strips player_<anim>_<dir>.png (idle, walk, attack, hurt, death) in player_frames.tres, used by player.tscn; bow / block / dash strips generated 2026-11-17, not in player_frames.tres yet |
 | C | Player idle/walk, 4 directions | assets/art/characters/player_{idle,walk}_{down,up,left,right}.png | 24x24 per frame, horizontal strip | idle4, walk6 | sprites/player.tres | generated |
 | C | Player bow draw | assets/art/characters/player_bow_<dir>.png | 24x24 | 6: draw 4 (frame 3 = held), release 2 | - | generated 2026-11-17 (PixelLab, tools/art/import_player_actions.py) |
 | C | Player shield block | assets/art/characters/player_block_<dir>.png | 24x24 | 4: raise 2, hold 2 | - | generated 2026-11-17 (PixelLab, tools/art/import_player_actions.py) |
 | C | Player dash | assets/art/characters/player_dash_<dir>.png | 24x24 | 4 | - | generated 2026-11-17 (PixelLab, tools/art/import_player_actions.py) |
 | S | Skeleton idle sample (1 static frame, facing right) | assets/art/enemies/skeleton_idle_sample.png | 24x24 | 1 | - | generated |
-| C | Skeleton guard full sheet | assets/art/enemies/skeleton.png | 24x24 (body ~16x20) | idle4/walk4/attack6 (windup 2)/hit2/death5 | sprites/skeleton.tres | todo (idle + walk done as separate strips, see round 4) |
+| C | Skeleton guard full sheet | assets/art/enemies/skeleton.png | 24x24 (body ~16x20) | idle4/walk4/attack6 (windup 2)/hit2/death5 | sprites/skeleton.tres | integrated: strips skeleton_<anim>_<dir>.png in skeleton_frames.tres, used by skeleton.tres |
 | C | Skeleton idle/walk, 4 directions | assets/art/enemies/skeleton_{idle,walk}_{down,up,left,right}.png | 24x24 per frame, horizontal strip | idle4, walk6 | sprites/skeleton.tres | generated |
-| C | Archer | assets/art/enemies/archer.png | 24x24 (body ~16x20) | idle4/walk4/attack5 (windup 2)/hit2/death5 | sprites/archer.tres | todo |
-| C | Beetle | assets/art/enemies/beetle.png | 16x16 (body ~10x8) | idle2/walk4/attack4 (windup 1)/hit2/death4 | sprites/beetle.tres | todo |
+| C | Archer | assets/art/enemies/archer.png | 24x24 (body ~16x20) | idle4/walk4/attack5 (windup 2)/hit2/death5 | sprites/archer.tres | integrated: strips archer_<anim>_<dir>.png in archer_frames.tres, used by archer.tres (2026-11-14) |
+| C | Beetle | assets/art/enemies/beetle.png | 16x16 (body ~10x8) | idle2/walk4/attack4 (windup 1)/hit2/death4 | sprites/beetle.tres | integrated: strips beetle_<anim>_<dir>.png in beetle_frames.tres, used by beetle.tres (2026-11-14) |
 | N | Stone golem | assets/art/enemies/golem_<anim>_<dir>.png, golem_frames.tres | 48x48 (body ~34x40) | idle4/walk4, attack/hurt/death from the importer | - | generated 2026-11-17 (see "Golem and ghost" below) |
 | N | Ghost | assets/art/enemies/ghost_<anim>_<dir>.png, ghost_frames.tres | 32x32 frames (body ~18x31; square like the other strips) | idle4/move4 (as walk), attack/hurt from the importer, own death 4 | - | generated 2026-11-17 (see "Golem and ghost" below) |
-| N | Boss: Guardian of the Ruins | assets/art/enemies/guardian.png | 64x64 (body ~52x56) | idle4/walk6/attack6 x2/summon6/hit2/death6 | - | todo |
+| N | Boss: Guardian of the Ruins | assets/art/enemies/guardian.png | 64x64 (body ~52x56) | idle4/walk6/attack6 x2/summon6/hit2/death6 | - | integrated: strips guardian_<anim>_<dir>.png in guardian_frames.tres, used by guardian.tres (2026-11-14) |
 | C | Training dummy | assets/art/enemies/training_dummy.png | 24x24 | idle1/hit2 (one strip of 3) | - | generated 2026-11-17 (tools/art/make_world_props.py) |
 
 Actor sizes per docs/art-style.md rev 3: collisions in code are unchanged; sprites are centered on the existing origin.
@@ -47,7 +58,7 @@ Actor sizes per docs/art-style.md rev 3: collisions in code are unchanged; sprit
 | C | Chest open | assets/art/pickups/chest.png (frames 1-3) | 16x16 | 3 (opening) | sprites/chest_open.tres | generated 2026-11-17 |
 | C | Coin | assets/art/pickups/coin.png | 16x16 (coin 6x8) | 4 spin | sprites/coin.tres | generated 2026-11-17 |
 | C | Medkit / health potion | assets/art/pickups/health_pack.png | 16x16 | 1 | sprites/health_potion.tres | generated 2026-11-17 |
-| C | Gravestone (cover) | assets/art/tiles/cover_gravestone.png | 16x16 | 1 | sprites/gravestone.tres, ruins_theme cover_tile | todo |
+| C | Gravestone (cover) | assets/art/tiles/cover_gravestone.png | 16x16 | 1 | sprites/gravestone.tres, ruins_theme cover_tile | integrated: ruins_tiles_atlas.png slot (5, 0) = ruins_theme cover_tile (no separate file); sprites/gravestone.tres is still the Kenney picture |
 | C | Gate with portal closed | assets/art/level/gate_closed.png | 48x32 | 1 | sprites/portal_closed.tres | generated 2026-11-17 (the placeholder is 16x16: the gate scene needs resizing) |
 | C | Gate with portal open | assets/art/level/gate_open.png | 48x32 | 4 loop | sprites/portal_open.tres | generated 2026-11-17 |
 | C | Portal open burst | assets/art/fx/portal_open.png | 32x32 | 5 | - | generated 2026-11-17 |
@@ -88,16 +99,16 @@ Biome 1 "Sandstone ruins" (core). Later biomes reuse the same layout: flooded ru
 | P | Asset | File | Size | Frames | Status |
 |---|---|---|---|---|---|
 | S | Floor base | assets/art/tiles/ruins_floor.png (col 0) | 16x16 | 1 | generated |
-| C | Floor variants (cracks, moss, debris) x3 | assets/art/tiles/ruins_floor.png (cols 1-3) | 16x16 | 1 each | todo |
+| C | Floor variants (cracks, moss, debris) x3 | assets/art/tiles/ruins_floor.png (cols 1-3) | 16x16 | 1 each | integrated: ruins_floor.png, ruins_floor_2.png, ruins_floor_3.png = ruins_tiles_atlas.png slots (0-2, 0); small details on top: floor_decals.png (generated 2026-11-17) |
 | S | Wall (top + south front face) | assets/art/tiles/ruins_wall.png (col 0) | 16x16 | 1 | generated (hand-drawn, round 4: lighter top) |
 | S | Wall top (no floor to the south: side walls, wall interiors) | assets/art/tiles/ruins_wall_top.png | 16x16 | 1 | generated (hand-drawn) |
 | S | Floor variants 2 and 3 | assets/art/tiles/ruins_floor_2.png, ruins_floor_3.png | 16x16 | 1 each | generated (hand-drawn) |
-| C | Wall variants x2 (brick, crumbled) | assets/art/tiles/ruins_wall.png (cols 1-2) | 16x16 | 1 each | todo |
+| C | Wall variants x2 (brick, crumbled) | assets/art/tiles/ruins_wall.png (cols 1-2) | 16x16 | 1 each | partly: one brick wall (atlas slot (3, 0)) and the cracked wall (slots (6, 0), (7, 0)); no second plain brick variant |
 | N | Wall autotile set (edges, corners) | assets/art/tiles/ruins_wall_set.png | 16x16 cells, 47-tile or 16-tile blob | - | todo |
-| C | Pit top edge (rim) | assets/art/tiles/pit.png (col 0) | 16x16 | 1 | todo |
-| C | Pit inner | assets/art/tiles/pit.png (col 1) | 16x16 | 1 | todo |
+| C | Pit top edge (rim) | assets/art/tiles/pit.png (col 0) | 16x16 | 1 | integrated: ruins_hazards.png slot 0 = ruins_theme pit_tile (tools/art/make_pit_tiles.py) |
+| C | Pit inner | assets/art/tiles/pit.png (col 1) | 16x16 | 1 | integrated: ruins_hazards.png slot 7 = ruins_theme pit_inner_tile |
 | N | Pit side/corner edges | assets/art/tiles/pit.png (cols 2-7) | 16x16 | 1 each | todo |
-| C | Spikes | assets/art/tiles/spikes.png | 16x16 | 3 (retracted, half, up) | todo |
+| C | Spikes | assets/art/tiles/spikes.png | 16x16 | 3 (retracted, half, up) | integrated: static spikes ruins_hazards.png slot 1, timed spikes spikes_timed_frames.tres (see the table above) |
 | L | Flooded ruins floor/wall/pit set | assets/art/tiles/flooded_*.png | 16x16 | as above | todo |
 | L | Jungle ruins floor/wall/pit set | assets/art/tiles/jungle_*.png | 16x16 | as above | todo |
 
@@ -125,14 +136,14 @@ Biome 1 "Sandstone ruins" (core). Later biomes reuse the same layout: flooded ru
 
 | P | Asset | File | Size | Frames | Status |
 |---|---|---|---|---|---|
-| L | Fireball (projectile + explosion) | assets/art/fx/fireball.png | 16x16 / 32x32 | 4 / 6 | todo |
-| L | Ice wall | assets/art/fx/ice_wall.png | 16x32 | 4 | todo |
-| L | Whirlwind | assets/art/fx/whirlwind.png | 32x32 | 6 | todo |
-| L | Teleport | assets/art/fx/teleport.png | 32x32 | 5 | todo |
-| L | Stone shield | assets/art/fx/stone_shield.png | 32x32 | 4 | todo |
-| L | Fire tornado (combo) | assets/art/fx/fire_tornado.png | 32x32 | 6 | todo |
-| L | Ice fortress (combo) | assets/art/fx/ice_fortress.png | 32x32 | 6 | todo |
-| L | Spell icons x7 | assets/art/ui/spell_<name>.png | 16x16 | 1 | todo |
+| L | Fireball (projectile + explosion) | assets/art/fx/fireball.png | 16x16 / 32x32 | 4 / 6 | integrated in another form: fire in three levels, fx/fire_l1-3.png + fire_trail.png in element_frames.tres (stage 26) |
+| L | Ice wall | assets/art/fx/ice_wall.png | 16x32 | 4 | integrated in another form: fx/ice_l1-3.png, one picture per level (stage 26) |
+| L | Whirlwind | assets/art/fx/whirlwind.png | 32x32 | 6 | integrated in another form: fx/wind_l1-3.png in element_frames.tres (stage 26) |
+| L | Teleport | assets/art/fx/teleport.png | 32x32 | 5 | todo (no teleport skill in the game yet) |
+| L | Stone shield | assets/art/fx/stone_shield.png | 32x32 | 4 | todo (no such spell in the game) |
+| L | Fire tornado (combo) | assets/art/fx/fire_tornado.png | 32x32 | 6 | replaced by the fused spells of stage 26: firestorm, blizzard, steam (fx/*_l1-3.png in fusion_frames.tres) |
+| L | Ice fortress (combo) | assets/art/fx/ice_fortress.png | 32x32 | 6 | replaced by the fused spells of stage 26 (see Fire tornado) |
+| L | Spell icons x7 | assets/art/ui/spell_<name>.png | 16x16 | 1 | integrated: fx/element_icons.png (fire, ice, wind) and fx/fusion_icons.png (firestorm, blizzard, steam), 6 spells exist |
 
 Generic FX (C): hit spark 16x16 x3, dust puff (dash/land) 16x16 x4, death poof 16x16 x4, pit fall 16x16 x3. Generated 2026-11-17: assets/art/fx/hit_spark.png, dust_puff.png, death_poof.png, pit_fall.png (16x16 strips, tools/art/make_world_props.py).
 
