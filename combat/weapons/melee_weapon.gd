@@ -30,6 +30,8 @@ var _busy_left: float = 0.0
 var _idle_time: float = 0.0
 var _has_buffered_press: bool = false
 var _buffered_direction: Vector2 = Vector2.RIGHT
+## Picture of the current swing (MeleeAttackStep.slash), created when first needed.
+var _slash: Sprite2D = null
 ## Hurtboxes already touched by the current step (each is tried once).
 var _hit_this_step: Array[Hurtbox] = []
 ## How many of them accepted the damage; reported for accuracy.
@@ -58,6 +60,7 @@ func cancel_attack() -> void:
 		_active_left = 0.0
 		# Report the interrupted swing with the hits it managed to land.
 		attack_performed.emit(_step_index, _hits_landed)
+		_update_slash()
 		queue_redraw()
 	_has_buffered_press = false
 	_next_step_index = 0
@@ -80,6 +83,7 @@ func _physics_process(delta: float) -> void:
 		# Checked every frame of the hit window, so targets that walk into the arc are hit too.
 		_hit_targets_in_arc()
 		_active_left -= delta
+		_update_slash()
 		if _active_left <= 0.0:
 			attack_performed.emit(_step_index, _hits_landed)
 			queue_redraw()
@@ -93,7 +97,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _draw() -> void:
-	if _active_left <= 0.0 or _step == null:
+	if _active_left <= 0.0 or _step == null or _step.slash != null:
 		return
 	var half_arc: float = deg_to_rad(_step.arc_degrees) * 0.5
 	var start_angle: float = _swing_direction.angle() - half_arc
@@ -120,7 +124,31 @@ func _start_step(direction: Vector2) -> void:
 	_reach_shape.radius = _step.reach
 	_hit_this_step.clear()
 	_hits_landed = 0
+	_update_slash()
 	queue_redraw()
+
+
+## Shows the frame of the swing picture for how far the hit window has gone.
+func _update_slash() -> void:
+	var showing: bool = _active_left > 0.0 and _step != null and _step.slash != null
+	if not showing:
+		if _slash != null:
+			_slash.visible = false
+		return
+	if _slash == null:
+		_slash = Sprite2D.new()
+		_slash.name = "Slash"
+		add_child(_slash)
+	if _slash.texture != _step.slash:
+		_slash.texture = _step.slash
+		_slash.hframes = maxi(_step.slash_frames, 1)
+	var total: float = _step.duration / attack_speed_multiplier
+	var progress: float = clampf(1.0 - _active_left / maxf(total, 0.001), 0.0, 0.999)
+	_slash.frame = int(progress * _slash.hframes)
+	_slash.rotation = _swing_direction.angle()
+	_slash.scale = Vector2.ONE * (_step.reach / maxf(_step.slash_reach, 1.0))
+	_slash.flip_v = _step.slash_flip
+	_slash.visible = true
 
 
 func _hit_targets_in_arc() -> void:

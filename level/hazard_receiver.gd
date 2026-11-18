@@ -79,7 +79,13 @@ func _on_spikes(trap: SpikeTrapData, delta: float) -> void:
 		health.take_damage(DamageInfo.new(trap.damage, null, trap.id))
 
 
+## Dust and pebbles falling into the pit (a strip played once), or null.
+@export var fall_effect: Texture2D = preload("res://assets/art/fx/pit_fall.png")
+@export var fall_effect_frames: int = 3
+
+
 func _start_fall() -> void:
+	StripSprite.spawn(body.get_parent(), body.global_position, fall_effect, fall_effect_frames, 10.0)
 	_is_falling = true
 	_fall_time_left = data.fall_delay
 	_spikes_time_left = 0.0

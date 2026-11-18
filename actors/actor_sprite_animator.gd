@@ -15,6 +15,9 @@ extends AnimatedSprite2D
 ## Seconds a corpse stays on the ground after its death animation, then fades.
 @export var corpse_time: float = 4.0
 @export var corpse_fade_time: float = 1.0
+## Spark over the actor when it takes damage (a strip played once), or null.
+@export var hit_effect: Texture2D = preload("res://assets/art/fx/hit_spark.png")
+@export var hit_effect_frames: int = 3
 ## Burst of bits when an enemy dies (bone chips for the skeleton).
 @export var death_particle_color: Color = Color("#d8d4c4")
 @export var death_particles: int = 10
@@ -104,6 +107,7 @@ func _on_attack(_step: int, _hits: int) -> void:
 
 
 func _on_damaged(_info: DamageInfo) -> void:
+	StripSprite.spawn(_body.get_parent(), _body.global_position + offset * 0.5, hit_effect, hit_effect_frames)
 	if _body is Enemy and (_body as Enemy).state == Enemy.State.WINDUP:
 		return
 	play_action("hurt", hurt_time)

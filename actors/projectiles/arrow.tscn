@@ -10,5 +10,4 @@ metadata/_custom_type_script = "uid://yjflwqlydqra"
 
 [node name="Sprite" type="Sprite2D" parent="."]
 position = Vector2(-6, 0)
-rotation = 1.5707964
 texture = ExtResource("2_sprite")

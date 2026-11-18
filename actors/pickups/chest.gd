@@ -24,7 +24,11 @@ func _collect(_player: Player) -> bool:
 	if is_open:
 		return false
 	is_open = true
-	if sprite != null and open_texture != null:
+	var strip: StripSprite = sprite as StripSprite
+	if strip != null and strip.hframes > 1:
+		# The lid opens: the rest of the strip, once.
+		strip.play_range(1, -1, false)
+	elif sprite != null and open_texture != null:
 		sprite.texture = open_texture
 	opened.emit(self)
 	return true

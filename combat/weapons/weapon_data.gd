@@ -11,6 +11,9 @@ const COMMON_RARITY: WeaponRarity = preload("res://combat/weapons/rarity/common.
 @export var display_name: String = ""
 ## Small picture for the HUD and the menu.
 @export var icon: Texture2D
+## Pictures of the rarer copies by rarity id (&"rare", &"legendary"); a missing one
+## keeps icon.
+@export var rarity_icons: Dictionary = {}
 ## The wielder aims at the nearest visible enemy within this distance, in pixels.
 ## 0 turns auto-aim off.
 @export var auto_aim_radius: float = 56.0
@@ -43,4 +46,6 @@ func get_full_name() -> String:
 func with_rarity(new_rarity: WeaponRarity) -> WeaponData:
 	var copy: WeaponData = duplicate() as WeaponData
 	copy.rarity = new_rarity
+	if new_rarity != null and rarity_icons.has(new_rarity.id):
+		copy.icon = rarity_icons[new_rarity.id]
 	return copy

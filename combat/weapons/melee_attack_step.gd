@@ -15,3 +15,12 @@ extends Resource
 @export var recovery: float = 0.15
 ## Speed in pixels per second given to each target, away from the wielder. 0 = no knockback.
 @export var knockback: float = 0.0
+@export_group("Look")
+## Picture of the swing: a strip of frames centred on the wielder, pointing right,
+## played over the hit window; null = the placeholder arc drawn in code.
+@export var slash: Texture2D
+@export var slash_frames: int = 3
+## The reach the picture was drawn for (it is scaled to this step's reach).
+@export var slash_reach: float = 24.0
+## Mirrored, for the swing back.
+@export var slash_flip: bool = false

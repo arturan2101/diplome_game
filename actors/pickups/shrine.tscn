@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://actors/pickups/shrine.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/sprites/shrine.tres" id="2"]
-[ext_resource type="Texture2D" path="res://assets/sprites/shrine_used.tres" id="3"]
+[ext_resource type="Texture2D" path="res://assets/art/level/shrine.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/art/level/shrine_used.png" id="3"]
+[ext_resource type="Script" path="res://actors/effects/strip_sprite.gd" id="strip"]
 
 [node name="Shrine" type="Area2D" node_paths=PackedStringArray("sprite")]
 script = ExtResource("1")
@@ -11,3 +12,7 @@ used_texture = ExtResource("3")
 
 [node name="Sprite" type="Sprite2D" parent="."]
 texture = ExtResource("2")
+offset = Vector2(0, -4)
+hframes = 4
+script = ExtResource("strip")
+fps = 6.0

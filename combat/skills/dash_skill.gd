@@ -32,12 +32,18 @@ func cancel() -> void:
 		_finish()
 
 
+## A puff of dust where the dash starts (a strip played once), or null.
+@export var dust_effect: Texture2D = preload("res://assets/art/fx/dust_puff.png")
+@export var dust_effect_frames: int = 4
+
+
 func _activate(direction: Vector2) -> void:
 	var dash_direction: Vector2 = direction.normalized()
 	if dash_direction.is_zero_approx():
 		dash_direction = wielder.facing
 	_velocity = dash_direction * _stats.distance / _stats.duration
 	_time_left = _stats.duration
+	StripSprite.spawn(wielder.get_parent(), wielder.global_position, dust_effect, dust_effect_frames)
 	wielder.health.make_invulnerable(_stats.duration + _stats.invulnerability_margin)
 	wielder.set_airborne(true)
 	_saved_collision_mask = wielder.collision_mask

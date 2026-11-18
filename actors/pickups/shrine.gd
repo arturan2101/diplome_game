@@ -24,7 +24,10 @@ func interact(_player: Player) -> bool:
 	if is_used:
 		return false
 	is_used = true
-	if sprite != null and used_texture != null:
+	var strip: StripSprite = sprite as StripSprite
+	if strip != null and used_texture != null:
+		strip.show_still(used_texture)
+	elif sprite != null and used_texture != null:
 		sprite.texture = used_texture
 	activated.emit(self)
 	return true

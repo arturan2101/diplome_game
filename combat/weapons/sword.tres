@@ -1,16 +1,23 @@
 [gd_resource type="Resource" script_class="MeleeWeaponData" format=3 uid="uid://bbblvshpl8u70"]
 
 [ext_resource type="Texture2D" path="res://assets/sprites/sword_icon.tres" id="icon_tex"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/slash.png" id="slash"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/slash_heavy.png" id="slash_heavy"]
+[ext_resource type="Texture2D" path="res://assets/art/weapons/sword_rare.png" id="icon_rare"]
+[ext_resource type="Texture2D" path="res://assets/art/weapons/sword_legendary.png" id="icon_legendary"]
 [ext_resource type="Script" uid="uid://nuho2ph11shq" path="res://combat/weapons/melee_weapon_data.gd" id="1_dljjw"]
 [ext_resource type="Script" uid="uid://dqcnjt2pkdxkd" path="res://combat/weapons/melee_attack_step.gd" id="1_f8ocv"]
 [ext_resource type="PackedScene" uid="uid://bfgh1odevltxd" path="res://combat/weapons/melee_weapon.tscn" id="2_03pyg"]
 
 [sub_resource type="Resource" id="Resource_03pyg"]
 script = ExtResource("1_f8ocv")
+slash = ExtResource("slash")
 metadata/_custom_type_script = "uid://dqcnjt2pkdxkd"
 
 [sub_resource type="Resource" id="Resource_f8ocv"]
 script = ExtResource("1_f8ocv")
+slash = ExtResource("slash")
+slash_flip = true
 metadata/_custom_type_script = "uid://dqcnjt2pkdxkd"
 
 [sub_resource type="Resource" id="Resource_qg0wa"]
@@ -21,6 +28,8 @@ arc_degrees = 160.0
 duration = 0.15
 recovery = 0.25
 knockback = 200.0
+slash = ExtResource("slash_heavy")
+slash_reach = 28.0
 metadata/_custom_type_script = "uid://dqcnjt2pkdxkd"
 
 [resource]
@@ -28,6 +37,10 @@ script = ExtResource("1_dljjw")
 combo = Array[ExtResource("1_f8ocv")]([SubResource("Resource_03pyg"), SubResource("Resource_f8ocv"), SubResource("Resource_qg0wa")])
 id = &"sword"
 icon = ExtResource("icon_tex")
+rarity_icons = {
+&"legendary": ExtResource("icon_legendary"),
+&"rare": ExtResource("icon_rare")
+}
 display_name = "Sword"
 auto_aim_radius = 48.0
 weapon_scene = ExtResource("2_03pyg")
