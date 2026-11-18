@@ -287,3 +287,15 @@ PixelLab create_character (standard, 4 directions, high top-down, black outline)
 - Decals use only floor-range colours (plus dim bone #767a8c and moss), so actors still pop. Drawn in `tools/art/make_world_props.py`.
 - The lights are the only art with partial alpha (lights need a falloff); the stepped rings keep the pixel look.
 - Readability with lights: in a mock-up with CanvasModulate about (0.32, 0.32, 0.42) an enemy outside the light almost disappears. Keep the ambient brighter, or keep actors readable another way (for example a light mask that leaves actors unshaded), and check on the phone that 60 FPS holds with a few lights.
+
+## Plan group 1: golem and ghost, combat effects (stages 29-31, art 2026-11-18)
+
+Drawn in `tools/art/make_combat_fx.py`. Strips are horizontal, frames left to right, no padding.
+
+| P | Asset | File | Size | Frames | Direction / use | Status |
+|---|---|---|---|---|---|---|
+| C | Golem slam shockwave: dust ring with stone chunks running out over cracks in the floor | assets/art/fx/golem_shockwave.png | 64x64 per frame (384x64) | 6, one pass (12 fps) | none, round, centred on the golem; the ring reaches ~31 px, scale x1.16 for slam_radius 36 | generated |
+| C | Golem slam warning: stippled dark shadow with a pulsing orange rim | assets/art/fx/golem_warning.png | 48x48 per frame (192x48) | 4, loop | none, round, centred; rim radius ~23 px, scale x1.5 for slam_radius 36 (replaces the circle of golem.gd _draw) | generated |
+| N | Ghost fade in: teal sparks converge, a flickering column of light, a white flash ring | assets/art/fx/ghost_fade_in.png | 32x32 per frame (160x32) | 5, one pass | none; the column matches the ghost body (about 14x26, centred) | generated |
+| N | Ghost fade out: flash ring, the column melts, sparks rise and scatter | assets/art/fx/ghost_fade_out.png | 32x32 per frame (160x32) | 5, one pass | none | generated |
+| C | Damage digits 0-9 | assets/art/ui/damage_digits.png | cells 5x7 (3x5 glyph + 1 px outline), strip 50x7 | 10 glyphs, index = digit | white #f4f0e0, tint in code (crit, heal); place digits 4 px apart so the outlines overlap | generated |
