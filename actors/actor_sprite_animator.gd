@@ -5,7 +5,13 @@ extends AnimatedSprite2D
 ## stretched to its windup time, or a player's attack), "hurt_<dir>" when the parent's
 ## Health takes damage, and "death" when it dies. An enemy is freed when it dies, so its
 ## death plays on a copy left on the ground (a heap of bones for the skeleton).
+## The player also shows lasting actions: "dash_<dir>" during a dash, "block_<dir>"
+## while the shield is up (it rises and holds), and "bow_<dir>" while drawing the bow
+## (frames 0-3 follow the draw, 4-5 play on release).
 ## Never changes movement or combat. Animations missing from sprite_frames are skipped.
+
+## Frames of the bow strip: drawing (0 .. BOW_DRAW_FRAMES - 1), then the release.
+const BOW_DRAW_FRAMES: int = 4
 
 ## Below this speed (pixels per second) the actor counts as standing.
 @export var walk_threshold: float = 5.0
@@ -27,6 +33,8 @@ var _body: CharacterBody2D
 var _action_left: float = 0.0
 var _was_winding_up: bool = false
 var _weapon: Weapon = null
+## The bow was drawn last frame (its release plays when the drawing stops).
+var _bow_drawn: bool = false
 
 
 func _ready() -> void:
@@ -52,6 +60,9 @@ func _process(delta: float) -> void:
 			_face(enemy.velocity if enemy.velocity.length() > walk_threshold else _to_player())
 			play_action("attack", enemy.data.windup)
 		_was_winding_up = winding
+	var player: Player = _body as Player
+	if player != null and _show_player_pose(player):
+		return
 	if _action_left > 0.0:
 		_action_left -= delta
 		return
@@ -62,6 +73,52 @@ func _process(delta: float) -> void:
 	var anim: StringName = StringName(("walk_" if moving else "idle_") + _direction)
 	if (anim != animation or not is_playing()) and sprite_frames.has_animation(anim):
 		play(anim)
+
+
+## The player's lasting actions. True if one is shown this frame.
+func _show_player_pose(player: Player) -> bool:
+	var skill: Skill = player.skill
+	if skill != null and skill.is_active():
+		if skill is DashSkill:
+			_face(player.velocity)
+			return _hold_pose("dash")
+		if skill is BlockSkill:
+			_face(player.get_look_direction())
+			return _hold_pose("block")
+	var bow: BowWeapon = player.weapon as BowWeapon
+	var progress: float = bow.get_draw_progress() if bow != null else 0.0
+	if progress > 0.0:
+		_face(player.get_look_direction())
+		var anim: StringName = StringName("bow_" + _direction)
+		if not sprite_frames.has_animation(anim):
+			return false
+		if animation != anim:
+			animation = anim
+		pause()
+		frame = mini(int(progress * BOW_DRAW_FRAMES), BOW_DRAW_FRAMES - 1)
+		_bow_drawn = true
+		_action_left = 0.0
+		return true
+	if _bow_drawn:
+		_bow_drawn = false
+		var release: StringName = StringName("bow_" + _direction)
+		if sprite_frames.has_animation(release) and sprite_frames.get_frame_count(release) > BOW_DRAW_FRAMES:
+			animation = release
+			frame = BOW_DRAW_FRAMES
+			play()
+			_action_left = float(sprite_frames.get_frame_count(release) - BOW_DRAW_FRAMES) / sprite_frames.get_animation_speed(release)
+	return false
+
+
+## Plays "<action>_<dir>" once and stays on its last frame while the action lasts.
+func _hold_pose(action: String) -> bool:
+	var anim: StringName = StringName(action + "_" + _direction)
+	if not sprite_frames.has_animation(anim):
+		return false
+	if animation != anim:
+		play(anim)
+	_action_left = 0.0
+	return true
 
 
 ## Plays "<action>_<dir>" (or "<action>") once, stretched to last the given seconds.
@@ -102,6 +159,9 @@ func _on_weapon_changed() -> void:
 func _on_attack(_step: int, _hits: int) -> void:
 	var player: Player = _body as Player
 	if player != null:
+		# The bow has its own draw and release.
+		if _weapon is BowWeapon and sprite_frames.has_animation(StringName("bow_" + _direction)):
+			return
 		_face(player.get_look_direction())
 	play_action("attack", attack_time)
 

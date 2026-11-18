@@ -1,7 +1,7 @@
 extends Node
 ## Manual preview of the integrated art (stage 30) in the real game, full series: the
 ## pickups (chest closed and open, coin, potion), a shrine, the gate closed and open, a
-## sword swing and an arrow in flight. Saves one PNG per view into the folder, then quits.
+## sword swing, the bow drawn and an arrow in flight, the shield raised, a dash. Saves one PNG per view into the folder, then quits.
 ## Not part of the test suite.
 ## Usage: godot --path . res://tests/manual/world_art_preview.tscn -- <folder>
 
@@ -11,6 +11,8 @@ const COIN_SCENE: PackedScene = preload("res://actors/pickups/coin.tscn")
 const POTION_SCENE: PackedScene = preload("res://actors/pickups/health_pack.tscn")
 const CHEST_SCENE: PackedScene = preload("res://actors/pickups/chest.tscn")
 const BOW: WeaponData = preload("res://combat/weapons/bow.tres")
+const BLOCK: SkillData = preload("res://combat/skills/block.tres")
+const DASH: SkillData = preload("res://combat/skills/dash.tres")
 const RUN_SEED: int = 5000
 const SETTLE_FRAMES: int = 12
 
@@ -54,10 +56,28 @@ func _ready() -> void:
 	player.swap_weapon()
 	await _frames(2)
 	Input.action_press(&"attack")
-	await _frames(40)
+	await _frames(30)
+	await _save("bow_draw.png")
+	await _frames(10)
 	Input.action_release(&"attack")
 	await _frames(4)
 	await _save("arrow.png")
+	await _frames(20)
+	player.set_skill(BLOCK)
+	Input.action_press(&"skill")
+	await _frames(12)
+	await _save("block.png")
+	Input.action_release(&"skill")
+	await _frames(30)
+	player.set_skill(DASH)
+	Input.action_press(&"move_left")
+	await _frames(2)
+	Input.action_press(&"skill")
+	await _frames(4)
+	await _save("dash.png")
+	Input.action_release(&"skill")
+	Input.action_release(&"move_left")
+	await _frames(20)
 	player.teleport(_game.gate.global_position + Vector2(-40.0, 0.0))
 	await _frames(SETTLE_FRAMES)
 	await _save("gate_closed.png")
