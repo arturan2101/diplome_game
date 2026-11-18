@@ -15,6 +15,10 @@ extends Director
 const OPEN_TAG: StringName = &"open"
 const HAZARD_TAG: StringName = &"hazard"
 const HAZARD_SOURCES: Array[StringName] = [&"pit", &"spikes_static", &"spikes_timed"]
+## Enemies a weak player is helped against with cover (they shoot), and with open rooms
+## (room to step out of a slam).
+const COVER_PROBLEMS: Array[StringName] = [&"archer", &"archer_triple"]
+const OPEN_PROBLEMS: Array[StringName] = [&"golem"]
 
 
 func choose_next(state: PlayerState) -> SectionPlan:
@@ -129,15 +133,19 @@ func _enemy_weights(state: PlayerState, problem: StringName) -> Dictionary:
 	return {}
 
 
-## Rooms and cover that help a weak player against what hurts them:
-## cover against archers, no hazard rooms if the hazards are the trouble.
+## Rooms and cover that help a weak player against what hurts them: cover against
+## archers, open rooms against the golem's slam, no hazard rooms if the hazards are
+## the trouble.
 func _help_with_problem(plan: SectionPlan, state: PlayerState, problem: StringName) -> void:
 	if problem == &"" or state.skill >= settings.weak_player_below:
 		return
 	if problem in HAZARD_SOURCES:
 		plan.avoided_tags.append(HAZARD_TAG)
-	elif problem == &"archer":
+	elif problem in COVER_PROBLEMS:
 		plan.cover_density = settings.rest_cover_density
 		if not COVER_TAG in plan.preferred_tags:
 			plan.preferred_tags.append(COVER_TAG)
 		plan.avoided_tags.append(OPEN_TAG)
+	elif problem in OPEN_PROBLEMS:
+		if not OPEN_TAG in plan.preferred_tags:
+			plan.preferred_tags.append(OPEN_TAG)

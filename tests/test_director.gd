@@ -124,6 +124,14 @@ func _test_adaptation() -> void:
 	weak_vs_archers.recent_damage = {&"archer": 40}
 	var plan: SectionPlan = director.choose_next(weak_vs_archers)
 	check(&"cover" in plan.preferred_tags and plan.cover_density >= 0.9, "against archers a weak player gets cover")
+	var weak_vs_elites: PlayerState = _state(1, [&"build"], [0.3])
+	weak_vs_elites.skill = 0.2
+	weak_vs_elites.recent_damage = {&"archer_triple": 40}
+	check(&"cover" in director.choose_next(weak_vs_elites).preferred_tags, "against triple-shot archers too")
+	var weak_vs_golems: PlayerState = _state(1, [&"build"], [0.3])
+	weak_vs_golems.skill = 0.2
+	weak_vs_golems.recent_damage = {&"golem": 40}
+	check(&"open" in director.choose_next(weak_vs_golems).preferred_tags, "against golems a weak player gets open rooms to step out of the slam")
 	var weak_vs_pits: PlayerState = _state(1, [&"build"], [0.3])
 	weak_vs_pits.skill = 0.2
 	weak_vs_pits.recent_damage = {&"pit": 60, &"skeleton": 10}
