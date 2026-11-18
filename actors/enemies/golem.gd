@@ -37,6 +37,10 @@ func get_windup_reach() -> float:
 	return _stats.slam_radius if _stats != null else super()
 
 
+func is_windup_area() -> bool:
+	return true
+
+
 ## 0 at the start of the windup, 1 when the slam comes.
 func get_windup_progress() -> float:
 	if state != State.WINDUP or data.windup <= 0.0:

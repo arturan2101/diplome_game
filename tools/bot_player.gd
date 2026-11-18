@@ -27,6 +27,8 @@ const DETOUR_TIME: float = 0.8
 const DETOUR_DIRECTIONS: int = 8
 ## Extra pixels of safe floor wanted beyond the end of a dodge.
 const DODGE_SAFETY_MARGIN: float = 8.0
+## A dodge out of an area attack (the golem's slam) lasts until it lands plus this.
+const AREA_DODGE_MARGIN: float = 0.15
 ## The current goal (enemy or health pack) stays the goal unless another one is
 ## closer by more than this many pixels of walking.
 const KEEP_GOAL_MARGIN: float = 16.0
@@ -262,8 +264,14 @@ func _dodge(player: Player, enemy: Enemy) -> void:
 	var wanted: Array[Vector2] = [(away + side).normalized(), (away - side).normalized(), away, side, -side]
 	if is_ranged:
 		wanted = [side, -side, away]
+	# Out of a circle around the enemy: straight away, and stay out until it lands.
+	var is_area: bool = enemy.is_windup_area()
+	if is_area:
+		wanted = [away, (away + side).normalized(), (away - side).normalized(), side, -side]
 	var uses_skill: bool = player.skill != null and player.skill.is_ready() and _rng.randf() < profile.skill_use_chance
 	var duration: float = profile.dodge_time
+	if is_area:
+		duration = maxf(duration, enemy.get_windup_time_left() + AREA_DODGE_MARGIN)
 	if is_ranged:
 		# Stay off the line until the arrow has flown past: the rest of the windup plus its flight.
 		var bow: BowWeaponData = enemy.weapon.data as BowWeaponData if enemy.weapon != null else null

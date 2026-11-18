@@ -127,6 +127,17 @@ func is_windup_ranged() -> bool:
 	return data.preferred_distance > 0.0
 
 
+## True if the attack being wound up hits a whole circle around the enemy (the golem's
+## slam): step out and stay out until it lands.
+func is_windup_area() -> bool:
+	return false
+
+
+## Seconds until the attack being wound up lands; 0 when not winding up.
+func get_windup_time_left() -> float:
+	return maxf(_state_time_left, 0.0) if state == State.WINDUP else 0.0
+
+
 ## Puts the enemy to sleep until awaken(); works before and after it enters the tree.
 func make_dormant() -> void:
 	is_dormant = true
