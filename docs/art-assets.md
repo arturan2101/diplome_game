@@ -10,7 +10,7 @@ Frames notation: idle4/walk4/attack5/hit2/death5 = rows of one sheet.
 
 Details, sizes and hooks are in the tables below.
 - Player: bow draw, shield block, dash strips (`characters/player_{bow,block,dash}_<dir>.png`), not in `player_frames.tres` yet.
-- Enemies: elite archer animation (`enemies/archer_elite_frames.tres`), stone golem (`golem_frames.tres`), ghost (`ghost_frames.tres`), training dummy (`training_dummy.png`).
+- Enemies: elite archer animation (`enemies/archer_elite_frames.tres`), ghost (`ghost_frames.tres`), training dummy (`training_dummy.png`). The stone golem is in the game since stage 29.
 - Pickups and level: chest, coin, health potion (`pickups/`), gate with portal 48x32 and its opening burst, torch, column, sarcophagus, bones, statue, shrine and used shrine (`level/`), arena door rubble and floor decals (`tiles/`).
 - Combat: sword slash and heavy slash (`fx/slash*.png`), player and enemy arrows, swords and bows in three rarities (`weapons/`).
 - Effects and light: hit spark, dust puff, death poof, pit fall, light textures (`fx/`).
@@ -32,7 +32,7 @@ Details, sizes and hooks are in the tables below.
 | C | Skeleton idle/walk, 4 directions | assets/art/enemies/skeleton_{idle,walk}_{down,up,left,right}.png | 24x24 per frame, horizontal strip | idle4, walk6 | sprites/skeleton.tres | generated |
 | C | Archer | assets/art/enemies/archer.png | 24x24 (body ~16x20) | idle4/walk4/attack5 (windup 2)/hit2/death5 | sprites/archer.tres | integrated: strips archer_<anim>_<dir>.png in archer_frames.tres, used by archer.tres (2026-11-14) |
 | C | Beetle | assets/art/enemies/beetle.png | 16x16 (body ~10x8) | idle2/walk4/attack4 (windup 1)/hit2/death4 | sprites/beetle.tres | integrated: strips beetle_<anim>_<dir>.png in beetle_frames.tres, used by beetle.tres (2026-11-14) |
-| N | Stone golem | assets/art/enemies/golem_<anim>_<dir>.png, golem_frames.tres | 48x48 (body ~34x40) | idle4/walk4, attack/hurt/death from the importer | - | generated 2026-11-17 (see "Golem and ghost" below) |
+| N | Stone golem | assets/art/enemies/golem_<anim>_<dir>.png, golem_frames.tres | 48x48 (body ~34x40) | idle4/walk4, attack/hurt/death from the importer | - | integrated in stage 29: `actors/enemies/golem.tres` (`sprite_frames`); wanted next: a slam shockwave on the floor (fx/golem_shockwave.png, 64x64, 6 frames) |
 | N | Ghost | assets/art/enemies/ghost_<anim>_<dir>.png, ghost_frames.tres | 32x32 frames (body ~18x31; square like the other strips) | idle4/move4 (as walk), attack/hurt from the importer, own death 4 | - | generated 2026-11-17 (see "Golem and ghost" below) |
 | N | Boss: Guardian of the Ruins | assets/art/enemies/guardian.png | 64x64 (body ~52x56) | idle4/walk6/attack6 x2/summon6/hit2/death6 | - | integrated: strips guardian_<anim>_<dir>.png in guardian_frames.tres, used by guardian.tres (2026-11-14) |
 | C | Training dummy | assets/art/enemies/training_dummy.png | 24x24 | idle1/hit2 (one strip of 3) | - | generated 2026-11-17 (tools/art/make_world_props.py) |
