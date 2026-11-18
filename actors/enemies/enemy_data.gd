@@ -55,4 +55,6 @@ extends Resource
 ## A type added after the comparison series (stage 29 on: the golem, the ghost): bought
 ## only with DirectorSettings.extra_enemies, from min_depth on.
 @export var is_extra: bool = false
+## Ruin shards it drops when killed, with the progress between runs on (stage 33).
+@export var shard_drop: int = 0
 @export var min_depth: int = 0

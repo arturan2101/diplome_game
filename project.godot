@@ -22,6 +22,7 @@ config/icon="res://icon.svg"
 GameManager="*uid://bot42q4nhdt28"
 Telemetry="*res://autoload/telemetry.gd"
 Playtest="*res://autoload/playtest.gd"
+Progress="*res://autoload/progress.gd"
 
 [gui]
 

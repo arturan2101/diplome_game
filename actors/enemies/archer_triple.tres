@@ -7,6 +7,7 @@
 
 [resource]
 script = ExtResource("1")
+shard_drop = 1
 sprite = ExtResource("2")
 weapon = ExtResource("3")
 id = &"archer_triple"

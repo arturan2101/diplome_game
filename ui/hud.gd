@@ -33,6 +33,8 @@ extends CanvasLayer
 @export var level_pips: Texture2D = preload("res://assets/art/fx/level_pips.png")
 @export var level_pip_size: Vector2 = Vector2(16.0, 4.0)
 @export var level_pip_gap: float = 1.0
+## Icon of the ruin shards counter.
+@export var shard_icon: Texture2D = preload("res://assets/sprites/shard.tres")
 ## Hint above the Take button ("Take Rare Bow", the name in the rarity colour) and the
 ## button itself; both appear only while there is something to take.
 @export var interact_prompt: RichTextLabel
@@ -58,6 +60,8 @@ var _player: Player = null
 var _rarity_bars: Array[ColorRect] = []
 ## Level marks under the spell icons, in slot order (empty without level_pips).
 var _spell_pips: Array[TextureRect] = []
+## Ruin shards owned (progress between runs on): icon and number under the coins.
+var _shards_label: Label = null
 
 
 func _ready() -> void:
@@ -74,6 +78,7 @@ func _ready() -> void:
 		boss_bar.visible = false
 	_make_rarity_bars()
 	_make_spell_pips()
+	_make_shard_counter()
 
 
 func _process(_delta: float) -> void:
@@ -272,6 +277,32 @@ func _make_spell_pips() -> void:
 		pips.visible = false
 		icon.add_child(pips)
 		_spell_pips.append(pips)
+
+
+## A shard icon and count under the coins, only with the progress between runs on.
+func _make_shard_counter() -> void:
+	if not GameManager.config.meta_progression or coins_label == null:
+		return
+	var icon: TextureRect = TextureRect.new()
+	icon.name = "ShardIcon"
+	icon.texture = shard_icon
+	icon.modulate = Color(0.75, 0.9, 1.2)
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon.position = coins_label.position + Vector2(-20.0, coins_label.size.y + 2.0)
+	icon.size = Vector2(16.0, 16.0)
+	coins_label.get_parent().add_child(icon)
+	_shards_label = Label.new()
+	_shards_label.name = "ShardsLabel"
+	_shards_label.position = coins_label.position + Vector2(0.0, coins_label.size.y + 2.0)
+	_shards_label.add_theme_font_size_override("font_size", coins_label.get_theme_font_size("font_size"))
+	coins_label.get_parent().add_child(_shards_label)
+	Progress.shards_changed.connect(_on_shards_changed)
+	_on_shards_changed(Progress.shards)
+
+
+func _on_shards_changed(shards: int) -> void:
+	if _shards_label != null:
+		_shards_label.text = str(shards)
 
 
 func _on_weapon_changed(_slot: int, _data: WeaponData) -> void:

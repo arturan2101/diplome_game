@@ -62,6 +62,8 @@ var _skill_uses: int = 0
 var _spell_uses: Dictionary = {}
 var _spell_damage: Dictionary = {}
 var _coins_at_start: int = 0
+## Ruin shards owned at the start of the section (Progress.run_shards).
+var _shards_at_start: int = 0
 var _traps: Dictionary = {}
 var _combat_rooms: int = 0
 var _combat_waves: int = 0
@@ -117,6 +119,7 @@ func begin_section(plan: SectionPlan, layout: SectionLayout, player: Player) -> 
 	_spell_uses = {}
 	_spell_damage = {}
 	_coins_at_start = GameManager.coins
+	_shards_at_start = Progress.run_shards
 	_traps = layout.traps.duplicate()
 	_combat_rooms = layout.combat_rooms.size()
 	_combat_waves = plan.combat_waves if _combat_rooms > 0 else 0
@@ -239,6 +242,7 @@ func end_section(died: bool) -> Dictionary:
 		"accuracy": snappedf(_accuracy(), SHARE_STEP),
 		"idle_time": snappedf(_idle_time, TIME_STEP),
 		"coins": GameManager.coins - _coins_at_start,
+		"shards": Progress.run_shards - _shards_at_start,
 		"traps": _string_keys(_traps),
 		"combat_rooms": _combat_rooms,
 		"combat_waves": _combat_waves,

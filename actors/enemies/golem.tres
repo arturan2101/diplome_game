@@ -6,6 +6,7 @@
 
 [resource]
 script = ExtResource("1")
+shard_drop = 1
 id = &"golem"
 display_name = "Stone golem"
 sprite_frames = ExtResource("2")

@@ -136,7 +136,29 @@ func _setup_debug_panel() -> void:
 	seed_edit.text_changed.connect(_on_seed_changed)
 	playtest_button.pressed.connect(_on_playtest_pressed)
 	export_button.pressed.connect(_on_export_pressed)
+	_add_progress_controls()
 	status_label.text = ""
+
+
+## Progress between runs for testing: everything unlocked and bought, or the real save;
+## and a button that forgets the save.
+func _add_progress_controls() -> void:
+	var box: Container = seed_edit.get_parent() as Container
+	if box == null:
+		return
+	var unlock: CheckBox = CheckBox.new()
+	unlock.name = "UnlockAll"
+	unlock.text = "Everything unlocked (testing)"
+	unlock.button_pressed = Progress.unlock_all
+	unlock.toggled.connect(func(on: bool) -> void: Progress.unlock_all = on)
+	box.add_child(unlock)
+	var reset: Button = Button.new()
+	reset.name = "ResetProgress"
+	reset.text = "Reset progress (shards, skills, spells)"
+	reset.pressed.connect(func() -> void:
+		Progress.reset()
+		status_label.text = "Progress reset.")
+	box.add_child(reset)
 
 
 func _toggle_debug_panel() -> void:

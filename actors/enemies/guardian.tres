@@ -10,6 +10,7 @@
 
 [resource]
 script = ExtResource("1")
+shard_drop = 5
 id = &"guardian"
 display_name = "Guardian of the Ruins"
 sprite = ExtResource("2")

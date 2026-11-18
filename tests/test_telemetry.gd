@@ -10,7 +10,7 @@ const RUN_SEED: int = 99
 const REQUIRED_KEYS: Array[String] = [
 	"session", "run", "mode", "seed", "section", "depth", "phase", "budget", "enemies", "time",
 	"t_ref", "damage", "damage_total", "blocked_damage", "hp_exit", "kills_ratio", "weapon_use",
-	"weapon_rarity", "weapon_multiplier", "skill_uses", "accuracy", "idle_time", "coins", "died", "p", "skill",
+	"weapon_rarity", "weapon_multiplier", "skill_uses", "accuracy", "idle_time", "coins", "shards", "died", "p", "skill",
 ]
 
 

@@ -25,6 +25,8 @@ func show_summary(summary: Dictionary) -> void:
 	var seconds: int = int(summary["time"])
 	stats_label.text = "Depth reached: %d\nSections cleared: %d\nTime: %d:%02d\nEnemies defeated: %d\nCoins: %d" % [
 			int(summary["depth"]) + 1, summary["sections"], seconds / 60, seconds % 60, summary["kills"], summary["coins"]]
+	if GameManager.config.meta_progression:
+		stats_label.text += "\nRuin shards: +%d (%d in all)" % [Progress.run_shards, Progress.shards]
 	menu_button.visible = menu_enabled
 	panel.visible = true
 	again_button.grab_focus()

@@ -15,6 +15,7 @@ signal section_finished(plan: SectionPlan, layout: SectionLayout)
 const ENEMY_SCENE: PackedScene = preload("res://actors/enemies/enemy.tscn")
 const WEAPON_PICKUP_SCENE: PackedScene = preload("res://actors/pickups/weapon_pickup.tscn")
 const COIN_SCENE: PackedScene = preload("res://actors/pickups/coin.tscn")
+const SHARD_SCENE: PackedScene = preload("res://actors/pickups/shard.tscn")
 const DEFAULT_CHEST_WEAPONS: WeaponPool = preload("res://combat/weapons/chest_weapons.tres")
 const DEFAULT_RARITY_TABLE: RarityTable = preload("res://combat/weapons/rarity_table.tres")
 const DEFAULT_SPELL_POOL: SpellPool = preload("res://combat/spells/spell_pool.tres")
@@ -557,6 +558,7 @@ func _create_enemy(enemy_data: EnemyData, cell: Vector2i) -> Enemy:
 
 func _on_enemy_defeated(enemy: Enemy) -> void:
 	GameManager.add_kill()
+	_drop_shards(enemy)
 	if enemy.has_meta(SUMMONED_META):
 		_servants.erase(enemy)
 	else:
@@ -566,6 +568,18 @@ func _on_enemy_defeated(enemy: Enemy) -> void:
 		_on_boss_defeated()
 	if _is_arena_sealed and _enemies_left <= 0:
 		_advance_arena()
+
+
+## Ruin shards from elite enemies, the golem and the boss (progress between runs on).
+## A fixed number per type, so nothing is drawn from the random streams.
+func _drop_shards(enemy: Enemy) -> void:
+	if not GameManager.config.meta_progression or enemy.data == null or enemy.data.shard_drop <= 0:
+		return
+	for i in enemy.data.shard_drop:
+		var shard: Shard = SHARD_SCENE.instantiate() as Shard
+		var spread: Vector2 = Vector2.RIGHT.rotated(TAU * i / enemy.data.shard_drop) * (6.0 if enemy.data.shard_drop > 1 else 0.0)
+		shard.position = _contents.to_local(enemy.global_position) + spread
+		_contents.add_child.call_deferred(shard)
 
 
 ## The boss calls servants next to itself, while fewer than its limit are alive.

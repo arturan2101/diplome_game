@@ -9,6 +9,10 @@ const TEST_LOG_DIR: String = "user://test_logs"
 
 
 func _ready() -> void:
+	# Tests never touch the player's save and start from nothing.
+	Progress.persist = false
+	Progress.unlock_all = false
+	Progress.from_dictionary({})
 	# Tests must not write into the real play logs.
 	Telemetry.log_directory = TEST_LOG_DIR
 	var only: String = _only_filter()

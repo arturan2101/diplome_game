@@ -48,6 +48,10 @@ var _game: Game = null
 
 
 func _ready() -> void:
+	# Bots start every run from nothing: no unlocks, no permanent skills, no save.
+	Progress.persist = false
+	Progress.unlock_all = false
+	Progress.from_dictionary({})
 	_runs = _int_argument(RUNS_ARG, DEFAULT_RUNS)
 	_max_sections = _int_argument(SECTIONS_ARG, DEFAULT_SECTIONS)
 	_first_seed = _int_argument(SEED_ARG, DEFAULT_FIRST_SEED)
