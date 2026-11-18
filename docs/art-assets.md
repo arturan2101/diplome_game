@@ -67,7 +67,7 @@ Actor sizes per docs/art-style.md rev 3: collisions in code are unchanged; sprit
 | N | Falling-stone trap (shadow warning + rock + rubble) | assets/art/level/falling_stone.png | 16x16 | warn2/fall3/rubble1 | - | todo |
 | N | Pillar (column hall template) | assets/art/level/pillar.png | 16x32 | 1 | - | generated 2026-11-17 |
 | N | Crypt props (sarcophagus, broken statue, bones) | assets/art/level/sarcophagus.png, statue.png, bones.png | 32x16 / 16x24 / 16x16 | 1 each | - | generated 2026-11-17 |
-| L | Skill-tree altar (hub before ruins) | assets/art/level/altar.png | 32x32 | 4 glow | - | todo |
+| L | Skill-tree altar (hub before ruins) | assets/art/level/altar.png | 32x32 | 4 glow | - | generated 2026-11-18 (see plan group 2) |
 | C | Wall torch (light accent, decorative) | assets/art/level/torch.png | 16x16 | 4 flicker | - | generated 2026-11-17 |
 
 ## Requested by gameplay code
@@ -299,3 +299,20 @@ Drawn in `tools/art/make_combat_fx.py`. Strips are horizontal, frames left to ri
 | N | Ghost fade in: teal sparks converge, a flickering column of light, a white flash ring | assets/art/fx/ghost_fade_in.png | 32x32 per frame (160x32) | 5, one pass | none; the column matches the ghost body (about 14x26, centred) | generated |
 | N | Ghost fade out: flash ring, the column melts, sparks rise and scatter | assets/art/fx/ghost_fade_out.png | 32x32 per frame (160x32) | 5, one pass | none | generated |
 | C | Damage digits 0-9 | assets/art/ui/damage_digits.png | cells 5x7 (3x5 glyph + 1 px outline), strip 50x7 | 10 glyphs, index = digit | white #f4f0e0, tint in code (crit, heal); place digits 4 px apart so the outlines overlap | generated |
+
+## Plan group 2: camp at the entrance and progression (batch 7, art 2026-11-18)
+
+Camp art in `tools/art/make_camp.py` (nature theme colours: grass #5a8a4a / #8ac060, warm stone #8a8466 / #6a6656 / #c8c088), UI in `tools/art/make_skill_ui.py`. Strips are horizontal, frames left to right.
+
+| P | Asset | File | Size | Frames | Direction / use | Status |
+|---|---|---|---|---|---|---|
+| C | Camp tiles: 0-1 grass (1 with flowers), 2 dirt path, 3 path with grass, 4 pebbles on grass, 5 boulder on grass (cover, outlined), 6 cliff front (bottom row = contact shadow), 7 cliff top (grass over rock) | assets/art/tiles/camp_tiles_atlas.png | 16x16 slots, one row (128x16) | 1 each | same layout idea as ruins_tiles_atlas.png; tiles tile seamlessly except the cliff edges | generated |
+| C | Entrance to the ruins: stone arch in a rock face, darkness inside, vines | assets/art/level/ruins_entrance.png | 48x32 | 1 | faces the viewer; the doorway is the arch opening (x 14-33, rows 8-28), threshold on row 29 | generated |
+| C | Campfire: logs, ring of stones, flame | assets/art/level/campfire.png | 16x16 per frame (64x16) | 4, loop (8 fps) | none; pairs with light_torch.png | generated |
+| C | Tent (A-frame, tan canvas, red pennant, guy ropes) | assets/art/level/tent.png | 32x32 | 1 | front face to the viewer, side roof to the right; ground shadow on row 29 | generated |
+| C | Skill altar: stone pedestal, hovering golden rune ring with a star, sparks | assets/art/level/altar.png | 32x32 per frame (128x32) | 4, loop (6 fps), the ring bobs 1 px | faces the viewer | generated |
+| C | Spell library shelf: books in many colours, a scroll, a violet orb | assets/art/level/spell_shelf.png | 32x24 | 1 | faces the viewer (stands against a wall or freely) | generated |
+| C | Skill tree node frame: locked (grey stone), available (dim gold), bought (bright gold, sparkling corners) | assets/art/ui/skill_node.png | 20x20 per state (60x20) | 3 states, index 0-2 | the 16x16 perk icon goes inside at (2, 2); the inside is transparent | generated |
+| C | Skill tree connection line: inactive (grey), active (gold) | assets/art/ui/skill_line.png | 8x6 per state (16x6) | 2 states | 9-slice / stretch horizontally (margins 0 left/right, the 6 px height stays); rotate 90 deg for vertical links | generated |
+| C | Skill tree panel background | assets/art/ui/skill_panel.png | 24x24 | 1 | 9-slice, margins 8 (gold corners) | generated |
+| C | Perk icons: 0 health+, 1 damage+, 2 speed+, 3 skill cooldown-, 4 healing+, 5 coin magnet, 6 armour, 7 chest luck, 8 third spell slot, 9 starting coins | assets/art/ui/perk_icons.png | 16x16 each (160x16) | 10, index as listed | green "+" badge (nature green) on boosts, blue "-" on the cooldown, no badge on 5-7 | generated |
