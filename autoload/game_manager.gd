@@ -96,7 +96,7 @@ func make_director() -> Director:
 func _apply_config(director: Director) -> void:
 	if config.boss_enabled and config.spells_enabled and config.spike_traps and config.combat_rooms \
 			and config.elite_enemies and config.secret_rooms and not config.merchant_glade and not config.soft_waves \
-			and not config.depth_pressure:
+			and not config.depth_pressure and not config.extra_enemies:
 		return
 	director.settings = director.settings.duplicate() as DirectorSettings
 	if not config.boss_enabled:
@@ -116,6 +116,8 @@ func _apply_config(director: Director) -> void:
 		director.settings.secret_room = null
 	if config.depth_pressure:
 		director.settings.depth_pressure = true
+	if config.extra_enemies:
+		director.settings.extra_enemies = true
 	if config.soft_waves:
 		director.settings.peak_multiplier = director.settings.soft_peak_multiplier
 		director.settings.rest_multiplier = director.settings.soft_rest_multiplier

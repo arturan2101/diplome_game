@@ -52,4 +52,7 @@ extends Resource
 ## Elite variants (stage 23) are bought only where the series allows them
 ## (ExperimentConfig.elite_enemies), and only from depth min_depth on (0 = the first).
 @export var is_elite: bool = false
+## A type added after the comparison series (stage 29 on: the golem, the ghost): bought
+## only with DirectorSettings.extra_enemies, from min_depth on.
+@export var is_extra: bool = false
 @export var min_depth: int = 0

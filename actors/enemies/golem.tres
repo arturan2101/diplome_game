@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="GolemData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/golem_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/golem_frames.tres" id="2"]
+[ext_resource type="PackedScene" path="res://actors/enemies/golem.tscn" id="3"]
+
+[resource]
+script = ExtResource("1")
+id = &"golem"
+display_name = "Stone golem"
+sprite_frames = ExtResource("2")
+body_radius = 10.0
+danger_cost = 5
+max_hp = 120
+move_speed = 26.0
+detection_range = 150.0
+attack_range = 30.0
+windup = 1.1
+recovery = 1.2
+scene = ExtResource("3")
+is_extra = true
+min_depth = 1
+slam_radius = 40.0
+slam_damage = 20
+slam_knockback = 220.0
+slam_flash_time = 0.3
+stagger_immune = true

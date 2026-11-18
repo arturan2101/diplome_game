@@ -10,6 +10,7 @@ spells_enabled = false
 combat_rooms = false
 elite_enemies = false
 merchant_glade = false
+extra_enemies = false
 depth_pressure = false
 spell_fusion = false
 secret_rooms = false

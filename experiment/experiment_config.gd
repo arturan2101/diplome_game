@@ -37,6 +37,9 @@ extends Resource
 ## budget floor growing with depth for every director, enemies growing faster
 ## (DirectorSettings.depth_pressure). Off in the clean series and the playtest.
 @export var depth_pressure: bool = true
+## Enemy types added after the comparison series: the stone golem (stage 29), the ghost.
+## Off in the clean series and the playtest.
+@export var extra_enemies: bool = true
 ## Soft tension waves of the rules director: a peak of x1.15 and a rest of x0.5
 ## (DirectorSettings.soft_peak_multiplier, soft_rest_multiplier) instead of x1.3 and
 ## x0.3. The other modes have no wave and do not change.
@@ -48,4 +51,4 @@ func to_dictionary() -> Dictionary:
 	return {"boss": boss_enabled, "spells": spells_enabled, "rarity": rarity_enabled, "soft_waves": soft_waves,
 			"spike_traps": spike_traps, "combat_rooms": combat_rooms, "elite_enemies": elite_enemies,
 			"secret_rooms": secret_rooms, "merchant_glade": merchant_glade, "spell_fusion": spell_fusion,
-			"depth_pressure": depth_pressure}
+			"depth_pressure": depth_pressure, "extra_enemies": extra_enemies}

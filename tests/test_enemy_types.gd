@@ -117,8 +117,8 @@ func _test_line_of_sight() -> void:
 func _test_real_resources() -> void:
 	var catalog: EnemyCatalog = load(CATALOG_PATH) as EnemyCatalog
 	check(catalog != null and catalog.get_ids() == ([&"skeleton", &"archer", &"beetle", &"guardian", &"skeleton_shield",
-			&"archer_triple"] as Array[StringName]),
-			"enemy catalog lists skeleton, archer, beetle, the boss and the two elites (last, so plans without elites stay the same)")
+			&"archer_triple", &"golem"] as Array[StringName]),
+			"enemy catalog lists skeleton, archer, beetle, the boss, the two elites and the golem")
 	if catalog == null:
 		return
 	var beetle: EnemyData = catalog.get_by_id(&"beetle")
@@ -137,11 +137,12 @@ func _test_real_resources() -> void:
 		var animated: AnimatedSprite2D = enemy.visual as AnimatedSprite2D
 		var has_look: bool = (sprite != null and sprite.texture == enemy_data.sprite) \
 				or (animated != null and animated.sprite_frames != null)
-		if enemy.weapon == null or not has_look \
+		# The golem's slam is its own attack, it has no weapon.
+		if (enemy.weapon == null and not enemy is Golem) or not has_look \
 				or enemy.health.hp != enemy_data.max_hp or enemy_data.danger_cost <= 0:
 			all_ready = false
 		enemy.queue_free()
-	check(all_ready, "every catalog enemy spawns (from enemy.tscn or its own scene) with weapon, sprite and HP from its data")
+	check(all_ready, "every catalog enemy spawns (from enemy.tscn or its own scene) with its attack, sprite and HP from its data")
 	await physics_frames(2)
 
 

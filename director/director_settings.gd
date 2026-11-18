@@ -30,6 +30,11 @@ extends Resource
 ## A section never gets less than this, except in the rest phase.
 @export var min_budget: int = 4
 
+@export_group("Extra enemies")
+## Enemy types added after the comparison series (EnemyData.is_extra: the golem, the
+## ghost). Off in the clean series and the playtest (ExperimentConfig.extra_enemies).
+@export var extra_enemies: bool = false
+
 @export_group("Depth pressure")
 ## Full game (ExperimentConfig.depth_pressure, stage 28): every depth is harder than the
 ## one before, whatever the player can do. No director may give a section less than

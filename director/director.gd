@@ -143,8 +143,9 @@ func pick_weighted(weights: Array[float], rng: RandomNumberGenerator) -> int:
 
 ## Spends a danger budget on enemies: picks random affordable types until nothing
 ## fits. weights (type id -> number) make some types more or less likely; a type
-## without a weight counts as 1. Elite types join only when they are on and the depth
-## has reached theirs (no depth = no elites). Returns type id -> number of spawns.
+## without a weight counts as 1. Elite and extra types join only when they are on and
+## the depth has reached theirs (no depth = none of them). Returns type id -> number of
+## spawns.
 func buy_enemies(budget: int, rng: RandomNumberGenerator, weights: Dictionary = {}, depth: int = -1) -> Dictionary:
 	var mix: Dictionary = {}
 	var left: int = budget
@@ -200,6 +201,8 @@ func buy_traps(plan: SectionPlan, rng: RandomNumberGenerator) -> int:
 
 
 func _can_buy(enemy_data: EnemyData, depth: int) -> bool:
+	if enemy_data.is_extra and not (settings.extra_enemies and depth >= enemy_data.min_depth):
+		return false
 	return not enemy_data.is_elite or (settings.elites_enabled and depth >= enemy_data.min_depth)
 
 
