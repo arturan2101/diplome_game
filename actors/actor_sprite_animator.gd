@@ -24,6 +24,12 @@ const BOW_DRAW_FRAMES: int = 4
 ## Spark over the actor when it takes damage (a strip played once), or null.
 @export var hit_effect: Texture2D = preload("res://assets/art/fx/hit_spark.png")
 @export var hit_effect_frames: int = 3
+## The damage of each hit floats up as a number: white over enemies, red over the player.
+@export var show_damage_numbers: bool = true
+@export var enemy_damage_color: Color = Color("#f4f0e0")
+@export var player_damage_color: Color = Color("#e85a3a")
+## Height of the number above the actor's centre.
+@export var damage_number_height: float = 14.0
 ## Burst of bits when an enemy dies (bone chips for the skeleton).
 @export var death_particle_color: Color = Color("#d8d4c4")
 @export var death_particles: int = 10
@@ -166,8 +172,11 @@ func _on_attack(_step: int, _hits: int) -> void:
 	play_action("attack", attack_time)
 
 
-func _on_damaged(_info: DamageInfo) -> void:
+func _on_damaged(info: DamageInfo) -> void:
 	StripSprite.spawn(_body.get_parent(), _body.global_position + offset * 0.5, hit_effect, hit_effect_frames)
+	if show_damage_numbers:
+		DamageNumber.spawn(_body.get_parent(), _body.global_position + Vector2(0.0, -damage_number_height), info.amount,
+				player_damage_color if _body is Player else enemy_damage_color)
 	if _body is Enemy and (_body as Enemy).state == Enemy.State.WINDUP:
 		return
 	play_action("hurt", hurt_time)

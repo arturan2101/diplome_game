@@ -11,9 +11,20 @@ extends Enemy
 @export var telegraph_alpha: float = 0.35
 @export var telegraph_segments: int = 32
 @export var dust_color: Color = Color(0.85, 0.83, 0.77)
+## Art (visual only): the pulsing shadow on the floor during the windup and the
+## shockwave of the slam, both round and centred; the radius each was drawn for, so
+## they are scaled to the slam's radius. Null = the circles drawn in code.
+@export var warning_texture: Texture2D = preload("res://assets/art/fx/golem_warning.png")
+@export var warning_frames: int = 4
+@export var warning_drawn_radius: float = 24.0
+@export var shockwave_texture: Texture2D = preload("res://assets/art/fx/golem_shockwave.png")
+@export var shockwave_frames: int = 6
+@export var shockwave_drawn_radius: float = 31.0
+@export var shockwave_fps: float = 12.0
 
 var _stats: GolemData = null
 var _flash_left: float = 0.0
+var _warning: StripSprite = null
 
 
 func _ready() -> void:
@@ -22,12 +33,24 @@ func _ready() -> void:
 	if _stats == null:
 		push_error("Golem needs GolemData: %s" % data)
 		set_physics_process(false)
+		return
+	if warning_texture != null:
+		_warning = StripSprite.new()
+		_warning.name = "Warning"
+		_warning.texture = warning_texture
+		_warning.hframes = maxi(warning_frames, 1)
+		_warning.scale = Vector2.ONE * (_stats.slam_radius / warning_drawn_radius)
+		_warning.show_behind_parent = true
+		_warning.visible = false
+		add_child(_warning)
 
 
 func _physics_process(delta: float) -> void:
 	super(delta)
 	if _flash_left > 0.0:
 		_flash_left -= delta
+	if _warning != null:
+		_warning.visible = state == State.WINDUP
 	if state == State.WINDUP or _flash_left > -delta:
 		queue_redraw()
 
@@ -67,6 +90,13 @@ func _update_windup(delta: float) -> void:
 			roundi(_stats.slam_damage * damage_multiplier), self, data.id, _stats.slam_knockback,
 			player_hurtbox_mask, sight_mask)
 	_flash_left = _stats.slam_flash_time
+	var wave: StripSprite = StripSprite.spawn(get_parent(), global_position, shockwave_texture, shockwave_frames, shockwave_fps)
+	if wave != null:
+		wave.scale = Vector2.ONE * (_stats.slam_radius / shockwave_drawn_radius)
+		# On the floor: drawn just before the golem, so under it (not z -1, which would put
+		# it under the floor tiles).
+		wave.get_parent().move_child(wave, get_index())
+		_flash_left = 0.0
 	_enter(State.RECOVER)
 
 
@@ -74,9 +104,11 @@ func _draw() -> void:
 	if _stats == null:
 		return
 	if state == State.WINDUP:
+		# The filling circle shows how soon the slam lands; the art shows its edge.
 		var progress: float = get_windup_progress()
 		draw_circle(Vector2.ZERO, _stats.slam_radius * progress, Color(telegraph_color, telegraph_alpha * (0.3 + 0.7 * progress)))
-		draw_arc(Vector2.ZERO, _stats.slam_radius, 0.0, TAU, telegraph_segments, Color(telegraph_color, 0.9), 1.5)
+		if _warning == null:
+			draw_arc(Vector2.ZERO, _stats.slam_radius, 0.0, TAU, telegraph_segments, Color(telegraph_color, 0.9), 1.5)
 	elif _flash_left > 0.0:
 		var t: float = 1.0 - _flash_left / _stats.slam_flash_time
 		draw_arc(Vector2.ZERO, _stats.slam_radius * (0.6 + 0.4 * t), 0.0, TAU, telegraph_segments,

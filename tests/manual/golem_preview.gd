@@ -23,6 +23,8 @@ const FLOOR_MAP: String = """##############################
 #............................#
 ##############################"""
 const SETTLE_FRAMES: int = 20
+## Frames after the slam when it is saved (the shockwave has spread by then).
+const SLAM_SHOT_FRAMES: int = 12
 
 var _out_dir: String = "user://golem_preview"
 
@@ -52,7 +54,7 @@ func _ready() -> void:
 	await _save("golem_windup.png")
 	while golem.state == Enemy.State.WINDUP:
 		await _frames(1)
-	await _frames(2)
+	await _frames(SLAM_SHOT_FRAMES)
 	await _save("golem_slam.png")
 	get_tree().quit()
 
