@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="MeleeWeaponData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://combat/weapons/melee_attack_step.gd" id="1"]
+[ext_resource type="Script" path="res://combat/weapons/melee_weapon_data.gd" id="2"]
+[ext_resource type="PackedScene" path="res://combat/weapons/enemy_melee_weapon.tscn" id="3"]
+
+[sub_resource type="Resource" id="touch"]
+script = ExtResource("1")
+damage = 9
+reach = 22.0
+arc_degrees = 140.0
+recovery = 0.0
+
+[resource]
+script = ExtResource("2")
+combo = Array[ExtResource("1")]([SubResource("touch")])
+id = &"ghost_touch"
+weapon_scene = ExtResource("3")

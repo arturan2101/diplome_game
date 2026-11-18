@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="GhostData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/ghost_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/ghost_frames.tres" id="2"]
+[ext_resource type="Resource" path="res://actors/enemies/ghost_touch.tres" id="3"]
+[ext_resource type="PackedScene" path="res://actors/enemies/ghost.tscn" id="4"]
+
+[resource]
+script = ExtResource("1")
+id = &"ghost"
+display_name = "Ghost"
+sprite_frames = ExtResource("2")
+body_radius = 6.0
+danger_cost = 3
+max_hp = 26
+move_speed = 34.0
+detection_range = 220.0
+attack_range = 18.0
+windup = 0.55
+recovery = 0.7
+weapon = ExtResource("3")
+scene = ExtResource("4")
+is_extra = true
+min_depth = 2
+drift_alpha = 0.45
+fade_time = 0.25

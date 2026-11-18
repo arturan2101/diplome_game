@@ -706,7 +706,8 @@ func _seal_arena() -> void:
 func _return_arena_strays(on_floor_too: bool) -> void:
 	var inside: Rect2i = layout.room_rects[layout.arena_room].grow(-1)
 	for enemy: Enemy in get_enemies():
-		if not on_floor_too and enemy.state == Enemy.State.FALLING:
+		# A ghost passes walls and comes back by itself.
+		if not on_floor_too and (enemy.state == Enemy.State.FALLING or enemy is Ghost):
 			continue
 		var cell: Vector2i = level.cell_at(enemy.global_position)
 		if not inside.has_point(cell) or (on_floor_too and not level.grid.is_floor(cell)):
