@@ -11,6 +11,8 @@ var data: SkillData = null
 var wielder: Player = null
 
 var _cooldown_left: float = 0.0
+## Share of the cooldown actually waited (a permanent skill shortens it); 1 = all of it.
+var cooldown_multiplier: float = 1.0
 
 
 ## Called by the player right after creating the skill, before adding it to the tree.
@@ -48,9 +50,9 @@ func is_active() -> bool:
 
 ## 0 = ready, 1 = cooldown just started. For the HUD.
 func get_cooldown_fraction() -> float:
-	if data == null or data.cooldown <= 0.0:
+	if data == null or data.cooldown * cooldown_multiplier <= 0.0:
 		return 0.0
-	return clampf(_cooldown_left / data.cooldown, 0.0, 1.0)
+	return clampf(_cooldown_left / (data.cooldown * cooldown_multiplier), 0.0, 1.0)
 
 
 ## Multiplier for the wielder's movement speed (the shield slows down).
@@ -74,7 +76,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _start_cooldown() -> void:
-	_cooldown_left = data.cooldown
+	_cooldown_left = data.cooldown * cooldown_multiplier
 
 
 ## Subclasses: start the skill.

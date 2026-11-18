@@ -45,6 +45,11 @@ const COVER_CHAR: String = "%"
 @export_flags_2d_physics var solid_layer: int = 1
 ## Change to the game scene when the player enters the ruins (tests turn it off).
 @export var change_scene_on_enter: bool = true
+## The permanent skills the altar sells (stage 35).
+@export var perk_tree: PerkTree = preload("res://progression/perks.tres")
+
+## The altar's screen, made in code.
+var skill_screen: SkillTreeScreen = null
 
 ## Cells of the letters in the map: {letter: cell}.
 var marks: Dictionary = {}
@@ -61,6 +66,10 @@ func _ready() -> void:
 	hud.bind_player(player)
 	hud.show_camp()
 	_place_things()
+	skill_screen = SkillTreeScreen.new()
+	skill_screen.name = "SkillTreeScreen"
+	add_child(skill_screen)
+	skills_requested.connect(func() -> void: skill_screen.open(perk_tree))
 	hud.show_banner("The camp at the ruins")
 
 

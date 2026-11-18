@@ -18,6 +18,8 @@ signal hp_changed(hp: int, max_hp: int)
 signal invulnerability_changed(is_invulnerable: bool)
 
 @export var max_hp: int = 100
+## Share of every hit's damage actually taken (armour: 0.9 = 10% less); 1 = all of it.
+@export var damage_taken_multiplier: float = 1.0
 ## Seconds of invulnerability after taking damage. Keep 0 for enemies,
 ## otherwise the hits of a sword combo would be absorbed.
 @export var invulnerability_time: float = 0.0
@@ -50,6 +52,8 @@ func can_take_damage(info: DamageInfo) -> bool:
 func take_damage(info: DamageInfo) -> bool:
 	if not can_take_damage(info):
 		return false
+	if damage_taken_multiplier != 1.0:
+		info.amount = maxi(1, roundi(info.amount * damage_taken_multiplier))
 	hp = maxi(hp - info.amount, 0)
 	damaged.emit(info)
 	hp_changed.emit(hp, max_hp)

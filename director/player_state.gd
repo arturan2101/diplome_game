@@ -17,6 +17,9 @@ var weapon_rarity: StringName = &"common"
 var weapon_multiplier: float = 1.0
 ## Known spells and their levels: {spell id: level}.
 var spells: Dictionary = {}
+## Permanent skills bought in the camp: {skill id: level} (empty without the progress
+## between runs).
+var perks: Dictionary = {}
 ## True if this is the last section of its depth: it ends with the locked arena.
 var is_depth_end: bool = false
 ## Generator for the director's own random choices about this section

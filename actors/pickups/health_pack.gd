@@ -6,4 +6,4 @@ extends Pickup
 
 
 func _collect(player: Player) -> bool:
-	return player.health != null and player.health.heal(heal_amount) > 0
+	return player.health != null and player.health.heal(roundi(heal_amount * player.heal_multiplier)) > 0

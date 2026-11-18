@@ -40,6 +40,14 @@ const GROUP: StringName = &"player"
 ## Things closer than this can be used with the interact button, in pixels.
 @export var interact_radius: float = 20.0
 
+## Bonuses of the camp's permanent skills (set by the game at the start of a run; all
+## neutral by default): weapon damage, what health packs heal, the basic skill's
+## cooldown, and the radius in which coins fly to the player.
+var damage_bonus: float = 1.0
+var heal_multiplier: float = 1.0
+var skill_cooldown_multiplier: float = 1.0
+var coin_magnet_radius: float = 0.0
+
 ## Last non-zero movement direction (unit vector).
 var facing: Vector2 = Vector2.RIGHT
 ## Weapon in the player's hands, null when unarmed.
@@ -167,6 +175,7 @@ func _create_weapon(weapon_data: WeaponData) -> Weapon:
 		return null
 	var new_weapon: Weapon = weapon_data.weapon_scene.instantiate() as Weapon
 	new_weapon.setup(weapon_data, self)
+	new_weapon.damage_multiplier *= damage_bonus
 	add_child(new_weapon)
 	return new_weapon
 
@@ -208,6 +217,7 @@ func set_skill(skill_data: SkillData) -> void:
 		return
 	skill = skill_data.skill_scene.instantiate() as Skill
 	skill.setup(skill_data, self)
+	skill.cooldown_multiplier = skill_cooldown_multiplier
 	add_child(skill)
 
 

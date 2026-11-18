@@ -17,6 +17,8 @@ signal glade_logged(record: Dictionary)
 const SETTINGS_PATH: String = "res://director/director_settings.tres"
 const LOG_EXTENSION: String = "jsonl"
 ## Where export_logs() puts the file when the shared Downloads folder cannot be written.
+## The camp's permanent skills (stage 35), for the "perks" key of a section line.
+const PERK_TREE_PATH: String = "res://progression/perks.tres"
 const EXPORT_FALLBACK_DIR: String = "user://export"
 ## The player counts as idle below this speed, in pixels per second.
 const IDLE_SPEED: float = 5.0
@@ -243,6 +245,7 @@ func end_section(died: bool) -> Dictionary:
 		"idle_time": snappedf(_idle_time, TIME_STEP),
 		"coins": GameManager.coins - _coins_at_start,
 		"shards": Progress.run_shards - _shards_at_start,
+		"perks": _perk_levels(),
 		"traps": _string_keys(_traps),
 		"combat_rooms": _combat_rooms,
 		"combat_waves": _combat_waves,
@@ -477,3 +480,12 @@ func _make_session_id() -> String:
 	# The process id keeps games started in the same second apart (parallel simulations).
 	stamp += "_%d" % OS.get_process_id()
 	return "%s_%04x" % [stamp, random.randi_range(0, 0xFFFF)]
+
+
+## Permanent skills of the camp in this run, {id: level} with string keys; empty
+## without the progress between runs.
+func _perk_levels() -> Dictionary:
+	if not GameManager.config.meta_progression:
+		return {}
+	var tree: PerkTree = load(PERK_TREE_PATH) as PerkTree
+	return _string_keys(tree.levels()) if tree != null else {}

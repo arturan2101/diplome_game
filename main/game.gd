@@ -31,6 +31,7 @@ const ITEM_SCENES: Dictionary = {
 }
 const DEFAULT_SHOP: ShopData = preload("res://shop/shop.tres")
 const DEFAULT_FUSIONS: FusionTable = preload("res://combat/spells/fusions.tres")
+const DEFAULT_PERKS: PerkTree = preload("res://progression/perks.tres")
 ## The flash where two spells merge (art: assets/art/fx/fusion_frames.tres).
 const MERGE_FRAMES: SpriteFrames = preload("res://assets/art/fx/fusion_frames.tres")
 const MERGE_ANIMATION: StringName = &"merge"
@@ -77,6 +78,8 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 @export var shop_screen: ShopScreen
 ## Which spells merge into which (stage 26). Empty = combat/spells/fusions.tres.
 @export var fusion_table: FusionTable
+## The camp's permanent skills (stage 35). Empty = progression/perks.tres.
+@export var perk_tree: PerkTree
 ## The merchant's glade between depths. Empty = generation/glade.tres.
 @export var glade_data: GladeData
 ## With the glade (spells are bought there), a secret room's chest holds a spell
@@ -138,6 +141,8 @@ func _ready() -> void:
 		shop_data = DEFAULT_SHOP
 	if fusion_table == null:
 		fusion_table = DEFAULT_FUSIONS
+	if perk_tree == null:
+		perk_tree = DEFAULT_PERKS
 	if glade_data == null:
 		glade_data = DEFAULT_GLADE
 	if shop_screen == null:
@@ -157,6 +162,7 @@ func _ready() -> void:
 		var zoom: Node = (load(DEBUG_ZOOM_SCRIPT) as GDScript).new()
 		zoom.name = "DebugCameraZoom"
 		add_child(zoom)
+	_apply_perks()
 	player.add_weapon(GameManager.starting_weapon)
 	player.set_skill(GameManager.starting_skill)
 	hud.bind_player(player)
@@ -331,6 +337,8 @@ func _make_player_state() -> PlayerState:
 	state.weapon_count = player.get_weapon_slots().size()
 	if player.spell_book != null:
 		state.spells = player.spell_book.to_dictionary()
+	if GameManager.config.meta_progression:
+		state.perks = perk_tree.levels()
 	if player.weapon != null:
 		state.weapon_rarity = player.weapon.data.get_rarity().id
 		state.weapon_multiplier = player.weapon.data.get_damage_multiplier()
@@ -570,6 +578,30 @@ func _on_enemy_defeated(enemy: Enemy) -> void:
 		_advance_arena()
 
 
+## The camp's permanent skills at the start of a run (progress between runs on): more
+## health, weapon damage, speed, healing, coins, the coin magnet and armour. Before the
+## weapons are made, so they take the damage bonus.
+func _apply_perks() -> void:
+	if not GameManager.config.meta_progression:
+		return
+	player.health.max_hp += roundi(perk_tree.total(PerkData.Effect.MAX_HP))
+	player.health.reset()
+	player.health.damage_taken_multiplier = maxf(0.0, 1.0 - perk_tree.total(PerkData.Effect.ARMOR))
+	player.damage_bonus = 1.0 + perk_tree.total(PerkData.Effect.DAMAGE)
+	player.move_speed *= 1.0 + perk_tree.total(PerkData.Effect.MOVE_SPEED)
+	player.heal_multiplier = 1.0 + perk_tree.total(PerkData.Effect.HEALING)
+	player.coin_magnet_radius = perk_tree.total(PerkData.Effect.COIN_MAGNET)
+	player.skill_cooldown_multiplier = maxf(0.0, 1.0 - perk_tree.total(PerkData.Effect.SKILL_COOLDOWN))
+	GameManager.add_coins(roundi(perk_tree.total(PerkData.Effect.START_COINS)))
+
+
+## Depths a chest's weapon rarity is rolled ahead (permanent skill), 0 without it.
+func _chest_luck() -> int:
+	if not GameManager.config.meta_progression:
+		return 0
+	return roundi(perk_tree.total(PerkData.Effect.CHEST_LUCK))
+
+
 ## Ruin shards from elite enemies, the golem and the boss (progress between runs on).
 ## A fixed number per type, so nothing is drawn from the random streams.
 func _drop_shards(enemy: Enemy) -> void:
@@ -661,7 +693,7 @@ func _roll_chest_weapon() -> WeaponData:
 	var base: WeaponData = chest_weapons.pick(_loot_rng)
 	if base == null or not GameManager.config.rarity_enabled:
 		return base
-	var rarity: WeaponRarity = rarity_table.pick(GameManager.depth, _loot_rng)
+	var rarity: WeaponRarity = rarity_table.pick(GameManager.depth + _chest_luck(), _loot_rng)
 	return base.with_rarity(rarity) if rarity != null else base
 
 

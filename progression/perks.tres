@@ -1,0 +1,166 @@
+[gd_resource type="Resource" script_class="PerkTree" load_steps=24 format=3]
+
+[ext_resource type="Script" path="res://progression/perk_tree.gd" id="1"]
+[ext_resource type="Script" path="res://progression/perk_data.gd" id="2"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/perk_icons.png" id="3"]
+
+[sub_resource type="AtlasTexture" id="icon_health"]
+atlas = ExtResource("3")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="icon_armor"]
+atlas = ExtResource("3")
+region = Rect2(96, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="icon_healing"]
+atlas = ExtResource("3")
+region = Rect2(64, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="icon_damage"]
+atlas = ExtResource("3")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="icon_speed"]
+atlas = ExtResource("3")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="icon_skill_cooldown"]
+atlas = ExtResource("3")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="icon_spell_slot"]
+atlas = ExtResource("3")
+region = Rect2(128, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="icon_start_coins"]
+atlas = ExtResource("3")
+region = Rect2(144, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="icon_coin_magnet"]
+atlas = ExtResource("3")
+region = Rect2(80, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="icon_chest_luck"]
+atlas = ExtResource("3")
+region = Rect2(112, 0, 16, 16)
+
+[sub_resource type="Resource" id="health"]
+script = ExtResource("2")
+id = &"health"
+display_name = "Vitality"
+description = "more health"
+icon = SubResource("icon_health")
+effect = 0
+values = PackedFloat32Array(15, 30, 45)
+costs = PackedInt32Array(2, 4, 7)
+tree_position = Vector2i(0, 0)
+
+[sub_resource type="Resource" id="armor"]
+script = ExtResource("2")
+id = &"armor"
+display_name = "Stone skin"
+description = "take less damage"
+icon = SubResource("icon_armor")
+effect = 6
+values = PackedFloat32Array(0.06, 0.12, 0.18)
+costs = PackedInt32Array(3, 5, 8)
+requires = SubResource("health")
+tree_position = Vector2i(0, 1)
+
+[sub_resource type="Resource" id="healing"]
+script = ExtResource("2")
+id = &"healing"
+display_name = "Herbalist"
+description = "health packs heal more"
+icon = SubResource("icon_healing")
+effect = 4
+values = PackedFloat32Array(0.2, 0.4, 0.6)
+costs = PackedInt32Array(3, 5, 8)
+requires = SubResource("armor")
+tree_position = Vector2i(0, 2)
+
+[sub_resource type="Resource" id="damage"]
+script = ExtResource("2")
+id = &"damage"
+display_name = "Sharp edge"
+description = "weapons hit harder"
+icon = SubResource("icon_damage")
+effect = 1
+values = PackedFloat32Array(0.08, 0.16, 0.24)
+costs = PackedInt32Array(2, 4, 7)
+tree_position = Vector2i(1, 0)
+
+[sub_resource type="Resource" id="speed"]
+script = ExtResource("2")
+id = &"speed"
+display_name = "Light feet"
+description = "move faster"
+icon = SubResource("icon_speed")
+effect = 2
+values = PackedFloat32Array(0.05, 0.1, 0.15)
+costs = PackedInt32Array(3, 5, 8)
+requires = SubResource("damage")
+tree_position = Vector2i(1, 1)
+
+[sub_resource type="Resource" id="skill_cooldown"]
+script = ExtResource("2")
+id = &"skill_cooldown"
+display_name = "Focus"
+description = "the basic skill comes back sooner"
+icon = SubResource("icon_skill_cooldown")
+effect = 3
+values = PackedFloat32Array(0.1, 0.2, 0.3)
+costs = PackedInt32Array(3, 5, 8)
+requires = SubResource("speed")
+tree_position = Vector2i(1, 2)
+
+[sub_resource type="Resource" id="spell_slot"]
+script = ExtResource("2")
+id = &"spell_slot"
+display_name = "Third hand"
+description = "a third spell slot"
+icon = SubResource("icon_spell_slot")
+effect = 8
+values = PackedFloat32Array(1)
+costs = PackedInt32Array(12)
+requires = SubResource("skill_cooldown")
+tree_position = Vector2i(1, 3)
+
+[sub_resource type="Resource" id="start_coins"]
+script = ExtResource("2")
+id = &"start_coins"
+display_name = "Purse"
+description = "start every run with coins"
+icon = SubResource("icon_start_coins")
+effect = 9
+values = PackedFloat32Array(10, 20, 35)
+costs = PackedInt32Array(2, 4, 6)
+tree_position = Vector2i(2, 0)
+
+[sub_resource type="Resource" id="coin_magnet"]
+script = ExtResource("2")
+id = &"coin_magnet"
+display_name = "Magnet"
+description = "coins fly to you"
+icon = SubResource("icon_coin_magnet")
+effect = 5
+values = PackedFloat32Array(28, 56)
+costs = PackedInt32Array(3, 6)
+requires = SubResource("start_coins")
+tree_position = Vector2i(2, 1)
+
+[sub_resource type="Resource" id="chest_luck"]
+script = ExtResource("2")
+id = &"chest_luck"
+display_name = "Lucky find"
+description = "rarer weapons in chests"
+icon = SubResource("icon_chest_luck")
+effect = 7
+values = PackedFloat32Array(1, 2)
+costs = PackedInt32Array(4, 8)
+requires = SubResource("coin_magnet")
+tree_position = Vector2i(2, 2)
+
+[resource]
+script = ExtResource("1")
+perks = Array[ExtResource("2")]([SubResource("health"), SubResource("armor"), SubResource("healing"), SubResource("damage"), SubResource("speed"), SubResource("skill_cooldown"), SubResource("spell_slot"), SubResource("start_coins"), SubResource("coin_magnet"), SubResource("chest_luck")])
