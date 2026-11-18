@@ -11,6 +11,9 @@ extends Node
 ##   --sections=N            stop a run after N sections (default 60)
 ##   --speed=N               times faster than real time (default 8)
 ##   --log-dir=NAME          write the logs to user://sim_logs/NAME instead of user://logs
+##   --perks=none|max        the camp's progress of the bot (with the progress between runs
+##                           on): nothing (default) or every skill at its top and every
+##                           spell unlocked
 ##   --calibrate             also measure the time the bot spends in each room and in the
 ##                           tunnels, written to user://calibration/<session>.json
 ## Each section is written to the usual JSONL log.
@@ -22,6 +25,7 @@ const SPEED_ARG: String = "--speed="
 const SEED_ARG: String = "--seed="
 const LOG_DIR_ARG: String = "--log-dir="
 const CALIBRATE_ARG: String = "--calibrate"
+const PERKS_ARG: String = "--perks="
 const SIM_LOGS_ROOT: String = "user://sim_logs"
 const CALIBRATION_DIR: String = "user://calibration"
 const DEFAULT_RUNS: int = 5
@@ -50,8 +54,9 @@ var _game: Game = null
 func _ready() -> void:
 	# Bots start every run from nothing: no unlocks, no permanent skills, no save.
 	Progress.persist = false
-	Progress.unlock_all = false
 	Progress.from_dictionary({})
+	# --perks=max: a fully levelled character (every skill at its top, every spell open).
+	Progress.unlock_all = _string_argument(PERKS_ARG, "none") == "max"
 	_runs = _int_argument(RUNS_ARG, DEFAULT_RUNS)
 	_max_sections = _int_argument(SECTIONS_ARG, DEFAULT_SECTIONS)
 	_first_seed = _int_argument(SEED_ARG, DEFAULT_FIRST_SEED)
