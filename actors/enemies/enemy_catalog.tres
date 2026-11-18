@@ -13,4 +13,6 @@
 script = ExtResource("1")
 hp_growth_per_depth = 0.15
 damage_growth_per_depth = 0.1
+pressure_hp_growth_per_depth = 0.25
+pressure_damage_growth_per_depth = 0.15
 enemies = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("8")])

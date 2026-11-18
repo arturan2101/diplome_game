@@ -30,6 +30,16 @@ extends Resource
 ## A section never gets less than this, except in the rest phase.
 @export var min_budget: int = 4
 
+@export_group("Depth pressure")
+## Full game (ExperimentConfig.depth_pressure, stage 28): every depth is harder than the
+## one before, whatever the player can do. No director may give a section less than
+## (depth_floor_base + depth_floor_step * depth) * m, where m is the rest multiplier in a
+## rest and 1 otherwise; the director adapts above that floor. Enemies also grow faster
+## with depth (EnemyCatalog.pressure_*). Off in the clean series and the playtest.
+@export var depth_pressure: bool = false
+@export var depth_floor_base: float = 9.0
+@export var depth_floor_step: float = 1.5
+
 @export_group("Tension wave")
 ## Budget multipliers of the phases: two build-up sections, a peak, a rest.
 @export var build_multipliers: Array[float] = [0.8, 1.0]

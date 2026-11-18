@@ -95,7 +95,8 @@ func make_director() -> Director:
 ## copy, the shared settings resource stays as is.
 func _apply_config(director: Director) -> void:
 	if config.boss_enabled and config.spells_enabled and config.spike_traps and config.combat_rooms \
-			and config.elite_enemies and config.secret_rooms and not config.merchant_glade and not config.soft_waves:
+			and config.elite_enemies and config.secret_rooms and not config.merchant_glade and not config.soft_waves \
+			and not config.depth_pressure:
 		return
 	director.settings = director.settings.duplicate() as DirectorSettings
 	if not config.boss_enabled:
@@ -113,6 +114,8 @@ func _apply_config(director: Director) -> void:
 		director.settings.elites_enabled = false
 	if not config.secret_rooms:
 		director.settings.secret_room = null
+	if config.depth_pressure:
+		director.settings.depth_pressure = true
 	if config.soft_waves:
 		director.settings.peak_multiplier = director.settings.soft_peak_multiplier
 		director.settings.rest_multiplier = director.settings.soft_rest_multiplier

@@ -24,6 +24,7 @@ func choose_next(state: PlayerState) -> SectionPlan:
 	plan.budget = budget_for(state, plan.phase)
 	if is_calm_start(state):
 		plan.budget = mini(plan.budget, calm_start_budget_cap(state))
+	apply_depth_floor(plan, state)
 	var problem: StringName = _problem_source(state)
 	# A weak player hurt by hazards gets no spike traps (see _help_with_problem).
 	var enemy_budget: int = plan.budget

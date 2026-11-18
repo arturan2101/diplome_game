@@ -269,7 +269,8 @@ func _weapon_in_hand() -> WeaponData:
 func _depth_multiplier(depth: int) -> float:
 	if _catalog == null:
 		_catalog = load(Director.CATALOG_PATH) as EnemyCatalog
-	return _catalog.hp_multiplier(depth) * _catalog.damage_multiplier(depth)
+	var pressure: bool = GameManager.config.depth_pressure
+	return _catalog.hp_multiplier(depth, pressure) * _catalog.damage_multiplier(depth, pressure)
 
 
 ## Writes one survey to the log, as a line of type "survey" next to the section lines.

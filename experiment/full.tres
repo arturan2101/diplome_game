@@ -10,6 +10,7 @@ spells_enabled = true
 combat_rooms = true
 elite_enemies = true
 merchant_glade = true
+depth_pressure = true
 spell_fusion = true
 secret_rooms = true
 spike_traps = true

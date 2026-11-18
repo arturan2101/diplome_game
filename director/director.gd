@@ -72,6 +72,20 @@ func calm_start_budget_cap(state: PlayerState) -> int:
 	return settings.calm_start_max_budget + roundi(settings.budget_depth_factor * state.depth)
 
 
+## The least a section of this phase may get at this depth with the depth pressure on
+## (DirectorSettings.depth_pressure); 0 when it is off.
+func depth_floor(depth: int, phase: StringName) -> int:
+	if not settings.depth_pressure:
+		return 0
+	var multiplier: float = settings.rest_multiplier if phase == SectionPlan.PHASE_REST else 1.0
+	return roundi((settings.depth_floor_base + settings.depth_floor_step * depth) * multiplier)
+
+
+## Raises the plan's budget to the depth floor (call before the budget is spent).
+func apply_depth_floor(plan: SectionPlan, state: PlayerState) -> void:
+	plan.budget = maxi(plan.budget, depth_floor(state.depth, plan.phase))
+
+
 ## Contents and layout the adaptive directors (rules and learned) fill the same way,
 ## after the phase, the budget and the enemies: coins, health packs (one more for a hurt
 ## player), cover, corridors; then the phase's layout: a rest section is short and wide

@@ -5,6 +5,10 @@ extends TestCase
 ## builds a passable section.
 
 const SEEDS: int = 200
+## Depths checked by the depth pressure test, and the first section index it uses (past
+## the calm start).
+const DEPTHS: int = 8
+const PRESSURE_SECTION: int = 5
 
 
 func run() -> void:
@@ -18,6 +22,7 @@ func run() -> void:
 	_test_learned_and_factory()
 	_test_chests_and_arena()
 	_test_plans_build_sections()
+	_test_depth_pressure()
 
 
 func _test_buy_enemies() -> void:
@@ -252,6 +257,51 @@ func _test_plans_build_sections() -> void:
 			if not SectionBuilder.is_passable(builder.build(plan, rng)):
 				impassable += 1
 	check(impassable == 0, "every plan of every director builds a passable section (%d fail)" % impassable)
+
+
+## Depth pressure (full game): no director gives less than the depth floor, and the
+## mean danger of a section (budget times how much stronger enemies are at that depth)
+## grows with every depth, also for a weak player; enemies grow faster.
+func _test_depth_pressure() -> void:
+	var settings: DirectorSettings = (load("res://director/director_settings.tres") as DirectorSettings).duplicate() as DirectorSettings
+	settings.depth_pressure = true
+	var directors: Dictionary = {"rules": RuleDirector.new(null, settings), "random": RandomDirector.new(null, settings),
+			"learned": LearnedDirector.new(null, settings)}
+	var histories: Array = [[], [SectionPlan.PHASE_BUILD], [SectionPlan.PHASE_BUILD, SectionPlan.PHASE_BUILD],
+			[SectionPlan.PHASE_PEAK], [SectionPlan.PHASE_REST]]
+	var catalog: EnemyCatalog = load(Director.CATALOG_PATH) as EnemyCatalog
+	for mode: String in directors:
+		var director: Director = directors[mode]
+		var floor_kept: bool = true
+		var means: Array[float] = []
+		var weak_means: Array[float] = []
+		for depth in DEPTHS:
+			var total: float = 0.0
+			var weak_total: float = 0.0
+			var strength: float = catalog.hp_multiplier(depth, true) * catalog.damage_multiplier(depth, true)
+			for i in SEEDS:
+				var history: Array = histories[i % histories.size()]
+				var state: PlayerState = _state(PRESSURE_SECTION + depth * 4, history, [], depth * 1000 + i)
+				state.depth = depth
+				state.skill = 0.1 + 0.85 * float(i % 10) / 9.0
+				var plan: SectionPlan = director.choose_next(state)
+				if plan.budget < director.depth_floor(depth, plan.phase):
+					floor_kept = false
+				total += plan.budget * strength
+				if state.skill < 0.3:
+					weak_total += plan.budget * strength
+			means.append(total / SEEDS)
+			weak_means.append(weak_total)
+		var growing: bool = true
+		for depth in range(1, DEPTHS):
+			if means[depth] <= means[depth - 1] or weak_means[depth] <= weak_means[depth - 1]:
+				growing = false
+		check(floor_kept and growing, "%s: with the depth pressure no section gets less than the floor and every depth is more dangerous (%s)"
+				% [mode, ", ".join(means.map(func(m: float) -> String: return "%.1f" % m))])
+	var plain: RuleDirector = RuleDirector.new()
+	check(plain.depth_floor(6, SectionPlan.PHASE_BUILD) == 0, "without the depth pressure there is no floor")
+	check(is_equal_approx(catalog.hp_multiplier(0, true), catalog.hp_multiplier(0)) and catalog.hp_multiplier(3, true) > catalog.hp_multiplier(3)
+			and catalog.damage_multiplier(3, true) > catalog.damage_multiplier(3), "with the depth pressure enemies grow faster with depth")
 
 
 func _state(section_index: int, phases: Array, results: Array, rng_seed: int = 1) -> PlayerState:

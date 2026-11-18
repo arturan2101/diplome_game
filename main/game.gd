@@ -546,8 +546,8 @@ func _create_enemy(enemy_data: EnemyData, cell: Vector2i) -> Enemy:
 	var enemy: Enemy = scene.instantiate() as Enemy
 	enemy.data = enemy_data
 	# Deeper ruins, tougher enemies.
-	enemy.hp_multiplier = _director.catalog.hp_multiplier(GameManager.depth)
-	enemy.damage_multiplier = _director.catalog.damage_multiplier(GameManager.depth)
+	enemy.hp_multiplier = _director.catalog.hp_multiplier(GameManager.depth, _director.settings.depth_pressure)
+	enemy.damage_multiplier = _director.catalog.damage_multiplier(GameManager.depth, _director.settings.depth_pressure)
 	enemy.position = level.to_local(level.cell_center(cell))
 	enemy.set_meta(SPAWN_CELL_META, cell)
 	enemy.defeated.connect(_on_enemy_defeated)
