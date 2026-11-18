@@ -6,7 +6,7 @@
 
 [sub_resource type="Resource" id="touch"]
 script = ExtResource("1")
-damage = 9
+damage = 13
 reach = 22.0
 arc_degrees = 140.0
 recovery = 0.0
