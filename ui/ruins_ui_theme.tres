@@ -1,0 +1,78 @@
+[gd_resource type="Theme" load_steps=9 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/ui/button.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/panel.png" id="2"]
+
+[sub_resource type="AtlasTexture" id="button_up"]
+atlas = ExtResource("1")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="button_down"]
+atlas = ExtResource("1")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="StyleBoxTexture" id="normal"]
+texture = SubResource("button_up")
+texture_margin_left = 4.0
+texture_margin_top = 4.0
+texture_margin_right = 4.0
+texture_margin_bottom = 4.0
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxTexture" id="hover"]
+texture = SubResource("button_up")
+texture_margin_left = 4.0
+texture_margin_top = 4.0
+texture_margin_right = 4.0
+texture_margin_bottom = 4.0
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+modulate_color = Color(1.2, 1.2, 1.25, 1)
+
+[sub_resource type="StyleBoxTexture" id="pressed"]
+texture = SubResource("button_down")
+texture_margin_left = 4.0
+texture_margin_top = 4.0
+texture_margin_right = 4.0
+texture_margin_bottom = 4.0
+content_margin_left = 8.0
+content_margin_top = 5.0
+content_margin_right = 8.0
+content_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="disabled"]
+texture = SubResource("button_up")
+texture_margin_left = 4.0
+texture_margin_top = 4.0
+texture_margin_right = 4.0
+texture_margin_bottom = 4.0
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+modulate_color = Color(0.55, 0.55, 0.6, 1)
+
+[sub_resource type="StyleBoxTexture" id="panel"]
+texture = ExtResource("2")
+texture_margin_left = 4.0
+texture_margin_top = 4.0
+texture_margin_right = 4.0
+texture_margin_bottom = 4.0
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+
+[resource]
+Button/styles/normal = SubResource("normal")
+Button/styles/hover = SubResource("hover")
+Button/styles/pressed = SubResource("pressed")
+Button/styles/disabled = SubResource("disabled")
+Button/styles/focus = SubResource("hover")
+PanelContainer/styles/panel = SubResource("panel")
+Panel/styles/panel = SubResource("panel")

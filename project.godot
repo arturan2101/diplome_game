@@ -23,6 +23,10 @@ GameManager="*uid://bot42q4nhdt28"
 Telemetry="*res://autoload/telemetry.gd"
 Playtest="*res://autoload/playtest.gd"
 
+[gui]
+
+theme/custom="res://ui/ruins_ui_theme.tres"
+
 [display]
 
 window/size/viewport_width=640

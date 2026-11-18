@@ -15,6 +15,10 @@ extends Control
 @export var rest_position: Vector2 = Vector2(96.0, 256.0)
 @export var base_color: Color = Color(1.0, 1.0, 1.0, 0.2)
 @export var knob_color: Color = Color(1.0, 1.0, 1.0, 0.5)
+## Pictures of the base (stretched to the radius) and the knob; null = plain circles.
+## base_color and knob_color tint them (their alpha keeps the joystick see-through).
+@export var base_texture: Texture2D = preload("res://assets/art/ui/joystick.png")
+@export var knob_texture: Texture2D = preload("res://assets/art/ui/joystick_knob.png")
 
 ## Index of the finger that controls the joystick, -1 when not touched.
 ## Following one finger lets other fingers press buttons at the same time.
@@ -46,8 +50,17 @@ func _notification(what: int) -> void:
 
 
 func _draw() -> void:
-	draw_circle(_base_center, radius, base_color)
-	draw_circle(_base_center + _knob_offset, knob_radius, knob_color)
+	if base_texture != null:
+		draw_texture_rect(base_texture, Rect2(_base_center - Vector2(radius, radius), Vector2(radius, radius) * 2.0), false,
+				Color(1.0, 1.0, 1.0, base_color.a * 2.5))
+	else:
+		draw_circle(_base_center, radius, base_color)
+	var knob: Vector2 = _base_center + _knob_offset
+	if knob_texture != null:
+		draw_texture_rect(knob_texture, Rect2(knob - Vector2(knob_radius, knob_radius), Vector2(knob_radius, knob_radius) * 2.0), false,
+				Color(1.0, 1.0, 1.0, knob_color.a * 1.6))
+	else:
+		draw_circle(knob, knob_radius, knob_color)
 
 
 func _on_touch(event: InputEventScreenTouch) -> void:
