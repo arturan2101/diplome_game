@@ -14,6 +14,7 @@ icon = ExtResource("2")
 color = Color(0.8, 1, 0.85, 1)
 cooldown = PackedFloat32Array(10, 9, 8)
 spell_scene = ExtResource("3")
+unlock_cost = 6
 damage = PackedInt32Array(4, 5, 6)
 radius = PackedFloat32Array(32, 38, 44)
 duration = PackedFloat32Array(2, 2.5, 3)

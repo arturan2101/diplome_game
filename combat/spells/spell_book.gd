@@ -1,6 +1,6 @@
 class_name SpellBook
 extends Node2D
-## The player's spells: SLOT_COUNT slots, each holding a Spell node (a child of this
+## The player's spells: slot_count slots (2, a third with a permanent skill), each holding a Spell node (a child of this
 ## node). Learning a spell the player already has raises its level, up to
 ## SpellData.MAX_LEVEL; a new spell goes into a free slot; with both slots full the
 ## caller has to choose a slot for replace(). Two spells at the top level can merge by a
@@ -19,11 +19,16 @@ signal spell_damage_dealt(spell_id: StringName, amount: int)
 
 enum LearnResult { LEARNED, LEVELED_UP, MAX_LEVEL, SLOTS_FULL }
 
+## Slots at the start of a run; a permanent skill of the camp adds one (up to MAX_SLOTS).
 const SLOT_COUNT: int = 2
+const MAX_SLOTS: int = 3
 ## Input actions of the slots, in slot order.
-const SLOT_ACTIONS: Array[StringName] = [&"spell_1", &"spell_2"]
+const SLOT_ACTIONS: Array[StringName] = [&"spell_1", &"spell_2", &"spell_3"]
 
 var caster: Player = null
+
+## Number of slots now (SLOT_COUNT, or more with the camp's skill).
+var slot_count: int = SLOT_COUNT
 
 ## One entry per slot; null = empty slot.
 var _slots: Array[Spell] = []
@@ -37,9 +42,19 @@ func setup(spell_caster: Player) -> void:
 	caster = spell_caster
 
 
+## More slots (a permanent skill of the camp): new ones are empty. Never fewer.
+func set_slot_count(count: int) -> void:
+	count = clampi(count, slot_count, MAX_SLOTS)
+	if count == slot_count:
+		return
+	slot_count = count
+	_slots.resize(slot_count)
+	spells_changed.emit()
+
+
 ## The spell in this slot, or null.
 func get_spell(slot: int) -> Spell:
-	if slot < 0 or slot >= SLOT_COUNT:
+	if slot < 0 or slot >= slot_count:
 		return null
 	return _slots[slot]
 
@@ -78,7 +93,7 @@ func learn(spell_data: SpellData) -> LearnResult:
 
 ## Puts a new spell (level 1) into a slot, forgetting the spell that was there.
 func replace(slot: int, spell_data: SpellData) -> void:
-	if slot >= 0 and slot < SLOT_COUNT:
+	if slot >= 0 and slot < slot_count:
 		_put(slot, spell_data)
 
 

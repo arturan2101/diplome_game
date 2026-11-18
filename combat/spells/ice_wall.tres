@@ -18,6 +18,7 @@ color = Color(0.6, 0.85, 1, 1)
 cooldown = PackedFloat32Array(10, 9, 8)
 auto_aim_radius = 96.0
 spell_scene = ExtResource("3")
+unlock_cost = 6
 blocks = PackedInt32Array(3, 4, 5)
 duration = PackedFloat32Array(4, 5, 6)
 distance = 32.0

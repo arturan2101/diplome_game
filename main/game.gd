@@ -105,6 +105,9 @@ var _pending_waves: Array[Array] = []
 var _is_arena_sealed: bool = false
 var _is_arena_cleared: bool = false
 var _stray_check_left: float = 0.0
+## Spells that can turn up in this run: the whole pool, or with the progress between
+## runs only the unlocked ones (stage 36).
+var _run_spells: SpellPool = null
 ## Generator for what chests hold in the current section.
 var _loot_rng: RandomNumberGenerator = null
 ## Scroll whose spell waits for the player to choose a slot.
@@ -133,6 +136,7 @@ func _ready() -> void:
 		rarity_table = DEFAULT_RARITY_TABLE
 	if spell_pool == null:
 		spell_pool = DEFAULT_SPELL_POOL
+	_run_spells = spell_pool.unlocked() if GameManager.config.meta_progression else spell_pool
 	if spell_choice == null:
 		spell_choice = SPELL_CHOICE_SCENE.instantiate() as SpellChoice
 		add_child(spell_choice)
@@ -389,7 +393,7 @@ func _spawn_item(entry: Dictionary, shop_rng: RandomNumberGenerator = null) -> v
 		chest.loot_weapon = _roll_chest_weapon()
 		chest.loot_coins = _loot_rng.randi_range(chest_coins_min, chest_coins_max)
 		if GameManager.config.spells_enabled and _loot_rng.randf() < _chest_spell_chance(entry):
-			chest.loot_spell = spell_pool.pick(_loot_rng)
+			chest.loot_spell = _run_spells.pick(_loot_rng)
 		chest.opened.connect(_on_chest_opened)
 	var shrine: Shrine = item as Shrine
 	if shrine != null:
@@ -400,7 +404,7 @@ func _spawn_item(entry: Dictionary, shop_rng: RandomNumberGenerator = null) -> v
 		var stock_rng: RandomNumberGenerator = shop_rng if shop_rng != null else GameManager.make_shop_rng(GameManager.section_index)
 		merchant.offers = ShopStock.make_offers(shop_data, GameManager.depth, stock_rng,
 				chest_weapons, rarity_table if GameManager.config.rarity_enabled else null,
-				spell_pool if GameManager.config.spells_enabled else null, player.spell_book, merchant.wandering,
+				_run_spells if GameManager.config.spells_enabled else null, player.spell_book, merchant.wandering,
 				get_shop_fusions())
 		merchant.shop_requested.connect(_on_shop_requested)
 	_contents.add_child(item)
@@ -593,6 +597,7 @@ func _apply_perks() -> void:
 	player.coin_magnet_radius = perk_tree.total(PerkData.Effect.COIN_MAGNET)
 	player.skill_cooldown_multiplier = maxf(0.0, 1.0 - perk_tree.total(PerkData.Effect.SKILL_COOLDOWN))
 	GameManager.add_coins(roundi(perk_tree.total(PerkData.Effect.START_COINS)))
+	player.spell_book.set_slot_count(SpellBook.SLOT_COUNT + roundi(perk_tree.total(PerkData.Effect.SPELL_SLOT)))
 
 
 ## Depths a chest's weapon rarity is rolled ahead (permanent skill), 0 without it.
@@ -650,7 +655,7 @@ func _on_boss_defeated() -> void:
 	hud.show_banner("The Guardian has fallen")
 	# With the glade, spells are bought from its merchant instead.
 	if _bot == null and GameManager.config.spells_enabled and not GameManager.config.merchant_glade:
-		spell_choice.open_offers.call_deferred(spell_pool.offer(shrine_offer_count, _loot_rng), player.spell_book)
+		spell_choice.open_offers.call_deferred(_run_spells.offer(shrine_offer_count, _loot_rng), player.spell_book)
 
 
 ## The player used a shrine: choose one of a few random spells. Bots do not use
@@ -658,7 +663,7 @@ func _on_boss_defeated() -> void:
 func _on_shrine_activated(_shrine: Shrine) -> void:
 	if _bot != null:
 		return
-	spell_choice.open_offers(spell_pool.offer(shrine_offer_count, _loot_rng), player.spell_book)
+	spell_choice.open_offers(_run_spells.offer(shrine_offer_count, _loot_rng), player.spell_book)
 
 
 ## A scroll was taken with both spell slots full: ask which spell to forget.

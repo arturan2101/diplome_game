@@ -28,6 +28,10 @@ extends CanvasLayer
 @export var spell_button_icons: Array[Sprite2D] = []
 ## Alpha of a spell button's icon while the spell cools down.
 @export var cooling_spell_alpha: float = 0.35
+## Where extra spell slots go (a permanent skill): the icon next to the last one, the
+## touch button here.
+@export var extra_spell_icon_step: Vector2 = Vector2(28.0, 0.0)
+@export var extra_spell_button_positions: Array[Vector2] = [Vector2(444.0, 200.0)]
 ## Gold marks of the spell level under each spell icon: a strip with one mark picture
 ## per level (art). Without it the level is written as a number.
 @export var level_pips: Texture2D = preload("res://assets/art/fx/level_pips.png")
@@ -209,7 +213,8 @@ func _make_rarity_bars() -> void:
 
 ## Icons, levels and buttons of the spell slots; empty slots are hidden.
 func _refresh_spells() -> void:
-	for slot in SpellBook.SLOT_COUNT:
+	_ensure_spell_slots()
+	for slot in _slot_count():
 		var spell: Spell = _spell_in(slot)
 		if slot < spell_icons.size():
 			spell_icons[slot].texture = spell.data.icon if spell != null else null
@@ -228,7 +233,7 @@ func _refresh_spells() -> void:
 
 
 func _update_spell_cooldowns() -> void:
-	for slot in SpellBook.SLOT_COUNT:
+	for slot in _slot_count():
 		var spell: Spell = _spell_in(slot)
 		if spell == null:
 			continue
@@ -236,6 +241,42 @@ func _update_spell_cooldowns() -> void:
 			spell_cooldowns[slot].anchor_top = 1.0 - spell.get_cooldown_fraction()
 		if slot < spell_button_icons.size():
 			spell_button_icons[slot].modulate.a = 1.0 if spell.is_ready() else cooling_spell_alpha
+
+
+func _slot_count() -> int:
+	if not is_instance_valid(_player) or _player.spell_book == null:
+		return SpellBook.SLOT_COUNT
+	return _player.spell_book.slot_count
+
+
+## Extra spell slots (the camp's skill) get their own icon and touch button: copies of
+## the last ones, moved aside.
+func _ensure_spell_slots() -> void:
+	while spell_icons.size() < _slot_count() and not spell_icons.is_empty() and not spell_buttons.is_empty():
+		var index: int = spell_icons.size()
+		var last_icon: TextureRect = spell_icons[spell_icons.size() - 1]
+		var icon: TextureRect = last_icon.duplicate() as TextureRect
+		icon.name = "Spell%d" % (index + 1)
+		icon.position = last_icon.position + extra_spell_icon_step
+		last_icon.get_parent().add_child(icon)
+		spell_icons.append(icon)
+		spell_cooldowns.append(icon.get_node("Cooldown") as Control)
+		spell_levels.append(icon.get_node("Level") as Label)
+		var pips: TextureRect = icon.get_node_or_null("LevelPips") as TextureRect
+		if pips != null and pips.texture != null:
+			# Its own strip region, not the copied slot's.
+			pips.texture = pips.texture.duplicate() as Texture2D
+			_spell_pips.append(pips)
+		var last_button: TouchScreenButton = spell_buttons[spell_buttons.size() - 1]
+		var button: TouchScreenButton = last_button.duplicate() as TouchScreenButton
+		button.name = "Spell%dButton" % (index + 1)
+		button.action = SpellBook.SLOT_ACTIONS[mini(index, SpellBook.SLOT_ACTIONS.size() - 1)]
+		var extra: int = index - SpellBook.SLOT_COUNT
+		if extra >= 0 and extra < extra_spell_button_positions.size():
+			button.position = extra_spell_button_positions[extra]
+		last_button.get_parent().add_child(button)
+		spell_buttons.append(button)
+		spell_button_icons.append(button.get_node("Icon") as Sprite2D)
 
 
 func _spell_in(slot: int) -> Spell:

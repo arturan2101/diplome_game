@@ -16,6 +16,7 @@ color = Color(1, 0.55, 0.15, 1)
 cooldown = PackedFloat32Array(6, 5, 4)
 auto_aim_radius = 160.0
 spell_scene = ExtResource("3")
+unlocked_from_start = true
 damage = PackedInt32Array(20, 28, 36)
 radius = PackedFloat32Array(24, 30, 36)
 speed = 220.0

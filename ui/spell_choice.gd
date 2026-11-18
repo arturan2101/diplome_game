@@ -84,7 +84,7 @@ func _show_offers() -> void:
 func _show_replace() -> void:
 	title.text = "Spell slots are full. Forget which spell for %s?" % _pending.display_name
 	_clear_choices()
-	for slot in SpellBook.SLOT_COUNT:
+	for slot in _book.slot_count:
 		var spell: Spell = _book.get_spell(slot)
 		if spell == null:
 			continue

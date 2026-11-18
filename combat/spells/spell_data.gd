@@ -23,6 +23,10 @@ const MAX_LEVEL: int = 3
 @export var auto_aim_radius: float = 0.0
 ## Scene with the spell behaviour (root node is a Spell), created when it is learned.
 @export var spell_scene: PackedScene
+## With the progress between runs (stage 36): open from the first run, or unlocked on
+## the camp's shelf for this many ruin shards. Only unlocked spells turn up in a run.
+@export var unlocked_from_start: bool = false
+@export var unlock_cost: int = 6
 @export_group("Look by level")
 ## Art of the effect, one look per level (index 0 = level 1): animations in frames
 ## (the flying fireball, the ring of wind) or one picture per level (an ice block).

@@ -1,6 +1,7 @@
 extends Node
-## Manual preview of the camp and its skill altar (stages 34-35): saves camp.png and
-## skill_tree.png (a few skills bought, the next ones open, the rest locked), then quits.
+## Manual preview of the camp, its skill altar and spell shelf (stages 34-36): saves
+## camp.png, skill_tree.png (a few skills bought, the next ones open, the rest locked)
+## and spell_shelf.png, then quits.
 ## The real save is not touched. Not part of the test suite.
 ## Usage: godot --path . res://tests/manual/skill_tree_preview.tscn -- <folder>
 
@@ -28,6 +29,9 @@ func _ready() -> void:
 	camp.skill_screen.select(camp.perk_tree.get_by_id(&"armor"))
 	await _save("skill_tree.png")
 	camp.skill_screen.close()
+	camp.shelf_screen.open(camp.spell_pool)
+	await _save("spell_shelf.png")
+	camp.shelf_screen.close()
 	get_tree().quit()
 
 

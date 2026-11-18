@@ -15,6 +15,16 @@ func offer(count: int, rng: RandomNumberGenerator) -> Array[SpellData]:
 	return picked
 
 
+## The spells open for a run with the progress between runs: from the start or
+## unlocked in the camp (Progress).
+func unlocked() -> SpellPool:
+	var open: SpellPool = SpellPool.new()
+	for spell_data: SpellData in spells:
+		if spell_data.unlocked_from_start or Progress.is_spell_unlocked(spell_data.id):
+			open.spells.append(spell_data)
+	return open
+
+
 ## One random spell, or null if the pool is empty.
 func pick(rng: RandomNumberGenerator) -> SpellData:
 	if spells.is_empty():

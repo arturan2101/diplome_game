@@ -330,7 +330,7 @@ func _handle_attack_input() -> void:
 func _handle_spell_input() -> void:
 	if spell_book == null or (skill != null and skill.blocks_attacks()):
 		return
-	for slot in SpellBook.SLOT_COUNT:
+	for slot in spell_book.slot_count:
 		if Input.is_action_just_pressed(SpellBook.SLOT_ACTIONS[slot]):
 			spell_book.cast(slot)
 
