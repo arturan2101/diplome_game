@@ -66,6 +66,10 @@ var _seen_windups: Dictionary = {}
 ## Enemy instance id -> seconds since its windup was first seen.
 var _windup_seen_time: Dictionary = {}
 var _dodge_time_left: float = 0.0
+## Dodging out of an area attack: its enemy, and the distance where the bot is out of the
+## circle and waits (instead of walking on, maybe into a pit).
+var _dodge_from: Enemy = null
+var _dodge_clear_distance: float = 0.0
 var _dodge_direction: Vector2 = Vector2.ZERO
 var _block_time_left: float = 0.0
 var _skill_pressed_last_frame: bool = false
@@ -159,6 +163,8 @@ func _update_target(player: Player, delta: float) -> void:
 func _movement_direction(player: Player, enemy: Enemy, delta: float, stand_still: bool) -> Vector2:
 	if _dodge_time_left > 0.0:
 		_dodge_time_left -= delta
+		if is_instance_valid(_dodge_from) and player.global_position.distance_to(_dodge_from.global_position) >= _dodge_clear_distance:
+			return Vector2.ZERO
 		return _dodge_direction
 	if _hesitation_left > 0.0:
 		_hesitation_left -= delta
@@ -281,6 +287,12 @@ func _dodge(player: Player, enemy: Enemy) -> void:
 	var reach: float = player.move_speed * duration + DODGE_SAFETY_MARGIN
 	if uses_skill and player.skill is DashSkill:
 		reach += (player.skill.data as DashSkillData).distance
+	_dodge_from = null
+	if is_area:
+		# Only the way out of the circle must be safe: past its edge the bot waits.
+		_dodge_from = enemy
+		_dodge_clear_distance = enemy.get_windup_reach() + DODGE_SAFETY_MARGIN
+		reach = maxf(_dodge_clear_distance - player.global_position.distance_to(enemy.global_position), 0.0) + DODGE_SAFETY_MARGIN
 	_dodge_direction = Vector2.ZERO
 	for direction: Vector2 in wanted:
 		if _is_safe_line(player.global_position, direction, reach):
