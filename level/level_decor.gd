@@ -1,41 +1,64 @@
 class_name LevelDecor
 extends Node2D
-## Visual only, no collision: small things on the floor (bones, rubble, grass in the
-## cracks) and torches on the brick fronts of walls, with an animated flame and no
-## light. Placed from the cell coordinates, so the same grid always looks the same.
-## Sits under a Level and rebuilds itself when the Level gets a new grid.
+## Visual only, no collision: small things on the floor (pebbles, cracks, a puddle,
+## moss, old bones...), torches with a warm glow, half-columns and statues against the
+## brick fronts of walls, and rubble on doors that were walled up while the level runs
+## (an arena or a combat room sealing). Places are picked from the cell coordinates
+## (hash), never from the game's random streams, so the same grid always looks the same
+## and the decor changes nothing in the sections. Sits under a Level (main.tscn) and
+## rebuilds itself when the Level gets a new grid.
 
-## Share of plain floor cells with a decor piece, and of brick wall fronts with a torch.
+## Share of plain floor cells with a decal, and of brick wall fronts with a torch, a
+## half-column or a statue.
 @export_range(0.0, 1.0) var floor_decor_chance: float = 0.06
 @export_range(0.0, 1.0) var torch_chance: float = 0.08
-## Flame frames per second.
+@export_range(0.0, 1.0) var pillar_chance: float = 0.05
+@export_range(0.0, 1.0) var statue_chance: float = 0.025
+## Floor decals: a strip of 16x16 pieces (pebbles, rubble, cracks, puddle, moss, bones,
+## broken slab), plus single pictures.
+@export var floor_decals: Texture2D = preload("res://assets/art/tiles/floor_decals.png")
+@export var extra_decals: Array[Texture2D] = [preload("res://assets/art/level/bones.png")]
+## Torch: a strip of flame frames, its frames per second, and its glow.
+@export var torch: Texture2D = preload("res://assets/art/level/torch.png")
+@export var torch_frames: int = 4
 @export var flame_fps: float = 8.0
+@export var torch_light: Texture2D = preload("res://assets/art/fx/light_torch.png")
+@export var torch_light_color: Color = Color(1.0, 0.62, 0.3, 0.22)
+## How much the glow breathes (share of its size).
+@export var torch_light_flicker: float = 0.06
+## Against the wall fronts; their bottom stands on the bottom of the wall cell.
+@export var pillar: Texture2D = preload("res://assets/art/level/pillar.png")
+@export var statue: Texture2D = preload("res://assets/art/level/statue.png")
+## Rubble drawn on door cells that turned into walls (sealed doors).
+@export var door_seal: Texture2D = preload("res://assets/art/tiles/door_seal.png")
 
-const BONE: Color = Color("#d8d4c4")
-const BONE_SHADOW: Color = Color("#9aa2ad")
-const RUBBLE: Color = Color("#5d6072")
-const RUBBLE_SHADOW: Color = Color("#2a2935")
-const GRASS: Color = Color("#3b5a45")
-const GRASS_DARK: Color = Color("#263a32")
-const WOOD: Color = Color("#7a4a2c")
-const FLAME: Array[Color] = [Color("#a82a30"), Color("#e85a3a"), Color("#e09a20"), Color("#ffd860")]
-## Pixel pictures: (dx, dy, color index) with 0 light, 1 dark.
-const PIECES: Array = [
-	[[5, 9, 0], [6, 9, 0], [7, 9, 0], [8, 9, 0], [4, 8, 0], [9, 10, 0], [5, 10, 1], [8, 10, 1]],
-	[[6, 7, 0], [7, 7, 0], [6, 8, 0], [7, 8, 1], [10, 11, 0], [11, 11, 1], [3, 12, 0]],
-	[[7, 10, 0], [6, 9, 0], [9, 9, 0], [8, 8, 0], [7, 11, 1], [9, 11, 1]],
-]
+enum WallPiece { TORCH, PILLAR, STATUE }
 
 var _level: Level = null
 var _grid: LevelGrid = null
-## {cell: piece index} with the kind in the high bits: 0 bones, 1 rubble, 2 grass.
+## {cell: decal index}.
 var _floor: Dictionary = {}
+## {cell: WallPiece}.
+var _wall: Dictionary = {}
 var _torches: Array[Vector2i] = []
+## Door cells walled up while the level runs: {cell: true}.
+var _sealed: Dictionary = {}
 var _time: float = 0.0
+## The glow is drawn by its own node with additive blending.
+var _lights: Node2D = null
 
 
 func _ready() -> void:
 	_level = get_parent() as Level
+	_lights = Node2D.new()
+	_lights.name = "Lights"
+	var glow: CanvasItemMaterial = CanvasItemMaterial.new()
+	glow.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	_lights.material = glow
+	_lights.draw.connect(_draw_lights)
+	add_child(_lights)
+	if _level != null:
+		_level.cells_changed.connect(_on_cells_changed)
 	_place_above_tiles.call_deferred()
 
 
@@ -56,51 +79,101 @@ func _process(delta: float) -> void:
 	_time += delta
 	if not _torches.is_empty():
 		queue_redraw()
+		_lights.queue_redraw()
 
 
 func _rebuild() -> void:
 	_floor.clear()
+	_wall.clear()
 	_torches.clear()
+	_sealed.clear()
 	if _grid != null:
+		var decal_count: int = _decal_count()
 		for y in _grid.height:
 			for x in _grid.width:
 				var cell: Vector2i = Vector2i(x, y)
 				var roll: float = float(absi(hash([cell, "decor"])) % 1000) / 1000.0
 				var kind: int = absi(hash([cell, "kind"]))
-				if _grid.get_cell(cell) == LevelGrid.Cell.FLOOR and roll < floor_decor_chance:
-					_floor[cell] = kind
-				elif _grid.get_cell(cell) == LevelGrid.Cell.WALL and _grid.is_floor(cell + Vector2i.DOWN) \
-						and roll < torch_chance:
-					_torches.append(cell)
+				if _grid.get_cell(cell) == LevelGrid.Cell.FLOOR and roll < floor_decor_chance and decal_count > 0:
+					_floor[cell] = kind % decal_count
+				elif _is_wall_front(cell):
+					if roll < torch_chance:
+						_wall[cell] = WallPiece.TORCH
+						_torches.append(cell)
+					elif roll < torch_chance + pillar_chance:
+						_wall[cell] = WallPiece.PILLAR
+					elif roll < torch_chance + pillar_chance + statue_chance:
+						_wall[cell] = WallPiece.STATUE
+	queue_redraw()
+	_lights.queue_redraw()
+
+
+## A wall cell showing its brick front: plain floor right below it.
+func _is_wall_front(cell: Vector2i) -> bool:
+	return _grid.get_cell(cell) == LevelGrid.Cell.WALL and _grid.is_floor(cell + Vector2i.DOWN)
+
+
+func _decal_count() -> int:
+	var strip: int = floor_decals.get_width() / _tile() if floor_decals != null else 0
+	return strip + extra_decals.size()
+
+
+func _tile() -> int:
+	return _level.theme.tile_size if _level != null and _level.theme != null else 16
+
+
+func _on_cells_changed(cells: Array[Vector2i], type: LevelGrid.Cell) -> void:
+	for cell: Vector2i in cells:
+		if type == LevelGrid.Cell.WALL:
+			_sealed[cell] = true
+		else:
+			_sealed.erase(cell)
 	queue_redraw()
 
 
 func _draw() -> void:
 	if _level == null or _grid == null:
 		return
-	var size: float = float(_level.theme.tile_size)
+	var size: float = float(_tile())
+	var strip: int = floor_decals.get_width() / _tile() if floor_decals != null else 0
 	for cell: Vector2i in _floor:
-		var kind: int = int(_floor[cell])
-		var origin: Vector2 = Vector2(cell) * size
-		match kind % 3:
-			0:
-				_draw_piece(origin, PIECES[kind % PIECES.size()], BONE, BONE_SHADOW)
-			1:
-				_draw_piece(origin, PIECES[(kind / 3) % PIECES.size()], RUBBLE, RUBBLE_SHADOW)
-			_:
-				for i in 4:
-					var x: float = 3.0 + float((kind / 7 + i * 3) % 10)
-					draw_rect(Rect2(origin + Vector2(x, 12.0 - float(i % 2)), Vector2(1, 2 + i % 2)), GRASS if i % 2 == 0 else GRASS_DARK)
-	var frame: int = int(_time * flame_fps)
+		var index: int = int(_floor[cell])
+		var spot: Rect2 = Rect2(Vector2(cell) * size, Vector2(size, size))
+		if index < strip:
+			draw_texture_rect_region(floor_decals, spot, Rect2(index * size, 0.0, size, size))
+		else:
+			draw_texture_rect(extra_decals[index - strip], spot, false)
+	var flame: int = int(_time * flame_fps)
+	for cell: Vector2i in _wall:
+		var bottom: Vector2 = Vector2(cell) * size + Vector2(size * 0.5, size)
+		match _wall[cell]:
+			WallPiece.TORCH:
+				if torch != null:
+					var frame: int = (flame + absi(hash(cell))) % maxi(torch_frames, 1)
+					var w: float = float(torch.get_width()) / maxi(torch_frames, 1)
+					draw_texture_rect_region(torch, Rect2(bottom - Vector2(w * 0.5, size), Vector2(w, size)),
+							Rect2(frame * w, 0.0, w, torch.get_height()))
+			WallPiece.PILLAR:
+				_draw_standing(pillar, bottom)
+			WallPiece.STATUE:
+				_draw_standing(statue, bottom)
+	if door_seal != null:
+		for cell: Vector2i in _sealed:
+			draw_texture(door_seal, Vector2(cell) * size)
+
+
+## A picture whose bottom stands on the bottom of the cell.
+func _draw_standing(picture: Texture2D, bottom: Vector2) -> void:
+	if picture != null:
+		draw_texture(picture, bottom - Vector2(picture.get_width() * 0.5, picture.get_height()))
+
+
+func _draw_lights() -> void:
+	if torch_light == null or _grid == null:
+		return
+	var size: float = float(_tile())
 	for cell: Vector2i in _torches:
-		var origin: Vector2 = Vector2(cell) * size + Vector2(7, 7)
-		draw_rect(Rect2(origin + Vector2(0, 2), Vector2(2, 4)), WOOD)
-		var flicker: int = (frame + absi(hash(cell))) % 4
-		draw_rect(Rect2(origin + Vector2(-1, 0), Vector2(4, 2)), FLAME[0])
-		draw_rect(Rect2(origin + Vector2(0, -1 - flicker % 2), Vector2(2, 2 + flicker % 2)), FLAME[1 + flicker % 2])
-		draw_rect(Rect2(origin + Vector2(flicker % 2, -2 - flicker % 3), Vector2(1, 2)), FLAME[3])
-
-
-func _draw_piece(origin: Vector2, pixels: Array, light: Color, dark: Color) -> void:
-	for p: Array in pixels:
-		draw_rect(Rect2(origin + Vector2(p[0], p[1]), Vector2.ONE), light if p[2] == 0 else dark)
+		var breathe: float = 1.0 + torch_light_flicker * sin(_time * 7.0 + float(absi(hash(cell)) % 100))
+		var extent: Vector2 = torch_light.get_size() * breathe
+		var centre: Vector2 = Vector2(cell) * size + Vector2(size * 0.5, size * 0.6)
+		_lights.draw_texture_rect(torch_light, Rect2(centre - extent * 0.5, extent), false, torch_light_color)

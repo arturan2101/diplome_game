@@ -5,6 +5,10 @@ extends Node2D
 ## Keeps the section clock that drives the timed spikes (TimedSpikeField).
 ## Actors find it through the "level" group.
 
+## Cells changed type while the level runs (set_cells: doors sealing and opening, a
+## secret room opening). The decor draws rubble on doors that became walls.
+signal cells_changed(cells: Array[Vector2i], type: LevelGrid.Cell)
+
 const GROUP: StringName = &"level"
 const DEFAULT_THEME: TileTheme = preload("res://level/ruins_theme.tres")
 const DEFAULT_HAZARDS: HazardData = preload("res://level/hazards.tres")
@@ -122,6 +126,7 @@ func set_cells(cells: Array[Vector2i], type: LevelGrid.Cell) -> void:
 		_ground.erase_cell(cell)
 		_props.erase_cell(cell)
 		_paint_cell(cell)
+	cells_changed.emit(cells, type)
 
 
 ## True if the timed spikes on this cell hurt right now (false for any other cell).
