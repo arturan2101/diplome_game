@@ -48,7 +48,7 @@ Actor sizes per docs/art-style.md rev 3: collisions in code are unchanged; sprit
 | C | Sword slash arc | assets/art/fx/slash.png (48x48, reach 24, 120 deg), slash_heavy.png (64x64, reach 28, 160 deg, gold) | 48x48 / 64x64, centred on the wielder, pointing right | 3 each (wind-up, full arc, fading; flip vertically for the swing back) | generated 2026-11-17 (replaces the polygon of melee_weapon.gd _draw) |
 | C | Player arrow | assets/art/weapons/arrow.png (replaces sprites/arrow.tres) | 16x16, pointing right, tip at (14, 8) | 1 | generated 2026-11-17 (replaces the line of arrow.gd _draw) |
 | C | Enemy arrow (red fletching) | assets/art/weapons/enemy_arrow.png | 16x16, pointing right, tip at (14, 8) | 1 | generated 2026-11-17 |
-| L | Spear, axe, crossbow, staff x3 rarities | assets/art/weapons/<name>_<rarity>.png | 16x16 | 1 | todo |
+| L | Spear, axe, crossbow, staff x3 rarities | assets/art/weapons/<name>_<rarity>.png | 16x16 | 1 | spear, daggers, crossbow generated 2026-11-18 (plan group 3); axe and staff todo |
 
 ## Pickups and level objects
 
@@ -130,7 +130,7 @@ Biome 1 "Sandstone ruins" (core). Later biomes reuse the same layout: flooded ru
 | C | Rarity frames (common/rare/legendary) | assets/art/ui/rarity_frame.png | 18x18 x3 | 1 | - | generated 2026-11-17 (tools/art/make_ui_icons.py) |
 | C | Menu/death-screen panel and button (9-slice) | assets/art/ui/panel.png, button.png | 16x16 9-slice each | 1 (button: normal/pressed) | - | generated 2026-11-17 (panel margins 4; button strip: normal, pressed) |
 | C | Depth/section icon | assets/art/ui/icon_depth.png | 16x16 | 1 | - | generated 2026-11-17 (tools/art/make_ui_icons.py) |
-| N | Parry, teleport skill icons | assets/art/ui/icon_{parry,teleport}.png | 16x16 | 1 | - | todo |
+| N | Parry, teleport skill icons | assets/art/ui/icon_{parry,teleport}.png | 16x16 | 1 | - | generated 2026-11-18 (see plan group 3) |
 
 ## Spell effects (later)
 
@@ -139,7 +139,7 @@ Biome 1 "Sandstone ruins" (core). Later biomes reuse the same layout: flooded ru
 | L | Fireball (projectile + explosion) | assets/art/fx/fireball.png | 16x16 / 32x32 | 4 / 6 | integrated in another form: fire in three levels, fx/fire_l1-3.png + fire_trail.png in element_frames.tres (stage 26) |
 | L | Ice wall | assets/art/fx/ice_wall.png | 16x32 | 4 | integrated in another form: fx/ice_l1-3.png, one picture per level (stage 26) |
 | L | Whirlwind | assets/art/fx/whirlwind.png | 32x32 | 6 | integrated in another form: fx/wind_l1-3.png in element_frames.tres (stage 26) |
-| L | Teleport | assets/art/fx/teleport.png | 32x32 | 5 | todo (no teleport skill in the game yet) |
+| L | Teleport | assets/art/fx/teleport_out.png, teleport_in.png | 32x32 | 5 each | generated 2026-11-18 (see plan group 3) |
 | L | Stone shield | assets/art/fx/stone_shield.png | 32x32 | 4 | todo (no such spell in the game) |
 | L | Fire tornado (combo) | assets/art/fx/fire_tornado.png | 32x32 | 6 | replaced by the fused spells of stage 26: firestorm, blizzard, steam (fx/*_l1-3.png in fusion_frames.tres) |
 | L | Ice fortress (combo) | assets/art/fx/ice_fortress.png | 32x32 | 6 | replaced by the fused spells of stage 26 (see Fire tornado) |
@@ -316,3 +316,23 @@ Camp art in `tools/art/make_camp.py` (nature theme colours: grass #5a8a4a / #8ac
 | C | Skill tree connection line: inactive (grey), active (gold) | assets/art/ui/skill_line.png | 8x6 per state (16x6) | 2 states | 9-slice / stretch horizontally (margins 0 left/right, the 6 px height stays); rotate 90 deg for vertical links | generated |
 | C | Skill tree panel background | assets/art/ui/skill_panel.png | 24x24 | 1 | 9-slice, margins 8 (gold corners) | generated |
 | C | Perk icons: 0 health+, 1 damage+, 2 speed+, 3 skill cooldown-, 4 healing+, 5 coin magnet, 6 armour, 7 chest luck, 8 third spell slot, 9 starting coins | assets/art/ui/perk_icons.png | 16x16 each (160x16) | 10, index as listed | green "+" badge (nature green) on boosts, blue "-" on the cooldown, no badge on 5-7 | generated |
+
+## Plan group 3: skills and weapons (batch 8, art 2026-11-18)
+
+Icons, weapons and effects in `tools/art/make_weapons_skills.py`; player strips from PixelLab with `tools/art/import_player_weapons.py` (animation ids in its docstring). Rarity accents: common steel, rare blue, legendary gold.
+
+| P | Asset | File | Size | Frames | Direction / use | Status |
+|---|---|---|---|---|---|---|
+| C | Parry icon: crossed blades with a gold spark | assets/art/ui/icon_parry.png | 16x16 | 1 | - | generated |
+| C | Teleport icon: violet swirl with sparks | assets/art/ui/icon_teleport.png | 16x16 | 1 | - | generated |
+| C | Parry flash: white-gold star, then a ring of sparks | assets/art/fx/parry_flash.png | 32x32 per frame (128x32) | 4, one pass (12 fps) | none, centred where the blow is parried | generated |
+| C | Teleport out: flash ring, violet column, it melts, sparks rise | assets/art/fx/teleport_out.png | 32x32 per frame (160x32) | 5, one pass | none; the column matches the player body, a small ring on the floor at row 27 | generated |
+| C | Teleport in: sparks converge, the column fills, flash ring | assets/art/fx/teleport_in.png | 32x32 per frame (160x32) | 5, one pass | none | generated |
+| C | Spear common / rare / legendary | assets/art/weapons/spear_{common,rare,legendary}.png | 16x16 | 1 | diagonal, tip up-right; binding in the rarity colour (legendary: gold head glint) | generated |
+| C | Daggers (a pair) common / rare / legendary | assets/art/weapons/daggers_{common,rare,legendary}.png | 16x16 | 1 | two crossed daggers; guards in the rarity colour | generated |
+| C | Crossbow common / rare / legendary | assets/art/weapons/crossbow_{common,rare,legendary}.png | 16x16 | 1 | pointing right; limbs in the rarity colour | generated |
+| C | Spear thrust streak | assets/art/fx/spear_thrust.png | 48x16 per frame (144x16) | 3 (start, full length with a tip spark, fading) | points right; the wielder is at the left edge, middle row (0, 8); rotate to the attack direction | generated |
+| C | Dagger quick slash | assets/art/fx/dagger_slash.png | 32x32 per frame (96x32) | 3 (wind-up, full arc, fading) | points right, centred on the wielder, reach ~13 px, 100 deg; flip vertically for the other hand | generated |
+| C | Crossbow bolt (short, steel head and fletching) | assets/art/weapons/crossbow_bolt.png | 16x16 | 1 | points right, tip at (14, 8) like arrow.png | generated |
+| C | Player spear attack | assets/art/characters/player_spear_{down,up,right,left}.png | 24x24 per frame (96x24) | 4 (thrust and pull back) | 4 directions, feet and shadow like player_idle_<dir>; "up": the spear is drawn above the right shoulder | generated, not in player_frames.tres yet |
+| C | Player dagger attack (two quick stabs) | assets/art/characters/player_daggers_{down,up,right,left}.png | 24x24 per frame (96x24) | 4 | 4 directions, as above | generated, not in player_frames.tres yet |
