@@ -4,6 +4,8 @@ extends CanvasLayer
 ## or straight into a new run with the same loadout.
 
 const MENU_SCENE: String = "res://ui/main_menu.tscn"
+## With the progress between runs, "play again" goes back to the camp first.
+const CAMP_SCENE: String = "res://camp/camp.tscn"
 
 @export var panel: Control
 @export var stats_label: Label
@@ -39,6 +41,10 @@ func _notification(what: int) -> void:
 
 
 func _on_again_pressed() -> void:
+	if GameManager.config.meta_progression:
+		get_tree().paused = false
+		get_tree().change_scene_to_file(CAMP_SCENE)
+		return
 	GameManager.restart_run()
 
 

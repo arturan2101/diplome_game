@@ -1,0 +1,24 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://camp/camp.gd" id="1"]
+[ext_resource type="Script" path="res://level/level.gd" id="2"]
+[ext_resource type="Resource" path="res://level/camp_theme.tres" id="3"]
+[ext_resource type="PackedScene" path="res://actors/player/player.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://ui/hud.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://ui/pause_menu.tscn" id="6"]
+
+[node name="Camp" type="Node2D" node_paths=PackedStringArray("level", "player", "hud")]
+script = ExtResource("1")
+level = NodePath("Level")
+player = NodePath("Player")
+hud = NodePath("HUD")
+
+[node name="Level" type="Node2D" parent="."]
+script = ExtResource("2")
+theme = ExtResource("3")
+
+[node name="Player" parent="." instance=ExtResource("4")]
+
+[node name="HUD" parent="." instance=ExtResource("5")]
+
+[node name="PauseMenu" parent="." instance=ExtResource("6")]

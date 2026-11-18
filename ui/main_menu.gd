@@ -5,6 +5,8 @@ extends Control
 ## player; it only goes to the log.
 
 const GAME_SCENE: String = "res://main/main.tscn"
+## With the progress between runs, a run starts from the camp at the ruins.
+const CAMP_SCENE: String = "res://camp/camp.tscn"
 const RANDOM_SEED_TEXT: String = ""
 
 ## Weapons and skills offered before a run. Adding one here adds a button.
@@ -119,6 +121,9 @@ func _start_run() -> void:
 		GameManager.starting_weapon = _selected_weapon
 	if _selected_skill != null:
 		GameManager.starting_skill = _selected_skill
+	if GameManager.config.meta_progression:
+		get_tree().change_scene_to_file(CAMP_SCENE)
+		return
 	GameManager.start_run()
 	get_tree().change_scene_to_file(GAME_SCENE)
 

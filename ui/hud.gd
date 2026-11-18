@@ -332,6 +332,12 @@ func show_section(section_index: int, depth: int) -> void:
 		depth_label.text = "Depth %d  -  Section %d" % [depth + 1, section_index + 1]
 
 
+## "Camp" while the player is in the camp between runs.
+func show_camp() -> void:
+	if depth_label != null:
+		depth_label.text = "Camp"
+
+
 ## "Depth 2  -  Glade" while the player is on the merchant's glade (not a section).
 func show_glade(depth: int) -> void:
 	if depth_label != null:
