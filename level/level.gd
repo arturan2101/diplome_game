@@ -277,9 +277,12 @@ func draws_cracks() -> bool:
 	return theme.cracked_wall_tile.x >= 0 and theme.cracked_wall_top_tile.x >= 0
 
 
-## Index of the region theme that draws this cell (in _region_names), or -1.
+## Index of the region theme that draws this cell (in _region_names), or -1. A hidden
+## region (a secret room not found yet) draws nothing of its own.
 func _region_index(cell: Vector2i) -> int:
 	for region: Dictionary in grid.theme_regions:
+		if region.get("hidden", false):
+			continue
 		if (region["rect"] as Rect2i).has_point(cell):
 			return _region_names.find(region["theme"])
 	return -1

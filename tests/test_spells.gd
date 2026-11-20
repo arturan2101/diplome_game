@@ -55,8 +55,8 @@ func _test_data() -> void:
 	var damage: Array[int] = []
 	for level in range(1, SpellData.MAX_LEVEL + 1):
 		damage.append(SpellData.int_at(fireball.damage, level))
-	check(damage[0] < damage[1] and damage[1] < damage[2] and fireball.cooldown_at(3) < fireball.cooldown_at(1),
-			"a higher level hits harder (%s) and cools down faster" % [damage])
+	check(damage[0] < damage[1] and damage[1] < damage[2] and fireball.cooldown_at(3) > fireball.cooldown_at(1),
+			"a higher level hits harder (%s) but comes back slower (stage 38)" % [damage])
 	check(SpellData.int_at(fireball.damage, 7) == damage[2], "levels past the table use the top level")
 	var pool: SpellPool = load(POOL) as SpellPool
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()

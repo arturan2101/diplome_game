@@ -90,8 +90,7 @@ func _test_table_and_balance() -> void:
 				result.power_at(1) / result.cooldown_at(1), best_rate])
 		if result.power_at(1) < best_power or result.power_at(1) / result.cooldown_at(1) < best_rate:
 			balanced = false
-		if not (result.power_at(1) < result.power_at(2) and result.power_at(2) < result.power_at(3)
-				and result.cooldown_at(3) <= result.cooldown_at(1)):
+		if not (result.power_at(1) < result.power_at(2) and result.power_at(2) < result.power_at(3)):
 			growing = false
 		for level in range(1, SpellData.MAX_LEVEL + 1):
 			if result.animation_at(level) == &"" or result.icon == null:

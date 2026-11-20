@@ -57,6 +57,9 @@ var health_packs: int = 1
 var coins: int = 6
 ## Share of cover slots that get cover, 0-1.
 var cover_density: float = 0.5
+## Move each cover off its template slot by up to one cell (full game tuning; not in
+## to_dictionary(), so logs and the clean series stay as they were).
+var cover_jitter: bool = false
 ## Room tags the director would like to see more often (e.g. cover, open, hazard).
 var preferred_tags: Array[StringName] = []
 ## Room tags the director would like to see less often.

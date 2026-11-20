@@ -37,6 +37,7 @@ func choose_next(state: PlayerState) -> SectionPlan:
 	plan.enemy_mix = buy_enemies(enemy_budget, state.rng, _enemy_weights(state, problem), state.depth)
 	fill_contents(plan, state)
 	_help_with_problem(plan, state, problem)
+	apply_floor_tuning(plan)
 	plan_combat_rooms(plan, state.rng)
 	finish_arena(plan, state.rng)
 	return plan

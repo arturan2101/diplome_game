@@ -51,6 +51,7 @@ func new_plan(state: PlayerState) -> SectionPlan:
 	# What the learned director sees; logged for every mode.
 	plan.context = BanditContext.features(state)
 	plan.secret_room = settings.secret_room
+	plan.cover_jitter = settings.cover_jitter
 	if state.is_depth_end:
 		plan.is_arena = true
 		plan.phase = SectionPlan.PHASE_ARENA
@@ -79,6 +80,13 @@ func depth_floor(depth: int, phase: StringName) -> int:
 		return 0
 	var multiplier: float = settings.rest_multiplier if phase == SectionPlan.PHASE_REST else 1.0
 	return roundi((settings.depth_floor_base + settings.depth_floor_step * depth) * multiplier)
+
+
+## The full game's tuning of what lies on the floor: fewer health packs and coins.
+func apply_floor_tuning(plan: SectionPlan) -> void:
+	plan.health_packs = maxi(0, plan.health_packs - settings.health_packs_fewer)
+	if settings.coin_scale != 1.0:
+		plan.coins = roundi(plan.coins * settings.coin_scale)
 
 
 ## Raises the plan's budget to the depth floor (call before the budget is spent).

@@ -166,6 +166,9 @@ func _test_in_game() -> void:
 	var room: Rect2i = game.layout.secret["rect"]
 	check(not game.level.grid.is_floor(room.position) and game.level.find_children("*", "Merchant", true, false).is_empty(),
 			"before the crack is broken the room is rock and nothing of it is there")
+	var wall_cell: Vector2i = room.position - Vector2i.ONE
+	check(game.level._region_index(wall_cell) == -1 and game.level._region_index(room.position) == -1,
+			"before it is found the room's walls are drawn as ruins (no grass showing through)")
 	game.player.health.max_hp = 100000
 	game.player.health.reset()
 	game.player.teleport(game.level.cell_center(crack + front))
@@ -177,6 +180,7 @@ func _test_in_game() -> void:
 			and record.get("secret_found") == true,
 			"breaking the crack opens the room, and the log says the section had a secret and it was found")
 	check(game.level.find_children("*", "Merchant", true, false).size() == 1, "the wandering merchant appears in the opened room")
+	check(game.level._region_index(room.position) >= 0, "once opened, the room is drawn overgrown")
 	game.queue_free()
 	GameManager.config = GameManager.DEFAULT_CONFIG
 	Telemetry.write_enabled = write_was

@@ -30,6 +30,14 @@ extends Resource
 ## A section never gets less than this, except in the rest phase.
 @export var min_budget: int = 4
 
+@export_group("Full game tuning")
+## After the author's playtest (ExperimentConfig.full_game_tuning, stage 38): health
+## packs per section fewer by this many (never below 0), coins on the floor times
+## this, and cover moved off its template slot by up to one cell.
+@export var health_packs_fewer: int = 0
+@export var coin_scale: float = 1.0
+@export var cover_jitter: bool = false
+
 @export_group("Extra enemies")
 ## Enemy types added after the comparison series (EnemyData.is_extra: the golem, the
 ## ghost). Off in the clean series and the playtest (ExperimentConfig.extra_enemies).

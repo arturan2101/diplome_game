@@ -26,6 +26,7 @@ func choose_next(state: PlayerState) -> SectionPlan:
 	plan.corridor_twist = rng.randf_range(0.0, MAX_TWIST)
 	plan.health_packs = rng.randi_range(0, MAX_HEALTH_PACKS)
 	plan.coins = rng.randi_range(settings.coins_min, settings.coins_max)
+	apply_floor_tuning(plan)
 	plan.cover_density = rng.randf()
 	plan_combat_rooms(plan, rng)
 	finish_arena(plan, rng)

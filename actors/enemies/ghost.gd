@@ -4,6 +4,8 @@ extends Enemy
 ## spikes, half see-through. It can only strike from open ground: inside a wall it
 ## never starts a windup (and walls keep the player's blows and arrows from it). To
 ## strike it fades in fully with a flash of light, touches with cold, then fades back.
+## Only a visible ghost can be hurt: during its windup, its strike and exposed_time
+## seconds after; see-through, nothing harms it (stage 38).
 
 ## Art (visual only): the flash when it fades in to strike and when it fades out.
 @export var fade_in_effect: Texture2D = preload("res://assets/art/fx/ghost_fade_in.png")
@@ -12,6 +14,8 @@ extends Enemy
 
 var _stats: GhostData = null
 var _shown: bool = false
+## Seconds it stays visible after the strike.
+var _exposed_left: float = 0.0
 
 
 func _ready() -> void:
@@ -28,16 +32,35 @@ func _ready() -> void:
 	# The see-through look is on the ghost itself: the sprite's own tints (windup, hit
 	# flash) stay untouched.
 	modulate.a = _stats.drift_alpha
+	_set_vulnerable(false)
 
 
 func _physics_process(delta: float) -> void:
 	super(delta)
 	if _stats == null:
 		return
-	var showing: bool = state == State.WINDUP or state == State.RECOVER
+	if state == State.WINDUP:
+		_exposed_left = _stats.exposed_time
+	elif _exposed_left > 0.0:
+		_exposed_left -= delta
+	var showing: bool = state == State.WINDUP or state == State.RECOVER or _exposed_left > 0.0
 	if showing != _shown:
 		_shown = showing
 		_fade(showing)
+		_set_vulnerable(showing)
+
+
+## True while blows can hurt it (it is visible).
+func is_vulnerable() -> bool:
+	return _shown
+
+
+## Only Health makes anything invulnerable (until the next strike).
+func _set_vulnerable(vulnerable: bool) -> void:
+	if vulnerable:
+		health.end_invulnerability()
+	else:
+		health.make_invulnerable(INF)
 
 
 ## True if the ghost floats inside a wall (or over anything but open ground).

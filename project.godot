@@ -24,10 +24,6 @@ Telemetry="*res://autoload/telemetry.gd"
 Playtest="*res://autoload/playtest.gd"
 Progress="*res://autoload/progress.gd"
 
-[gui]
-
-theme/custom="res://ui/ruins_ui_theme.tres"
-
 [display]
 
 window/size/viewport_width=640
@@ -36,6 +32,10 @@ window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
 window/handheld/orientation=4
+
+[gui]
+
+theme/custom="res://ui/ruins_ui_theme.tres"
 
 [input]
 

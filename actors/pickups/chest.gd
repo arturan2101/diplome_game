@@ -7,6 +7,8 @@ extends Pickup
 
 ## Emitted once, when the chest opens.
 signal opened(chest: Chest)
+## Emitted when the player touches it while it is locked (for a hint).
+signal locked_touch(chest: Chest)
 
 @export var sprite: Sprite2D
 @export var open_texture: Texture2D
@@ -18,11 +20,21 @@ var loot_coins: int = 0
 ## The spell scroll inside, or null (most chests have none).
 var loot_spell: SpellData = null
 var is_open: bool = false
+## Full game: returns true while it must stay shut (enemies chasing the player nearby);
+## the chest then opens as soon as the player stands on it and it is free.
+var lock_check: Callable = Callable()
+
+var _waiting: Player = null
 
 
-func _collect(_player: Player) -> bool:
+func _collect(player: Player) -> bool:
 	if is_open:
 		return false
+	if lock_check.is_valid() and lock_check.call(global_position):
+		_waiting = player
+		locked_touch.emit(self)
+		return false
+	_waiting = null
 	is_open = true
 	var strip: StripSprite = sprite as StripSprite
 	if strip != null and strip.hframes > 1:
@@ -36,3 +48,15 @@ func _collect(_player: Player) -> bool:
 
 func _after_collect() -> void:
 	pass
+
+
+## A locked chest opens once it is free while the player still stands on it.
+func _physics_process(_delta: float) -> void:
+	if _waiting == null or is_open:
+		return
+	if not is_instance_valid(_waiting) or not overlaps_body(_waiting):
+		_waiting = null
+		return
+	if not lock_check.call(global_position):
+		_on_body_entered(_waiting)
+

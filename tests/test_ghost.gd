@@ -51,6 +51,9 @@ func _test_through_wall() -> void:
 	target.global_position = level.cell_center(Vector2i(9, 2))
 	await physics_frames(3)
 	check(is_equal_approx(ghost.modulate.a, data.drift_alpha), "a drifting ghost is half see-through")
+	var hp: int = ghost.health.hp
+	check(not ghost.hurtbox.receive_hit(DamageInfo.new(5, null, &"test")) and ghost.health.hp == hp,
+			"while see-through, blows go through it")
 	var wound_up_in_wall: bool = false
 	var was_in_wall: bool = false
 	var reached: bool = false
@@ -69,6 +72,13 @@ func _test_through_wall() -> void:
 	await physics_frames(roundi(data.windup * 60.0) + 2)
 	var health: Health = target.get_node("Health") as Health
 	check(health.hp < health.max_hp and ghost.modulate.a > 0.95, "it strikes fully visible (%d damage)" % (health.max_hp - health.hp))
+	var ghost_hp: int = ghost.health.hp
+	check(ghost.is_vulnerable() and ghost.hurtbox.receive_hit(DamageInfo.new(5, null, &"test")) and ghost.health.hp == ghost_hp - 5,
+			"visible after its strike, it can be hurt")
+	# Nobody left to strike: it fades out after its exposed time.
+	target.queue_free()
+	await physics_frames(roundi((data.recovery + data.exposed_time + data.fade_time) * 60.0) + 10)
+	check(not ghost.is_vulnerable(), "then it fades and is safe again")
 	ghost.global_position = level.cell_center(Vector2i(3, 1))
 	await physics_frames(5)
 	check(ghost.state != Enemy.State.FALLING and is_instance_valid(ghost), "a ghost floats over a pit")

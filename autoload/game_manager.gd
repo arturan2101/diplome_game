@@ -37,6 +37,9 @@ const MIN_SECTIONS_PER_DEPTH: int = 3
 const MAX_SECTIONS_PER_DEPTH: int = 4
 const DEFAULT_WEAPON: WeaponData = preload("res://combat/weapons/sword.tres")
 const DEFAULT_SKILL: SkillData = preload("res://combat/skills/dash.tres")
+## The full game's tuning after the playtest (ExperimentConfig.full_game_tuning).
+const FULL_GAME_FEWER_PACKS: int = 1
+const FULL_GAME_COIN_SCALE: float = 0.5
 
 ## Director mode of the next runs (debug menu or --mode=).
 var director_mode: DirectorMode = DirectorMode.RULES
@@ -96,7 +99,7 @@ func make_director() -> Director:
 func _apply_config(director: Director) -> void:
 	if config.boss_enabled and config.spells_enabled and config.spike_traps and config.combat_rooms \
 			and config.elite_enemies and config.secret_rooms and not config.merchant_glade and not config.soft_waves \
-			and not config.depth_pressure and not config.extra_enemies:
+			and not config.depth_pressure and not config.extra_enemies and not config.full_game_tuning:
 		return
 	director.settings = director.settings.duplicate() as DirectorSettings
 	if not config.boss_enabled:
@@ -118,6 +121,10 @@ func _apply_config(director: Director) -> void:
 		director.settings.depth_pressure = true
 	if config.extra_enemies:
 		director.settings.extra_enemies = true
+	if config.full_game_tuning:
+		director.settings.health_packs_fewer = FULL_GAME_FEWER_PACKS
+		director.settings.coin_scale = FULL_GAME_COIN_SCALE
+		director.settings.cover_jitter = true
 	if config.soft_waves:
 		director.settings.peak_multiplier = director.settings.soft_peak_multiplier
 		director.settings.rest_multiplier = director.settings.soft_rest_multiplier

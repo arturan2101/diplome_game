@@ -82,6 +82,12 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 @export var perk_tree: PerkTree
 ## The merchant's glade between depths. Empty = generation/glade.tres.
 @export var glade_data: GladeData
+## The full game's tuning (ExperimentConfig.full_game_tuning): shop prices times this,
+## chest coins times this, and a chest stays shut while an enemy chasing the player is
+## within chest_lock_radius pixels.
+@export var tuned_shop_price: float = 1.5
+@export var tuned_chest_coin_scale: float = 0.5
+@export var chest_lock_radius: float = 80.0
 ## With the glade (spells are bought there), a secret room's chest holds a spell
 ## scroll with this chance, as a reward for finding it; other chests hold none.
 @export_range(0.0, 1.0) var secret_chest_spell_chance: float = 0.25
@@ -116,6 +122,8 @@ var _pending_scroll: SpellPickup = null
 var _combat: CombatRoomTracker = null
 ## True while the player is on the glade between depths (not a section).
 var _in_glade: bool = false
+## The secret room's cracked wall of this section, if any.
+var _secret_wall: BreakableWall = null
 ## Two spells merged in the shop: the flash plays when the shop closes.
 var _merge_pending: bool = false
 ## A new spell bought with both slots full waits for the player to choose a slot; the
@@ -143,6 +151,9 @@ func _ready() -> void:
 	spell_choice.closed.connect(_on_spell_choice_closed)
 	if shop_data == null:
 		shop_data = DEFAULT_SHOP
+	if GameManager.config.full_game_tuning:
+		shop_data = shop_data.duplicate() as ShopData
+		shop_data.price_multiplier = tuned_shop_price
 	if fusion_table == null:
 		fusion_table = DEFAULT_FUSIONS
 	if perk_tree == null:
@@ -392,6 +403,10 @@ func _spawn_item(entry: Dictionary, shop_rng: RandomNumberGenerator = null) -> v
 		# Loot is decided now, in spawn order, so the same seed gives the same chests.
 		chest.loot_weapon = _roll_chest_weapon()
 		chest.loot_coins = _loot_rng.randi_range(chest_coins_min, chest_coins_max)
+		if GameManager.config.full_game_tuning:
+			chest.loot_coins = maxi(1, roundi(chest.loot_coins * tuned_chest_coin_scale))
+			chest.lock_check = _enemies_chasing_near
+			chest.locked_touch.connect(func(_chest: Chest) -> void: hud.show_banner("Enemies nearby"))
 		if GameManager.config.spells_enabled and _loot_rng.randf() < _chest_spell_chance(entry):
 			chest.loot_spell = _run_spells.pick(_loot_rng)
 		chest.opened.connect(_on_chest_opened)
@@ -429,6 +444,33 @@ func _spawn_secret() -> void:
 	wall.position = level.to_local(level.cell_center(layout.secret["crack"]))
 	wall.broken.connect(_on_secret_wall_broken)
 	_contents.add_child(wall)
+	_secret_wall = wall
+	# Full game: a secret in a combat room (or the arena) waits until the fight is over.
+	if GameManager.config.full_game_tuning and _is_fight_room(int(layout.secret.get("room", -1))):
+		wall.health.make_invulnerable(INF)
+
+
+## True if the room locks for a fight: a combat room of this section or the arena.
+func _is_fight_room(room_index: int) -> bool:
+	if room_index < 0:
+		return false
+	return room_index == layout.arena_room or _combat.get_room(room_index) != null
+
+
+## The fight of a room is over: its secret wall can break now.
+func _unlock_secret_wall(room_index: int) -> void:
+	if is_instance_valid(_secret_wall) and int(layout.secret.get("room", -1)) == room_index:
+		_secret_wall.health.end_invulnerability()
+
+
+## True if an enemy chasing the player stands within chest_lock_radius of this point.
+func _enemies_chasing_near(at: Vector2) -> bool:
+	for enemy: Enemy in get_enemies():
+		if enemy.is_dormant or enemy.state == Enemy.State.IDLE:
+			continue
+		if enemy.global_position.distance_to(at) <= chest_lock_radius:
+			return true
+	return false
 
 
 func _on_secret_wall_broken(_wall: BreakableWall) -> void:
@@ -447,6 +489,9 @@ func _open_secret() -> void:
 		for x in range(room.position.x, room.end.x):
 			cells.append(Vector2i(x, y))
 	level.grid.cracked.erase(layout.secret["crack"])
+	# Its theme shows from now on (the cells below are drawn again).
+	for region: Dictionary in level.grid.theme_regions:
+		region["hidden"] = false
 	# A patch of light from above in the middle of the room.
 	var middle: Vector2i = room.position + room.size / 2
 	for cell: Vector2i in [middle, middle + Vector2i.LEFT, middle + Vector2i.UP, middle + Vector2i(-1, -1)]:
@@ -774,7 +819,8 @@ func _on_combat_wave_started(_room: CombatRoom, wave: int) -> void:
 		hud.show_banner("Another wave!")
 
 
-func _on_combat_room_cleared(_room: CombatRoom) -> void:
+func _on_combat_room_cleared(room: CombatRoom) -> void:
+	_unlock_secret_wall(room.index)
 	hud.show_banner("The way is open")
 
 
@@ -795,6 +841,7 @@ func _advance_arena() -> void:
 		return
 	_is_arena_sealed = false
 	_is_arena_cleared = true
+	_unlock_secret_wall(layout.arena_room)
 	level.set_cells(layout.arena_doors, LevelGrid.Cell.FLOOR)
 	gate.open()
 	hud.show_banner("The way down is open")

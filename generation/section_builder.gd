@@ -475,7 +475,8 @@ func _place_secret(layout: SectionLayout, path: Array[PlacedRoom], plan: Section
 			region = region.grow_side(SIDE_TOP, -1)
 		else:
 			region = region.grow_side(SIDE_BOTTOM, -1)
-		layout.grid.theme_regions.append({"rect": region, "theme": data.theme})
+		# "hidden": drawn with the ruins until the room is found (no grass showing through).
+		layout.grid.theme_regions.append({"rect": region, "theme": data.theme, "hidden": true})
 		var far: Vector2i = crack + out * interior.size[0 if out.x != 0 else 1]
 		var chest_cell: Vector2i = Vector2i(clampi(far.x, interior.position.x, interior.end.x - 1),
 				clampi(far.y, interior.position.y, interior.end.y - 1))
@@ -635,8 +636,33 @@ func _place_cover(layout: SectionLayout, rooms: Array[PlacedRoom], plan: Section
 	for room: PlacedRoom in rooms:
 		for cell: Vector2i in room.to_section_cells(room.template.cover_slots):
 			if rng.randf() < plan.cover_density and not taken.has(cell):
+				if plan.cover_jitter:
+					cell = _jittered_cover(layout.grid, room, cell, rng, taken)
 				layout.grid.set_cell(cell, LevelGrid.Cell.COVER)
 				taken[cell] = true
+
+
+## Cover a cell off its slot (full game tuning): one of the 8 cells around, plain floor
+## inside the room, not taken, with no other cover touching it; else the slot itself.
+static func _jittered_cover(grid: LevelGrid, room: PlacedRoom, slot: Vector2i, rng: RandomNumberGenerator,
+		taken: Dictionary) -> Vector2i:
+	var inside: Rect2i = room.get_rect().grow(-2)
+	var options: Array[Vector2i] = []
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var cell: Vector2i = slot + Vector2i(dx, dy)
+			if inside.has_point(cell) and grid.is_floor(cell) and not taken.has(cell) and not _touches_cover(grid, cell, slot):
+				options.append(cell)
+	return options[rng.randi_range(0, options.size() - 1)] if not options.is_empty() else slot
+
+
+static func _touches_cover(grid: LevelGrid, cell: Vector2i, ignore: Vector2i) -> bool:
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var near: Vector2i = cell + Vector2i(dx, dy)
+			if near != cell and near != ignore and grid.get_cell(near) == LevelGrid.Cell.COVER:
+				return true
+	return false
 
 
 ## Spreads the enemy spawns over the rooms: first one spawn per room of the path

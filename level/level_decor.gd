@@ -12,8 +12,12 @@ extends Node2D
 ## half-column or a statue.
 @export_range(0.0, 1.0) var floor_decor_chance: float = 0.06
 @export_range(0.0, 1.0) var torch_chance: float = 0.08
-@export_range(0.0, 1.0) var pillar_chance: float = 0.05
-@export_range(0.0, 1.0) var statue_chance: float = 0.025
+## Half-columns and statues against the walls looked stuck on (playtest, stage 38):
+## off until free-standing obstacles replace them.
+@export_range(0.0, 1.0) var pillar_chance: float = 0.0
+@export_range(0.0, 1.0) var statue_chance: float = 0.0
+## Two torches are at least this many cells apart (no pairs side by side).
+@export var torch_min_spacing: float = 4.0
 ## Floor decals: a strip of 16x16 pieces (pebbles, rubble, cracks, puddle, moss, bones,
 ## broken slab), plus single pictures.
 @export var floor_decals: Texture2D = preload("res://assets/art/tiles/floor_decals.png")
@@ -98,6 +102,8 @@ func _rebuild() -> void:
 					_floor[cell] = kind % decal_count
 				elif _is_wall_front(cell):
 					if roll < torch_chance:
+						if _torch_near(cell):
+							continue
 						_wall[cell] = WallPiece.TORCH
 						_torches.append(cell)
 					elif roll < torch_chance + pillar_chance:
@@ -106,6 +112,14 @@ func _rebuild() -> void:
 						_wall[cell] = WallPiece.STATUE
 	queue_redraw()
 	_lights.queue_redraw()
+
+
+## True if a torch already stands closer than torch_min_spacing.
+func _torch_near(cell: Vector2i) -> bool:
+	for other: Vector2i in _torches:
+		if Vector2(other).distance_to(Vector2(cell)) < torch_min_spacing:
+			return true
+	return false
 
 
 ## A wall cell showing its brick front: plain floor right below it.

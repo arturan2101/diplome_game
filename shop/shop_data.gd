@@ -29,9 +29,13 @@ extends Resource
 @export var wandering_discount: float = 0.7
 
 
+## Every price times this (the full game's tuning makes the shop dearer).
+@export var price_multiplier: float = 1.0
+
+
 ## Final price of something that costs `base` at the first depth.
 func price_for(base: float, depth: int, wandering: bool) -> int:
-	var price: float = base * (1.0 + price_growth_per_depth * depth)
+	var price: float = base * price_multiplier * (1.0 + price_growth_per_depth * depth)
 	if wandering:
 		price *= wandering_discount
 	return maxi(1, roundi(price))

@@ -44,6 +44,11 @@ extends Resource
 ## the boss, the camp's permanent skills and spell unlocks. Off in the clean series
 ## and the playtest.
 @export var meta_progression: bool = true
+## Tuning of the full game after the author's playtest (stage 38): fewer health packs
+## and coins, a dearer shop, cover not in neat rows, no chest opened next to enemies
+## that chase the player, no secret wall broken before its room's fight is over. Off in
+## the clean series and the playtest.
+@export var full_game_tuning: bool = true
 ## Soft tension waves of the rules director: a peak of x1.15 and a rest of x0.5
 ## (DirectorSettings.soft_peak_multiplier, soft_rest_multiplier) instead of x1.3 and
 ## x0.3. The other modes have no wave and do not change.
@@ -55,4 +60,5 @@ func to_dictionary() -> Dictionary:
 	return {"boss": boss_enabled, "spells": spells_enabled, "rarity": rarity_enabled, "soft_waves": soft_waves,
 			"spike_traps": spike_traps, "combat_rooms": combat_rooms, "elite_enemies": elite_enemies,
 			"secret_rooms": secret_rooms, "merchant_glade": merchant_glade, "spell_fusion": spell_fusion,
-			"depth_pressure": depth_pressure, "extra_enemies": extra_enemies, "meta_progression": meta_progression}
+			"depth_pressure": depth_pressure, "extra_enemies": extra_enemies, "meta_progression": meta_progression,
+			"full_game_tuning": full_game_tuning}
