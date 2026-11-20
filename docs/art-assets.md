@@ -412,3 +412,18 @@ A living marble statue: a hulking colossus, gold crown helmet, purple eyes and g
 | N | Hurt (recoil) | warden_hurt_<dir>.png | 4 (12 fps) | - | generated |
 | N | Death: collapses forward onto its front | warden_death.png | 8 (10 fps), last frame held | - | generated |
 | N | SpriteFrames with all of the above (names `<anim>_<dir>`, `death`) | assets/art/enemies/warden_frames.tres | - | - | generated, not used by guardian.tres yet |
+
+### 5. Enemy attacks with a readable wind-up
+
+Generator `tools/art/make_enemy_windups.py` (PixelLab ids, steps and frame meanings in its docstring). They replace the attack strips that were the idle frame shifted with a slash drawn over it, so the red / orange warning tint can go: the wind-up pose itself says an attack is coming. The humanoids come from PixelLab skeleton-v3 clips on characters imported from the game's own idle frames (enlarged 2x, so the animation starts from the sprite the game shows), brought back to game size and snapped to the colours of the enemy's own idle and walk strips; feet on the idle's feet row in every frame, the idle's shadow under them. Elites are recoloured from the new strips as before. **Frame counts changed** (were 4), so attack timing in code may need a look: hold the wind-up frames longer if a telegraph needs more time.
+
+| P | Asset | File | Frames | Wind-up / hit | Status |
+|---|---|---|---|---|---|
+| C | Skeleton: sword raised high behind the head, slash down | assets/art/enemies/skeleton_attack_<dir>.png | 6 (24x24) | wind-up 0-1 (hold 1), slash 2-3, recover 4-5 | generated |
+| C | Shield skeleton (elite): the same, red armour, the shield stays where the idle has it | skeleton_elite_attack_<dir>.png | 6 (24x24) | as the skeleton | generated |
+| C | Archer: bow up, draw to the cheek, release | archer_attack_<dir>.png | 6 (24x24) | bow up 0, draw 1-2 (hold 2), release 3 (spawn the arrow), recoil 4, lower 5 | generated; from the front the bow is hidden by the body, the arm movement shows |
+| C | Triple-shot archer (elite): the same, purple cloth, gold eyes | archer_elite_attack_<dir>.png | 6 (24x24) | as the archer | generated |
+| C | Beetle: crouches flat and pulls back, then lunges 3 px with open mandibles | beetle_attack_<dir>.png | 4 (16x16) | crouch 0-1 (hold 1), lunge-bite 2-3 | generated (drawn in code from the idle) |
+| N | Golem: both fists rise over the head and hold, then slam the ground | golem_attack_<dir>.png | 8 (48x48) | rise 0, fists overhead 1-3 (hold 3), slam 4-5, recover 6-7 | generated; grass by finish_golem.py's overgrow |
+| N | Ghost: pulls back with its arms raised, then reaches out | ghost_attack_<dir>.png | 6 (32x32) | pull back 0-1 (hold 1), reach and touch 2-3, back 4-5 | generated |
+| C | SpriteFrames rewritten with the new attack lengths (other animations unchanged) | skeleton_frames.tres, skeleton_elite_frames.tres, archer_frames.tres, archer_elite_frames.tres, ghost_frames.tres, golem_frames.tres | - | - | generated |

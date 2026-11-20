@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=88 format=3]
+[gd_resource type="SpriteFrames" load_steps=96 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/art/enemies/skeleton_elite_attack_down.png" id="attack_down"]
 [ext_resource type="Texture2D" path="res://assets/art/enemies/skeleton_elite_attack_left.png" id="attack_left"]
@@ -34,6 +34,14 @@ region = Rect2(48, 0, 24, 24)
 atlas = ExtResource("attack_down")
 region = Rect2(72, 0, 24, 24)
 
+[sub_resource type="AtlasTexture" id="attack_down_4"]
+atlas = ExtResource("attack_down")
+region = Rect2(96, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="attack_down_5"]
+atlas = ExtResource("attack_down")
+region = Rect2(120, 0, 24, 24)
+
 [sub_resource type="AtlasTexture" id="attack_left_0"]
 atlas = ExtResource("attack_left")
 region = Rect2(0, 0, 24, 24)
@@ -49,6 +57,14 @@ region = Rect2(48, 0, 24, 24)
 [sub_resource type="AtlasTexture" id="attack_left_3"]
 atlas = ExtResource("attack_left")
 region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="attack_left_4"]
+atlas = ExtResource("attack_left")
+region = Rect2(96, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="attack_left_5"]
+atlas = ExtResource("attack_left")
+region = Rect2(120, 0, 24, 24)
 
 [sub_resource type="AtlasTexture" id="attack_right_0"]
 atlas = ExtResource("attack_right")
@@ -66,6 +82,14 @@ region = Rect2(48, 0, 24, 24)
 atlas = ExtResource("attack_right")
 region = Rect2(72, 0, 24, 24)
 
+[sub_resource type="AtlasTexture" id="attack_right_4"]
+atlas = ExtResource("attack_right")
+region = Rect2(96, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="attack_right_5"]
+atlas = ExtResource("attack_right")
+region = Rect2(120, 0, 24, 24)
+
 [sub_resource type="AtlasTexture" id="attack_up_0"]
 atlas = ExtResource("attack_up")
 region = Rect2(0, 0, 24, 24)
@@ -81,6 +105,14 @@ region = Rect2(48, 0, 24, 24)
 [sub_resource type="AtlasTexture" id="attack_up_3"]
 atlas = ExtResource("attack_up")
 region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="attack_up_4"]
+atlas = ExtResource("attack_up")
+region = Rect2(96, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="attack_up_5"]
+atlas = ExtResource("attack_up")
+region = Rect2(120, 0, 24, 24)
 
 [sub_resource type="AtlasTexture" id="death_0"]
 atlas = ExtResource("death")
@@ -312,6 +344,12 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("attack_down_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("attack_down_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("attack_down_5")
 }],
 "loop": false,
 "name": &"attack_down",
@@ -329,6 +367,12 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("attack_left_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("attack_left_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("attack_left_5")
 }],
 "loop": false,
 "name": &"attack_left",
@@ -346,6 +390,12 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("attack_right_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("attack_right_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("attack_right_5")
 }],
 "loop": false,
 "name": &"attack_right",
@@ -363,6 +413,12 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("attack_up_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("attack_up_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("attack_up_5")
 }],
 "loop": false,
 "name": &"attack_up",
