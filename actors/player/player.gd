@@ -47,6 +47,9 @@ var damage_bonus: float = 1.0
 var heal_multiplier: float = 1.0
 var skill_cooldown_multiplier: float = 1.0
 var coin_magnet_radius: float = 0.0
+## Critical hits of the player's weapons (ExperimentConfig.arsenal, set by the game
+## before the weapons are made). Off: every weapon's crit chance is 0.
+var critical_hits: bool = false
 
 ## Last non-zero movement direction (unit vector).
 var facing: Vector2 = Vector2.RIGHT
@@ -70,6 +73,8 @@ var _weapons: Array[Weapon] = []
 var _active_slot: int = 0
 var _aim_query: PhysicsShapeQueryParameters2D = PhysicsShapeQueryParameters2D.new()
 var _aim_shape: CircleShape2D = CircleShape2D.new()
+## Seconds left in which the next hit is a sure critical hit (after a parry).
+var _sure_crit_left: float = 0.0
 
 
 func _ready() -> void:
@@ -101,6 +106,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_sure_crit_left = maxf(_sure_crit_left - delta, 0.0)
 	_move(delta)
 	_handle_skill_input()
 	if Input.is_action_just_pressed("swap_weapon"):
@@ -176,6 +182,8 @@ func _create_weapon(weapon_data: WeaponData) -> Weapon:
 	var new_weapon: Weapon = weapon_data.weapon_scene.instantiate() as Weapon
 	new_weapon.setup(weapon_data, self)
 	new_weapon.damage_multiplier *= damage_bonus
+	if not critical_hits:
+		new_weapon.crit_chance = 0.0
 	add_child(new_weapon)
 	return new_weapon
 
@@ -197,6 +205,34 @@ func _update_interaction() -> void:
 		_interaction_target_id = nearest_id
 		interaction_target = nearest
 		interaction_changed.emit(nearest)
+
+
+## Every carried weapon below its top level gains one level (after a boss, stage 39).
+## The weapon keeps its node; only its data and damage change. Returns how many rose.
+func raise_weapon_levels() -> int:
+	var raised: int = 0
+	for carried: Weapon in _weapons:
+		if carried.data.is_max_level():
+			continue
+		carried.data = carried.data.with_level(carried.data.level + 1)
+		carried.damage_multiplier = carried.data.get_damage_multiplier() * damage_bonus
+		raised += 1
+	if raised > 0:
+		weapon_changed.emit(_active_slot, weapon.data)
+	return raised
+
+
+## The next hit within this many seconds is a sure critical hit (a successful parry).
+func grant_sure_crit(seconds: float) -> void:
+	_sure_crit_left = maxf(_sure_crit_left, seconds)
+
+
+## True once if a sure critical hit is waiting; the weapon calls it for every hit.
+func consume_sure_crit() -> bool:
+	if _sure_crit_left <= 0.0:
+		return false
+	_sure_crit_left = 0.0
+	return true
 
 
 ## Switches to the next weapon slot. With fewer than two weapons it does nothing.

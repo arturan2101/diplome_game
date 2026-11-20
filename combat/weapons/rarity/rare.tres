@@ -9,3 +9,4 @@ display_name = "Rare"
 color = Color(0.3, 0.6, 1, 1)
 damage_multiplier = 1.3
 attack_speed_multiplier = 1.1
+crit_chance_bonus = 0.03

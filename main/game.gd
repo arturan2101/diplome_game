@@ -178,6 +178,7 @@ func _ready() -> void:
 		zoom.name = "DebugCameraZoom"
 		add_child(zoom)
 	_apply_perks()
+	player.critical_hits = GameManager.config.arsenal
 	player.add_weapon(GameManager.starting_weapon)
 	player.set_skill(GameManager.starting_skill)
 	hud.bind_player(player)
@@ -697,7 +698,12 @@ func _on_boss_defeated() -> void:
 			servant.tree_entered.connect(servant.queue_free)
 	_servants.clear()
 	hud.hide_boss()
-	hud.show_banner("The Guardian has fallen")
+	# Batch 8: the weapons the player carries grow a level with every boss.
+	if GameManager.config.arsenal and player.raise_weapon_levels() > 0:
+		hud.show_banner("The Guardian has fallen
+Your weapons grow stronger")
+	else:
+		hud.show_banner("The Guardian has fallen")
 	# With the glade, spells are bought from its merchant instead.
 	if _bot == null and GameManager.config.spells_enabled and not GameManager.config.merchant_glade:
 		spell_choice.open_offers.call_deferred(_run_spells.offer(shrine_offer_count, _loot_rng), player.spell_book)

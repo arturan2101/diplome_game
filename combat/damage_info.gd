@@ -18,6 +18,8 @@ var knockback: Vector2 = Vector2.ZERO
 var direction: Vector2 = Vector2.ZERO
 ## True for damage that invulnerability does not absorb (falling into a pit).
 var ignores_invulnerability: bool = false
+## True for a critical hit (stage 39): its number is drawn bigger and golden.
+var is_critical: bool = false
 
 
 func _init(damage_amount: int = 0, damage_source: Node = null, damage_source_id: StringName = &"",

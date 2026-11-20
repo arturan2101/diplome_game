@@ -41,6 +41,7 @@ rarity_icons = {
 &"legendary": ExtResource("icon_legendary"),
 &"rare": ExtResource("icon_rare")
 }
+crit_chance = 0.05
 display_name = "Sword"
 auto_aim_radius = 48.0
 weapon_scene = ExtResource("2_03pyg")

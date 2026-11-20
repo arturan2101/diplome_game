@@ -22,6 +22,22 @@ const COMMON_RARITY: WeaponRarity = preload("res://combat/weapons/rarity/common.
 ## How rare this copy of the weapon is; empty = common. The base .tres files stay
 ## common: a found weapon is a copy of its base resource with a rarity (with_rarity()).
 @export var rarity: WeaponRarity
+## Name of the player's animation for an attack with this weapon: "<name>_<dir>"
+## (the spear thrusts, the daggers stab); a missing animation plays nothing.
+@export var attack_animation: StringName = &"attack"
+
+@export_group("Level and critical hits")
+## Level of this copy: 1 as found, one more after every boss the player kills while
+## carrying it, up to max_level (stage 39, only with ExperimentConfig.arsenal).
+@export var level: int = 1
+@export var max_level: int = 3
+## Extra damage for each level above the first: 0.25 = level 2 hits x1.25, level 3 x1.5.
+@export var damage_per_level: float = 0.25
+## Chance (0-1) that a hit is critical, before the rarity's bonus. 0 = never (enemy
+## weapons). The player's weapons only crit with ExperimentConfig.arsenal.
+@export_range(0.0, 1.0) var crit_chance: float = 0.0
+## A critical hit deals this many times the damage.
+@export var crit_multiplier: float = 2.0
 
 
 ## The rarity of this weapon, never null (common when none is set).
@@ -29,17 +45,65 @@ func get_rarity() -> WeaponRarity:
 	return rarity if rarity != null else COMMON_RARITY
 
 
+## Rarity and level together.
 func get_damage_multiplier() -> float:
-	return get_rarity().damage_multiplier
+	return get_rarity().damage_multiplier * get_level_multiplier()
+
+
+## 1 at level 1, then damage_per_level more for every level.
+func get_level_multiplier() -> float:
+	return 1.0 + damage_per_level * float(maxi(level, 1) - 1)
+
+
+## The chance of a critical hit with the rarity's bonus; 0 for a weapon that never crits.
+func get_crit_chance() -> float:
+	if crit_chance <= 0.0:
+		return 0.0
+	return clampf(crit_chance + get_rarity().crit_chance_bonus, 0.0, 1.0)
+
+
+func is_max_level() -> bool:
+	return level >= max_level
 
 
 func get_attack_speed_multiplier() -> float:
 	return get_rarity().attack_speed_multiplier
 
 
-## The name with the rarity in front, e.g. "Rare Sword".
+## The name with the rarity in front and the level after it once it has grown,
+## e.g. "Rare Sword" or "Rare Sword Lv2".
 func get_full_name() -> String:
-	return "%s %s" % [get_rarity().display_name, display_name]
+	var full_name: String = "%s %s" % [get_rarity().display_name, display_name]
+	return full_name if level <= 1 else "%s Lv%d" % [full_name, level]
+
+
+## A copy of this weapon at the given level (clamped to 1..max_level); this resource
+## itself is not changed.
+func with_level(new_level: int) -> WeaponData:
+	var copy: WeaponData = duplicate() as WeaponData
+	copy.level = clampi(new_level, 1, max_level)
+	return copy
+
+
+## Lines of the weapon card (ui/weapon_card.gd): {"name", "value", "text"}; a higher
+## value is better, the text is what the card shows. Subclasses add their own lines
+## (damage, speed, reach); the base adds the critical hits.
+func get_card_stats() -> Array[Dictionary]:
+	var stats: Array[Dictionary] = []
+	var chance: float = get_crit_chance()
+	if chance > 0.0:
+		stats.append(card_line("Crit", chance, "%d%% x%s" % [roundi(chance * 100.0), _short(crit_multiplier)]))
+	return stats
+
+
+static func card_line(line_name: String, value: float, text: String) -> Dictionary:
+	return {"name": line_name, "value": value, "text": text}
+
+
+## A number with at most one decimal, without a trailing ".0".
+static func _short(value: float) -> String:
+	var rounded: float = snappedf(value, 0.1)
+	return str(int(rounded)) if is_equal_approx(rounded, roundf(rounded)) else "%.1f" % rounded
 
 
 ## A copy of this weapon with the given rarity; this resource itself is not changed.

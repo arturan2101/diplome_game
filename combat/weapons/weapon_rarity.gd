@@ -15,3 +15,5 @@ extends Resource
 ## Attacks are this many times faster: sword swings with their recovery, bow draw
 ## and bow cooldown take this many times less time.
 @export var attack_speed_multiplier: float = 1.0
+## Added to the chance of a critical hit of a weapon that can crit (stage 39).
+@export var crit_chance_bonus: float = 0.0

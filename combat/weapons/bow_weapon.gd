@@ -51,7 +51,7 @@ func _on_attack_released(direction: Vector2) -> void:
 	# Released during the cooldown or without a direction: no shot.
 	if _cooldown_left > 0.0 or direction.is_zero_approx():
 		return
-	_shoot(direction, roundi(_damage_for_hold(hold) * damage_multiplier))
+	_shoot(direction, float(_damage_for_hold(hold)))
 	_cooldown_left = _stats.cooldown / attack_speed_multiplier
 
 
@@ -96,14 +96,19 @@ func _damage_for_hold(hold: float) -> int:
 	return roundi(lerpf(_stats.min_damage, _stats.max_damage, _draw_progress_for(hold)))
 
 
+func is_ranged() -> bool:
+	return true
+
+
 ## One arrow, or a fan of arrow_count arrows over spread_degrees around the direction.
-func _shoot(direction: Vector2, damage: int) -> void:
+## Every arrow is its own hit (its own chance of a critical hit).
+func _shoot(direction: Vector2, base_damage: float) -> void:
 	var count: int = maxi(1, _stats.arrow_count)
 	var spread: float = deg_to_rad(_stats.spread_degrees)
 	for i in count:
 		var angle: float = 0.0 if count == 1 else lerpf(-spread * 0.5, spread * 0.5, float(i) / float(count - 1))
 		var arrow: Arrow = _stats.arrow_scene.instantiate() as Arrow
-		arrow.setup(DamageInfo.new(damage, wielder, source_id), direction.rotated(angle), _stats.arrow_speed, _stats.arrow_range)
+		arrow.setup(make_hit(base_damage), direction.rotated(angle), _stats.arrow_speed, _stats.arrow_range)
 		# The arrow only emits a signal and knows nothing about the bow. If the bow is freed
 		# while the arrow flies, Godot drops this connection and the arrow still works.
 		arrow.landed.connect(_on_arrow_landed)

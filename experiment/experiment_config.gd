@@ -49,6 +49,10 @@ extends Resource
 ## that chase the player, no secret wall broken before its room's fight is over. Off in
 ## the clean series and the playtest.
 @export var full_game_tuning: bool = true
+## Batch 8 (stage 39): weapon levels that grow after every boss, critical hits, the
+## spear, the daggers and the crossbow in chests and the shop, parry and teleport as
+## basic skills. Off in the clean series and the playtest.
+@export var arsenal: bool = true
 ## Soft tension waves of the rules director: a peak of x1.15 and a rest of x0.5
 ## (DirectorSettings.soft_peak_multiplier, soft_rest_multiplier) instead of x1.3 and
 ## x0.3. The other modes have no wave and do not change.
@@ -61,4 +65,4 @@ func to_dictionary() -> Dictionary:
 			"spike_traps": spike_traps, "combat_rooms": combat_rooms, "elite_enemies": elite_enemies,
 			"secret_rooms": secret_rooms, "merchant_glade": merchant_glade, "spell_fusion": spell_fusion,
 			"depth_pressure": depth_pressure, "extra_enemies": extra_enemies, "meta_progression": meta_progression,
-			"full_game_tuning": full_game_tuning}
+			"full_game_tuning": full_game_tuning, "arsenal": arsenal}

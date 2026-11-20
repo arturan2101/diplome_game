@@ -23,6 +23,10 @@ var is_active: bool = true
 var damage_multiplier: float = 1.0
 ## Attacks take this many times less time (weapon rarity).
 var attack_speed_multiplier: float = 1.0
+## Chance (0-1) of a critical hit and how much it multiplies the damage. From the data;
+## the player zeroes the chance when critical hits are off (ExperimentConfig.arsenal).
+var crit_chance: float = 0.0
+var crit_multiplier: float = 2.0
 
 
 ## Called by the wielder right after creating the weapon, before adding it to the tree.
@@ -34,6 +38,30 @@ func setup(weapon_data: WeaponData, weapon_wielder: Node2D, damage_source_id: St
 	# A rare weapon hits harder and a little faster; the base numbers stay in the data.
 	damage_multiplier = weapon_data.get_damage_multiplier()
 	attack_speed_multiplier = weapon_data.get_attack_speed_multiplier()
+	crit_chance = weapon_data.get_crit_chance()
+	crit_multiplier = weapon_data.crit_multiplier
+
+
+## One hit of this weapon: base_damage times damage_multiplier, and sometimes a
+## critical hit (times crit_multiplier). A player who just parried gets a sure critical
+## hit. GameManager.rng is only drawn from when a critical hit is possible, so weapons
+## that never crit (enemies, the clean series) do not change the random stream.
+func make_hit(base_damage: float, knockback: Vector2 = Vector2.ZERO) -> DamageInfo:
+	var amount: int = roundi(base_damage * damage_multiplier)
+	var player: Player = wielder as Player
+	var critical: bool = player != null and player.consume_sure_crit()
+	if not critical and crit_chance > 0.0:
+		critical = GameManager.rng.randf() < crit_chance
+	if critical:
+		amount = roundi(amount * crit_multiplier)
+	var info: DamageInfo = DamageInfo.new(amount, wielder, source_id, knockback)
+	info.is_critical = critical
+	return info
+
+
+## True for weapons that shoot (the bot keeps its distance with them).
+func is_ranged() -> bool:
+	return false
 
 
 ## Called when the attack button is pressed. direction is the aim at that moment.

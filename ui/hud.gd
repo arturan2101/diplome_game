@@ -64,6 +64,9 @@ var _player: Player = null
 var _rarity_bars: Array[ColorRect] = []
 ## Level marks under the spell icons, in slot order (empty without level_pips).
 var _spell_pips: Array[TextureRect] = []
+## Level marks under the weapon icons, under the rarity bar (only with weapon levels,
+## ExperimentConfig.arsenal), in slot order.
+var _weapon_pips: Array[TextureRect] = []
 ## Ruin shards owned (progress between runs on): icon and number under the coins.
 var _shards_label: Label = null
 
@@ -81,6 +84,7 @@ func _ready() -> void:
 	if boss_bar != null:
 		boss_bar.visible = false
 	_make_rarity_bars()
+	_make_weapon_pips()
 	_make_spell_pips()
 	_make_shard_counter()
 
@@ -189,6 +193,10 @@ func _refresh_weapons() -> void:
 			_rarity_bars[i].visible = i < slots.size()
 			if i < slots.size():
 				_rarity_bars[i].color = slots[i].get_rarity().color
+		if i < _weapon_pips.size():
+			_weapon_pips[i].visible = i < slots.size()
+			if i < slots.size():
+				_show_level(_weapon_pips[i], slots[i].level)
 	if attack_button_icon != null:
 		attack_button_icon.texture = slots[active].icon if active < slots.size() else null
 	if swap_button_icon != null:
@@ -224,8 +232,7 @@ func _refresh_spells() -> void:
 		if slot < _spell_pips.size():
 			_spell_pips[slot].visible = spell != null
 			if spell != null:
-				(_spell_pips[slot].texture as AtlasTexture).region = Rect2(
-						Vector2(level_pip_size.x * (spell.level - 1), 0.0), level_pip_size)
+				_show_level(_spell_pips[slot], spell.level)
 		if slot < spell_buttons.size():
 			spell_buttons[slot].visible = spell != null
 		if slot < spell_button_icons.size():
@@ -301,23 +308,47 @@ func get_spell_pips(slot: int) -> TextureRect:
 	return _spell_pips[slot] if slot < _spell_pips.size() else null
 
 
+func get_weapon_pips(slot: int) -> TextureRect:
+	return _weapon_pips[slot] if slot < _weapon_pips.size() else null
+
+
 ## A strip of level marks under every spell icon; the region shows the level.
 func _make_spell_pips() -> void:
 	if level_pips == null:
 		return
 	for icon: TextureRect in spell_icons:
-		var pips: TextureRect = TextureRect.new()
-		pips.name = "LevelPips"
-		pips.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var strip: AtlasTexture = AtlasTexture.new()
-		strip.atlas = level_pips
-		strip.region = Rect2(Vector2.ZERO, level_pip_size)
-		pips.texture = strip
-		pips.position = Vector2((icon.size.x - level_pip_size.x) * 0.5, icon.size.y + level_pip_gap)
-		pips.size = level_pip_size
-		pips.visible = false
-		icon.add_child(pips)
-		_spell_pips.append(pips)
+		_spell_pips.append(_make_pips(icon, icon.size.y + level_pip_gap))
+
+
+## Level marks under every weapon icon, below its rarity bar (weapon levels on).
+func _make_weapon_pips() -> void:
+	if level_pips == null or not GameManager.config.arsenal:
+		return
+	for icon: TextureRect in weapon_icons:
+		_weapon_pips.append(_make_pips(icon, icon.size.y + rarity_bar_gap + rarity_bar_height + level_pip_gap))
+
+
+## A hidden strip of level marks centred under an icon, at this height.
+func _make_pips(icon: TextureRect, top: float) -> TextureRect:
+	var pips: TextureRect = TextureRect.new()
+	pips.name = "LevelPips"
+	pips.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var strip: AtlasTexture = AtlasTexture.new()
+	strip.atlas = level_pips
+	strip.region = Rect2(Vector2.ZERO, level_pip_size)
+	pips.texture = strip
+	pips.position = Vector2((icon.size.x - level_pip_size.x) * 0.5, top)
+	pips.size = level_pip_size
+	pips.visible = false
+	icon.add_child(pips)
+	return pips
+
+
+## Shows this level's picture of the strip (one more mark per level).
+func _show_level(pips: TextureRect, level: int) -> void:
+	var frames: int = maxi(1, roundi(level_pips.get_width() / level_pip_size.x))
+	(pips.texture as AtlasTexture).region = Rect2(
+			Vector2(level_pip_size.x * (clampi(level, 1, frames) - 1), 0.0), level_pip_size)
 
 
 ## A shard icon and count under the coins, only with the progress between runs on.

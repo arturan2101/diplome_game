@@ -9,3 +9,4 @@ display_name = "Legendary"
 color = Color(1, 0.78, 0.2, 1)
 damage_multiplier = 1.7
 attack_speed_multiplier = 1.2
+crit_chance_bonus = 0.06

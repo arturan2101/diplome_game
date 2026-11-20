@@ -24,3 +24,17 @@ extends WeaponData
 ## Arrows per shot, spread evenly over spread_degrees (the elite archer's triple shot).
 @export var arrow_count: int = 1
 @export var spread_degrees: float = 0.0
+
+
+func get_card_stats() -> Array[Dictionary]:
+	var multiplier: float = get_damage_multiplier()
+	var low: int = roundi(min_damage * multiplier)
+	var high: int = roundi(max_damage * multiplier)
+	var draw: float = draw_time / get_attack_speed_multiplier()
+	var stats: Array[Dictionary] = [
+		card_line("Damage", high * arrow_count, "%d-%d" % [low, high] + ("" if arrow_count <= 1 else " x%d" % arrow_count)),
+		card_line("Draw", -draw, "%s s" % _short(draw)),
+		card_line("Range", arrow_range, str(roundi(arrow_range))),
+	]
+	stats.append_array(super())
+	return stats

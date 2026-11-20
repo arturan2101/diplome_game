@@ -28,6 +28,9 @@ const BOW_DRAW_FRAMES: int = 4
 @export var show_damage_numbers: bool = true
 @export var enemy_damage_color: Color = Color("#f4f0e0")
 @export var player_damage_color: Color = Color("#e85a3a")
+## A critical hit's number: golden and bigger.
+@export var crit_damage_color: Color = Color("#ffd24a")
+@export var crit_number_scale: float = 1.4
 ## Height of the number above the actor's centre.
 @export var damage_number_height: float = 14.0
 ## Burst of bits when an enemy dies (bone chips for the skeleton).
@@ -175,8 +178,13 @@ func _on_attack(_step: int, _hits: int) -> void:
 func _on_damaged(info: DamageInfo) -> void:
 	StripSprite.spawn(_body.get_parent(), _body.global_position + offset * 0.5, hit_effect, hit_effect_frames)
 	if show_damage_numbers:
-		DamageNumber.spawn(_body.get_parent(), _body.global_position + Vector2(0.0, -damage_number_height), info.amount,
-				player_damage_color if _body is Player else enemy_damage_color)
+		var color: Color = player_damage_color if _body is Player else enemy_damage_color
+		if info.is_critical:
+			color = crit_damage_color
+		var number: DamageNumber = DamageNumber.spawn(_body.get_parent(),
+				_body.global_position + Vector2(0.0, -damage_number_height), info.amount, color)
+		if number != null and info.is_critical:
+			number.scale = Vector2.ONE * crit_number_scale
 	if _body is Enemy and (_body as Enemy).state == Enemy.State.WINDUP:
 		return
 	play_action("hurt", hurt_time)
