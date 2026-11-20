@@ -357,3 +357,16 @@ Style atlases keep the ruins layout, so a new TileTheme only swaps textures: `<s
 | N | Wall-top autotiles | assets/art/tiles/ruins_wall_set.png | 4x4 cells of 16x16 (64x64) | 16 | index = N + 2E + 4S + 8W, a bit set where that neighbour is not wall; cell (index % 4, index / 4) | generated |
 | N | Light shaft from above (warm, stepped alpha like the light textures, dust motes) | assets/art/fx/light_shaft.png | 32x48 | 1 | bottom centre on the node | generated |
 | N | Mini-boss Bone Keeper: big skeleton priest, violet robe, gold mitre, skull staff | assets/art/enemies/bone_keeper_<anim>_<dir>.png, bone_keeper_frames.tres | 48x48 per frame | idle 4, walk 4, attack 6 (wind-up frames 1-2), summon 6, hurt 2, death 4 | 4 directions; feet on row 46 in every strip | generated |
+
+## Author's list 2026-11-21 (batch 10)
+
+Order from the author: shard, obstacles and wall details, portal and free-standing gate, new boss, enemy attack wind-ups (these replace the red / orange warnings in the game, so the wind-up must read on its own).
+
+### 1. Ruins shard (camp currency)
+
+Generator `tools/art/make_shard.py`.
+
+| P | Asset | File | Size | Frames | Centre / bottom | Status |
+|---|---|---|---|---|---|---|
+| C | Shard pickup: floating blue crystal, a glint runs down the facets, sparkles, the shadow glows blue on frames 1-2 | assets/art/pickups/shard.png | 16x16 per frame (64x16) | 4, loop (8 fps) | crystal centre (7.5, 7), shadow row 14 = ground, same as coin.png | generated |
+| C | Shard HUD icon | assets/art/ui/icon_shard.png | 16x16 | 1 | centred, no shadow, like icon_coin.png | generated |
