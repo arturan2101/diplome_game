@@ -64,7 +64,7 @@ Actor sizes per docs/art-style.md rev 3: collisions in code are unchanged; sprit
 | C | Portal open burst | assets/art/fx/portal_open.png | 32x32 | 5 | - | generated 2026-11-17 |
 | C | Arena door seal (rubble) | assets/art/tiles/door_seal.png | 16x16 | 1 | - | generated 2026-11-17 |
 | N | Spell shrine | assets/art/level/shrine.png, shrine_used.png | 16x24 | 4 glow; used 1 | sprites/shrine.tres, shrine_used.tres | generated 2026-11-17 |
-| N | Falling-stone trap (shadow warning + rock + rubble) | assets/art/level/falling_stone.png | 16x16 | warn2/fall3/rubble1 | - | todo |
+| N | Falling-stone trap (shadow warning + rock + rubble) | assets/art/level/falling_stone.png | 16x16 | warn2/fall3/rubble1 | - | generated 2026-11-18 (see plan group 4) |
 | N | Pillar (column hall template) | assets/art/level/pillar.png | 16x32 | 1 | - | generated 2026-11-17 |
 | N | Crypt props (sarcophagus, broken statue, bones) | assets/art/level/sarcophagus.png, statue.png, bones.png | 32x16 / 16x24 / 16x16 | 1 each | - | generated 2026-11-17 |
 | L | Skill-tree altar (hub before ruins) | assets/art/level/altar.png | 32x32 | 4 glow | - | generated 2026-11-18 (see plan group 2) |
@@ -86,7 +86,7 @@ Assets the code already uses with placeholders; integration = repointing the res
 | C | Wall collapse | actors/effects/wall_collapse.tscn | 16x24 | 6 | `level/breakable_wall.gd`: `collapse_scene` | integrated |
 | C | Nature theme (secret rooms, the glade) with the sunlit floor | level/nature_theme.tres | 16x16 | - | `level/level.gd`: `DEFAULT_REGION_THEMES` (`&"nature"`); `sunlit_floor_tile` (slot 6) under the light from above | integrated |
 | C | Merchant and wandering merchant (idle), goods carpet | assets/art/characters/merchant_frames.tres, merchant_wander_frames.tres, assets/art/props/merchant_carpet.png | 24x24, 32x16 | idle 4 | `actors/npc/merchant.gd`: `frames`, `wandering_frames`, `carpet` | integrated |
-| N | Light shaft from above (soft warm beam, bottom centre on the node) | assets/art/fx/light_shaft.png | about 32x48 | 1 | `level/light_shaft.gd`: `texture` | todo (drawn in code) |
+| N | Light shaft from above (soft warm beam, bottom centre on the node) | assets/art/fx/light_shaft.png | 32x48 | 1 | `level/light_shaft.gd`: `texture` | generated 2026-11-18 (see plan group 4) |
 | N | Shop screen: panel frame, item slots, healing icon | assets/art/ui/trade_panel.png, trade_slot.png, shop_icons.png (slot 0) | 24x24, 20x20, 16x16 | 1 | `ui/shop_screen.tscn` (frame), `ui/shop_screen.gd` (`slot_texture`), `assets/sprites/shop_heal_icon.tres` | integrated |
 | C | Glade: open grass, sunlit patch with old slabs around it, props | nature_tiles_atlas.png slots (7, 0), (6, 0), (0-2, 0); assets/art/props/big_tree.png, broken_column.png | 16x16, 32x26, 16x24 | 1 | `level/glade_theme.tres` (`floor_tiles`, `sunlit_floor_tile`, `paved_floor_tiles`), `generation/glade.tres` (`props`) | integrated |
 
@@ -104,13 +104,13 @@ Biome 1 "Sandstone ruins" (core). Later biomes reuse the same layout: flooded ru
 | S | Wall top (no floor to the south: side walls, wall interiors) | assets/art/tiles/ruins_wall_top.png | 16x16 | 1 | generated (hand-drawn) |
 | S | Floor variants 2 and 3 | assets/art/tiles/ruins_floor_2.png, ruins_floor_3.png | 16x16 | 1 each | generated (hand-drawn) |
 | C | Wall variants x2 (brick, crumbled) | assets/art/tiles/ruins_wall.png (cols 1-2) | 16x16 | 1 each | partly: one brick wall (atlas slot (3, 0)) and the cracked wall (slots (6, 0), (7, 0)); no second plain brick variant |
-| N | Wall autotile set (edges, corners) | assets/art/tiles/ruins_wall_set.png | 16x16 cells, 47-tile or 16-tile blob | - | todo |
+| N | Wall autotile set (edges, corners) | assets/art/tiles/ruins_wall_set.png | 16x16 cells, 16-tile set (4x4) | - | generated 2026-11-18 (see plan group 4) |
 | C | Pit top edge (rim) | assets/art/tiles/pit.png (col 0) | 16x16 | 1 | integrated: ruins_hazards.png slot 0 = ruins_theme pit_tile (tools/art/make_pit_tiles.py) |
 | C | Pit inner | assets/art/tiles/pit.png (col 1) | 16x16 | 1 | integrated: ruins_hazards.png slot 7 = ruins_theme pit_inner_tile |
-| N | Pit side/corner edges | assets/art/tiles/pit.png (cols 2-7) | 16x16 | 1 each | todo |
+| N | Pit side/corner edges | assets/art/tiles/pit_edges.png (8 slots) | 16x16 | 1 each | generated 2026-11-18 (see plan group 4) |
 | C | Spikes | assets/art/tiles/spikes.png | 16x16 | 3 (retracted, half, up) | integrated: static spikes ruins_hazards.png slot 1, timed spikes spikes_timed_frames.tres (see the table above) |
-| L | Flooded ruins floor/wall/pit set | assets/art/tiles/flooded_*.png | 16x16 | as above | todo |
-| L | Jungle ruins floor/wall/pit set | assets/art/tiles/jungle_*.png | 16x16 | as above | todo |
+| L | Flooded ruins floor/wall/pit set | assets/art/tiles/flooded_*.png | 16x16 | as above | generated 2026-11-18 (see plan group 4) |
+| L | Jungle ruins floor/wall/pit set | assets/art/tiles/jungle_*.png | 16x16 | as above | todo (the plan chose fire ruins instead, see plan group 4) |
 
 ## UI icons
 
@@ -336,3 +336,24 @@ Icons, weapons and effects in `tools/art/make_weapons_skills.py`; player strips 
 | C | Crossbow bolt (short, steel head and fletching) | assets/art/weapons/crossbow_bolt.png | 16x16 | 1 | points right, tip at (14, 8) like arrow.png | generated |
 | C | Player spear attack | assets/art/characters/player_spear_{down,up,right,left}.png | 24x24 per frame (96x24) | 4 (thrust and pull back) | 4 directions, feet and shadow like player_idle_<dir>; "up": the spear is drawn above the right shoulder | generated, not in player_frames.tres yet |
 | C | Player dagger attack (two quick stabs) | assets/art/characters/player_daggers_{down,up,right,left}.png | 24x24 per frame (96x24) | 4 | 4 directions, as above | generated, not in player_frames.tres yet |
+
+## Plan group 4: ruin styles by depth (batch 9, art 2026-11-18)
+
+Styles in `tools/art/make_depth_styles.py` (built from the ruins tiles), extras in `tools/art/make_ruins_extras.py`, mini-boss from PixelLab with `tools/art/import_pixellab.py` + `tools/art/finish_bone_keeper.py` (ids and steps in its docstring).
+
+Style atlases keep the ruins layout, so a new TileTheme only swaps textures: `<style>_tiles_atlas.png` slots 0-2 floor (0 plain, the common one), 3 wall front, 4 wall top, 5 cover, 6 cracked wall front, 7 cracked wall top, plus slot 8 = a wall front variant to mix with 3 (`wall_tiles = [Vector2i(3, 0), Vector2i(8, 0)]`); `<style>_hazards.png` slot 0 pit edge, 1 spikes, 7 pit inside, and slot 2 extra.
+
+| P | Asset | File | Size | Frames | Direction / use | Status |
+|---|---|---|---|---|---|---|
+| C | Flooded ruins tiles: wet floor with puddles (slots 1-2), moss, wall with water running down (slot 8) | assets/art/tiles/flooded_tiles_atlas.png | 16x16 slots, 9 in a row (144x16) | 1 each | ruins layout + slot 8 | generated |
+| C | Flooded hazards: 0 deep water edge (stone rim, water below), 1 spikes, 2 shallow water still frame, 7 deep water inside | assets/art/tiles/flooded_hazards.png | 16x16 slots (128x16) | 1 each | deep water works like a pit; shallow water is walkable (slows) | generated |
+| C | Shallow water over the floor, ripples drifting right | assets/art/tiles/flooded_shallow.png | 16x16 per frame (64x16) | 4, loop (6 fps), tiles seamlessly | - | generated |
+| C | Fire ruins tiles: basalt floor (embers on slots 1-2), dark basalt walls, glowing crack on slot 8 | assets/art/tiles/fire_tiles_atlas.png | 16x16 slots, 9 in a row (144x16) | 1 each | ruins layout + slot 8 | generated |
+| C | Fire hazards: 0 lava edge, 1 spikes on basalt, 2 cooled crust (walkable, red seams), 7 lava inside | assets/art/tiles/fire_hazards.png | 16x16 slots (128x16) | 1 each (still frames of the animation) | lava works like a pit | generated |
+| C | Lava animation: row 0 edge, row 1 inside | assets/art/tiles/fire_lava.png | 16x16 per frame (64x32) | 4 per row, loop (6 fps), tiles seamlessly | - | generated |
+| C | Fire decals: glowing coals, ash, cooled splash, big ember | assets/art/tiles/fire_decals.png | 16x16 each (64x16) | 1 each | scatter like floor_decals.png | generated |
+| N | Falling-stone trap: warning shadow (2), the rock falls (3), rubble (1) | assets/art/level/falling_stone.png | 16x16 per frame (96x16) | 6: warn 0-1, fall 2-4, rubble 5 | top-down, the shadow lies where the rock lands | generated |
+| N | Pit edges and corners: 0 floor to the west, 1 east, 2 south, 3 north+west, 4 north+east, 5 south+west, 6 south+east, 7 north+south | assets/art/tiles/pit_edges.png | 16x16 slots (128x16) | 1 each | pit cells; with ruins_hazards slot 0 (floor to the north) and slot 7 (inside) | generated |
+| N | Wall-top autotiles | assets/art/tiles/ruins_wall_set.png | 4x4 cells of 16x16 (64x64) | 16 | index = N + 2E + 4S + 8W, a bit set where that neighbour is not wall; cell (index % 4, index / 4) | generated |
+| N | Light shaft from above (warm, stepped alpha like the light textures, dust motes) | assets/art/fx/light_shaft.png | 32x48 | 1 | bottom centre on the node | generated |
+| N | Mini-boss Bone Keeper: big skeleton priest, violet robe, gold mitre, skull staff | assets/art/enemies/bone_keeper_<anim>_<dir>.png, bone_keeper_frames.tres | 48x48 per frame | idle 4, walk 4, attack 6 (wind-up frames 1-2), summon 6, hurt 2, death 4 | 4 directions; feet on row 46 in every strip | generated |
