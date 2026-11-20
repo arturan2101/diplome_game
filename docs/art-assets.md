@@ -393,3 +393,22 @@ Generator `tools/art/make_portal.py`. The boss portal replaces the arch in a wal
 | C | Boss portal loop: purple light ripples out of the centre, runes pulse, sparks | assets/art/level/portal_loop.png | 32x48 per frame (128x48) | 4, loop (8 fps) | as portal_rise | generated |
 | C | Free-standing gate, closed (dark spiral) | assets/art/level/gate_free_closed.png | 48x32 | 1 | arch centre x 23.5, threshold row 29, shadow row 31; footings x 7-15 and 32-40 | generated |
 | C | Free-standing gate, open portal loop | assets/art/level/gate_free_open.png | 48x32 per frame (192x32) | 4, loop (8 fps) | as gate_free_closed; the opening burst stays fx/portal_open.png | generated |
+
+### 4. New boss: Ruins Warden (replaces the Guardian of the Ruins)
+
+A living marble statue: a hulking colossus, gold crown helmet, purple eyes and glowing cracks, a round stone shield with a purple rune on its left forearm, a torn red sash. No weapon: it fights with the shield and its fists. PixelLab character `601be13f-5f28-4841-99d1-ce60ca3f1344` ("ruins_warden_boss_v3"); attacks, summon, roar, hurt and death are skeleton-v3 clips written pose by pose, so the wind-up poses are exact. Importer `tools/art/finish_warden.py <zip>` (steps and the PixelLab animation names in its docstring).
+
+**Canvas 96x96, not 64x64**: the body is about 52 px tall (close to the 52x56 of the style guide), and the raised shield and the spread arms of the wind-ups need the room; at 64x64 they would be cut off or the boss would shrink to golem size. Feet centre at (48, 92) in every frame of every strip (lowest pixel on row 92), shadow rows 91-93. All strips share that point, so the sprite needs one offset for all animations. The wind-ups replace the red circles: hold the marked frames longer in code if a telegraph needs more time.
+
+| P | Asset | File | Frames (96x96 each) | Wind-up / hit | Status |
+|---|---|---|---|---|---|
+| N | Idle (breathing) | assets/art/enemies/warden_idle_<dir>.png | 4, loop (6 fps) | - | generated |
+| N | Walk (heavy steps) | warden_walk_<dir>.png | 6, loop (10 fps) | - | generated |
+| N | Ground slam: shield and fist lifted overhead, then slammed down into a crouch | warden_slam_<dir>.png | 8 (10 fps) | wind-up 1-3 (arms overhead, hold 3), impact 4, crouch 4-6, recover 7 | generated |
+| N | Boulder throw: picks a boulder off the floor, cocks it behind the head, hurls it | warden_throw_<dir>.png | 5 (10 fps) | pick-up 0-1, wind-up 2-3 (boulder overhead, hold 3), release 4 (spawn the projectile here) | generated |
+| N | Circular wave: arms spread wide, knee up, stomp (stone debris ring on the floor) | warden_wave_<dir>.png | 8 (10 fps) | wind-up 1-3 (arms wide, knee up, hold 3), stomp 4, debris 5-6, recover 7 | generated |
+| N | Summon: fist raised to the sky, trembling | warden_summon_<dir>.png | 6 (8 fps) | raise 1, hold 2-4 (spawn here), lower 5 | generated |
+| N | Roar (going into phase 2): crouch with clenched fists, then bursts up, arms thrown wide | warden_roar_<dir>.png | 8 (10 fps) | crouch 0-3, burst 4-6 | generated |
+| N | Hurt (recoil) | warden_hurt_<dir>.png | 4 (12 fps) | - | generated |
+| N | Death: collapses forward onto its front | warden_death.png | 8 (10 fps), last frame held | - | generated |
+| N | SpriteFrames with all of the above (names `<anim>_<dir>`, `death`) | assets/art/enemies/warden_frames.tres | - | - | generated, not used by guardian.tres yet |
