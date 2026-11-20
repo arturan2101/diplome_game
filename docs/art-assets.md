@@ -370,3 +370,15 @@ Generator `tools/art/make_shard.py`.
 |---|---|---|---|---|---|---|
 | C | Shard pickup: floating blue crystal, a glint runs down the facets, sparkles, the shadow glows blue on frames 1-2 | assets/art/pickups/shard.png | 16x16 per frame (64x16) | 4, loop (8 fps) | crystal centre (7.5, 7), shadow row 14 = ground, same as coin.png | generated |
 | C | Shard HUD icon | assets/art/ui/icon_shard.png | 16x16 | 1 | centred, no shadow, like icon_coin.png | generated |
+
+### 2. Room obstacles and flat wall details
+
+Generator `tools/art/make_obstacles.py`. They replace the half-columns and statues against the walls (`level/level_decor.gd` pillar / statue). Obstacles: the bottom row of the picture is the bottom of the cell the obstacle blocks (draw with the bottom-left corner on the cell's bottom-left; the picture rises above the cell); the base sits on the last rows with a #0f0e14 shadow under it, shifted 1 px right. Wall details: overlays on the brick front of `ruins_wall.png` (rows 6-14 only, nothing on the top face or outside the cell), placed on the same cell as the wall tile.
+
+| P | Asset | File | Size | Frames | Centre / bottom | Status |
+|---|---|---|---|---|---|---|
+| C | Whole column: capital with top face, fluted shaft with a crack, plinth with moss | assets/art/level/obstacle_column.png | 16x32 (blocks 1 cell, rows 16-31) | 1 | centre x 7.5; plinth front rows 28-29, outline row 30, shadow row 31 | generated |
+| C | Broken column: jagged break high on the left, a chip lying on the plinth | assets/art/level/obstacle_column_broken.png | 16x24 (blocks 1 cell, rows 8-23) | 1 | as the whole column, shadow row 23 | generated |
+| C | Rock pile: four rocks lit from the top-left, moss between them | assets/art/level/obstacle_rocks.png | 16x16 (1 cell) | 1 | shadow rows 13-15 | generated |
+| C | Sarcophagus: lid with a sword relief, front with carved panels | assets/art/level/obstacle_sarcophagus.png | 32x16 (2 cells side by side) | 1 | outline row 14, shadow row 15 | generated |
+| C | Wall details: 0 crack, 1 hanging chain, 2 niche with a skull, 3 torn red banner with a gold emblem, 4 moss and ivy (torch stays `level/torch.png`) | assets/art/tiles/wall_details.png | 16x16 slots (80x16) | 1 each | overlay on the wall front cell, rows 6-14 | generated |
