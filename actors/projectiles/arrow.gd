@@ -20,10 +20,17 @@ const GROUP: StringName = &"projectiles"
 @export var width: float = 2.0
 @export var color: Color = Color(0.95, 0.85, 0.55)
 
+## How many targets the arrow flies through after hitting one (the crossbow bolt sets
+## it before setup()); 0 = it stops at the first target.
+var pierce: int = 0
+
 var _info: DamageInfo = null
 var _direction: Vector2 = Vector2.RIGHT
 var _speed: float = 0.0
 var _distance_left: float = 0.0
+## True once a target took damage; hurtboxes already flown through are not hit again.
+var _has_hit: bool = false
+var _passed: Array[RID] = []
 
 
 ## Called by the bow before adding the arrow to the scene.
@@ -45,16 +52,29 @@ func _physics_process(delta: float) -> void:
 	ray.collide_with_areas = true
 	# Point-blank shots: a target already overlapping the start point is still hit.
 	ray.hit_from_inside = true
+	ray.exclude = _passed
 	var result: Dictionary = get_world_2d().direct_space_state.intersect_ray(ray)
 	if not result.is_empty():
 		var hurtbox: Hurtbox = result["collider"] as Hurtbox
 		# A wall or an absorbed hit (invulnerable target) is a miss; the arrow is spent either way.
-		_land(hurtbox != null and hurtbox.receive_hit(_info))
+		if hurtbox != null and hurtbox.receive_hit(_info if _passed.is_empty() else _info.copy()):
+			_has_hit = true
+		if hurtbox == null or pierce <= 0:
+			_land(_has_hit)
+			return
+		# Through this target and on: the rest of the flight starts where it was hit.
+		pierce -= 1
+		_passed.append(hurtbox.get_rid())
+		var hit_position: Vector2 = result["position"]
+		_distance_left -= from.distance_to(hit_position)
+		global_position = hit_position
+		if _distance_left <= 0.0:
+			_land(_has_hit)
 		return
 	global_position = to
 	_distance_left -= travel
 	if _distance_left <= 0.0:
-		_land(false)
+		_land(_has_hit)
 
 
 func _draw() -> void:

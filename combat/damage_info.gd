@@ -28,3 +28,12 @@ func _init(damage_amount: int = 0, damage_source: Node = null, damage_source_id:
 	source = damage_source
 	source_id = damage_source_id
 	knockback = damage_knockback
+
+
+## A separate copy, for one projectile that hits several targets.
+func copy() -> DamageInfo:
+	var info: DamageInfo = DamageInfo.new(amount, source, source_id, knockback)
+	info.direction = direction
+	info.ignores_invulnerability = ignores_invulnerability
+	info.is_critical = is_critical
+	return info

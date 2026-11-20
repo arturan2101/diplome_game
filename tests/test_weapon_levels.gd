@@ -2,12 +2,14 @@ extends TestCase
 ## Headless test for batch 8's weapon levels and critical hits (stage 39): levels in the
 ## data, critical hits that only touch the random stream when they are possible, the
 ## player's switch for them, levels after a boss, the sure critical hit after a parry
-## and the level marks in the HUD.
+## the level marks in the HUD and the card of a weapon on the floor.
 
 const SWORD: String = "res://combat/weapons/sword.tres"
 const BOW: String = "res://combat/weapons/bow.tres"
 const RARE: String = "res://combat/weapons/rarity/rare.tres"
 const ARCHER_BOW: String = "res://actors/enemies/archer_bow.tres"
+const SPEAR: String = "res://combat/weapons/spear.tres"
+const PICKUP_SCENE: String = "res://actors/pickups/weapon_pickup.tscn"
 const PLAYER_SCENE: String = "res://actors/player/player.tscn"
 const GAME_SCENE: String = "res://main/main.tscn"
 const DRAWS: int = 4000
@@ -18,6 +20,7 @@ func run() -> void:
 	_test_make_hit()
 	await _test_player_switch()
 	await _test_levels_in_game()
+	await _test_weapon_card()
 
 
 func _test_data() -> void:
@@ -112,5 +115,38 @@ func _test_levels_in_game() -> void:
 	game._on_boss_defeated()
 	check(game.player.weapon.data.level == 2 and (pips.texture as AtlasTexture).region.position.x == game.hud.level_pip_size.x,
 			"after the boss the weapon is level 2 and shows two marks")
+	game.queue_free()
+	await physics_frames(2)
+
+
+## The card of a weapon on the floor: its name and numbers against the weapon in hand,
+## refreshed when the player swaps weapons in place.
+func _test_weapon_card() -> void:
+	GameManager.start_run(4243)
+	var game: Game = (load(GAME_SCENE) as PackedScene).instantiate() as Game
+	game.death_screen_enabled = false
+	add_child(game)
+	await physics_frames(2)
+	var card: WeaponCard = game.hud.weapon_card
+	check(card != null and not card.visible, "no card while no weapon is near")
+	var pickup: WeaponPickup = (load(PICKUP_SCENE) as PackedScene).instantiate() as WeaponPickup
+	pickup.weapon_data = (load(BOW) as WeaponData).with_rarity(load(RARE) as WeaponRarity)
+	game.add_child(pickup)
+	await physics_frames(1)
+	game.hud._on_interaction_changed(pickup)
+	var rows: Array[PackedStringArray] = card.get_rows()
+	var names: Array[String] = []
+	for row: PackedStringArray in rows:
+		names.append(row[0])
+	check(card.visible and card.get_title() == "Rare Bow", "the card names the rare bow")
+	check(names.has("Damage") and names.has("Draw") and names.has("Hits/s") and names.has("Crit"),
+			"bow lines, the sword's own lines and crit: %s" % [names])
+	check(card.position.y + card.size.y <= game.hud.interact_prompt.position.y + 1.0, "the card sits above the hint")
+	game.player.add_weapon(load(SPEAR) as WeaponData)
+	pickup.interact(game.player)
+	await physics_frames(2)
+	check(card.visible and card.get_title() == "Common Sword", "after a swap in place the card shows the sword left on the floor")
+	game.hud._on_interaction_changed(null)
+	check(not card.visible, "the card hides when the player walks away")
 	game.queue_free()
 	await physics_frames(2)

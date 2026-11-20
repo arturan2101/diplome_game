@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="WeaponPool" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://combat/weapons/weapon_pool.gd" id="1"]
+[ext_resource type="Script" path="res://combat/weapons/weapon_data.gd" id="2"]
+[ext_resource type="Resource" path="res://combat/weapons/sword.tres" id="3"]
+[ext_resource type="Resource" path="res://combat/weapons/bow.tres" id="4"]
+[ext_resource type="Resource" path="res://combat/weapons/spear.tres" id="5"]
+[ext_resource type="Resource" path="res://combat/weapons/daggers.tres" id="6"]
+[ext_resource type="Resource" path="res://combat/weapons/crossbow.tres" id="7"]
+
+[resource]
+script = ExtResource("1")
+weapons = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7")])

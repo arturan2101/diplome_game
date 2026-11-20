@@ -43,6 +43,9 @@ extends CanvasLayer
 ## button itself; both appear only while there is something to take.
 @export var interact_prompt: RichTextLabel
 @export var interact_button: TouchScreenButton
+## Card of the weapon on the floor next to the player (stage 39): its bottom sits this
+## many pixels above the bottom of the hint's parent. Created in code.
+@export var weapon_card_bottom: float = -56.0
 ## Health bar of the boss with its name, shown during the boss fight.
 @export var boss_bar: ProgressBar
 @export var boss_label: Label
@@ -69,6 +72,9 @@ var _spell_pips: Array[TextureRect] = []
 var _weapon_pips: Array[TextureRect] = []
 ## Ruin shards owned (progress between runs on): icon and number under the coins.
 var _shards_label: Label = null
+## Card of the weapon lying next to the player, and that weapon (null = none near).
+var weapon_card: WeaponCard = null
+var _card_target: WeaponPickup = null
 
 
 func _ready() -> void:
@@ -78,6 +84,7 @@ func _ready() -> void:
 	_on_section_changed(GameManager.section_index, GameManager.depth)
 	if fade != null:
 		fade.color.a = 0.0
+	_make_weapon_card()
 	_on_interaction_changed(null)
 	if banner != null:
 		banner.visible = false
@@ -164,6 +171,31 @@ func _on_interaction_changed(target: Interactable) -> void:
 			interact_prompt.text = "%s  [lb]E[rb]" % target.get_prompt()
 	if interact_button != null:
 		interact_button.visible = target != null
+	_card_target = target as WeaponPickup
+	_refresh_weapon_card()
+
+
+func _make_weapon_card() -> void:
+	if interact_prompt == null:
+		return
+	weapon_card = WeaponCard.new()
+	weapon_card.name = "WeaponCard"
+	interact_prompt.get_parent().add_child(weapon_card)
+
+
+## Shows the card of the weapon next to the player against the one in hand, or hides it.
+func _refresh_weapon_card() -> void:
+	if weapon_card == null:
+		return
+	if not is_instance_valid(_card_target) or _card_target.weapon_data == null:
+		weapon_card.visible = false
+		return
+	var in_hand: WeaponData = _player.weapon.data if is_instance_valid(_player) and _player.weapon != null else null
+	weapon_card.show_weapon(_card_target.weapon_data, in_hand)
+	var holder: Control = weapon_card.get_parent() as Control
+	var width: float = holder.size.x if holder != null else get_viewport().get_visible_rect().size.x
+	var bottom: float = (holder.size.y if holder != null else get_viewport().get_visible_rect().size.y) + weapon_card_bottom
+	weapon_card.position = Vector2(roundf((width - weapon_card.size.x) * 0.5), roundf(bottom - weapon_card.size.y))
 
 
 ## Darkens the screen; await it before swapping the section.
@@ -378,6 +410,9 @@ func _on_shards_changed(shards: int) -> void:
 
 
 func _on_weapon_changed(_slot: int, _data: WeaponData) -> void:
+	# A weapon swapped in place now lies where the new one was: the card shows it.
+	# Deferred, because the pickup takes the old weapon only after this signal.
+	_refresh_weapon_card.call_deferred()
 	_refresh_weapons()
 
 

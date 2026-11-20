@@ -1,0 +1,71 @@
+[gd_resource type="Resource" script_class="MeleeWeaponData" load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://combat/weapons/melee_weapon_data.gd" id="1"]
+[ext_resource type="Script" path="res://combat/weapons/melee_attack_step.gd" id="2"]
+[ext_resource type="PackedScene" path="res://combat/weapons/melee_weapon.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/art/weapons/daggers_common.png" id="icon"]
+[ext_resource type="Texture2D" path="res://assets/art/weapons/daggers_rare.png" id="icon_rare"]
+[ext_resource type="Texture2D" path="res://assets/art/weapons/daggers_legendary.png" id="icon_legendary"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/dagger_slash.png" id="slash"]
+
+[sub_resource type="Resource" id="stab_1"]
+script = ExtResource("2")
+damage = 5
+reach = 18.0
+arc_degrees = 100.0
+duration = 0.07
+recovery = 0.07
+slash = ExtResource("slash")
+slash_reach = 13.0
+
+[sub_resource type="Resource" id="stab_2"]
+script = ExtResource("2")
+damage = 5
+reach = 18.0
+arc_degrees = 100.0
+duration = 0.07
+recovery = 0.07
+slash = ExtResource("slash")
+slash_reach = 13.0
+slash_flip = true
+
+[sub_resource type="Resource" id="stab_3"]
+script = ExtResource("2")
+damage = 5
+reach = 18.0
+arc_degrees = 100.0
+duration = 0.07
+recovery = 0.07
+slash = ExtResource("slash")
+slash_reach = 13.0
+
+[sub_resource type="Resource" id="stab_4"]
+script = ExtResource("2")
+damage = 7
+reach = 18.0
+arc_degrees = 100.0
+duration = 0.07
+recovery = 0.07
+knockback = 80.0
+slash = ExtResource("slash")
+slash_reach = 13.0
+slash_flip = true
+
+[resource]
+script = ExtResource("1")
+combo = Array[ExtResource("2")]([SubResource("stab_1"), SubResource("stab_2"), SubResource("stab_3"), SubResource("stab_4")])
+combo_window = 0.35
+combo_end_cooldown = 0.2
+buffer_window = 0.12
+id = &"daggers"
+display_name = "Daggers"
+icon = ExtResource("icon")
+rarity_icons = {
+&"legendary": ExtResource("icon_legendary"),
+&"rare": ExtResource("icon_rare")
+}
+auto_aim_radius = 40.0
+weapon_scene = ExtResource("3")
+attack_animation = &"daggers"
+crit_chance = 0.2
+crit_multiplier = 1.75

@@ -1,0 +1,53 @@
+[gd_resource type="Resource" script_class="MeleeWeaponData" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://combat/weapons/melee_weapon_data.gd" id="1"]
+[ext_resource type="Script" path="res://combat/weapons/melee_attack_step.gd" id="2"]
+[ext_resource type="PackedScene" path="res://combat/weapons/melee_weapon.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/art/weapons/spear_common.png" id="icon"]
+[ext_resource type="Texture2D" path="res://assets/art/weapons/spear_rare.png" id="icon_rare"]
+[ext_resource type="Texture2D" path="res://assets/art/weapons/spear_legendary.png" id="icon_legendary"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/spear_thrust.png" id="thrust"]
+
+[sub_resource type="Resource" id="thrust_1"]
+script = ExtResource("2")
+damage = 13
+reach = 40.0
+arc_degrees = 36.0
+duration = 0.12
+recovery = 0.22
+knockback = 60.0
+slash = ExtResource("thrust")
+slash_reach = 48.0
+slash_centered = false
+slash_pivot = Vector2(0, 8)
+
+[sub_resource type="Resource" id="thrust_2"]
+script = ExtResource("2")
+damage = 17
+reach = 44.0
+arc_degrees = 36.0
+duration = 0.14
+recovery = 0.3
+knockback = 160.0
+slash = ExtResource("thrust")
+slash_reach = 48.0
+slash_centered = false
+slash_pivot = Vector2(0, 8)
+
+[resource]
+script = ExtResource("1")
+combo = Array[ExtResource("2")]([SubResource("thrust_1"), SubResource("thrust_2")])
+combo_window = 0.4
+combo_end_cooldown = 0.3
+buffer_window = 0.2
+id = &"spear"
+display_name = "Spear"
+icon = ExtResource("icon")
+rarity_icons = {
+&"legendary": ExtResource("icon_legendary"),
+&"rare": ExtResource("icon_rare")
+}
+auto_aim_radius = 64.0
+weapon_scene = ExtResource("3")
+attack_animation = &"spear"
+crit_chance = 0.08

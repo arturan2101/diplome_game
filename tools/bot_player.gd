@@ -38,6 +38,9 @@ const KEEP_GOAL_MARGIN: float = 16.0
 ## stands within SHIELD_FRONT_DEGREES of where the shield faces.
 const FLANK_DISTANCE: float = 20.0
 const SHIELD_FRONT_DEGREES: float = 70.0
+## A melee weapon shorter than the profile's attack distance (the daggers) is swung from
+## this much inside its reach; the sword reaches far enough, so nothing changes for it.
+const MELEE_REACH_MARGIN: float = 2.0
 const SPIKE_LOOKAHEAD: float = 24.0
 const SPIKE_SAFETY: float = 0.1
 
@@ -176,7 +179,7 @@ func _movement_direction(player: Player, enemy: Enemy, delta: float, stand_still
 	var goal: Vector2 = _choose_goal(player, enemy)
 	_check_progress(player, goal, delta)
 	# A bow user that likes distance steps back from a close enemy.
-	if enemy != null and not enemy.is_dormant and player.weapon is BowWeapon and profile.bow_keep_distance > 0.0 \
+	if enemy != null and not enemy.is_dormant and player.weapon != null and player.weapon.is_ranged() and profile.bow_keep_distance > 0.0 \
 			and player.global_position.distance_to(enemy.global_position) < profile.bow_keep_distance:
 		return enemy.global_position.direction_to(player.global_position)
 	return _jitter(_direction_along_path(player, goal, delta), delta)
@@ -320,7 +323,7 @@ func _handle_attack(player: Player, enemy: Enemy, delta: float) -> bool:
 		_set_attack(false)
 		return false
 	var distance: float = player.global_position.distance_to(enemy.global_position)
-	if player.weapon is BowWeapon:
+	if player.weapon.is_ranged():
 		if distance <= profile.bow_attack_distance and _can_see(player, enemy):
 			_attack_held_time += delta
 			if _is_attack_held and _attack_held_time >= profile.bow_hold_time:
@@ -333,6 +336,9 @@ func _handle_attack(player: Player, enemy: Enemy, delta: float) -> bool:
 	# Melee: tap the button every other frame while the enemy is in reach;
 	# a careless bot sometimes swings from too far.
 	var reach: float = profile.melee_attack_distance
+	var melee: MeleeWeaponData = player.weapon.data as MeleeWeaponData
+	if melee != null and not melee.combo.is_empty():
+		reach = minf(reach, melee.combo[0].reach - MELEE_REACH_MARGIN)
 	var in_reach: bool = distance <= reach or (distance <= reach * 2.0 and _rng.randf() < profile.miss_chance)
 	_set_attack(in_reach and not _is_attack_held)
 	return false

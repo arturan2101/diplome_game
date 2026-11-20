@@ -17,6 +17,9 @@ const WEAPON_PICKUP_SCENE: PackedScene = preload("res://actors/pickups/weapon_pi
 const COIN_SCENE: PackedScene = preload("res://actors/pickups/coin.tscn")
 const SHARD_SCENE: PackedScene = preload("res://actors/pickups/shard.tscn")
 const DEFAULT_CHEST_WEAPONS: WeaponPool = preload("res://combat/weapons/chest_weapons.tres")
+## With batch 8 (ExperimentConfig.arsenal) chests and the shop also hold the spear, the
+## daggers and the crossbow.
+const ARSENAL_CHEST_WEAPONS: WeaponPool = preload("res://combat/weapons/chest_weapons_arsenal.tres")
 const DEFAULT_RARITY_TABLE: RarityTable = preload("res://combat/weapons/rarity_table.tres")
 const DEFAULT_SPELL_POOL: SpellPool = preload("res://combat/spells/spell_pool.tres")
 const SPELL_PICKUP_SCENE: PackedScene = preload("res://actors/pickups/spell_pickup.tscn")
@@ -56,7 +59,8 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 @export var pause_menu: PauseMenu
 ## Show the death screen when the player dies. Tests and simulations switch it off.
 @export var death_screen_enabled: bool = true
-## Weapons chests can hold. Empty = combat/weapons/chest_weapons.tres.
+## Weapons chests can hold. Empty = combat/weapons/chest_weapons.tres, or with batch 8
+## on combat/weapons/chest_weapons_arsenal.tres.
 @export var chest_weapons: WeaponPool
 ## Chances of common, rare and legendary chest weapons by depth.
 ## Empty = combat/weapons/rarity_table.tres.
@@ -139,7 +143,7 @@ var _servants: Array[Enemy] = []
 
 func _ready() -> void:
 	if chest_weapons == null:
-		chest_weapons = DEFAULT_CHEST_WEAPONS
+		chest_weapons = ARSENAL_CHEST_WEAPONS if GameManager.config.arsenal else DEFAULT_CHEST_WEAPONS
 	if rarity_table == null:
 		rarity_table = DEFAULT_RARITY_TABLE
 	if spell_pool == null:

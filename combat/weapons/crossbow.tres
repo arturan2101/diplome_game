@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="CrossbowWeaponData" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://combat/weapons/crossbow_weapon_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://combat/weapons/crossbow_weapon.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://actors/projectiles/crossbow_bolt.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/art/weapons/crossbow_common.png" id="icon"]
+[ext_resource type="Texture2D" path="res://assets/art/weapons/crossbow_rare.png" id="icon_rare"]
+[ext_resource type="Texture2D" path="res://assets/art/weapons/crossbow_legendary.png" id="icon_legendary"]
+
+[resource]
+script = ExtResource("1")
+damage = 22
+reload_time = 1.1
+bolt_speed = 420.0
+bolt_range = 260.0
+pierce = 1
+bolt_scene = ExtResource("3")
+id = &"crossbow"
+display_name = "Crossbow"
+icon = ExtResource("icon")
+rarity_icons = {
+&"legendary": ExtResource("icon_legendary"),
+&"rare": ExtResource("icon_rare")
+}
+auto_aim_radius = 170.0
+weapon_scene = ExtResource("2")
+attack_animation = &"bow"
+crit_chance = 0.12
+crit_multiplier = 2.5

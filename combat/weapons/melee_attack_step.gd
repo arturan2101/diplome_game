@@ -24,3 +24,8 @@ extends Resource
 @export var slash_reach: float = 24.0
 ## Mirrored, for the swing back.
 @export var slash_flip: bool = false
+## True: the wielder is in the middle of each frame (sword, daggers). False: at
+## slash_pivot, in pixels from the frame's top-left corner (the spear's thrust starts at
+## the left edge).
+@export var slash_centered: bool = true
+@export var slash_pivot: Vector2 = Vector2.ZERO

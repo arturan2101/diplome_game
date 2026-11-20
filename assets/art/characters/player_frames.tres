@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=156 format=3]
+[gd_resource type="SpriteFrames" load_steps=196 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_attack_down.png" id="attack_down"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_attack_left.png" id="attack_left"]
@@ -12,6 +12,10 @@
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_bow_left.png" id="bow_left"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_bow_right.png" id="bow_right"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_bow_up.png" id="bow_up"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_daggers_down.png" id="daggers_down"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_daggers_left.png" id="daggers_left"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_daggers_right.png" id="daggers_right"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_daggers_up.png" id="daggers_up"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_dash_down.png" id="dash_down"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_dash_left.png" id="dash_left"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_dash_right.png" id="dash_right"]
@@ -26,6 +30,10 @@
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_idle_right.png" id="idle_right"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_idle_sample.png" id="idle_sample"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_idle_up.png" id="idle_up"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_spear_down.png" id="spear_down"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_spear_left.png" id="spear_left"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_spear_right.png" id="spear_right"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_spear_up.png" id="spear_up"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_walk_down.png" id="walk_down"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_walk_left.png" id="walk_left"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_walk_right.png" id="walk_right"]
@@ -255,6 +263,70 @@ region = Rect2(96, 0, 24, 24)
 atlas = ExtResource("bow_up")
 region = Rect2(120, 0, 24, 24)
 
+[sub_resource type="AtlasTexture" id="daggers_down_0"]
+atlas = ExtResource("daggers_down")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="daggers_down_1"]
+atlas = ExtResource("daggers_down")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="daggers_down_2"]
+atlas = ExtResource("daggers_down")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="daggers_down_3"]
+atlas = ExtResource("daggers_down")
+region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="daggers_left_0"]
+atlas = ExtResource("daggers_left")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="daggers_left_1"]
+atlas = ExtResource("daggers_left")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="daggers_left_2"]
+atlas = ExtResource("daggers_left")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="daggers_left_3"]
+atlas = ExtResource("daggers_left")
+region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="daggers_right_0"]
+atlas = ExtResource("daggers_right")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="daggers_right_1"]
+atlas = ExtResource("daggers_right")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="daggers_right_2"]
+atlas = ExtResource("daggers_right")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="daggers_right_3"]
+atlas = ExtResource("daggers_right")
+region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="daggers_up_0"]
+atlas = ExtResource("daggers_up")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="daggers_up_1"]
+atlas = ExtResource("daggers_up")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="daggers_up_2"]
+atlas = ExtResource("daggers_up")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="daggers_up_3"]
+atlas = ExtResource("daggers_up")
+region = Rect2(72, 0, 24, 24)
+
 [sub_resource type="AtlasTexture" id="dash_down_0"]
 atlas = ExtResource("dash_down")
 region = Rect2(0, 0, 24, 24)
@@ -433,6 +505,70 @@ region = Rect2(48, 0, 24, 24)
 
 [sub_resource type="AtlasTexture" id="idle_up_3"]
 atlas = ExtResource("idle_up")
+region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_down_0"]
+atlas = ExtResource("spear_down")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_down_1"]
+atlas = ExtResource("spear_down")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_down_2"]
+atlas = ExtResource("spear_down")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_down_3"]
+atlas = ExtResource("spear_down")
+region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_left_0"]
+atlas = ExtResource("spear_left")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_left_1"]
+atlas = ExtResource("spear_left")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_left_2"]
+atlas = ExtResource("spear_left")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_left_3"]
+atlas = ExtResource("spear_left")
+region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_right_0"]
+atlas = ExtResource("spear_right")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_right_1"]
+atlas = ExtResource("spear_right")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_right_2"]
+atlas = ExtResource("spear_right")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_right_3"]
+atlas = ExtResource("spear_right")
+region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_up_0"]
+atlas = ExtResource("spear_up")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_up_1"]
+atlas = ExtResource("spear_up")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_up_2"]
+atlas = ExtResource("spear_up")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="spear_up_3"]
+atlas = ExtResource("spear_up")
 region = Rect2(72, 0, 24, 24)
 
 [sub_resource type="AtlasTexture" id="walk_down_0"]
@@ -763,6 +899,74 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("daggers_down_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("daggers_down_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("daggers_down_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("daggers_down_3")
+}],
+"loop": false,
+"name": &"daggers_down",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("daggers_left_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("daggers_left_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("daggers_left_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("daggers_left_3")
+}],
+"loop": false,
+"name": &"daggers_left",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("daggers_right_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("daggers_right_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("daggers_right_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("daggers_right_3")
+}],
+"loop": false,
+"name": &"daggers_right",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("daggers_up_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("daggers_up_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("daggers_up_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("daggers_up_3")
+}],
+"loop": false,
+"name": &"daggers_up",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("dash_down_0")
 }, {
 "duration": 1.0,
@@ -965,6 +1169,74 @@ animations = [{
 "loop": true,
 "name": &"idle_up",
 "speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("spear_down_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("spear_down_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("spear_down_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("spear_down_3")
+}],
+"loop": false,
+"name": &"spear_down",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("spear_left_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("spear_left_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("spear_left_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("spear_left_3")
+}],
+"loop": false,
+"name": &"spear_left",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("spear_right_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("spear_right_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("spear_right_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("spear_right_3")
+}],
+"loop": false,
+"name": &"spear_right",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("spear_up_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("spear_up_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("spear_up_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("spear_up_3")
+}],
+"loop": false,
+"name": &"spear_up",
+"speed": 12.0
 }, {
 "frames": [{
 "duration": 1.0,

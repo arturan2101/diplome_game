@@ -148,6 +148,9 @@ func _update_slash() -> void:
 	_slash.rotation = _swing_direction.angle()
 	_slash.scale = Vector2.ONE * (_step.reach / maxf(_step.slash_reach, 1.0))
 	_slash.flip_v = _step.slash_flip
+	# The pivot of the picture sits on the wielder; rotation and scale turn around it.
+	var frame_size: Vector2 = Vector2(_slash.texture.get_width() / float(_slash.hframes), _slash.texture.get_height())
+	_slash.offset = Vector2.ZERO if _step.slash_centered else frame_size * 0.5 - _step.slash_pivot
 	_slash.visible = true
 
 

@@ -5,6 +5,7 @@ extends AnimatedSprite2D
 ## stretched to its windup time, or a player's attack), "hurt_<dir>" when the parent's
 ## Health takes damage, and "death" when it dies. An enemy is freed when it dies, so its
 ## death plays on a copy left on the ground (a heap of bones for the skeleton).
+## A player's attack plays the weapon's own animation (WeaponData.attack_animation).
 ## The player also shows lasting actions: "dash_<dir>" during a dash, "block_<dir>"
 ## while the shield is up (it rises and holds), and "bow_<dir>" while drawing the bow
 ## (frames 0-3 follow the draw, 4-5 play on release).
@@ -172,6 +173,10 @@ func _on_attack(_step: int, _hits: int) -> void:
 		if _weapon is BowWeapon and sprite_frames.has_animation(StringName("bow_" + _direction)):
 			return
 		_face(player.get_look_direction())
+		# Each weapon names its own attack (the spear thrusts, the daggers stab).
+		if _weapon != null and _weapon.data != null:
+			play_action(String(_weapon.data.attack_animation), attack_time)
+			return
 	play_action("attack", attack_time)
 
 
