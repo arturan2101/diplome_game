@@ -382,3 +382,14 @@ Generator `tools/art/make_obstacles.py`. They replace the half-columns and statu
 | C | Rock pile: four rocks lit from the top-left, moss between them | assets/art/level/obstacle_rocks.png | 16x16 (1 cell) | 1 | shadow rows 13-15 | generated |
 | C | Sarcophagus: lid with a sword relief, front with carved panels | assets/art/level/obstacle_sarcophagus.png | 32x16 (2 cells side by side) | 1 | outline row 14, shadow row 15 | generated |
 | C | Wall details: 0 crack, 1 hanging chain, 2 niche with a skull, 3 torn red banner with a gold emblem, 4 moss and ivy (torch stays `level/torch.png`) | assets/art/tiles/wall_details.png | 16x16 slots (80x16) | 1 each | overlay on the wall front cell, rows 6-14 | generated |
+
+### 3. Boss portal and free-standing gate
+
+Generator `tools/art/make_portal.py`. The boss portal replaces the arch in a wall after the boss; the free-standing gate is the arch of `gate_*.png` without the brick pillars at its sides, for arenas without a boss.
+
+| P | Asset | File | Size | Frames | Centre / bottom | Status |
+|---|---|---|---|---|---|---|
+| C | Boss portal rising from the floor: 0 purple cracks in the floor, 1 the slabs break and fall in, the slot glows, 2-4 the stone frame rises out of the slot with dust, 5 it stands dark, 6 runes light up and a spark appears inside, 7 the glow spreads | assets/art/level/portal_rise.png | 32x48 per frame (256x48) | 8, once (10 fps), then portal_loop | front view; centre x 15.5, opening x 9-22 / y 11-41; base rows 42-45, outline row 46, shadow row 47 = floor | generated |
+| C | Boss portal loop: purple light ripples out of the centre, runes pulse, sparks | assets/art/level/portal_loop.png | 32x48 per frame (128x48) | 4, loop (8 fps) | as portal_rise | generated |
+| C | Free-standing gate, closed (dark spiral) | assets/art/level/gate_free_closed.png | 48x32 | 1 | arch centre x 23.5, threshold row 29, shadow row 31; footings x 7-15 and 32-40 | generated |
+| C | Free-standing gate, open portal loop | assets/art/level/gate_free_open.png | 48x32 per frame (192x32) | 4, loop (8 fps) | as gate_free_closed; the opening burst stays fx/portal_open.png | generated |
