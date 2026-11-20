@@ -25,7 +25,7 @@ func _test_menu() -> void:
 			"the menu opens on the title screen; the experiment panel is hidden")
 	menu.play_button.pressed.emit()
 	check(menu.loadout_screen.visible and not menu.title_screen.visible, "Play leads to the loadout choice")
-	check(menu.weapon_row.get_child_count() == 2 and menu.skill_row.get_child_count() == 2,
+	check(menu.weapon_row.get_child_count() == 2 and menu.skill_row.get_child_count() == menu.get_offered_skills().size(),
 			"there is a button for each starting weapon and each basic skill")
 	var bow_button: Button = menu.weapon_row.get_child(1) as Button
 	var block_button: Button = menu.skill_row.get_child(1) as Button

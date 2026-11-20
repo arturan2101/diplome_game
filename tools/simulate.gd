@@ -14,6 +14,8 @@ extends Node
 ##   --perks=none|max        the camp's progress of the bot (with the progress between runs
 ##                           on): nothing (default) or every skill at its top and every
 ##                           spell unlocked
+##   --weapon=ID, --skill=ID starting weapon (combat/weapons/ID.tres) and basic skill
+##                           (combat/skills/ID.tres); default sword and dash
 ##   --calibrate             also measure the time the bot spends in each room and in the
 ##                           tunnels, written to user://calibration/<session>.json
 ## Each section is written to the usual JSONL log.
@@ -26,6 +28,8 @@ const SEED_ARG: String = "--seed="
 const LOG_DIR_ARG: String = "--log-dir="
 const CALIBRATE_ARG: String = "--calibrate"
 const PERKS_ARG: String = "--perks="
+const WEAPON_ARG: String = "--weapon="
+const SKILL_ARG: String = "--skill="
 const SIM_LOGS_ROOT: String = "user://sim_logs"
 const CALIBRATION_DIR: String = "user://calibration"
 const DEFAULT_RUNS: int = 5
@@ -61,6 +65,12 @@ func _ready() -> void:
 	_max_sections = _int_argument(SECTIONS_ARG, DEFAULT_SECTIONS)
 	_first_seed = _int_argument(SEED_ARG, DEFAULT_FIRST_SEED)
 	_calibrate = CALIBRATE_ARG in OS.get_cmdline_user_args()
+	var weapon_id: String = _string_argument(WEAPON_ARG, "")
+	if weapon_id != "":
+		GameManager.starting_weapon = load("res://combat/weapons/%s.tres" % weapon_id) as WeaponData
+	var skill_id: String = _string_argument(SKILL_ARG, "")
+	if skill_id != "":
+		GameManager.starting_skill = load("res://combat/skills/%s.tres" % skill_id) as SkillData
 	_profile = BotPlayer.profile_from_command_line()
 	if _profile == null:
 		_profile = BotPlayer.DEFAULT_PROFILE

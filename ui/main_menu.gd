@@ -12,6 +12,8 @@ const RANDOM_SEED_TEXT: String = ""
 ## Weapons and skills offered before a run. Adding one here adds a button.
 @export var weapons: Array[WeaponData] = []
 @export var skills: Array[SkillData] = []
+## Basic skills offered too when batch 8 is on (ExperimentConfig.arsenal): parry, teleport.
+@export var arsenal_skills: Array[SkillData] = []
 @export var title_screen: Control
 @export var loadout_screen: Control
 @export var title_label: Control
@@ -53,7 +55,7 @@ func _ready() -> void:
 	quit_button.visible = not OS.has_feature("mobile")
 	title_label.gui_input.connect(_on_title_input)
 	_selected_weapon = _fill_row(weapon_row, weapons, GameManager.starting_weapon, _on_weapon_chosen)
-	_selected_skill = _fill_row(skill_row, skills, GameManager.starting_skill, _on_skill_chosen)
+	_refresh_skill_row()
 	_setup_debug_panel()
 	_show_loadout(false)
 
@@ -84,6 +86,25 @@ func _unhandled_input(event: InputEvent) -> void:
 func _show_loadout(show_loadout: bool) -> void:
 	title_screen.visible = not show_loadout
 	loadout_screen.visible = show_loadout
+	if show_loadout:
+		# The series may have been switched in the experiment panel since.
+		_refresh_skill_row()
+
+
+## The basic skills this series offers: the core ones, plus batch 8's with it on.
+func get_offered_skills() -> Array[SkillData]:
+	var offered: Array[SkillData] = skills.duplicate()
+	if GameManager.config.arsenal:
+		offered.append_array(arsenal_skills)
+	return offered
+
+
+func _refresh_skill_row() -> void:
+	for button: Node in skill_row.get_children():
+		skill_row.remove_child(button)
+		button.queue_free()
+	var current: SkillData = _selected_skill if _selected_skill != null else GameManager.starting_skill
+	_selected_skill = _fill_row(skill_row, get_offered_skills(), current, _on_skill_chosen)
 
 
 ## Makes one toggle button per item (weapon or skill) and presses the current one.

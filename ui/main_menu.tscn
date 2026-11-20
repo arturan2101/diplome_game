@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://ui/main_menu.gd" id="1"]
 [ext_resource type="Script" path="res://combat/weapons/weapon_data.gd" id="2"]
@@ -7,6 +7,8 @@
 [ext_resource type="Script" path="res://combat/skills/skill_data.gd" id="5"]
 [ext_resource type="Resource" path="res://combat/skills/dash.tres" id="6"]
 [ext_resource type="Resource" path="res://combat/skills/block.tres" id="7"]
+[ext_resource type="Resource" path="res://combat/skills/parry.tres" id="parry"]
+[ext_resource type="Resource" path="res://combat/skills/teleport.tres" id="teleport"]
 
 [node name="MainMenu" type="Control" node_paths=PackedStringArray("title_screen", "loadout_screen", "title_label", "play_button", "quit_button", "weapon_row", "skill_row", "start_button", "back_button", "debug_panel", "mode_option", "seed_edit", "player_id_edit", "playtest_button", "export_button", "status_label")]
 layout_mode = 3
@@ -18,6 +20,7 @@ grow_vertical = 2
 script = ExtResource("1")
 weapons = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4")])
 skills = Array[ExtResource("5")]([ExtResource("6"), ExtResource("7")])
+arsenal_skills = Array[ExtResource("5")]([ExtResource("parry"), ExtResource("teleport")])
 title_screen = NodePath("TitleScreen")
 loadout_screen = NodePath("LoadoutScreen")
 title_label = NodePath("TitleScreen/Box/Title")

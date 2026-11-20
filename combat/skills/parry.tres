@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ParrySkillData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://combat/skills/parry_skill_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://combat/skills/parry_skill.tscn" id="2"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/icon_parry.png" id="icon_tex"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/parry_flash.png" id="flash"]
+
+[resource]
+script = ExtResource("1")
+window = 0.3
+arc_degrees = 180.0
+move_speed_multiplier = 0.5
+stun_time = 1.2
+stun_range = 48.0
+push_speed = 90.0
+invulnerability_after = 0.3
+sure_crit_time = 1.5
+success_cooldown = 0.3
+flash = ExtResource("flash")
+flash_frames = 4
+flash_fps = 12.0
+id = &"parry"
+display_name = "Parry"
+icon = ExtResource("icon_tex")
+cooldown = 1.0
+skill_scene = ExtResource("2")

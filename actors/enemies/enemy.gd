@@ -39,6 +39,8 @@ enum State { IDLE, CHASE, RETREAT, WINDUP, RECOVER, STAGGER, FALLING }
 @export var dormant_color: Color = Color(0.55, 0.58, 0.68)
 ## Tint of an enemy frozen by the blizzard.
 @export var frozen_color: Color = Color(0.55, 0.8, 1.0)
+## Tint of an enemy stunned by the player's parry.
+@export var stunned_color: Color = Color(1.0, 0.95, 0.6)
 ## Animated art has the feet on the second-to-last row of its square frame; it is
 ## drawn so the feet sit this many pixels below the body's centre.
 @export var feet_below_centre: float = 6.0
@@ -65,6 +67,8 @@ var _repath_time_left: float = 0.0
 var _flash_tween: Tween = null
 ## Seconds left in the ice (freeze()).
 var _frozen_left: float = 0.0
+## Seconds the stagger lasts at least (a parry's stun, stun()).
+var _stun_left: float = 0.0
 
 
 func _ready() -> void:
@@ -204,6 +208,23 @@ func apply_knockback(knockback_velocity: Vector2) -> void:
 	velocity = knockback_velocity
 
 
+## Stunned by a parry: the attack is lost and the enemy reels back and stands dazed for
+## at least this many seconds. Bosses, stagger-immune enemies (the golem) and frozen,
+## sleeping or falling ones are not stunned.
+func stun(seconds: float, push: Vector2 = Vector2.ZERO) -> void:
+	if data == null or data.is_boss or is_dormant:
+		return
+	apply_knockback(push)
+	if state != State.STAGGER:
+		return
+	_stun_left = maxf(_stun_left, seconds)
+	visual.modulate = stunned_color
+
+
+func is_stunned() -> bool:
+	return state == State.STAGGER and _stun_left > 0.0
+
+
 func _update_idle() -> void:
 	_target = get_tree().get_first_node_in_group(Player.GROUP) as Node2D
 	if _target != null and global_position.distance_to(_target.global_position) <= data.detection_range:
@@ -258,12 +279,16 @@ func _update_recover(delta: float) -> void:
 
 func _update_stagger(delta: float) -> void:
 	velocity = velocity.move_toward(Vector2.ZERO, data.knockback_friction * delta)
-	if velocity.length() <= stagger_end_speed:
+	_stun_left = maxf(_stun_left - delta, 0.0)
+	if velocity.length() <= stagger_end_speed and _stun_left <= 0.0:
 		_enter(State.CHASE)
 
 
 func _enter(new_state: State) -> void:
 	state = new_state
+	# A stun lasts only through its own stagger (another push keeps it).
+	if new_state != State.STAGGER:
+		_stun_left = 0.0
 	velocity = Vector2.ZERO
 	visual.modulate = Color.WHITE
 	match new_state:

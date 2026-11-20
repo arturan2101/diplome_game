@@ -41,6 +41,8 @@ const SHIELD_FRONT_DEGREES: float = 70.0
 ## A melee weapon shorter than the profile's attack distance (the daggers) is swung from
 ## this much inside its reach; the sword reaches far enough, so nothing changes for it.
 const MELEE_REACH_MARGIN: float = 2.0
+## With the parry, the bot presses when the blow is this share of the window away.
+const PARRY_TIMING: float = 0.5
 const SPIKE_LOOKAHEAD: float = 24.0
 const SPIKE_SAFETY: float = 0.1
 
@@ -75,6 +77,8 @@ var _dodge_from: Enemy = null
 var _dodge_clear_distance: float = 0.0
 var _dodge_direction: Vector2 = Vector2.ZERO
 var _block_time_left: float = 0.0
+## With the parry: the melee enemy whose blow the bot waits for, to press in time.
+var _parry_target: Enemy = null
 var _skill_pressed_last_frame: bool = false
 var _hesitation_left: float = 0.0
 var _jitter_angle: float = 0.0
@@ -245,6 +249,8 @@ func _handle_skill(player: Player, delta: float) -> void:
 		if _block_time_left <= 0.0:
 			Input.action_release(&"skill")
 			_skill_pressed_last_frame = false
+	if _parry_target != null:
+		_time_parry(player)
 	for enemy: Enemy in game.get_enemies():
 		var id: int = enemy.get_instance_id()
 		if enemy.state != Enemy.State.WINDUP:
@@ -278,6 +284,13 @@ func _dodge(player: Player, enemy: Enemy) -> void:
 	if is_area:
 		wanted = [away, (away + side).normalized(), (away - side).normalized(), side, -side]
 	var uses_skill: bool = player.skill != null and player.skill.is_ready() and _rng.randf() < profile.skill_use_chance
+	if uses_skill and player.skill is ParrySkill:
+		# A melee blow is parried standing still; arrows and area slams are walked out of.
+		if not enemy.is_windup_ranged() and not enemy.is_windup_area():
+			_parry_target = enemy
+			_dodge_time_left = 0.0
+			return
+		uses_skill = false
 	var duration: float = profile.dodge_time
 	if is_area:
 		duration = maxf(duration, enemy.get_windup_time_left() + AREA_DODGE_MARGIN)
@@ -290,6 +303,8 @@ func _dodge(player: Player, enemy: Enemy) -> void:
 	var reach: float = player.move_speed * duration + DODGE_SAFETY_MARGIN
 	if uses_skill and player.skill is DashSkill:
 		reach += (player.skill.data as DashSkillData).distance
+	elif uses_skill and player.skill is TeleportSkill:
+		reach += (player.skill.data as TeleportSkillData).distance
 	_dodge_from = null
 	if is_area:
 		# Only the way out of the circle must be safe: past its edge the bot waits.
@@ -313,6 +328,19 @@ func _dodge(player: Player, enemy: Enemy) -> void:
 		# Stand and hold the shield towards the attacker instead of running.
 		_dodge_time_left = 0.0
 		_block_time_left = BLOCK_HOLD_TIME
+
+
+## Presses the parry when the awaited blow is about to land; forgets it if the enemy
+## stopped winding up.
+func _time_parry(player: Player) -> void:
+	if not is_instance_valid(_parry_target) or _parry_target.state != Enemy.State.WINDUP or player.skill == null:
+		_parry_target = null
+		return
+	var window: float = (player.skill.data as ParrySkillData).window
+	if _parry_target.get_windup_time_left() <= window * PARRY_TIMING and player.skill.is_ready():
+		Input.action_press(&"skill")
+		_skill_pressed_last_frame = true
+		_parry_target = null
 
 
 ## Presses or releases the attack action. Returns true if the bot should stand still
