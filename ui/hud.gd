@@ -43,9 +43,10 @@ extends CanvasLayer
 ## button itself; both appear only while there is something to take.
 @export var interact_prompt: RichTextLabel
 @export var interact_button: TouchScreenButton
-## Card of the weapon on the floor next to the player (stage 39): its bottom sits this
-## many pixels above the bottom of the hint's parent. Created in code.
-@export var weapon_card_bottom: float = -56.0
+## Card of the weapon on the floor next to the player (stage 39), created in code: its
+## top-right corner sits this far from the top-right of the screen, under the coins and
+## shards and above the touch buttons, so it never covers the player in the middle.
+@export var weapon_card_margin: Vector2 = Vector2(8.0, 48.0)
 ## Health bar of the boss with its name, shown during the boss fight.
 @export var boss_bar: ProgressBar
 @export var boss_label: Label
@@ -194,8 +195,7 @@ func _refresh_weapon_card() -> void:
 	weapon_card.show_weapon(_card_target.weapon_data, in_hand)
 	var holder: Control = weapon_card.get_parent() as Control
 	var width: float = holder.size.x if holder != null else get_viewport().get_visible_rect().size.x
-	var bottom: float = (holder.size.y if holder != null else get_viewport().get_visible_rect().size.y) + weapon_card_bottom
-	weapon_card.position = Vector2(roundf((width - weapon_card.size.x) * 0.5), roundf(bottom - weapon_card.size.y))
+	weapon_card.position = Vector2(roundf(width - weapon_card.size.x - weapon_card_margin.x), weapon_card_margin.y)
 
 
 ## Darkens the screen; await it before swapping the section.

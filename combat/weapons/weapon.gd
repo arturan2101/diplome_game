@@ -23,8 +23,9 @@ var is_active: bool = true
 var damage_multiplier: float = 1.0
 ## Attacks take this many times less time (weapon rarity).
 var attack_speed_multiplier: float = 1.0
-## Chance (0-1) of a critical hit and how much it multiplies the damage. From the data;
-## the player zeroes the chance when critical hits are off (ExperimentConfig.arsenal).
+## Chance (0-1) of a critical hit and how much it multiplies the damage. The chance is
+## 0 unless the player switches critical hits on (ExperimentConfig.arsenal): then it
+## comes from the data. Enemy weapons and weapons made elsewhere (tests) never crit.
 var crit_chance: float = 0.0
 var crit_multiplier: float = 2.0
 
@@ -38,7 +39,6 @@ func setup(weapon_data: WeaponData, weapon_wielder: Node2D, damage_source_id: St
 	# A rare weapon hits harder and a little faster; the base numbers stay in the data.
 	damage_multiplier = weapon_data.get_damage_multiplier()
 	attack_speed_multiplier = weapon_data.get_attack_speed_multiplier()
-	crit_chance = weapon_data.get_crit_chance()
 	crit_multiplier = weapon_data.crit_multiplier
 
 

@@ -48,7 +48,7 @@ var heal_multiplier: float = 1.0
 var skill_cooldown_multiplier: float = 1.0
 var coin_magnet_radius: float = 0.0
 ## Critical hits of the player's weapons (ExperimentConfig.arsenal, set by the game
-## before the weapons are made). Off: every weapon's crit chance is 0.
+## before the weapons are made). On: each weapon crits with its data's chance; off: never.
 var critical_hits: bool = false
 
 ## Last non-zero movement direction (unit vector).
@@ -182,8 +182,8 @@ func _create_weapon(weapon_data: WeaponData) -> Weapon:
 	var new_weapon: Weapon = weapon_data.weapon_scene.instantiate() as Weapon
 	new_weapon.setup(weapon_data, self)
 	new_weapon.damage_multiplier *= damage_bonus
-	if not critical_hits:
-		new_weapon.crit_chance = 0.0
+	if critical_hits:
+		new_weapon.crit_chance = weapon_data.get_crit_chance()
 	add_child(new_weapon)
 	return new_weapon
 

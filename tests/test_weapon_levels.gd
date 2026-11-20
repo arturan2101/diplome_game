@@ -141,7 +141,9 @@ func _test_weapon_card() -> void:
 	check(card.visible and card.get_title() == "Rare Bow", "the card names the rare bow")
 	check(names.has("Damage") and names.has("Draw") and names.has("Hits/s") and names.has("Crit"),
 			"bow lines, the sword's own lines and crit: %s" % [names])
-	check(card.position.y + card.size.y <= game.hud.interact_prompt.position.y + 1.0, "the card sits above the hint")
+	var holder: Control = card.get_parent() as Control
+	check(not Rect2(card.position, card.size).has_point(holder.size * 0.5) and card.position.x + card.size.x <= holder.size.x,
+			"the card sits on the right, away from the player in the middle")
 	game.player.add_weapon(load(SPEAR) as WeaponData)
 	pickup.interact(game.player)
 	await physics_frames(2)
