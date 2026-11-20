@@ -686,13 +686,13 @@
 
 ## Этап 39. Пачка 8: оружие и навыки
 
-**План (решения записаны в design.md, «Пачка 8»):** флаг конфига `arsenal` (полная игра — да, чистая серия и плейтест — нет); уровни оружия 1–3 за убитых боссов; крит у каждого оружия; карточка оружия у подсказки «Take»; копьё и кинжалы данными, арбалет своим классом; парирование и телепорт как базовые навыки; поддержка в боте; тесты и ручная сцена.
+**План (решения записаны в design.md, «Пачка 8»):** флаг конфига `arsenal` (полная игра — да, чистая серия и плейтест — нет); уровни оружия 1–3 за убитых боссов; крит у каждого оружия; карточка оружия; копьё и кинжалы данными, арбалет своим классом; парирование и телепорт как базовые навыки; поддержка в боте; тесты и ручная сцена.
 
 **Что сделано**
 - Флаг `ExperimentConfig.arsenal` (`experiment/*.tres`), ключ `arsenal` в словаре конфига в логе.
 - Уровни: `WeaponData.level`, `max_level` (3), `damage_per_level` (+25%), `get_level_multiplier()`, `with_level()`; `Player.raise_weapon_levels()` после каждого убитого Хранителя (баннер «Your weapons grow stronger»); метки уровня под иконками оружия в HUD.
 - Крит: `WeaponData.crit_chance`, `crit_multiplier`, `WeaponRarity.crit_chance_bonus`; все удары идут через `Weapon.make_hit()` (урон × множитель, бросок крита через `GameManager.rng` только если крит возможен); `DamageInfo.is_critical` — золотое увеличенное число; `Player.critical_hits` (ставит игра по флагу), `grant_sure_crit()` / `consume_sure_crit()` (верный крит после парирования).
-- Карточка оружия `ui/weapon_card.gd` (`WeaponCard`, строится кодом): имя в цвете редкости, строки `WeaponData.get_card_stats()` рядом с оружием в руке, лучше — зелёным, хуже — красным; HUD показывает её над подсказкой и обновляет после обмена на месте.
+- Карточка оружия `ui/weapon_card.gd` (`WeaponCard`, строится кодом): имя в цвете редкости, строки `WeaponData.get_card_stats()` рядом с оружием в руке, лучше — зелёным, хуже — красным; HUD показывает её справа сверху (под монетами, не закрывая игрока) и обновляет после обмена на месте.
 - Копьё `combat/weapons/spear.tres` и кинжалы `daggers.tres` — данные `MeleeWeaponData`; `MeleeAttackStep.slash_centered`, `slash_pivot` (укол копья начинается от игрока); `WeaponData.attack_animation` и анимации `spear_*`, `daggers_*` в `player_frames.tres` (пересобран `tools/build_player_frames.py`, добавились только новые анимации).
 - Арбалет: `CrossbowWeaponData`, `CrossbowWeapon`, `combat/weapons/crossbow.tres`, болт `actors/projectiles/crossbow_bolt.tscn`; `Arrow.pierce` (болт пролетает сквозь врага), `DamageInfo.copy()`.
 - Пул сундуков и магазина при флаге — `combat/weapons/chest_weapons_arsenal.tres` (пять видов).
