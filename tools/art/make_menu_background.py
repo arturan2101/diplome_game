@@ -7,9 +7,10 @@
 - the ruins gate on the right: a ruined wall with ivy that crumbles away right of the
   gate (the sunset shows behind it), pilasters with burning torches, an arch whose
   wedge stones carry purple runes (like the logo), and inside a tunnel going down:
-  receding inner arches and steps into darkness towards a faint purple doorway far
-  below; a light purple glow: the arch's inner rim lit, the runes bright, a thin mist
-  over the threshold and a few sparks;
+  receding inner arches and steps towards a bright purple doorway far below (the
+  author's pick of three takes). A strong purple light pours out of it: a halo and rays
+  in the tunnel, the arches' edges lit, the stone, the wall and the ground in front
+  tinted in fading rings, mist over the threshold and sparks rising around the gate;
 - the camp on the left: an A-frame canvas tent in perspective (front flaps tied back,
   side roof, ridge pole, guy ropes and pegs), a backpack, log seats, the fire pit with
   stones and logs and its warm light on the grass;
@@ -450,46 +451,82 @@ def torch(cv, x, y):
 
 # --- the purple light of the gate -------------------------------------------------------
 
+# Colours under purple light, strong and soft. Stone and brick keep their light / dark
+# order (mortar stays dark), grass and path take a violet cast.
+STRONG = {"m": "U", "T": "H", "s": "H", "e": "h", "F": "h", "f": "h", "5": "h", "g": "5", "k": "g",
+          "N": "h", "n": "5", "G": "H", "V": "H", "w": "H", "v": "h", "X": "H", "x": "U", "W": "U"}
+SOFT = {"m": "H", "T": "H", "s": "h", "e": "h", "F": "5", "f": "5", "5": "h", "g": "g",
+        "N": "h", "n": "5", "G": "h", "V": "H", "w": "h", "v": "5", "X": "h", "x": "H", "W": "H"}
+
+
 def purple_glow(cv):
-    """A light glow (the author preferred the dark tunnel): the arch's inner rim lit
-    purple, the runes brighter, a little mist over the threshold and a few sparks; the
-    tunnel stays dark with its faint doorway, the wall and the ground are not tinted."""
+    """The author's pick: a strong glow. A bright doorway deep in the tunnel with a halo
+    and rays, the stone, wall and ground around the gate lit purple in fading rings,
+    mist over the threshold and sparks rising around the gate."""
     rnd = random.Random(13)
-    R1 = ARCH_R + ARCH_T
-    # the inner rim of the arch: a bright line, a softer one behind it
-    for y in range(ARCH_SPRING - R1, ARCH_FLOOR + 1):
-        for x in range(ARCH_CX - R1, ARCH_CX + R1 + 1):
-            if in_arch(x, y, ARCH_R) or not in_arch(x, y, R1):
+    cx, cy = ARCH_CX, ARCH_SPRING + 40
+    # 1. inside the tunnel: light from the far doorway, the arches' edges catch it
+    vx, vy = DOOR
+    for y in range(ARCH_SPRING - ARCH_R, ARCH_FLOOR + 1):
+        for x in range(ARCH_CX - ARCH_R, ARCH_CX + ARCH_R + 1):
+            if not in_arch(x, y, ARCH_R):
                 continue
-            if not in_arch(x, y, ARCH_R + 1.5):
-                if in_arch(x, y, ARCH_R + 3) and (x + y) % 2 == 0 and key_at(cv, x, y) != "g":
+            k = key_at(cv, x, y)
+            d = math.hypot(x - vx, (y - vy) * 1.3)
+            if k in ("o", "d"):
+                if d < 9:
+                    cv.put(x, y, "H")
+                elif d < 20:
                     cv.put(x, y, "h")
+                elif d < 34 and (x + y) % 2 == 0:
+                    cv.put(x, y, "h")
+                elif d < 48 and (x + y) % 4 == 0:
+                    cv.put(x, y, "5")
+            elif k in ("5", "g", "k", "e", "f"):
+                cv.put(x, y, "H" if d < 30 else "h")
+    # the doorway itself: a bright slit with rays fanning out towards the opening
+    for y in range(vy - 9, vy + 5):
+        for x in range(vx - 4, vx + 5):
+            cv.put(x, y, "U" if abs(x - vx) < 2 and vy - 7 < y < vy + 3 else "H")
+    for i in range(9):
+        ang = math.pi * (0.1 + 0.8 * i / 8)
+        for t in range(10, 46, 2):
+            x, y = vx + math.cos(ang) * t * 1.1, vy - 4 - math.sin(ang) * t * 0.9
+            if in_arch(int(x), int(y), ARCH_R - 1) and key_at(cv, x, y) in ("o", "d", "5", "h"):
+                cv.put(x, y, "H" if t < 24 else "h")
+    # 2. around the gate: the stone, the wall, the ground in front take the light,
+    #    strong close to the opening, in a checker further out, sparse at the edge
+    for y in range(40, H_):
+        for x in range(360, 620):
+            if in_arch(x, y, ARCH_R):
                 continue
-            cv.put(x, y, "H" if y < ARCH_FLOOR - 30 or (x + y) % 3 else "h")
-    # the runes in the wedge stones: a white heart and a purple halo
-    n_stones = 13
-    for i in range(2, n_stones, 2):
-        ang = i * math.pi / n_stones + math.pi / n_stones / 2
-        r = ARCH_R + ARCH_T / 2
-        x, y = ARCH_CX + math.cos(ang) * r, ARCH_SPRING - math.sin(ang) * r
-        cv.put(x, y, "U")
-        for dx, dy in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
-            if key_at(cv, x + dx, y + dy) in ("s", "e", "T"):
-                cv.put(x + dx, y + dy, "h")
-    ky = ARCH_SPRING - R1 - 4
-    for x, y in ((0, 4), (0, 5)):
-        cv.put(ARCH_CX + x, ky + y, "U")
-    # a thin purple mist over the threshold, sparks drifting out of the tunnel
-    for x in range(ARCH_CX - ARCH_R - 10, ARCH_CX + ARCH_R + 11):
-        top = ARCH_FLOOR - 3 + 2 * math.sin(x / 6.0)
-        for y in range(int(top), ARCH_FLOOR + 5):
-            if (x + y) % 2 == 0 and abs(x - ARCH_CX) < ARCH_R + 10 - (y - top) * 3:
-                cv.put(x, y, "h")
-    for _ in range(18):
-        x = ARCH_CX + rnd.uniform(-ARCH_R - 20, ARCH_R + 20)
-        y = rnd.uniform(ARCH_SPRING - 20, ARCH_FLOOR - 4)
-        if not in_arch(int(x), int(y), ARCH_R - 4):
-            cv.put(x, y, rnd.choice("HHU"))
+            d = math.hypot((x - cx) / 118.0, (y - cy) / (96.0 if y < ARCH_FLOOR else 52.0))
+            k = key_at(cv, x, y)
+            if k is None or d >= 1.0:
+                continue
+            if d < 0.52:
+                new = STRONG.get(k)
+            elif d < 0.74:
+                new = (STRONG if (x + y) % 2 == 0 else SOFT).get(k)
+            elif d < 0.88:
+                new = SOFT.get(k) if (x + y) % 2 == 0 else None
+            else:
+                new = SOFT.get(k) if (x + 2 * y) % 4 == 0 else None
+            if new:
+                cv.put(x, y, new)
+    # 3. purple mist rolling out over the threshold, sparks rising around the gate
+    for x in range(ARCH_CX - 80, ARCH_CX + 81):
+        top = ARCH_FLOOR - 6 + 3 * math.sin(x / 7.0)
+        for y in range(int(top), ARCH_FLOOR + 8):
+            if (x + y) % 2 == 0 and abs(x - ARCH_CX) < 80 - (y - top) * 2:
+                cv.put(x, y, "H" if y < top + 3 and abs(x - ARCH_CX) < ARCH_R else "h")
+    for _ in range(70):
+        ang = rnd.random() * math.pi
+        r = rnd.uniform(ARCH_R + 4, ARCH_R + 70)
+        x, y = cx + math.cos(ang) * r * 1.1, ARCH_SPRING + 30 - math.sin(ang) * r
+        cv.put(x, y, rnd.choice("HHHU"))
+        if rnd.random() < 0.3:
+            cv.put(x, y + 1, "h")
 
 
 # --- camp ------------------------------------------------------------------------------
