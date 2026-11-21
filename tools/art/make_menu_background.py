@@ -4,10 +4,13 @@
   striped retro sun setting on the horizon, clouds lit from below, stars and a moon;
 - far mountains with a stepped temple, ruined towers and an aqueduct, their sun-facing
   edges rimmed with sunset light, a mist band in the valley;
-- the ruins gate on the right: a ruined wall with ivy, pilasters with burning torches,
-  an arch whose wedge stones carry glowing purple runes (like the logo), and inside a
-  tunnel going down: receding inner arches and steps into darkness, a faint purple
-  doorway far below;
+- the ruins gate on the right: a ruined wall with ivy that crumbles away right of the
+  gate (the sunset shows behind it), pilasters with burning torches, an arch whose
+  wedge stones carry purple runes (like the logo), and inside a tunnel going down:
+  receding inner arches and steps towards a bright purple doorway far below. A strong
+  purple light pours out of it: rays in the tunnel, the arches' edges lit, the stone,
+  the wall and the ground in front tinted in fading rings, mist over the threshold and
+  sparks rising around the gate;
 - the camp on the left: an A-frame canvas tent in perspective (front flaps tied back,
   side roof, ridge pole, guy ropes and pegs), a backpack, log seats, the fire pit with
   stones and logs and its warm light on the grass;
@@ -32,6 +35,9 @@ FIRE_POS = (FIRE[0] - 16, FIRE[1] - 28)  # top-left of the 32x32 flame overlay
 SUN = (250, HORIZON + 4, 30)
 ARCH_CX, ARCH_SPRING, ARCH_R, ARCH_T = 478, 186, 46, 17
 ARCH_FLOOR = 300
+TORCHES = []                            # filled by gate(), drawn after the purple glow
+DOOR = (ARCH_CX, 250)                   # the far doorway: the source of the purple light
+TUNNEL = (0.86, 0.72, 0.58, 0.44, 0.32)  # sizes of the receding inner arches
 
 PAL = {k: rgb(k)[:3] for k in C}
 
@@ -273,21 +279,45 @@ def gate(cv):
     # ruined wall with brick courses, broken top, ivy
     x0 = 382
     tops = {}
+
+    def row_end(row):
+        """The wall crumbles away on the right: each brick course ends a bit further
+        out than the one above it, on a half-brick step."""
+        return 566 + min(44, max(0, row - 2) * 3) + (9 if (row * 7) % 3 == 0 else 0)
+
     for x in range(x0, W_):
-        tops[x] = int(96 + 10 * math.sin(x / 15.0) + 7 * math.sin(x / 4.7) + (30 if x > 600 else 0) + (18 if x < 400 else 0))
+        tops[x] = int(96 + 10 * math.sin(x / 15.0) + 7 * math.sin(x / 4.7) + (18 if x < 400 else 0))
         for y in range(tops[x], ARCH_FLOOR + 4):
             row = (y - 90) // 8
+            if x >= row_end(row):
+                continue
             joint = (y - 90) % 8 == 0 or (x + (row % 2) * 9) % 18 == 0
-            cv.put(x, y, "g" if joint else ("f" if (y - 90) % 8 == 1 else "5"))
-        cv.put(x, tops[x], "e")
-        cv.put(x, tops[x] + 1, "F")
+            k = "g" if joint else ("f" if (y - 90) % 8 == 1 else "5")
+            if x == row_end(row) - 1 and not joint:
+                k = "e"                                  # the broken end of each brick course
+            cv.put(x, y, k)
+        if x < row_end((tops[x] - 90) // 8):
+            cv.put(x, tops[x], "e")
+            cv.put(x, tops[x] + 1, "F")
+    # the top of each step of the broken edge, and fallen bricks at its foot
+    for row in range(0, (ARCH_FLOOR - 90) // 8 + 1):
+        y = 90 + row * 8
+        for x in range(row_end(row - 1) if row else x0, row_end(row)):
+            if y >= tops.get(x, 999):
+                cv.put(x, y, "F")
+    for bx, by in ((618, 302), (630, 296), (612, 290), (636, 306)):
+        for y in range(by - 4, by):
+            for x in range(bx, bx + 8):
+                cv.put(x, y, "F" if y == by - 4 else ("5" if x < bx + 6 else "g"))
+        for x in range(bx - 1, bx + 9):
+            cv.put(x, by, "k")
     # the tunnel inside: receding arches and steps going down into the dark
-    vx, vy = ARCH_CX, 250
+    vx, vy = DOOR
     for y in range(ARCH_SPRING - ARCH_R, ARCH_FLOOR + 1):
         for x in range(ARCH_CX - ARCH_R, ARCH_CX + ARCH_R + 1):
             if in_arch(x, y, ARCH_R):
                 cv.put(x, y, "o")
-    for i, s in enumerate((0.86, 0.72, 0.58, 0.44, 0.32)):
+    for i, s in enumerate(TUNNEL):
         r = ARCH_R * s
         spring = vy + (ARCH_SPRING - vy) * s
         floor = vy + (ARCH_FLOOR - vy) * s
@@ -373,10 +403,10 @@ def gate(cv):
             cv.put(x, ARCH_FLOOR - 4, "T")
             for y in range(ARCH_FLOOR - 3, ARCH_FLOOR + 2):
                 cv.put(x, y, "s" if x < px + 8 else "e")
-        torch(cv, px + 5, ARCH_SPRING + 10)
+        TORCHES.append((px + 5, ARCH_SPRING + 10))
     # ivy hanging from the wall top and the cornice
     for _ in range(26):
-        x = rnd.randrange(x0 + 4, W_ - 2)
+        x = rnd.randrange(x0 + 4, 566)
         y0 = tops[x] + 1 if rnd.random() < 0.6 else ky - 4
         length = rnd.randint(8, 34)
         for k in range(length):
@@ -417,6 +447,81 @@ def torch(cv, x, y):
         for i, ch in enumerate(row):
             if ch != ".":
                 cv.put(x - 2 + i + (1 if j < 2 else 0), y - 7 + j, ch)
+
+
+# --- the purple light of the gate -------------------------------------------------------
+
+# Colours under purple light, strong and soft. Stone and brick keep their light / dark
+# order (mortar stays dark), grass and path take a violet cast.
+STRONG = {"m": "U", "T": "U", "s": "H", "e": "h", "F": "h", "f": "h", "5": "h", "g": "5", "k": "g",
+          "N": "h", "n": "5", "G": "H", "V": "H", "w": "H", "v": "h", "X": "H", "x": "U", "W": "U"}
+SOFT = {"m": "H", "T": "H", "s": "h", "e": "h", "F": "5", "f": "5", "5": "h", "g": "g",
+        "N": "h", "n": "5", "G": "h", "V": "H", "w": "h", "v": "5", "X": "h", "x": "H", "W": "H"}
+
+
+def purple_glow(cv):
+    rnd = random.Random(13)
+    cx, cy = ARCH_CX, ARCH_SPRING + 22
+    # 1. inside the tunnel: the light comes from the far end, so each receding arch
+    #    is brighter than the one in front of it; arch edges and step tops catch it
+    vx, vy = DOOR
+    fills = ("k", "5", "h", "h", "H", "H")
+    edges = ("h", "h", "H", "H", "U", "U")
+    for y in range(ARCH_SPRING - ARCH_R, ARCH_FLOOR + 1):
+        for x in range(ARCH_CX - ARCH_R, ARCH_CX + ARCH_R + 1):
+            if not in_arch(x, y, ARCH_R):
+                continue
+            level = 0
+            for sc in TUNNEL:
+                r = ARCH_R * sc
+                if in_arch(x, y, r, vy + (ARCH_SPRING - vy) * sc, vx, vy + (ARCH_FLOOR - vy) * sc):
+                    level += 1
+            k = key_at(cv, x, y)
+            if k in ("o", "d"):
+                fill = fills[level]
+                if level in (2, 4) and (x + y) % 2 == 0:
+                    fill = fills[level - 1]          # a soft step between two levels
+                cv.put(x, y, fill)
+            else:
+                cv.put(x, y, edges[level])
+    # the far doorway: a tall arched opening, white at its heart
+    for y in range(vy - 12, vy + 4):
+        for x in range(vx - 4, vx + 5):
+            if in_arch(x, y, 4.5, vy - 7, vx, vy + 3):
+                cv.put(x, y, "U" if in_arch(x, y, 2.5, vy - 6, vx, vy + 3) else "H")
+    # 2. around the gate: the stone, the wall, the ground in front take the light,
+    #    strong close to the opening, in a checker further out, sparse at the edge
+    for y in range(40, H_):
+        for x in range(360, 620):
+            if in_arch(x, y, ARCH_R):
+                continue
+            d = math.hypot((x - cx) / 128.0, (y - cy) / (112.0 if y < ARCH_FLOOR else 60.0))
+            k = key_at(cv, x, y)
+            if k is None or d >= 1.0:
+                continue
+            if d < 0.52:
+                new = STRONG.get(k)
+            elif d < 0.74:
+                new = (STRONG if (x + y) % 2 == 0 else SOFT).get(k)
+            elif d < 0.88:
+                new = SOFT.get(k) if (x + y) % 2 == 0 else None
+            else:
+                new = SOFT.get(k) if (x + 2 * y) % 4 == 0 else None
+            if new:
+                cv.put(x, y, new)
+    # 3. purple mist rolling out over the threshold, sparks rising around the gate
+    for x in range(ARCH_CX - 80, ARCH_CX + 81):
+        top = ARCH_FLOOR - 6 + 3 * math.sin(x / 7.0)
+        for y in range(int(top), ARCH_FLOOR + 8):
+            if (x + y) % 2 == 0 and abs(x - ARCH_CX) < 80 - (y - top) * 2:
+                cv.put(x, y, "H" if y < top + 3 and abs(x - ARCH_CX) < ARCH_R else "h")
+    for _ in range(70):
+        ang = rnd.random() * math.pi
+        r = rnd.uniform(ARCH_R + 4, ARCH_R + 70)
+        x, y = cx + math.cos(ang) * r * 1.1, ARCH_SPRING + 30 - math.sin(ang) * r
+        cv.put(x, y, rnd.choice("HHHU"))
+        if rnd.random() < 0.3:
+            cv.put(x, y + 1, "h")
 
 
 # --- camp ------------------------------------------------------------------------------
@@ -588,6 +693,9 @@ def background():
     far_layers(cv)
     ground(cv)
     gate(cv)
+    purple_glow(cv)
+    for tx, ty in TORCHES:
+        torch(cv, tx, ty)
     fire_pit(cv)
     tent(cv)
     foreground(cv)
