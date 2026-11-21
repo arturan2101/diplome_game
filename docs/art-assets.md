@@ -427,3 +427,27 @@ Generator `tools/art/make_enemy_windups.py` (PixelLab ids, steps and frame meani
 | N | Golem: both fists rise over the head and hold, then slam the ground | golem_attack_<dir>.png | 8 (48x48) | rise 0, fists overhead 1-3 (hold 3), slam 4-5, recover 6-7 | generated; grass by finish_golem.py's overgrow |
 | N | Ghost: pulls back with its arms raised, then reaches out | ghost_attack_<dir>.png | 6 (32x32) | pull back 0-1 (hold 1), reach and touch 2-3, back 4-5 | generated |
 | C | SpriteFrames rewritten with the new attack lengths (other animations unchanged) | skeleton_frames.tres, skeleton_elite_frames.tres, archer_frames.tres, archer_elite_frames.tres, ghost_frames.tres, golem_frames.tres | - | - | generated |
+
+## Batch 11 (stage 40, new element system)
+
+Generator `tools/art/make_elements2.py`, in the style of `make_element_frames.py` / `make_fusion_frames.py` (no outline on effects, three looks per level, each bigger and richer). All animations are in `assets/art/fx/element2_frames.tres` (names = file names without .png, loop as noted). 12 fps unless noted.
+
+| P | Asset | File | Size / frames | Anchor / use | Status |
+|---|---|---|---|---|---|
+| C | Water wave rolling forward (l2 taller, l3 tallest with spray) | assets/art/fx/water_l{1,2,3}.png | 48x32, 4, once | caster at the left edge, middle row (y 16); points right, rotate in code | generated |
+| C | Water turning to ice at level 3: frost burst over the same arc, shards break off on the last frame | assets/art/fx/ice_burst_l3.png | 48x32, 4, once | as water_l3 | generated |
+| C | Ice crust over a frozen enemy (ice at the feet, icicles at the sides, middle open) | assets/art/fx/frozen_mark.png | 16x16, 1 | centred on the enemy, bottom row = feet | generated |
+| C | Stone spike breaking out of the floor: 0 cracks, 1 tip with dust, 2 full, 3 cracking, 4 rubble (l3 with a glowing seam) | assets/art/fx/stone_spikes_l{1,2,3}.png | 16x24, 5, once | floor row 22, shadow row 23, centre x 8; spawn several in a line | generated |
+| C | Drops falling from a wet enemy | assets/art/fx/wet_drops.png | 8x8, 4, loop (8 fps) | over the enemy's head | generated |
+| C | Plasma orb, violet-white with a short tail and crackling sparks | assets/art/fx/plasma_l{1,2,3}.png | 16x16 (l3 24x24), 4, loop | flies right; orb centre (size/2 + 2, size/2) | generated |
+| C | Lava pool flat on the floor, bubbles and drifting crust (l3 with embers) | assets/art/fx/lava_pool_l{1,2,3}.png | 48x48, 4, loop (8 fps) | centre (24, 24); radius 11 / 15 / 19 px (flattened 0.62) | generated |
+| C | Lightning bolt: bright, branching, fading | assets/art/fx/lightning.png | 64x16, 3, once | from (0, 8) to (63, 8): stretch and rotate between two points | generated |
+| C | Lightning hit: flash, ring, sparks | assets/art/fx/lightning_hit.png | 16x16, 3, once | centred where the bolt lands | generated |
+| C | Vines growing out of the floor in a ring: soil cracks, sprouts, leaves, curls (l2 gold buds, l3 thorns and red flowers) | assets/art/fx/vines_l{1,2,3}.png | 48x48, 5, once, hold the last | centre (24, 24); ring radius 15 / 18 / 21 px (flattened 0.6) | generated |
+| C | Sand ring around the caster with dust (l3 with stones), like wind_l* | assets/art/fx/sandstorm_l{1,2,3}.png | 48x48, 4, loop | centred on the caster | generated |
+| N | Volcanic lightning: the bolt in gold and red-orange | assets/art/fx/volcanic_lightning.png | 64x16, 3, once | as lightning.png | generated |
+| N | Storm cloud with flashes (frames 1 and 3, a short bolt under it) and rain | assets/art/fx/storm_cloud.png | 48x32, 4, loop (8 fps) | above the player, cloud centre (24, 13) | generated |
+| N | Meteor: a burning rock falling, flame teardrop above it | assets/art/fx/meteor.png | 32x32, 4, loop | rock centre (16, 21); move it down in code | generated |
+| N | Meteor shadow growing on the floor (red rim on the last two frames) | assets/art/fx/meteor_shadow.png | 32x32, 4, once | centre (16, 16), where the meteor lands | generated |
+| N | Meteor impact: flash, fire ring with a column, smoke and thrown rocks, crater | assets/art/fx/meteor_impact.png | 64x64, 5, once | centre (32, 36) = impact point | generated |
+| C | Element icons: water, stone_spikes, plasma, lava, lightning, vines, sandstorm, volcanic_lightning, storm_cloud, meteor | assets/art/ui/element_icons2.png | 16x16 slots (160x16) | same frame as fx/element_icons.png (1 px outline) | generated |

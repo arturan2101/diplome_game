@@ -1,0 +1,951 @@
+[gd_resource type="SpriteFrames" load_steps=140 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/fx/water_l1.png" id="water_l1"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/stone_spikes_l1.png" id="stone_spikes_l1"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/plasma_l1.png" id="plasma_l1"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/lava_pool_l1.png" id="lava_pool_l1"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/vines_l1.png" id="vines_l1"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/sandstorm_l1.png" id="sandstorm_l1"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/water_l2.png" id="water_l2"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/stone_spikes_l2.png" id="stone_spikes_l2"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/plasma_l2.png" id="plasma_l2"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/lava_pool_l2.png" id="lava_pool_l2"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/vines_l2.png" id="vines_l2"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/sandstorm_l2.png" id="sandstorm_l2"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/water_l3.png" id="water_l3"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/stone_spikes_l3.png" id="stone_spikes_l3"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/plasma_l3.png" id="plasma_l3"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/lava_pool_l3.png" id="lava_pool_l3"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/vines_l3.png" id="vines_l3"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/sandstorm_l3.png" id="sandstorm_l3"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/ice_burst_l3.png" id="ice_burst_l3"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/wet_drops.png" id="wet_drops"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/lightning.png" id="lightning"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/lightning_hit.png" id="lightning_hit"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/volcanic_lightning.png" id="volcanic_lightning"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/storm_cloud.png" id="storm_cloud"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/meteor.png" id="meteor"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/meteor_shadow.png" id="meteor_shadow"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/meteor_impact.png" id="meteor_impact"]
+
+[sub_resource type="AtlasTexture" id="water_l1_0"]
+atlas = ExtResource("water_l1")
+region = Rect2(0, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="water_l1_1"]
+atlas = ExtResource("water_l1")
+region = Rect2(48, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="water_l1_2"]
+atlas = ExtResource("water_l1")
+region = Rect2(96, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="water_l1_3"]
+atlas = ExtResource("water_l1")
+region = Rect2(144, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="stone_spikes_l1_0"]
+atlas = ExtResource("stone_spikes_l1")
+region = Rect2(0, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="stone_spikes_l1_1"]
+atlas = ExtResource("stone_spikes_l1")
+region = Rect2(16, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="stone_spikes_l1_2"]
+atlas = ExtResource("stone_spikes_l1")
+region = Rect2(32, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="stone_spikes_l1_3"]
+atlas = ExtResource("stone_spikes_l1")
+region = Rect2(48, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="stone_spikes_l1_4"]
+atlas = ExtResource("stone_spikes_l1")
+region = Rect2(64, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="plasma_l1_0"]
+atlas = ExtResource("plasma_l1")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="plasma_l1_1"]
+atlas = ExtResource("plasma_l1")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="plasma_l1_2"]
+atlas = ExtResource("plasma_l1")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="plasma_l1_3"]
+atlas = ExtResource("plasma_l1")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="lava_pool_l1_0"]
+atlas = ExtResource("lava_pool_l1")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="lava_pool_l1_1"]
+atlas = ExtResource("lava_pool_l1")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="lava_pool_l1_2"]
+atlas = ExtResource("lava_pool_l1")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="lava_pool_l1_3"]
+atlas = ExtResource("lava_pool_l1")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="vines_l1_0"]
+atlas = ExtResource("vines_l1")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="vines_l1_1"]
+atlas = ExtResource("vines_l1")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="vines_l1_2"]
+atlas = ExtResource("vines_l1")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="vines_l1_3"]
+atlas = ExtResource("vines_l1")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="vines_l1_4"]
+atlas = ExtResource("vines_l1")
+region = Rect2(192, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="sandstorm_l1_0"]
+atlas = ExtResource("sandstorm_l1")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="sandstorm_l1_1"]
+atlas = ExtResource("sandstorm_l1")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="sandstorm_l1_2"]
+atlas = ExtResource("sandstorm_l1")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="sandstorm_l1_3"]
+atlas = ExtResource("sandstorm_l1")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="water_l2_0"]
+atlas = ExtResource("water_l2")
+region = Rect2(0, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="water_l2_1"]
+atlas = ExtResource("water_l2")
+region = Rect2(48, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="water_l2_2"]
+atlas = ExtResource("water_l2")
+region = Rect2(96, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="water_l2_3"]
+atlas = ExtResource("water_l2")
+region = Rect2(144, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="stone_spikes_l2_0"]
+atlas = ExtResource("stone_spikes_l2")
+region = Rect2(0, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="stone_spikes_l2_1"]
+atlas = ExtResource("stone_spikes_l2")
+region = Rect2(16, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="stone_spikes_l2_2"]
+atlas = ExtResource("stone_spikes_l2")
+region = Rect2(32, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="stone_spikes_l2_3"]
+atlas = ExtResource("stone_spikes_l2")
+region = Rect2(48, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="stone_spikes_l2_4"]
+atlas = ExtResource("stone_spikes_l2")
+region = Rect2(64, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="plasma_l2_0"]
+atlas = ExtResource("plasma_l2")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="plasma_l2_1"]
+atlas = ExtResource("plasma_l2")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="plasma_l2_2"]
+atlas = ExtResource("plasma_l2")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="plasma_l2_3"]
+atlas = ExtResource("plasma_l2")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="lava_pool_l2_0"]
+atlas = ExtResource("lava_pool_l2")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="lava_pool_l2_1"]
+atlas = ExtResource("lava_pool_l2")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="lava_pool_l2_2"]
+atlas = ExtResource("lava_pool_l2")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="lava_pool_l2_3"]
+atlas = ExtResource("lava_pool_l2")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="vines_l2_0"]
+atlas = ExtResource("vines_l2")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="vines_l2_1"]
+atlas = ExtResource("vines_l2")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="vines_l2_2"]
+atlas = ExtResource("vines_l2")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="vines_l2_3"]
+atlas = ExtResource("vines_l2")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="vines_l2_4"]
+atlas = ExtResource("vines_l2")
+region = Rect2(192, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="sandstorm_l2_0"]
+atlas = ExtResource("sandstorm_l2")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="sandstorm_l2_1"]
+atlas = ExtResource("sandstorm_l2")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="sandstorm_l2_2"]
+atlas = ExtResource("sandstorm_l2")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="sandstorm_l2_3"]
+atlas = ExtResource("sandstorm_l2")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="water_l3_0"]
+atlas = ExtResource("water_l3")
+region = Rect2(0, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="water_l3_1"]
+atlas = ExtResource("water_l3")
+region = Rect2(48, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="water_l3_2"]
+atlas = ExtResource("water_l3")
+region = Rect2(96, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="water_l3_3"]
+atlas = ExtResource("water_l3")
+region = Rect2(144, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="stone_spikes_l3_0"]
+atlas = ExtResource("stone_spikes_l3")
+region = Rect2(0, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="stone_spikes_l3_1"]
+atlas = ExtResource("stone_spikes_l3")
+region = Rect2(16, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="stone_spikes_l3_2"]
+atlas = ExtResource("stone_spikes_l3")
+region = Rect2(32, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="stone_spikes_l3_3"]
+atlas = ExtResource("stone_spikes_l3")
+region = Rect2(48, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="stone_spikes_l3_4"]
+atlas = ExtResource("stone_spikes_l3")
+region = Rect2(64, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="plasma_l3_0"]
+atlas = ExtResource("plasma_l3")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="plasma_l3_1"]
+atlas = ExtResource("plasma_l3")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="plasma_l3_2"]
+atlas = ExtResource("plasma_l3")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="plasma_l3_3"]
+atlas = ExtResource("plasma_l3")
+region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="lava_pool_l3_0"]
+atlas = ExtResource("lava_pool_l3")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="lava_pool_l3_1"]
+atlas = ExtResource("lava_pool_l3")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="lava_pool_l3_2"]
+atlas = ExtResource("lava_pool_l3")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="lava_pool_l3_3"]
+atlas = ExtResource("lava_pool_l3")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="vines_l3_0"]
+atlas = ExtResource("vines_l3")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="vines_l3_1"]
+atlas = ExtResource("vines_l3")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="vines_l3_2"]
+atlas = ExtResource("vines_l3")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="vines_l3_3"]
+atlas = ExtResource("vines_l3")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="vines_l3_4"]
+atlas = ExtResource("vines_l3")
+region = Rect2(192, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="sandstorm_l3_0"]
+atlas = ExtResource("sandstorm_l3")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="sandstorm_l3_1"]
+atlas = ExtResource("sandstorm_l3")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="sandstorm_l3_2"]
+atlas = ExtResource("sandstorm_l3")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="sandstorm_l3_3"]
+atlas = ExtResource("sandstorm_l3")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="ice_burst_l3_0"]
+atlas = ExtResource("ice_burst_l3")
+region = Rect2(0, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="ice_burst_l3_1"]
+atlas = ExtResource("ice_burst_l3")
+region = Rect2(48, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="ice_burst_l3_2"]
+atlas = ExtResource("ice_burst_l3")
+region = Rect2(96, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="ice_burst_l3_3"]
+atlas = ExtResource("ice_burst_l3")
+region = Rect2(144, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="wet_drops_0"]
+atlas = ExtResource("wet_drops")
+region = Rect2(0, 0, 8, 8)
+
+[sub_resource type="AtlasTexture" id="wet_drops_1"]
+atlas = ExtResource("wet_drops")
+region = Rect2(8, 0, 8, 8)
+
+[sub_resource type="AtlasTexture" id="wet_drops_2"]
+atlas = ExtResource("wet_drops")
+region = Rect2(16, 0, 8, 8)
+
+[sub_resource type="AtlasTexture" id="wet_drops_3"]
+atlas = ExtResource("wet_drops")
+region = Rect2(24, 0, 8, 8)
+
+[sub_resource type="AtlasTexture" id="lightning_0"]
+atlas = ExtResource("lightning")
+region = Rect2(0, 0, 64, 16)
+
+[sub_resource type="AtlasTexture" id="lightning_1"]
+atlas = ExtResource("lightning")
+region = Rect2(64, 0, 64, 16)
+
+[sub_resource type="AtlasTexture" id="lightning_2"]
+atlas = ExtResource("lightning")
+region = Rect2(128, 0, 64, 16)
+
+[sub_resource type="AtlasTexture" id="lightning_hit_0"]
+atlas = ExtResource("lightning_hit")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="lightning_hit_1"]
+atlas = ExtResource("lightning_hit")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="lightning_hit_2"]
+atlas = ExtResource("lightning_hit")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="volcanic_lightning_0"]
+atlas = ExtResource("volcanic_lightning")
+region = Rect2(0, 0, 64, 16)
+
+[sub_resource type="AtlasTexture" id="volcanic_lightning_1"]
+atlas = ExtResource("volcanic_lightning")
+region = Rect2(64, 0, 64, 16)
+
+[sub_resource type="AtlasTexture" id="volcanic_lightning_2"]
+atlas = ExtResource("volcanic_lightning")
+region = Rect2(128, 0, 64, 16)
+
+[sub_resource type="AtlasTexture" id="storm_cloud_0"]
+atlas = ExtResource("storm_cloud")
+region = Rect2(0, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="storm_cloud_1"]
+atlas = ExtResource("storm_cloud")
+region = Rect2(48, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="storm_cloud_2"]
+atlas = ExtResource("storm_cloud")
+region = Rect2(96, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="storm_cloud_3"]
+atlas = ExtResource("storm_cloud")
+region = Rect2(144, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="meteor_0"]
+atlas = ExtResource("meteor")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="meteor_1"]
+atlas = ExtResource("meteor")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="meteor_2"]
+atlas = ExtResource("meteor")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="meteor_3"]
+atlas = ExtResource("meteor")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="meteor_shadow_0"]
+atlas = ExtResource("meteor_shadow")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="meteor_shadow_1"]
+atlas = ExtResource("meteor_shadow")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="meteor_shadow_2"]
+atlas = ExtResource("meteor_shadow")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="meteor_shadow_3"]
+atlas = ExtResource("meteor_shadow")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="meteor_impact_0"]
+atlas = ExtResource("meteor_impact")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="meteor_impact_1"]
+atlas = ExtResource("meteor_impact")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="meteor_impact_2"]
+atlas = ExtResource("meteor_impact")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="meteor_impact_3"]
+atlas = ExtResource("meteor_impact")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="meteor_impact_4"]
+atlas = ExtResource("meteor_impact")
+region = Rect2(256, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("water_l1_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("water_l1_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("water_l1_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("water_l1_3")
+}],
+"loop": false,
+"name": &"water_l1",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("stone_spikes_l1_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("stone_spikes_l1_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("stone_spikes_l1_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("stone_spikes_l1_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("stone_spikes_l1_4")
+}],
+"loop": false,
+"name": &"stone_spikes_l1",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("plasma_l1_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("plasma_l1_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("plasma_l1_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("plasma_l1_3")
+}],
+"loop": true,
+"name": &"plasma_l1",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("lava_pool_l1_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("lava_pool_l1_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("lava_pool_l1_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("lava_pool_l1_3")
+}],
+"loop": true,
+"name": &"lava_pool_l1",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("vines_l1_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("vines_l1_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("vines_l1_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("vines_l1_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("vines_l1_4")
+}],
+"loop": false,
+"name": &"vines_l1",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("sandstorm_l1_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("sandstorm_l1_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("sandstorm_l1_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("sandstorm_l1_3")
+}],
+"loop": true,
+"name": &"sandstorm_l1",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("water_l2_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("water_l2_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("water_l2_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("water_l2_3")
+}],
+"loop": false,
+"name": &"water_l2",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("stone_spikes_l2_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("stone_spikes_l2_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("stone_spikes_l2_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("stone_spikes_l2_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("stone_spikes_l2_4")
+}],
+"loop": false,
+"name": &"stone_spikes_l2",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("plasma_l2_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("plasma_l2_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("plasma_l2_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("plasma_l2_3")
+}],
+"loop": true,
+"name": &"plasma_l2",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("lava_pool_l2_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("lava_pool_l2_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("lava_pool_l2_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("lava_pool_l2_3")
+}],
+"loop": true,
+"name": &"lava_pool_l2",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("vines_l2_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("vines_l2_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("vines_l2_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("vines_l2_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("vines_l2_4")
+}],
+"loop": false,
+"name": &"vines_l2",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("sandstorm_l2_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("sandstorm_l2_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("sandstorm_l2_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("sandstorm_l2_3")
+}],
+"loop": true,
+"name": &"sandstorm_l2",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("water_l3_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("water_l3_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("water_l3_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("water_l3_3")
+}],
+"loop": false,
+"name": &"water_l3",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("stone_spikes_l3_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("stone_spikes_l3_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("stone_spikes_l3_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("stone_spikes_l3_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("stone_spikes_l3_4")
+}],
+"loop": false,
+"name": &"stone_spikes_l3",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("plasma_l3_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("plasma_l3_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("plasma_l3_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("plasma_l3_3")
+}],
+"loop": true,
+"name": &"plasma_l3",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("lava_pool_l3_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("lava_pool_l3_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("lava_pool_l3_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("lava_pool_l3_3")
+}],
+"loop": true,
+"name": &"lava_pool_l3",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("vines_l3_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("vines_l3_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("vines_l3_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("vines_l3_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("vines_l3_4")
+}],
+"loop": false,
+"name": &"vines_l3",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("sandstorm_l3_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("sandstorm_l3_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("sandstorm_l3_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("sandstorm_l3_3")
+}],
+"loop": true,
+"name": &"sandstorm_l3",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("ice_burst_l3_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("ice_burst_l3_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("ice_burst_l3_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("ice_burst_l3_3")
+}],
+"loop": false,
+"name": &"ice_burst_l3",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("wet_drops_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("wet_drops_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("wet_drops_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("wet_drops_3")
+}],
+"loop": true,
+"name": &"wet_drops",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("lightning_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("lightning_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("lightning_2")
+}],
+"loop": false,
+"name": &"lightning",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("lightning_hit_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("lightning_hit_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("lightning_hit_2")
+}],
+"loop": false,
+"name": &"lightning_hit",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("volcanic_lightning_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("volcanic_lightning_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("volcanic_lightning_2")
+}],
+"loop": false,
+"name": &"volcanic_lightning",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("storm_cloud_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("storm_cloud_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("storm_cloud_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("storm_cloud_3")
+}],
+"loop": true,
+"name": &"storm_cloud",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("meteor_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("meteor_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("meteor_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("meteor_3")
+}],
+"loop": true,
+"name": &"meteor",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("meteor_shadow_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("meteor_shadow_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("meteor_shadow_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("meteor_shadow_3")
+}],
+"loop": false,
+"name": &"meteor_shadow",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("meteor_impact_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("meteor_impact_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("meteor_impact_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("meteor_impact_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("meteor_impact_4")
+}],
+"loop": false,
+"name": &"meteor_impact",
+"speed": 12.0
+}]
