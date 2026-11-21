@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="ZoneData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/zone_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/meteor_icon.tres" id="2"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/element2_frames.tres" id="frames"]
+[ext_resource type="PackedScene" path="res://combat/spells/zone_spell.tscn" id="3"]
+
+
+[resource]
+script = ExtResource("1")
+id = &"meteor"
+display_name = "Meteor"
+description = "a burning rock falls from above and leaves a pool of lava (lava + sandstorm)"
+icon = ExtResource("2")
+color = Color(1, 0.45, 0.15, 1)
+cooldown = PackedFloat32Array(12, 13, 14)
+auto_aim_radius = 150.0
+spell_scene = ExtResource("3")
+tick_damage = PackedInt32Array(8, 9, 10)
+tick_interval = 0.5
+duration = PackedFloat32Array(4, 4.5, 5)
+radius = PackedFloat32Array(32, 36, 40)
+impact_delay = 0.8
+impact_damage = PackedInt32Array(100, 120, 140)
+impact_radius = 40.0
+impact_knockback = 200.0
+frames = ExtResource("frames")
+level_animations = Array[StringName]([&"lava_pool_l1", &"lava_pool_l2", &"lava_pool_l3"])
+look_radius = PackedFloat32Array(11, 15, 19)
+fall_animation = &"meteor"
+shadow_animation = &"meteor_shadow"
+impact_animation = &"meteor_impact"

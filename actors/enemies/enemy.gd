@@ -13,6 +13,9 @@ signal defeated(enemy: Enemy)
 
 enum State { IDLE, CHASE, RETREAT, WINDUP, RECOVER, STAGGER, FALLING }
 
+## Search depth from a hurtbox up to the enemy that owns it (owner_of()).
+const OWNER_SEARCH_DEPTH: int = 4
+
 @export var data: EnemyData
 @export var health: Health
 @export var hurtbox: Hurtbox
@@ -37,8 +40,14 @@ enum State { IDLE, CHASE, RETREAT, WINDUP, RECOVER, STAGGER, FALLING }
 @export var waypoint_reach: float = 4.0
 ## Tint of a dormant enemy: a sleeping boss looks like stone.
 @export var dormant_color: Color = Color(0.55, 0.58, 0.68)
-## Tint of an enemy frozen by the blizzard.
+## Tint of an enemy frozen by the water's ice form.
 @export var frozen_color: Color = Color(0.55, 0.8, 1.0)
+## Statuses of the elements (stage 40): drops falling from a wet enemy (an animation of
+## status_frames over its head) and ice crust over a frozen one (feet on the bottom row).
+@export var status_frames: SpriteFrames = preload("res://assets/art/fx/element2_frames.tres")
+@export var wet_animation: StringName = &"wet_drops"
+@export var wet_mark_height: float = 14.0
+@export var frozen_mark: Texture2D = preload("res://assets/art/fx/frozen_mark.png")
 ## Tint of an enemy stunned by the player's parry.
 @export var stunned_color: Color = Color(1.0, 0.95, 0.6)
 ## Animated art has the feet on the second-to-last row of its square frame; it is
@@ -69,6 +78,15 @@ var _flash_tween: Tween = null
 var _frozen_left: float = 0.0
 ## Seconds the stagger lasts at least (a parry's stun, stun()).
 var _stun_left: float = 0.0
+## Element statuses (stage 40): seconds left wet (lightning hurts more), rooted (vines:
+## no walking, attacks still come), slowed (sandstorm: walking at _slow_multiplier).
+var _wet_left: float = 0.0
+var _root_left: float = 0.0
+var _slow_left: float = 0.0
+var _slow_multiplier: float = 1.0
+## Drops shown while wet and ice shown while frozen, created when first needed.
+var _wet_mark: AnimatedSprite2D = null
+var _ice_mark: Sprite2D = null
 
 
 func _ready() -> void:
@@ -96,6 +114,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if is_dormant:
 		return
+	_update_statuses(delta)
 	if is_frozen():
 		_frozen_left -= delta
 		if not is_frozen():
@@ -168,7 +187,7 @@ func _fall_asleep() -> void:
 	visual.modulate = dormant_color
 
 
-## Holds the enemy in ice for this many seconds (the blizzard): it does not move,
+## Holds the enemy in ice for this many seconds (the water's ice form): it does not move,
 ## attack or get pushed, and its animation stops. Freezing again extends the time to
 ## the longer one. Bosses, sleeping and falling enemies do not freeze.
 func freeze(seconds: float) -> void:
@@ -179,6 +198,7 @@ func freeze(seconds: float) -> void:
 			weapon.cancel_attack()
 		_enter(State.IDLE)
 		visual.modulate = frozen_color
+		_show_ice(true)
 		var animated: AnimatedSprite2D = visual as AnimatedSprite2D
 		if animated != null:
 			animated.speed_scale = 0.0
@@ -191,6 +211,7 @@ func is_frozen() -> bool:
 
 func _thaw() -> void:
 	_frozen_left = 0.0
+	_show_ice(false)
 	var animated: AnimatedSprite2D = visual as AnimatedSprite2D
 	if animated != null:
 		animated.speed_scale = 1.0
@@ -225,6 +246,99 @@ func is_stunned() -> bool:
 	return state == State.STAGGER and _stun_left > 0.0
 
 
+## Wet for this many seconds (the water's wave): lightning hurts it more. Again: the
+## longer time wins.
+func make_wet(seconds: float) -> void:
+	if seconds <= 0.0 or data == null:
+		return
+	_wet_left = maxf(_wet_left, seconds)
+	_show_wet(true)
+
+
+func is_wet() -> bool:
+	return _wet_left > 0.0
+
+
+## Held in place for this many seconds (the vines): it cannot walk, but still turns and
+## attacks whatever comes into reach. Bosses are not rooted.
+func root(seconds: float) -> void:
+	if seconds <= 0.0 or data == null or data.is_boss:
+		return
+	_root_left = maxf(_root_left, seconds)
+
+
+func is_rooted() -> bool:
+	return _root_left > 0.0
+
+
+## Walks at multiplier of its speed for this many seconds (the sandstorm). The stronger
+## slow wins while both last.
+func slow(multiplier: float, seconds: float) -> void:
+	if seconds <= 0.0 or data == null:
+		return
+	if _slow_left <= 0.0 or multiplier < _slow_multiplier:
+		_slow_multiplier = clampf(multiplier, 0.0, 1.0)
+	_slow_left = maxf(_slow_left, seconds)
+
+
+func is_slowed() -> bool:
+	return _slow_left > 0.0
+
+
+## Speed of walking now: the data's speed, slowed or stopped by statuses.
+func get_walk_speed() -> float:
+	if is_rooted():
+		return 0.0
+	return data.move_speed * (_slow_multiplier if is_slowed() else 1.0)
+
+
+func _update_statuses(delta: float) -> void:
+	if _wet_left > 0.0:
+		_wet_left = maxf(_wet_left - delta, 0.0)
+		if _wet_left <= 0.0:
+			_show_wet(false)
+	_root_left = maxf(_root_left - delta, 0.0)
+	_slow_left = maxf(_slow_left - delta, 0.0)
+
+
+func _show_wet(wet: bool) -> void:
+	if _wet_mark == null:
+		if not wet or status_frames == null or not status_frames.has_animation(wet_animation):
+			return
+		_wet_mark = AnimatedSprite2D.new()
+		_wet_mark.name = "WetDrops"
+		_wet_mark.sprite_frames = status_frames
+		_wet_mark.position = Vector2(0.0, -wet_mark_height)
+		add_child(_wet_mark)
+	_wet_mark.visible = wet
+	if wet:
+		_wet_mark.play(wet_animation)
+	else:
+		_wet_mark.stop()
+
+
+func _show_ice(frozen: bool) -> void:
+	if _ice_mark == null:
+		if not frozen or frozen_mark == null:
+			return
+		_ice_mark = Sprite2D.new()
+		_ice_mark.name = "IceCrust"
+		_ice_mark.texture = frozen_mark
+		_ice_mark.position = Vector2(0.0, feet_below_centre - frozen_mark.get_height() * 0.5 + 1.0)
+		add_child(_ice_mark)
+	_ice_mark.visible = frozen
+
+
+## The enemy a hurtbox belongs to (a spell effect hits hurtboxes), or null.
+static func owner_of(hurtbox: Node) -> Enemy:
+	var node: Node = hurtbox
+	for _i in OWNER_SEARCH_DEPTH:
+		if node == null or node is Enemy:
+			break
+		node = node.get_parent()
+	return node as Enemy
+
+
 func _update_idle() -> void:
 	_target = get_tree().get_first_node_in_group(Player.GROUP) as Node2D
 	if _target != null and global_position.distance_to(_target.global_position) <= data.detection_range:
@@ -242,7 +356,7 @@ func _update_chase(delta: float) -> void:
 	if distance <= data.attack_range and _can_see_target():
 		_enter(State.WINDUP)
 		return
-	velocity = _direction_to_target(delta) * data.move_speed
+	velocity = _direction_to_target(delta) * get_walk_speed()
 
 
 ## A short step away from the player (ranged enemies). Ends on time, at the preferred
@@ -258,7 +372,7 @@ func _update_retreat(delta: float) -> void:
 		_retreat_cooldown_left = data.retreat_cooldown
 		_enter(State.WINDUP if distance <= data.attack_range and _can_see_target() else State.CHASE)
 		return
-	velocity = away * data.move_speed
+	velocity = away * get_walk_speed()
 
 
 func _update_windup(delta: float) -> void:

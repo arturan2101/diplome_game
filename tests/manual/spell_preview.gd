@@ -1,6 +1,6 @@
 extends Node2D
 ## Manual preview of spells (open spell_preview.tscn and press F6). The player knows
-## Fireball (level 2) and Ice Wall; training dummies stand to the right; a shrine and a
+## Fireball (level 2) and Water; training dummies stand to the right; a shrine and a
 ## Whirlwind scroll are next to the player. U and I cast the spells, E uses the shrine
 ## or takes the scroll (with both slots full the game asks which spell to forget).
 ## With the launch argument --demo the scene casts by itself and opens the shrine
@@ -14,7 +14,7 @@ const SCROLL_SCENE: PackedScene = preload("res://actors/pickups/spell_pickup.tsc
 const CHOICE_SCENE: PackedScene = preload("res://ui/spell_choice.tscn")
 const POOL: SpellPool = preload("res://combat/spells/spell_pool.tres")
 const FIREBALL: SpellData = preload("res://combat/spells/fireball.tres")
-const ICE_WALL: SpellData = preload("res://combat/spells/ice_wall.tres")
+const WATER: SpellData = preload("res://combat/spells/water.tres")
 const WHIRLWIND: SpellData = preload("res://combat/spells/whirlwind.tres")
 const DEMO_ARG: String = "--demo"
 const FLOOR_MAP: String = """#####################
@@ -48,7 +48,7 @@ func _ready() -> void:
 	_player.global_position = level.cell_center(Vector2i(4, 5))
 	_player.spell_book.learn(FIREBALL)
 	_player.spell_book.learn(FIREBALL)
-	_player.spell_book.learn(ICE_WALL)
+	_player.spell_book.learn(WATER)
 	for cell: Vector2i in [Vector2i(13, 5), Vector2i(14, 4), Vector2i(14, 6), Vector2i(16, 5)]:
 		var dummy: Node2D = DUMMY_SCENE.instantiate() as Node2D
 		add_child(dummy)

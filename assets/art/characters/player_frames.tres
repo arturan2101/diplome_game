@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=196 format=3]
+[gd_resource type="SpriteFrames" load_steps=216 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_attack_down.png" id="attack_down"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_attack_left.png" id="attack_left"]
@@ -12,6 +12,10 @@
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_bow_left.png" id="bow_left"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_bow_right.png" id="bow_right"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_bow_up.png" id="bow_up"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_crossbow_down.png" id="crossbow_down"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_crossbow_left.png" id="crossbow_left"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_crossbow_right.png" id="crossbow_right"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_crossbow_up.png" id="crossbow_up"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_daggers_down.png" id="daggers_down"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_daggers_left.png" id="daggers_left"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_daggers_right.png" id="daggers_right"]
@@ -262,6 +266,70 @@ region = Rect2(96, 0, 24, 24)
 [sub_resource type="AtlasTexture" id="bow_up_5"]
 atlas = ExtResource("bow_up")
 region = Rect2(120, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_down_0"]
+atlas = ExtResource("crossbow_down")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_down_1"]
+atlas = ExtResource("crossbow_down")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_down_2"]
+atlas = ExtResource("crossbow_down")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_down_3"]
+atlas = ExtResource("crossbow_down")
+region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_left_0"]
+atlas = ExtResource("crossbow_left")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_left_1"]
+atlas = ExtResource("crossbow_left")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_left_2"]
+atlas = ExtResource("crossbow_left")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_left_3"]
+atlas = ExtResource("crossbow_left")
+region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_right_0"]
+atlas = ExtResource("crossbow_right")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_right_1"]
+atlas = ExtResource("crossbow_right")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_right_2"]
+atlas = ExtResource("crossbow_right")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_right_3"]
+atlas = ExtResource("crossbow_right")
+region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_up_0"]
+atlas = ExtResource("crossbow_up")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_up_1"]
+atlas = ExtResource("crossbow_up")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_up_2"]
+atlas = ExtResource("crossbow_up")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="crossbow_up_3"]
+atlas = ExtResource("crossbow_up")
+region = Rect2(72, 0, 24, 24)
 
 [sub_resource type="AtlasTexture" id="daggers_down_0"]
 atlas = ExtResource("daggers_down")
@@ -896,6 +964,74 @@ animations = [{
 "loop": false,
 "name": &"bow_up",
 "speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("crossbow_down_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("crossbow_down_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("crossbow_down_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("crossbow_down_3")
+}],
+"loop": false,
+"name": &"crossbow_down",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("crossbow_left_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("crossbow_left_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("crossbow_left_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("crossbow_left_3")
+}],
+"loop": false,
+"name": &"crossbow_left",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("crossbow_right_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("crossbow_right_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("crossbow_right_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("crossbow_right_3")
+}],
+"loop": false,
+"name": &"crossbow_right",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("crossbow_up_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("crossbow_up_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("crossbow_up_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("crossbow_up_3")
+}],
+"loop": false,
+"name": &"crossbow_up",
+"speed": 12.0
 }, {
 "frames": [{
 "duration": 1.0,

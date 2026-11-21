@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="WaveData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/wave_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/water_icon.tres" id="2"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/element2_frames.tres" id="frames"]
+[ext_resource type="PackedScene" path="res://combat/spells/wave_spell.tscn" id="3"]
+
+
+[resource]
+script = ExtResource("1")
+id = &"water"
+display_name = "Water"
+description = "a wave pushes enemies back and soaks them; at level 3 it turns to ice and freezes them"
+icon = ExtResource("2")
+color = Color(0.35, 0.6, 1, 1)
+cooldown = PackedFloat32Array(6, 7, 8)
+auto_aim_radius = 64.0
+spell_scene = ExtResource("3")
+unlock_cost = 6
+damage = PackedInt32Array(10, 13, 16)
+reach = PackedFloat32Array(40, 46, 52)
+arc_degrees = 100.0
+knockback = 160.0
+wet_time = 4.0
+ice_from_level = 3
+freeze_time = 2.0
+frames = ExtResource("frames")
+level_animations = Array[StringName]([&"water_l1", &"water_l2", &"ice_burst_l3"])

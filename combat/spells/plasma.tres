@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="FireballData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/fireball_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/plasma_icon.tres" id="2"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/element2_frames.tres" id="frames"]
+[ext_resource type="PackedScene" path="res://combat/spells/fireball_spell.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://combat/spells/fireball.tscn" id="4"]
+
+
+[resource]
+script = ExtResource("1")
+id = &"plasma"
+display_name = "Plasma"
+description = "a ball of plasma flies through every enemy in its way (fire + air)"
+icon = ExtResource("2")
+color = Color(0.78, 0.55, 1, 1)
+cooldown = PackedFloat32Array(8, 9, 10)
+auto_aim_radius = 160.0
+spell_scene = ExtResource("3")
+damage = PackedInt32Array(75, 90, 105)
+radius = PackedFloat32Array(12, 14, 16)
+speed = 260.0
+max_range = 220.0
+knockback = 60.0
+projectile_scene = ExtResource("4")
+pierce = true
+frames = ExtResource("frames")
+level_animations = Array[StringName]([&"plasma_l1", &"plasma_l2", &"plasma_l3"])
+rotate_look = true

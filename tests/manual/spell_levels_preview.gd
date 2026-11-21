@@ -6,9 +6,12 @@ extends Node
 ## Usage: godot --path . res://tests/manual/spell_levels_preview.tscn -- <folder>
 
 const PLAYER_SCENE: PackedScene = preload("res://actors/player/player.tscn")
-const SPELLS: Array[String] = ["res://combat/spells/fireball.tres", "res://combat/spells/whirlwind.tres",
-		"res://combat/spells/ice_wall.tres", "res://combat/spells/firestorm.tres",
-		"res://combat/spells/blizzard.tres", "res://combat/spells/steam.tres"]
+const SPELLS: Array[String] = ["res://combat/spells/fireball.tres", "res://combat/spells/water.tres",
+		"res://combat/spells/whirlwind.tres", "res://combat/spells/stone_spikes.tres",
+		"res://combat/spells/steam.tres", "res://combat/spells/plasma.tres", "res://combat/spells/lava.tres",
+		"res://combat/spells/lightning.tres", "res://combat/spells/vines.tres", "res://combat/spells/sandstorm.tres",
+		"res://combat/spells/volcanic_lightning.tres", "res://combat/spells/storm_cloud.tres",
+		"res://combat/spells/meteor.tres"]
 const FLOOR_MAP: String = """########################################
 #......................................#
 #......................................#

@@ -24,6 +24,6 @@ rarity_icons = {
 }
 auto_aim_radius = 170.0
 weapon_scene = ExtResource("2")
-attack_animation = &"bow"
+attack_animation = &"crossbow"
 crit_chance = 0.12
 crit_multiplier = 2.5

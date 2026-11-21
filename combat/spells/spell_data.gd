@@ -1,7 +1,8 @@
 class_name SpellData
 extends Resource
 ## Data shared by every spell. A concrete spell is a .tres file of a subclass
-## (FireballData, IceWallData, WhirlwindData) plus a small effect script; a fused spell
+## (FireballData, WaveData, WhirlwindData, StoneSpikesData, ZoneData, LightningData,
+## StormCloudData) plus a small effect script; a fused spell
 ## (stage 26) is one more .tres of the same subclasses with its own numbers and look.
 ## Numbers that grow with the spell level are arrays: index 0 is level 1.
 

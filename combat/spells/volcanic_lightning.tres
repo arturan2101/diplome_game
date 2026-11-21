@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="LightningData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/lightning_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/volcanic_lightning_icon.tres" id="2"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/element2_frames.tres" id="frames"]
+[ext_resource type="PackedScene" path="res://combat/spells/lightning_spell.tscn" id="3"]
+[ext_resource type="Script" path="res://combat/spells/zone_data.gd" id="4"]
+
+[sub_resource type="Resource" id="small_lava"]
+script = ExtResource("4")
+id = &"volcanic_lightning"
+color = Color(1, 0.38, 0.1, 1)
+tick_damage = PackedInt32Array(4, 5, 6)
+tick_interval = 0.5
+duration = PackedFloat32Array(2, 2, 2)
+radius = PackedFloat32Array(14, 14, 16)
+frames = ExtResource("frames")
+level_animations = Array[StringName]([&"lava_pool_l1", &"lava_pool_l1", &"lava_pool_l1"])
+look_radius = PackedFloat32Array(11, 11, 11)
+
+[resource]
+script = ExtResource("1")
+id = &"volcanic_lightning"
+display_name = "Volcanic Lightning"
+description = "chain lightning that leaves lava under every enemy it strikes (lava + lightning)"
+icon = ExtResource("2")
+color = Color(1, 0.45, 0.2, 1)
+cooldown = PackedFloat32Array(9, 10, 11)
+auto_aim_radius = 150.0
+spell_scene = ExtResource("3")
+damage = PackedInt32Array(100, 115, 130)
+chain_count = PackedInt32Array(3, 4, 4)
+jump_range = 64.0
+wet_multiplier = 1.5
+zone_on_hit = SubResource("small_lava")
+frames = ExtResource("frames")
+bolt_animation = &"volcanic_lightning"
+hit_animation = &"lightning_hit"

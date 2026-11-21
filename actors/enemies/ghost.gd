@@ -78,7 +78,7 @@ func _update_chase(delta: float) -> void:
 	if distance <= data.attack_range and not is_in_wall() and _can_see_target():
 		_enter(State.WINDUP)
 		return
-	velocity = _direction_to_target(delta) * data.move_speed
+	velocity = _direction_to_target(delta) * get_walk_speed()
 
 
 ## Straight at the target, through anything.

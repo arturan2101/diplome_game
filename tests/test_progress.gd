@@ -27,13 +27,13 @@ func _test_save() -> void:
 	var saved: Dictionary = Progress.to_dictionary()
 	Progress.from_dictionary({})
 	Progress.load_progress()
-	check(Progress.shards == 7 and Progress.is_spell_unlocked(&"whirlwind") and not Progress.is_spell_unlocked(&"ice_wall")
+	check(Progress.shards == 7 and Progress.is_spell_unlocked(&"whirlwind") and not Progress.is_spell_unlocked(&"water")
 			and Progress.perk_level(&"health", 3) == 2 and Progress.to_dictionary() == saved,
 			"shards, skills and unlocked spells survive a reload")
 	check(not Progress.spend_shards(8) and Progress.shards == 7 and Progress.spend_shards(5) and Progress.shards == 2,
 			"shards are spent only when there are enough")
 	Progress.unlock_all = true
-	check(Progress.is_spell_unlocked(&"ice_wall") and Progress.perk_level(&"speed", 3) == 3,
+	check(Progress.is_spell_unlocked(&"water") and Progress.perk_level(&"speed", 3) == 3,
 			"everything unlocked (testing): every spell open, every skill at its top")
 	Progress.unlock_all = false
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_SAVE))

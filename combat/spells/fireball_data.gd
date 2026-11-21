@@ -16,6 +16,10 @@ extends SpellData
 @export var projectile_scene: PackedScene
 ## Seconds the blast stays drawn.
 @export var blast_time: float = 0.25
+## The plasma (stage 40): the ball flies through enemies, hurting each one it passes
+## with the full damage, and bursts only at a wall or at the end of its range (the
+## burst spares the enemies it already went through).
+@export var pierce: bool = false
 @export_group("Look")
 ## The look turns with the flight (a ball with a tail); off for round looks (steam).
 @export var rotate_look: bool = true

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="StoneSpikesData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/stone_spikes_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stone_spikes_icon.tres" id="2"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/element2_frames.tres" id="frames"]
+[ext_resource type="PackedScene" path="res://combat/spells/stone_spikes_spell.tscn" id="3"]
+
+
+[resource]
+script = ExtResource("1")
+id = &"stone_spikes"
+display_name = "Stone Spikes"
+description = "a line of spikes breaks out of the floor and stuns"
+icon = ExtResource("2")
+color = Color(0.62, 0.5, 0.38, 1)
+cooldown = PackedFloat32Array(7, 8, 9)
+auto_aim_radius = 96.0
+spell_scene = ExtResource("3")
+unlock_cost = 6
+damage = PackedInt32Array(16, 22, 28)
+length = PackedFloat32Array(56, 64, 72)
+stun_time = PackedFloat32Array(0.6, 0.8, 1.0)
+frames = ExtResource("frames")
+level_animations = Array[StringName]([&"stone_spikes_l1", &"stone_spikes_l2", &"stone_spikes_l3"])

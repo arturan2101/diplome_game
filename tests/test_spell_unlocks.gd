@@ -25,7 +25,7 @@ func _test_pool() -> void:
 	var open: Array[StringName] = _ids(_pool.unlocked())
 	check(open == ([&"fireball"] as Array[StringName]), "at first only the fireball is open (%s)" % [open])
 	Progress.unlock_spell(&"whirlwind")
-	check(_ids(_pool.unlocked()).has(&"whirlwind") and not _ids(_pool.unlocked()).has(&"ice_wall"), "an unlocked spell joins the run's pool")
+	check(_ids(_pool.unlocked()).has(&"whirlwind") and not _ids(_pool.unlocked()).has(&"water"), "an unlocked spell joins the run's pool")
 	Progress.from_dictionary({})
 
 

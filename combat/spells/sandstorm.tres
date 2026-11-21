@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="WhirlwindData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/whirlwind_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sandstorm_icon.tres" id="2"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/element2_frames.tres" id="frames"]
+[ext_resource type="PackedScene" path="res://combat/spells/whirlwind_spell.tscn" id="3"]
+
+
+[resource]
+script = ExtResource("1")
+id = &"sandstorm"
+display_name = "Sandstorm"
+description = "a storm of sand around you wears enemies down and slows them (earth + air)"
+icon = ExtResource("2")
+color = Color(0.9, 0.78, 0.5, 1)
+cooldown = PackedFloat32Array(10, 11, 12)
+auto_aim_radius = 0.0
+spell_scene = ExtResource("3")
+damage = PackedInt32Array(5, 6, 7)
+radius = PackedFloat32Array(36, 42, 48)
+duration = PackedFloat32Array(4, 4.5, 5)
+tick_interval = 0.25
+knockback = 0.0
+slow_multiplier = 0.5
+slow_time = 0.6
+frames = ExtResource("frames")
+level_animations = Array[StringName]([&"sandstorm_l1", &"sandstorm_l2", &"sandstorm_l3"])

@@ -19,6 +19,9 @@ const WALL_OFFSET: float = 4.0
 @export var blast_time: float = 0.25
 @export var color: Color = Color(1.0, 0.55, 0.15)
 
+## Flies through enemies, hurting each (the plasma); set by the spell before setup().
+var pierce: bool = false
+
 var _info: DamageInfo = null
 var _direction: Vector2 = Vector2.RIGHT
 var _speed: float = 0.0
@@ -41,6 +44,9 @@ var _trail_animation: StringName = &""
 var _trail_spacing: float = 0.0
 var _trail_time: float = 0.0
 var _trail_left: float = 0.0
+## Hurtboxes the piercing ball went through, and the damage it dealt on the way.
+var _passed: Array = []
+var _pierce_dealt: int = 0
 
 
 ## Called by the spell before adding the ball to the scene. info carries the damage,
@@ -114,8 +120,17 @@ func _physics_process(delta: float) -> void:
 	var ray: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(from, to, _target_mask | _wall_mask)
 	ray.collide_with_areas = true
 	ray.hit_from_inside = true
+	var exclude: Array[RID] = []
+	for passed: Hurtbox in _passed:
+		if is_instance_valid(passed):
+			exclude.append(passed.get_rid())
+	ray.exclude = exclude
 	var result: Dictionary = get_world_2d().direct_space_state.intersect_ray(ray)
 	if not result.is_empty():
+		var hurtbox: Hurtbox = result["collider"] as Hurtbox
+		if pierce and hurtbox != null:
+			_pierce(hurtbox)
+			return
 		global_position = (result["position"] as Vector2) - _direction * WALL_OFFSET
 		_explode()
 		return
@@ -151,10 +166,22 @@ func _update_blast_look() -> void:
 	_look.modulate.a = clampf(2.0 - 2.0 * t, 0.0, 1.0)
 
 
+## The piercing ball hurts the enemy it reached and flies on (the next frame starts
+## from here, the enemy left out of the rays).
+func _pierce(hurtbox: Hurtbox) -> void:
+	_passed.append(hurtbox)
+	var hit: DamageInfo = _info.copy()
+	hit.source = _info.source if is_instance_valid(_info.source) else null
+	hit.direction = _direction
+	hit.knockback = _direction * _knockback
+	if hurtbox.receive_hit(hit):
+		_pierce_dealt += hit.amount
+
+
 func _explode() -> void:
-	var dealt: int = AreaDamage.hit(get_world_2d().direct_space_state, global_position, _radius, _info.amount,
-			_info.source if is_instance_valid(_info.source) else null, _info.source_id, _knockback,
-			_target_mask, _wall_mask)
+	var dealt: int = _pierce_dealt + AreaDamage.hit(get_world_2d().direct_space_state, global_position, _radius,
+			_info.amount, _info.source if is_instance_valid(_info.source) else null, _info.source_id, _knockback,
+			_target_mask, _wall_mask, Callable(), Vector2.ZERO, 360.0, _passed)
 	_blast_left = blast_time
 	if _look != null:
 		if _blast_look:

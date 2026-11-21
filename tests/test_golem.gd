@@ -2,7 +2,7 @@ extends TestCase
 ## Headless test for the stone golem (stage 29): bought by the director only with the
 ## extra enemies on and from its depth; slow, not pushed back; the slam after the windup
 ## hurts what stands in its circle (with the golem's id as the source) and nothing
-## outside it; the bot is told to leave the whole circle; the blizzard freezes it.
+## outside it; the bot is told to leave the whole circle; the water's ice freezes it.
 
 const GOLEM: String = "res://actors/enemies/golem.tres"
 const SEEDS: int = 300
@@ -85,7 +85,7 @@ func _test_heavy_and_frozen() -> void:
 	check(golem.health.max_hp == (load(GOLEM) as GolemData).max_hp and golem.data.move_speed < 30.0,
 			"the golem is tough (%d HP) and slow" % golem.health.max_hp)
 	golem.freeze(0.5)
-	check(golem.is_frozen(), "the blizzard freezes a golem too")
+	check(golem.is_frozen(), "the water's ice freezes a golem too")
 	await _clear([golem])
 
 

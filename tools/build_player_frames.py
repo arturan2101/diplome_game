@@ -1,6 +1,6 @@
 """Rewrites assets/art/characters/player_frames.tres from every player strip in the
 folder: idle, walk, attack, hurt, death and the actions of stage 30 (bow draw, shield
-block, dash) and the attacks of the spear and the daggers (stage 39). Strips are 24x24 frames side by side, named player_<anim>_<dir>.png or
+block, dash) and the attacks of the spear, the daggers and the crossbow (stage 39). Strips are 24x24 frames side by side, named player_<anim>_<dir>.png or
 player_<anim>.png. Run from the project root after new strips are added:
     python tools/build_player_frames.py
 """
@@ -15,7 +15,7 @@ ACTOR = "player"
 F = 24
 # Frames per second and looping of each kind of animation.
 SPEED = {"idle": 6.0, "walk": 10.0, "attack": 12.0, "hurt": 12.0, "death": 10.0, "bow": 10.0, "block": 8.0, "dash": 16.0,
-         "spear": 12.0, "daggers": 14.0}
+         "spear": 12.0, "daggers": 14.0, "crossbow": 12.0}
 LOOPING = {"idle", "walk"}
 PATTERN = re.compile(r"^(%s)(_[a-z]+)?$" % "|".join(SPEED))
 

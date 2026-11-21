@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ZoneData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/zone_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vines_icon.tres" id="2"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/element2_frames.tres" id="frames"]
+[ext_resource type="PackedScene" path="res://combat/spells/zone_spell.tscn" id="3"]
+
+
+[resource]
+script = ExtResource("1")
+id = &"vines"
+display_name = "Vines"
+description = "vines grow out of the floor and hold enemies in place (water + earth)"
+icon = ExtResource("2")
+color = Color(0.35, 0.75, 0.3, 1)
+cooldown = PackedFloat32Array(8, 9, 10)
+auto_aim_radius = 140.0
+spell_scene = ExtResource("3")
+tick_damage = PackedInt32Array(5, 6, 7)
+tick_interval = 0.5
+duration = PackedFloat32Array(3, 3.5, 4)
+radius = PackedFloat32Array(30, 34, 38)
+root_time = 0.6
+frames = ExtResource("frames")
+level_animations = Array[StringName]([&"vines_l1", &"vines_l2", &"vines_l3"])
+look_radius = PackedFloat32Array(15, 18, 21)

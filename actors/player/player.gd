@@ -266,6 +266,12 @@ func aim_direction(radius: float) -> Vector2:
 	return global_position.direction_to(target.global_position)
 
 
+## The nearest visible enemy hurtbox within radius, or null. Spells that land on a
+## spot (a lava pool, vines) aim at it.
+func aim_target(radius: float) -> Hurtbox:
+	return _find_aim_target(radius) if radius > 0.0 else null
+
+
 ## Where attacks, shots and the shield point: at the nearest visible enemy within the
 ## weapon's auto-aim radius, otherwise where the player last moved.
 func get_look_direction() -> Vector2:

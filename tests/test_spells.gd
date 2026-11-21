@@ -1,11 +1,11 @@
 extends TestCase
 ## Headless test for spells: numbers by level, the spell pool, the spell book (learn,
 ## level up, full slots, replace, cooldown), the three effects (fireball blast,
-## whirlwind ticks, ice wall blocks), the scroll and the shrine, the choice screen,
+## whirlwind ticks, the water's wave), the scroll and the shrine, the choice screen,
 ## shrines in plans and sections, and spell uses and damage in the log.
 
 const FIREBALL: String = "res://combat/spells/fireball.tres"
-const ICE_WALL: String = "res://combat/spells/ice_wall.tres"
+const WATER: String = "res://combat/spells/water.tres"
 const WHIRLWIND: String = "res://combat/spells/whirlwind.tres"
 const POOL: String = "res://combat/spells/spell_pool.tres"
 const PLAYER_SCENE: String = "res://actors/player/player.tscn"
@@ -19,31 +19,21 @@ const TARGET_HP: int = 1000
 const TARGET_RADIUS: float = 8.0
 const PLANS: int = 1000
 const RUN_SEED: int = 31
-## Open floor with one pit ('~' at cell 5,5) for the ice wall.
-const FLOOR_MAP: String = """###########
-#.........#
-#.........#
-#.........#
-#.........#
-#....~....#
-#.........#
-#.........#
-###########"""
 
 var _fireball: SpellData = null
-var _ice_wall: SpellData = null
+var _water: SpellData = null
 var _whirlwind: SpellData = null
 
 
 func run() -> void:
 	_fireball = load(FIREBALL) as SpellData
-	_ice_wall = load(ICE_WALL) as SpellData
+	_water = load(WATER) as SpellData
 	_whirlwind = load(WHIRLWIND) as SpellData
 	_test_data()
 	await _test_book()
 	await _test_fireball()
 	await _test_whirlwind()
-	await _test_ice_wall()
+	await _test_water()
 	await _test_scroll_and_shrine()
 	await _test_choice_screen()
 	_test_plans_and_sections()
@@ -65,7 +55,7 @@ func _test_data() -> void:
 	var ids: Dictionary = {}
 	for spell_data: SpellData in offer:
 		ids[spell_data.id] = true
-	check(offer.size() == 3 and ids.size() == 3 and pool.offer(5, rng).size() == 3,
+	check(offer.size() == 3 and ids.size() == 3 and pool.offer(9, rng).size() == pool.spells.size(),
 			"a shrine offers three different spells, never more than the pool has")
 
 
@@ -82,14 +72,14 @@ func _test_book() -> void:
 			and book.level_of(&"fireball") == 3, "learning it again raises the level up to 3")
 	check(book.learn(_fireball) == SpellBook.LearnResult.MAX_LEVEL and book.level_of(&"fireball") == 3,
 			"past level 3 nothing changes")
-	check(book.learn(_ice_wall) == SpellBook.LearnResult.LEARNED and book.get_spell(1).data == _ice_wall,
+	check(book.learn(_water) == SpellBook.LearnResult.LEARNED and book.get_spell(1).data == _water,
 			"a second spell takes the second slot")
 	check(book.learn(_whirlwind) == SpellBook.LearnResult.SLOTS_FULL and book.level_of(&"whirlwind") == 0,
 			"a third spell does not fit while both slots are full")
 	book.replace(0, _whirlwind)
 	await physics_frames(1)
 	check(book.level_of(&"fireball") == 0 and book.get_spell(0).data == _whirlwind and book.get_spell(0).level == 1
-			and book.to_dictionary() == {&"whirlwind": 1, &"ice_wall": 1}, "replace forgets the old spell for a new one")
+			and book.to_dictionary() == {&"whirlwind": 1, &"water": 1}, "replace forgets the old spell for a new one")
 	check(learned == ([1, 2, 3, 1, 1] as Array[int]), "spell_learned reports every new spell and level-up")
 	check(book.cast(0) and not book.cast(0) and is_equal_approx(book.get_spell(0).get_cooldown_fraction(), 1.0),
 			"after a cast the spell cools down")
@@ -147,47 +137,27 @@ func _test_whirlwind() -> void:
 	await physics_frames(2)
 
 
-## Level 3 ice wall: five tiles across the aim; the pit tile and the tile where an enemy
-## stands are skipped; the blocks stop rays on the world layer and melt later.
-func _test_ice_wall() -> void:
-	var level: Level = Level.new()
-	level.debug_map = FLOOR_MAP
-	add_child(level)
-	var player: Player = _add_player(level.cell_center(Vector2i(3, 4)))
-	var standing: CharacterBody2D = CharacterBody2D.new()
-	standing.collision_layer = ENEMY_BODY_LAYER
-	standing.collision_mask = 0
-	var shape: CollisionShape2D = CollisionShape2D.new()
-	var circle: CircleShape2D = CircleShape2D.new()
-	circle.radius = 6.0
-	shape.shape = circle
-	standing.add_child(shape)
-	add_child(standing)
-	standing.global_position = level.cell_center(Vector2i(5, 3))
+## Water at level 1: a wave in front hurts, pushes and wets; behind the caster nothing.
+func _test_water() -> void:
+	var player: Player = _add_player(Vector2(100.0, 700.0))
+	var front: Enemy = TestFactory.enemy(TestFactory.melee_enemy_data(&"wave_front"))
+	front.data.max_hp = 1000
+	add_child(front)
+	front.global_position = Vector2(130.0, 700.0)
+	var behind: Enemy = TestFactory.enemy(TestFactory.melee_enemy_data(&"wave_behind"))
+	behind.data.max_hp = 1000
+	add_child(behind)
+	behind.global_position = Vector2(70.0, 700.0)
 	await physics_frames(2)
-	for _i in SpellData.MAX_LEVEL:
-		player.spell_book.learn(_ice_wall)
-	check(player.spell_book.get_spell(0).try_cast(Vector2.RIGHT), "the ice wall is cast")
-	await physics_frames(2)
-	var cells: Array[Vector2i] = []
-	for child: Node in level.get_children():
-		if child is IceBlock:
-			cells.append(level.cell_at((child as IceBlock).global_position))
-	cells.sort()
-	check(cells == ([Vector2i(5, 2), Vector2i(5, 4), Vector2i(5, 6)] as Array[Vector2i]),
-			"blocks stand on free floor across the aim; the pit and the enemy's tile are skipped: %s" % [cells])
-	var ray: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(
-			level.cell_center(Vector2i(8, 4)), level.cell_center(Vector2i(3, 4)), WORLD_LAYER)
-	var hit: Dictionary = player.get_world_2d().direct_space_state.intersect_ray(ray)
-	check(not hit.is_empty() and hit["collider"] is IceBlock, "the ice stops anything that walls stop (arrows, enemies)")
-	var duration: float = SpellData.float_at((_ice_wall as IceWallData).duration, 3)
-	await physics_frames(ceili(duration * Engine.physics_ticks_per_second) + 10)
-	var left: int = 0
-	for child: Node in level.get_children():
-		if child is IceBlock:
-			left += 1
-	check(left == 0, "the ice melts after %.0f s" % duration)
-	for node: Node in [player, standing, level]:
+	player.spell_book.learn(_water)
+	var start: Vector2 = front.global_position
+	check(player.spell_book.get_spell(0).try_cast(Vector2.RIGHT), "the water is cast")
+	await physics_frames(6)
+	var damage: int = SpellData.int_at((_water as WaveData).damage, 1)
+	check(front.health.hp == 1000 - damage and front.is_wet() and front.global_position.x > start.x + 2.0,
+			"the wave hurts (%d), soaks and pushes the enemy in front" % damage)
+	check(behind.health.hp == 1000 and not behind.is_wet(), "the enemy behind the caster is not touched")
+	for node: Node in [player, front, behind]:
 		node.queue_free()
 	await physics_frames(2)
 
@@ -202,7 +172,7 @@ func _test_scroll_and_shrine() -> void:
 	check(scroll.interact(player) and player.spell_book.level_of(&"fireball") == 1 and scroll.is_queued_for_deletion(),
 			"taking a scroll teaches the spell and uses the scroll up")
 	await physics_frames(1)
-	player.spell_book.learn(_ice_wall)
+	player.spell_book.learn(_water)
 	var full: SpellPickup = _add_scroll(_whirlwind, player.position + Vector2(-12.0, 0.0))
 	var full_events: Array[SpellPickup] = []
 	full.slots_full.connect(func(pickup: SpellPickup) -> void: full_events.append(pickup))
@@ -237,25 +207,25 @@ func _test_choice_screen() -> void:
 	add_child(choice)
 	var closed: Array = []
 	choice.closed.connect(func(learned: SpellData) -> void: closed.append(learned))
-	var offers: Array[SpellData] = [_fireball, _ice_wall, _whirlwind]
+	var offers: Array[SpellData] = [_fireball, _water, _whirlwind]
 	choice.open_offers(offers, book)
 	var buttons: Array[Button] = _choice_buttons(choice)
 	check(choice.is_open() and get_tree().paused and buttons.size() == 3, "the shrine screen shows three spells and pauses")
 	buttons[0].pressed.emit()
 	check(not choice.is_open() and not get_tree().paused and book.level_of(&"fireball") == 1 and closed == [_fireball],
 			"choosing a spell learns it, closes the screen and resumes")
-	book.learn(_ice_wall)
+	book.learn(_water)
 	choice.open_offers(offers, book)
 	_choice_buttons(choice)[2].pressed.emit()
 	var slots: Array[Button] = _choice_buttons(choice)
 	check(choice.is_open() and slots.size() == 2 and choice.title.text.contains("Whirlwind"),
 			"a new spell with full slots asks which one to forget")
 	slots[1].pressed.emit()
-	check(not choice.is_open() and book.level_of(&"ice_wall") == 0 and book.level_of(&"whirlwind") == 1
+	check(not choice.is_open() and book.level_of(&"water") == 0 and book.level_of(&"whirlwind") == 1
 			and book.level_of(&"fireball") == 1, "the chosen slot gets the new spell")
-	choice.open_replace(_ice_wall, book)
+	choice.open_replace(_water, book)
 	choice.back_button.pressed.emit()
-	check(not choice.is_open() and not get_tree().paused and closed.back() == null and book.level_of(&"ice_wall") == 0,
+	check(not choice.is_open() and not get_tree().paused and closed.back() == null and book.level_of(&"water") == 0,
 			"Keep my spells closes without changes")
 	choice.open_offers(offers, book)
 	var escape: InputEventAction = InputEventAction.new()

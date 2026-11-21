@@ -4,11 +4,8 @@ extends Spell
 ## enemies inside and pushes them out (AreaDamage). The spell node is a child of the
 ## caster, so the wind moves with it. The first tick comes at once.
 ## The look is the level's animation of the spell, stretched to the radius; without
-## one a placeholder is drawn. The firestorm and the blizzard (fused spells) use this
-## script too; the blizzard's ticks also freeze the enemies they hit.
-
-## Search depth from a hurtbox up to the enemy that owns it.
-const OWNER_SEARCH_DEPTH: int = 4
+## one a placeholder is drawn. The sandstorm (a fused spell) uses this script too; its
+## ticks also slow the enemies they hit.
 
 ## Placeholder look: how fast the wind lines turn, radians per second.
 @export var spin_speed: float = 9.0
@@ -55,8 +52,7 @@ func _physics_process(delta: float) -> void:
 	_tick_left -= delta
 	if _tick_left <= 0.0:
 		_tick_left += stats.tick_interval
-		var freeze: float = SpellData.float_at(stats.freeze_time, level)
-		var on_hit: Callable = _freeze_owner.bind(freeze) if freeze > 0.0 else Callable()
+		var on_hit: Callable = _on_hit if stats.has_status() else Callable()
 		_report_damage(AreaDamage.hit(get_world_2d().direct_space_state, caster.global_position,
 				_radius(), SpellData.int_at(stats.damage, level), caster, stats.id, stats.knockback,
 				target_mask, wall_mask, on_hit))
@@ -65,16 +61,17 @@ func _physics_process(delta: float) -> void:
 	queue_redraw()
 
 
-## The blizzard: the enemy whose hurtbox took the tick freezes.
-func _freeze_owner(hurtbox: Hurtbox, seconds: float) -> void:
-	var node: Node = hurtbox
-	for _i in OWNER_SEARCH_DEPTH:
-		if node == null or node is Enemy:
-			break
-		node = node.get_parent()
-	var enemy: Enemy = node as Enemy
-	if enemy != null and is_instance_valid(enemy):
-		enemy.freeze(seconds)
+## The enemy whose hurtbox took the tick freezes or slows down (the sandstorm).
+func _on_hit(hurtbox: Hurtbox) -> void:
+	var stats: WhirlwindData = data as WhirlwindData
+	var enemy: Enemy = Enemy.owner_of(hurtbox)
+	if enemy == null or not is_instance_valid(enemy):
+		return
+	var freeze: float = SpellData.float_at(stats.freeze_time, level)
+	if freeze > 0.0:
+		enemy.freeze(freeze)
+	if stats.slow_time > 0.0:
+		enemy.slow(stats.slow_multiplier, stats.slow_time)
 
 
 ## Starts the level's animation, stretched so the ring's art covers the radius.
