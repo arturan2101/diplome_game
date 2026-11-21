@@ -660,15 +660,25 @@ DUMMY = """
 
 
 def dummy_frames():
-    """Idle, then two hit frames: the top leans back and straw flies off."""
+    """Idle, then two hit frames that wobble on the post: the top bends away from the blow
+    (head 2 px, body 1 px), then swings back past the middle (1 px the other way) while
+    straw flies off. The post and the foot never move."""
     rows = DUMMY.strip("\n").splitlines()
     out = [draw(DUMMY, 24, 24)]
-    for lean, top_rows, specks in ((1, 18, [(5, 8, "u"), (19, 6, "Y"), (4, 14, "c")]),
-                                   (1, 10, [(3, 5, "Y"), (20, 10, "u"), (18, 15, "c")])):
+
+    def shift(line, n):
+        if n > 0:
+            return "." * n + line[:-n]
+        if n < 0:
+            return line[-n:] + "." * -n
+        return line
+
+    for offsets, specks in (((2, 1), [(5, 8, "u"), (20, 6, "Y"), (4, 14, "c")]),
+                            ((-1, -1), [(3, 5, "Y"), (20, 10, "u"), (18, 15, "c")])):
         shifted = []
         for y, line in enumerate(rows):
-            line = "." * lean + line[:-lean] if y < top_rows else line
-            shifted.append(list(line))
+            n = offsets[0] if y < 9 else offsets[1] if y < 18 else 0
+            shifted.append(list(shift(line, n)))
         for x, y, c in specks:
             if shifted[y][x] == ".":
                 shifted[y][x] = c
