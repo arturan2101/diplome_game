@@ -484,3 +484,109 @@ Generator `tools/art/make_title.py` (32-colour palette plus the camp's nature co
 | C | Campfire flames for the background | assets/art/ui/menu_fire.png | 32x32, 3 (96x32), loop 8 fps | draw at (178, 278) on the background (the fire's base is at (194, 306)) | generated |
 
 Integrated in stage 42: warden_boulder(+_hit) in `actors/projectiles/stone.tscn`, drowned / tide_crab / ember_imp / magma_beetle frames in `actors/enemies/<id>.tres`, imp_fireball in `actors/projectiles/imp_fireball.tscn`, flooded_decals in `level/flooded_theme.tres`, shop_icons2 in `shop/shop.tres` (ShopData.goods_icons). Not used yet: floor_plates.png, merchant_sign.png.
+
+## Audio (batch 13)
+
+PixelLab's sound and music tools need a tier 2 subscription; the author chose CC0 packs instead (Kenney audio packs and Juhani Junkala's retro sound effects and chiptunes, list and links in `assets/audio/CREDITS.md`). Every file is built by `tools/audio/make_audio.py` (recipe per file: source clips, layering, speed, filters; usage in its docstring) with one treatment so the packs sound like one game: retro, a little muffled (low-pass), a short stone-room reflection, silence trimmed at both ends, a short fade-out. Sound effects: OGG Vorbis, mono, 44.1 kHz, peak -1 dBFS (footsteps -12 dBFS), 0.1-1.2 s (loops, the roar, the Warden's death and thunder up to 3 s). Music: OGG Vorbis, stereo, 44.1 kHz, -14 LUFS, true peak under -1 dBFS; each loop is the whole file, repeated to 60-120 s, filtered and echoed across the seam so the end joins the start (play it with looping on). Variants `<name>_1.._3`: pick one at random.
+
+| P | File | Length | What it is for | Status |
+|---|---|---|---|---|
+| C | assets/audio/sfx/sword_swing_1.ogg | 0.14 s | sword swing (pick one of the variants at random) | generated |
+| C | assets/audio/sfx/sword_swing_2.ogg | 0.14 s | sword swing (pick one of the variants at random) | generated |
+| C | assets/audio/sfx/sword_swing_3.ogg | 0.16 s | sword swing (pick one of the variants at random) | generated |
+| C | assets/audio/sfx/sword_hit_1.ogg | 0.45 s | sword hits an enemy | generated |
+| C | assets/audio/sfx/sword_hit_2.ogg | 0.43 s | sword hits an enemy | generated |
+| C | assets/audio/sfx/sword_hit_3.ogg | 0.53 s | sword hits an enemy | generated |
+| C | assets/audio/sfx/heavy_slash.ogg | 0.42 s | third hit of the sword combo | generated |
+| C | assets/audio/sfx/bow_draw.ogg | 0.50 s | drawing the bow (wooden creak) | generated |
+| C | assets/audio/sfx/bow_release.ogg | 0.27 s | arrow released | generated |
+| C | assets/audio/sfx/arrow_hit_flesh.ogg | 0.14 s | arrow hits an enemy | generated |
+| C | assets/audio/sfx/arrow_hit_wall.ogg | 0.50 s | arrow hits a wall or cover | generated |
+| C | assets/audio/sfx/crossbow_shot.ogg | 0.19 s | crossbow fires | generated |
+| C | assets/audio/sfx/crossbow_reload.ogg | 0.65 s | crossbow reloads | generated |
+| C | assets/audio/sfx/spear_thrust_1.ogg | 0.43 s | spear thrust | generated |
+| C | assets/audio/sfx/spear_thrust_2.ogg | 0.51 s | spear thrust | generated |
+| C | assets/audio/sfx/dagger_stab_1.ogg | 0.30 s | dagger stab (fast, short) | generated |
+| C | assets/audio/sfx/dagger_stab_2.ogg | 0.33 s | dagger stab (fast, short) | generated |
+| C | assets/audio/sfx/dagger_stab_3.ogg | 0.23 s | dagger stab (fast, short) | generated |
+| C | assets/audio/sfx/crit_hit.ogg | 0.51 s | critical hit: a bright ring over the hit | generated |
+| C | assets/audio/sfx/player_hurt_1.ogg | 0.19 s | the player takes damage | generated |
+| C | assets/audio/sfx/player_hurt_2.ogg | 0.21 s | the player takes damage | generated |
+| C | assets/audio/sfx/player_hurt_3.ogg | 0.11 s | the player takes damage | generated |
+| C | assets/audio/sfx/player_death.ogg | 1.20 s | the player dies | generated |
+| C | assets/audio/sfx/footstep_stone_1.ogg | 0.10 s | footstep on stone, very soft (peak -12 dBFS) | generated |
+| C | assets/audio/sfx/footstep_stone_2.ogg | 0.10 s | footstep on stone, very soft (peak -12 dBFS) | generated |
+| C | assets/audio/sfx/footstep_stone_3.ogg | 0.11 s | footstep on stone, very soft (peak -12 dBFS) | generated |
+| C | assets/audio/sfx/footstep_stone_4.ogg | 0.11 s | footstep on stone, very soft (peak -12 dBFS) | generated |
+| C | assets/audio/sfx/dash.ogg | 0.32 s | dash | generated |
+| C | assets/audio/sfx/shield_block.ogg | 0.19 s | a hit blocked by the shield | generated |
+| C | assets/audio/sfx/parry.ogg | 0.89 s | parry: metallic ring | generated |
+| C | assets/audio/sfx/teleport_out.ogg | 0.90 s | teleport: vanish | generated |
+| C | assets/audio/sfx/teleport_in.ogg | 0.90 s | teleport: appear (the vanish reversed) | generated |
+| C | assets/audio/sfx/weapon_level_up.ogg | 0.76 s | weapon level up | generated |
+| C | assets/audio/sfx/skeleton_swing.ogg | 0.18 s | skeleton sword swing | generated |
+| C | assets/audio/sfx/bones_hit_1.ogg | 0.14 s | hit on a skeleton (bones clatter) | generated |
+| C | assets/audio/sfx/bones_hit_2.ogg | 0.17 s | hit on a skeleton (bones clatter) | generated |
+| C | assets/audio/sfx/bones_hit_3.ogg | 0.12 s | hit on a skeleton (bones clatter) | generated |
+| C | assets/audio/sfx/skeleton_death.ogg | 0.56 s | skeleton collapses | generated |
+| C | assets/audio/sfx/archer_release.ogg | 0.27 s | enemy archer shoots | generated |
+| C | assets/audio/sfx/beetle_bite.ogg | 0.19 s | beetle bite | generated |
+| C | assets/audio/sfx/beetle_swarm_loop.ogg | 2.00 s | beetle swarm skittering, seamless loop (soft, high-passed) | generated |
+| C | assets/audio/sfx/golem_windup.ogg | 1.20 s | golem wind-up: stone grinding | generated |
+| C | assets/audio/sfx/golem_slam.ogg | 1.20 s | golem ground slam | generated |
+| C | assets/audio/sfx/ghost_wail.ogg | 1.20 s | ghost wail (no voice: an eerie tone) | generated |
+| C | assets/audio/sfx/ghost_fade.ogg | 0.38 s | ghost fades in or out | generated |
+| C | assets/audio/sfx/drowned_grab.ogg | 0.64 s | drowned grab (wet) | generated |
+| C | assets/audio/sfx/crab_snap.ogg | 0.35 s | tide crab claw snap | generated |
+| C | assets/audio/sfx/imp_cast.ogg | 0.70 s | ember imp throws its fireball (fire whoosh) | generated |
+| C | assets/audio/sfx/magma_hiss.ogg | 1.00 s | magma beetle hiss / lava | generated |
+| C | assets/audio/sfx/enemy_spawn.ogg | 1.00 s | spawn warning before an enemy or a wave appears | generated |
+| C | assets/audio/sfx/warden_roar.ogg | 2.60 s | Ruins Warden roar, phase 2 (low rumble, no voice) | generated |
+| C | assets/audio/sfx/warden_slam.ogg | 1.20 s | Warden ground slam | generated |
+| C | assets/audio/sfx/warden_throw.ogg | 0.80 s | Warden throws the boulder | generated |
+| C | assets/audio/sfx/boulder_hit.ogg | 0.89 s | the boulder lands | generated |
+| C | assets/audio/sfx/warden_summon.ogg | 1.20 s | Warden summons | generated |
+| C | assets/audio/sfx/warden_death.ogg | 3.00 s | Warden crumbles | generated |
+| C | assets/audio/sfx/fireball_cast.ogg | 0.70 s | fireball cast | generated |
+| C | assets/audio/sfx/fireball_explode.ogg | 1.00 s | fireball explodes | generated |
+| C | assets/audio/sfx/water_wave.ogg | 1.20 s | water wave | generated |
+| C | assets/audio/sfx/ice_freeze.ogg | 0.18 s | ice / freeze | generated |
+| C | assets/audio/sfx/whirlwind_loop.ogg | 2.00 s | whirlwind, seamless loop | generated |
+| C | assets/audio/sfx/stone_spikes.ogg | 0.77 s | stone spikes break out of the floor | generated |
+| C | assets/audio/sfx/steam_burst.ogg | 1.00 s | steam burst | generated |
+| C | assets/audio/sfx/plasma_shot.ogg | 0.33 s | plasma orb shot | generated |
+| C | assets/audio/sfx/lava_bubble_loop.ogg | 1.60 s | lava pool bubbling, seamless loop | generated |
+| C | assets/audio/sfx/lightning_strike_1.ogg | 0.90 s | lightning strike | generated |
+| C | assets/audio/sfx/lightning_strike_2.ogg | 0.90 s | lightning strike | generated |
+| C | assets/audio/sfx/vines_grow.ogg | 0.46 s | vines grow | generated |
+| C | assets/audio/sfx/sandstorm_loop.ogg | 2.50 s | sandstorm, seamless loop | generated |
+| C | assets/audio/sfx/thunder_rumble.ogg | 2.80 s | storm cloud thunder | generated |
+| C | assets/audio/sfx/meteor_fall.ogg | 1.20 s | meteor falling (whistle) | generated |
+| C | assets/audio/sfx/meteor_impact.ogg | 1.20 s | meteor impact | generated |
+| C | assets/audio/sfx/spell_fusion.ogg | 1.03 s | two spells merge (magic chime) | generated |
+| C | assets/audio/sfx/coin_pickup_1.ogg | 0.42 s | coin picked up | generated |
+| C | assets/audio/sfx/coin_pickup_2.ogg | 0.13 s | coin picked up | generated |
+| C | assets/audio/sfx/shard_pickup.ogg | 0.21 s | ruins shard picked up (glassy) | generated |
+| C | assets/audio/sfx/health_pickup.ogg | 0.79 s | health potion picked up | generated |
+| C | assets/audio/sfx/chest_open.ogg | 0.91 s | chest opens | generated |
+| C | assets/audio/sfx/chest_locked.ogg | 0.46 s | chest is locked | generated |
+| C | assets/audio/sfx/gate_open.ogg | 1.20 s | gate / arena door opens (stone) | generated |
+| C | assets/audio/sfx/portal_enter.ogg | 1.20 s | entering the portal | generated |
+| C | assets/audio/sfx/secret_wall_break.ogg | 1.20 s | secret wall breaks | generated |
+| C | assets/audio/sfx/spikes_out.ogg | 0.37 s | spikes come out | generated |
+| C | assets/audio/sfx/pit_fall.ogg | 0.82 s | falling into a pit | generated |
+| C | assets/audio/sfx/shop_buy.ogg | 0.72 s | buying in the shop | generated |
+| C | assets/audio/sfx/shop_denied.ogg | 0.10 s | not enough coins / denied | generated |
+| C | assets/audio/sfx/ui_click.ogg | 0.14 s | button click | generated |
+| C | assets/audio/sfx/ui_open.ogg | 0.31 s | a menu or panel opens | generated |
+| C | assets/audio/sfx/ui_close.ogg | 0.31 s | a menu or panel closes | generated |
+| C | assets/audio/sfx/banner.ogg | 1.20 s | short sting when a floor style or the arena starts | generated |
+| C | assets/audio/sfx/death_sting.ogg | 2.28 s | game over sting (sound effect) | generated |
+| C | assets/audio/music/menu_camp.ogg | 75.3 s | menu and camp: calm (Stage Select, slowed 0.85, muffled, echo); seamless loop (the whole file); -14.1 LUFS | generated |
+| C | assets/audio/music/ruins_explore.ogg | 102.9 s | ruins floors: quiet (Stage 1, slowed 0.8, muffled, echo); seamless loop (the whole file); -14.0 LUFS | generated |
+| C | assets/audio/music/flooded_explore.ogg | 66.0 s | flooded floors: watery, echoing (Stage 2, slowed 0.85, long echo); seamless loop (the whole file); -14.0 LUFS | generated |
+| C | assets/audio/music/fire_explore.ogg | 82.7 s | fire floors: tense (Level 2, slowed 0.88, muffled); seamless loop (the whole file); -14.0 LUFS | generated |
+| C | assets/audio/music/combat.ogg | 81.9 s | combat rooms and the arena: faster (Level 3); seamless loop (the whole file); -14.0 LUFS | generated |
+| C | assets/audio/music/boss_warden.ogg | 78.0 s | Ruins Warden fight: heavy (Boss Fight, slowed 0.92); seamless loop (the whole file); -14.0 LUFS | generated |
+| C | assets/audio/music/glade_merchant.ogg | 74.3 s | merchant's glade: gentle, a little cheerful (Level 1); seamless loop (the whole file); -14.0 LUFS | generated |
+| C | assets/audio/music/death_jingle.ogg | 5.2 s | after death, plays once (the Ending's opening, slowed, fading out); not a loop; -14.0 LUFS | generated |
