@@ -23,4 +23,5 @@ move_speed = 80.0
 detection_range = 150.0
 attack_range = 12.0
 windup = 0.3
+attack_strike_frame = 2
 recovery = 0.4

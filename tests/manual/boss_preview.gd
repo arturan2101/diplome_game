@@ -1,6 +1,6 @@
 extends Node2D
-## Manual preview of the boss (open boss_preview.tscn and press F6): the Guardian of
-## the Ruins in a big room with the player (sword and bow). Fight it with the usual
+## Manual preview of the boss (open boss_preview.tscn and press F6): the Ruins Warden
+## (class Guardian) in a big room with the player (sword and bow). Fight it with the usual
 ## controls; K deals it 25% of its HP, to see the second phase and its servants.
 ## With the launch argument --demo the player stands still and the scene hurts the
 ## boss by itself (used for screenshots).

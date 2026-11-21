@@ -1,6 +1,6 @@
 class_name GuardianData
 extends EnemyData
-## Numbers of the boss, the Guardian of the Ruins. The EnemyData part describes its
+## Numbers of the boss (the Ruins Warden since stage 41; the class keeps its old name). The EnemyData part describes its
 ## slam (weapon, attack_range, windup, recovery); this adds the thrown stone, the
 ## second phase with its shockwave, and the servants it calls.
 

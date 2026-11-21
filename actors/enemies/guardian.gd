@@ -1,14 +1,16 @@
 class_name Guardian
 extends Enemy
-## The boss, Guardian of the Ruins (numbers in GuardianData).
+## The boss (numbers in GuardianData). Since stage 41 it looks like the Ruins Warden, a
+## living marble statue; the class and the log id stay "guardian".
 ## Phase 1: walks slowly; a heavy slam (its weapon) when the player is close, a thrown
 ## stone when the player keeps away.
 ## Phase 2 (below half HP): roars for a moment, calls servants and keeps calling them
 ## while few are left, moves and recovers faster, and every second close attack is a
 ## shockwave around itself.
-## Every attack is drawn on the ground while it winds up (the slam's arc, the stone's
-## line, the shockwave's circle) and fills up until the hit. Knockback does not move
-## the Guardian and it does not fall into pits.
+## Every attack has its own wind-up pose in the art (slam: shield and fist overhead;
+## throw: a boulder cocked behind the head; shockwave: arms wide, knee up), so nothing
+## is drawn on the ground. Knockback does not move the Guardian and it does not fall
+## into pits.
 
 signal phase_changed(phase: int)
 ## The game spawns the servants: it owns the enemies of the section.
@@ -18,18 +20,14 @@ enum Attack { SLAM, THROW, SHOCKWAVE }
 
 ## Physics layers the stone and the shockwave hurt (player_hurtbox).
 @export_flags_2d_physics var player_hurtbox_mask: int = 8
-## Look of the telegraphs.
-@export var telegraph_color: Color = Color(1.0, 0.2, 0.15)
-@export var telegraph_alpha: float = 0.45
-@export var telegraph_segments: int = 24
-@export var stone_line_width: float = 3.0
+## Animation of each attack ("<name>_<dir>" in the art).
+@export var attack_animations: Dictionary = {Attack.SLAM: "slam", Attack.THROW: "throw", Attack.SHOCKWAVE: "wave"}
 
 var phase: int = 1
 ## The attack being wound up (or the last one).
 var attack: Attack = Attack.SLAM
 
 var _stats: GuardianData = null
-var _windup_total: float = 0.0
 var _roar_left: float = 0.0
 var _summon_left: float = 0.0
 var _throw_cooldown_left: float = 0.0
@@ -61,11 +59,8 @@ func _physics_process(delta: float) -> void:
 	if _roar_left > 0.0:
 		_roar_left -= delta
 		velocity = Vector2.ZERO
-		queue_redraw()
 		return
 	super(delta)
-	if state == State.WINDUP:
-		queue_redraw()
 
 
 func get_windup_reach() -> float:
@@ -81,15 +76,17 @@ func is_windup_ranged() -> bool:
 	return attack == Attack.THROW
 
 
-## Share of the current windup already done, 0-1 (the telegraph fills up with it).
-func get_windup_progress() -> float:
-	if state != State.WINDUP or _windup_total <= 0.0:
-		return 0.0
-	return clampf(1.0 - _state_time_left / _windup_total, 0.0, 1.0)
-
-
 func is_roaring() -> bool:
 	return _roar_left > 0.0
+
+
+## Seconds it stands and roars going into the second phase.
+func get_roar_time() -> float:
+	return _stats.roar_time if _stats != null else 0.0
+
+
+func get_attack_animation() -> String:
+	return String(attack_animations.get(attack, "attack"))
 
 
 ## A boss stands its ground: hits and the shield do not push or stagger it.
@@ -126,7 +123,6 @@ func _start_attack(kind: Attack) -> void:
 		Attack.SHOCKWAVE:
 			_state_time_left = _stats.shockwave_windup
 	_windup_total = _state_time_left
-	queue_redraw()
 
 
 func _update_windup(delta: float) -> void:
@@ -147,10 +143,10 @@ func _update_windup(delta: float) -> void:
 					roundi(_stats.shockwave_damage * damage_multiplier), self, data.id, _stats.shockwave_knockback,
 					player_hurtbox_mask, sight_mask)
 			_shockwave_next = false
+	struck.emit()
 	_enter(State.RECOVER)
 	if phase == 2:
 		_state_time_left *= _stats.phase_two_recovery_multiplier
-	queue_redraw()
 
 
 func _throw() -> void:
@@ -179,44 +175,4 @@ func _enter_phase_two() -> void:
 	_shockwave_next = true
 	phase_changed.emit(phase)
 	summon_requested.emit(self, _stats.summon_count)
-	queue_redraw()
 
-
-func _draw() -> void:
-	if _roar_left > 0.0:
-		var t: float = 1.0 - _roar_left / _stats.roar_time
-		draw_arc(Vector2.ZERO, data.body_radius + 4.0 + 24.0 * t, 0.0, TAU, telegraph_segments,
-				Color(telegraph_color, 0.7 * (1.0 - t)), 2.0)
-		return
-	if state != State.WINDUP:
-		return
-	var progress: float = get_windup_progress()
-	var fill: Color = Color(telegraph_color, telegraph_alpha * (0.3 + 0.7 * progress))
-	var edge: Color = Color(telegraph_color, 0.9)
-	match attack:
-		Attack.SLAM:
-			var stats: MeleeWeaponData = data.weapon as MeleeWeaponData
-			if stats != null and not stats.combo.is_empty():
-				var step: MeleeAttackStep = stats.combo[0]
-				_draw_sector(step.reach, step.arc_degrees, edge, false)
-				_draw_sector(step.reach * progress, step.arc_degrees, fill, true)
-		Attack.THROW:
-			draw_line(Vector2.ZERO, _attack_direction * _stats.throw_range, fill, stone_line_width)
-		Attack.SHOCKWAVE:
-			draw_circle(Vector2.ZERO, _stats.shockwave_radius * progress, fill)
-			draw_arc(Vector2.ZERO, _stats.shockwave_radius, 0.0, TAU, telegraph_segments * 2, edge, 1.5)
-
-
-## The slam's area: a sector around the attack direction, filled or as an outline.
-func _draw_sector(radius: float, arc_degrees: float, color: Color, filled: bool) -> void:
-	var half: float = deg_to_rad(arc_degrees) * 0.5
-	var start: float = _attack_direction.angle() - half
-	var points: PackedVector2Array = PackedVector2Array([Vector2.ZERO])
-	for i in telegraph_segments + 1:
-		points.append(Vector2.from_angle(start + 2.0 * half * i / telegraph_segments) * radius)
-	if filled:
-		if radius > 0.0:
-			draw_colored_polygon(points, color)
-	else:
-		points.append(Vector2.ZERO)
-		draw_polyline(points, color, 1.5)

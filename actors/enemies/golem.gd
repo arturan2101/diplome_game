@@ -1,14 +1,13 @@
 class_name Golem
 extends Enemy
 ## Stone golem (stage 29): slow and tough, hits do not push it back. Its only attack is a
-## slam of the ground around itself after a long windup; the area is shown on the floor
-## as a circle that fills up during the windup, so a careful player steps out in time.
+## slam of the ground around itself after a long windup: both fists rise and hold over
+## its head (the art's wind-up), a shadow pulses on the floor over the slam's area, so a
+## careful player steps out in time.
 ## Damage goes out with the golem's id as its source, like any enemy's.
 
 @export_flags_2d_physics var player_hurtbox_mask: int = 8
-## The slam's warning circle: colour, fill alpha at the end of the windup, smoothness.
-@export var telegraph_color: Color = Color(1.0, 0.45, 0.2)
-@export var telegraph_alpha: float = 0.35
+## Smoothness of the dust ring drawn after the slam.
 @export var telegraph_segments: int = 32
 @export var dust_color: Color = Color(0.85, 0.83, 0.77)
 ## Art (visual only): the pulsing shadow on the floor during the windup and the
@@ -64,13 +63,6 @@ func is_windup_area() -> bool:
 	return true
 
 
-## 0 at the start of the windup, 1 when the slam comes.
-func get_windup_progress() -> float:
-	if state != State.WINDUP or data.windup <= 0.0:
-		return 0.0
-	return clampf(1.0 - _state_time_left / data.windup, 0.0, 1.0)
-
-
 func apply_knockback(knockback_velocity: Vector2) -> void:
 	if _stats != null and _stats.stagger_immune:
 		return
@@ -90,6 +82,7 @@ func _update_windup(delta: float) -> void:
 			roundi(_stats.slam_damage * damage_multiplier), self, data.id, _stats.slam_knockback,
 			player_hurtbox_mask, sight_mask)
 	_flash_left = _stats.slam_flash_time
+	struck.emit()
 	var wave: StripSprite = StripSprite.spawn(get_parent(), global_position, shockwave_texture, shockwave_frames, shockwave_fps)
 	if wave != null:
 		wave.scale = Vector2.ONE * (_stats.slam_radius / shockwave_drawn_radius)
@@ -103,13 +96,7 @@ func _update_windup(delta: float) -> void:
 func _draw() -> void:
 	if _stats == null:
 		return
-	if state == State.WINDUP:
-		# The filling circle shows how soon the slam lands; the art shows its edge.
-		var progress: float = get_windup_progress()
-		draw_circle(Vector2.ZERO, _stats.slam_radius * progress, Color(telegraph_color, telegraph_alpha * (0.3 + 0.7 * progress)))
-		if _warning == null:
-			draw_arc(Vector2.ZERO, _stats.slam_radius, 0.0, TAU, telegraph_segments, Color(telegraph_color, 0.9), 1.5)
-	elif _flash_left > 0.0:
+	if _flash_left > 0.0 and state != State.WINDUP:
 		var t: float = 1.0 - _flash_left / _stats.slam_flash_time
 		draw_arc(Vector2.ZERO, _stats.slam_radius * (0.6 + 0.4 * t), 0.0, TAU, telegraph_segments,
 				Color(dust_color, 0.8 * (1.0 - t)), 3.0)

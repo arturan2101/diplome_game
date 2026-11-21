@@ -6,13 +6,13 @@
 [ext_resource type="PackedScene" path="res://actors/enemies/guardian.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://actors/projectiles/stone.tscn" id="5"]
 
-[ext_resource type="SpriteFrames" path="res://assets/art/enemies/guardian_frames.tres" id="frames"]
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/warden_frames.tres" id="frames"]
 
 [resource]
 script = ExtResource("1")
 shard_drop = 5
 id = &"guardian"
-display_name = "Guardian of the Ruins"
+display_name = "Ruins Warden"
 sprite = ExtResource("2")
 sprite_frames = ExtResource("frames")
 sprite_scale = 2.0
@@ -23,6 +23,8 @@ move_speed = 34.0
 detection_range = 150.0
 attack_range = 30.0
 windup = 0.8
+attack_strike_frame = 4
+feet_row = 92
 recovery = 0.8
 weapon = ExtResource("3")
 scene = ExtResource("4")

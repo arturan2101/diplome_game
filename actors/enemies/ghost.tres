@@ -17,6 +17,7 @@ move_speed = 40.0
 detection_range = 220.0
 attack_range = 18.0
 windup = 0.5
+attack_strike_frame = 2
 recovery = 0.7
 weapon = ExtResource("3")
 scene = ExtResource("4")

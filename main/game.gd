@@ -687,7 +687,7 @@ func _on_summon_requested(guardian: Guardian, count: int) -> void:
 
 
 func _on_boss_phase_changed(_phase: int) -> void:
-	hud.show_banner("The Guardian calls its servants!")
+	hud.show_banner("The Warden calls its servants!")
 
 
 ## The servants crumble with the boss; the player may choose a spell as a reward.
@@ -704,10 +704,10 @@ func _on_boss_defeated() -> void:
 	hud.hide_boss()
 	# Batch 8: the weapons the player carries grow a level with every boss.
 	if GameManager.config.arsenal and player.raise_weapon_levels() > 0:
-		hud.show_banner("The Guardian has fallen
+		hud.show_banner("The Warden has fallen
 Your weapons grow stronger")
 	else:
-		hud.show_banner("The Guardian has fallen")
+		hud.show_banner("The Warden has fallen")
 	# With the glade, spells are bought from its merchant instead.
 	if _bot == null and GameManager.config.spells_enabled and not GameManager.config.merchant_glade:
 		spell_choice.open_offers.call_deferred(_run_spells.offer(shrine_offer_count, _loot_rng), player.spell_book)
@@ -798,7 +798,7 @@ func _seal_arena() -> void:
 	if boss != null:
 		boss.awaken()
 		hud.show_boss(boss)
-		hud.show_banner("The Guardian of the Ruins awakens")
+		hud.show_banner("The Ruins Warden awakens")
 	else:
 		hud.show_banner("The doors are sealed")
 	if _enemies_left <= 0:

@@ -1,14 +1,19 @@
 class_name ActorSpriteAnimator
 extends AnimatedSprite2D
 ## Visual only: picks "<idle|walk>_<down|up|left|right>" from the parent body's
-## velocity and plays one-shot actions over them: "attack_<dir>" (an enemy's windup,
-## stretched to its windup time, or a player's attack), "hurt_<dir>" when the parent's
+## velocity and plays one-shot actions over them: "attack_<dir>" (an enemy's attack,
+## or a player's attack), "hurt_<dir>" when the parent's
 ## Health takes damage, and "death" when it dies. An enemy is freed when it dies, so its
 ## death plays on a copy left on the ground (a heap of bones for the skeleton).
 ## A player's attack plays the weapon's own animation (WeaponData.attack_animation).
 ## The player also shows lasting actions: "dash_<dir>" during a dash, "block_<dir>"
 ## while the shield is up (it rises and holds), and "bow_<dir>" while drawing the bow
 ## (frames 0-3 follow the draw, 4-5 play on release).
+## An enemy's attack (stage 41): with EnemyData.attack_strike_frame the frames before it
+## are the wind-up, spread over the windup and held on the last, and the blow plays when
+## the enemy reports `struck`; a cut-short windup drops it. The boss names its attack
+## animation (slam, throw, wave) and also roars ("roar") going into its second phase and
+## raises a fist ("summon") when it calls servants.
 ## Never changes movement or combat. Animations missing from sprite_frames are skipped.
 
 ## Frames of the bow strip: drawing (0 .. BOW_DRAW_FRAMES - 1), then the release.
@@ -34,6 +39,8 @@ const BOW_DRAW_FRAMES: int = 4
 @export var crit_number_scale: float = 1.4
 ## Height of the number above the actor's centre.
 @export var damage_number_height: float = 14.0
+## Seconds the boss's summon gesture lasts.
+@export var summon_time: float = 0.75
 ## Burst of bits when an enemy dies (bone chips for the skeleton).
 @export var death_particle_color: Color = Color("#d8d4c4")
 @export var death_particles: int = 10
@@ -45,6 +52,9 @@ var _was_winding_up: bool = false
 var _weapon: Weapon = null
 ## The bow was drawn last frame (its release plays when the drawing stops).
 var _bow_drawn: bool = false
+## The enemy's wind-up being shown (held before its strike frame), &"" when none.
+var _windup_animation: StringName = &""
+var _strike_frame: int = -1
 
 
 func _ready() -> void:
@@ -58,6 +68,13 @@ func _ready() -> void:
 	if _body.has_signal("weapon_changed"):
 		_body.connect("weapon_changed", _on_weapon_changed.unbind(2))
 		_on_weapon_changed.call_deferred()
+	var enemy: Enemy = _body as Enemy
+	if enemy != null:
+		enemy.struck.connect(_on_struck)
+	var boss: Guardian = _body as Guardian
+	if boss != null:
+		boss.phase_changed.connect(_on_phase_changed)
+		boss.summon_requested.connect(_on_summon_requested.unbind(2))
 
 
 func _process(delta: float) -> void:
@@ -68,8 +85,15 @@ func _process(delta: float) -> void:
 		var winding: bool = enemy.state == Enemy.State.WINDUP
 		if winding and not _was_winding_up:
 			_face(enemy.velocity if enemy.velocity.length() > walk_threshold else _to_player())
-			play_action("attack", enemy.data.windup)
+			_start_windup(enemy)
 		_was_winding_up = winding
+		if not winding:
+			_windup_animation = &""
+		elif _windup_animation != &"":
+			# Hold the wind-up: its frames follow the windup, the last one waits for the blow.
+			frame = mini(int(enemy.get_windup_progress() * _strike_frame), _strike_frame - 1)
+			_action_left = 0.0
+			return
 	var player: Player = _body as Player
 	if player != null and _show_player_pose(player):
 		return
@@ -119,6 +143,48 @@ func _show_player_pose(player: Player) -> bool:
 			play()
 			_action_left = float(sprite_frames.get_frame_count(release) - BOW_DRAW_FRAMES) / sprite_frames.get_animation_speed(release)
 	return false
+
+
+## An enemy's attack: held wind-up frames with a strike frame, or the whole animation
+## stretched over the windup without one.
+func _start_windup(enemy: Enemy) -> void:
+	var action: String = enemy.get_attack_animation()
+	var anim: StringName = StringName(action + "_" + _direction)
+	var strike: int = enemy.data.attack_strike_frame
+	if strike <= 0 or not sprite_frames.has_animation(anim) or strike >= sprite_frames.get_frame_count(anim):
+		play_action(action, enemy.data.windup)
+		return
+	_windup_animation = anim
+	_strike_frame = strike
+	animation = anim
+	pause()
+	frame = 0
+
+
+## The blow: the rest of the attack animation from its strike frame, at its own speed.
+func _on_struck() -> void:
+	if _windup_animation == &"" or not sprite_frames.has_animation(_windup_animation):
+		return
+	var anim: StringName = _windup_animation
+	_windup_animation = &""
+	animation = anim
+	frame = _strike_frame
+	play()
+	_action_left = float(sprite_frames.get_frame_count(anim) - _strike_frame) / maxf(sprite_frames.get_animation_speed(anim), 1.0)
+
+
+## The boss roars going into its second phase, for as long as it stands still for it.
+func _on_phase_changed(_phase: int) -> void:
+	_face(_to_player())
+	play_action("roar", (_body as Guardian).get_roar_time())
+
+
+## The boss raises a fist when it calls servants (not over its roar or an attack).
+func _on_summon_requested() -> void:
+	var enemy: Enemy = _body as Enemy
+	if _action_left > 0.0 or (enemy != null and enemy.state == Enemy.State.WINDUP):
+		return
+	play_action("summon", summon_time)
 
 
 ## Plays "<action>_<dir>" once and stays on its last frame while the action lasts.
@@ -192,6 +258,9 @@ func _on_damaged(info: DamageInfo) -> void:
 		if number != null and info.is_critical:
 			number.scale = Vector2.ONE * crit_number_scale
 	if _body is Enemy and (_body as Enemy).state == Enemy.State.WINDUP:
+		return
+	# The boss's roar is not cut by a hit.
+	if _body is Guardian and (_body as Guardian).is_roaring():
 		return
 	play_action("hurt", hurt_time)
 

@@ -13,6 +13,13 @@ extends Resource
 @export var sprite_frames: SpriteFrames
 ## Scale of the picture (beetles are smaller than a tile).
 @export var sprite_scale: float = 1.0
+## Row of the frames where the feet stand; -1 = the second-to-last row (the 24x24 and
+## 48x48 art). The 96x96 boss stands on row 92.
+@export var feet_row: int = -1
+## Frame of the attack animation where the blow lands (stage 41): the frames before it
+## are the wind-up, stretched over the windup and held on the last one, the rest plays
+## when the attack comes. -1 = the whole animation is stretched over the windup.
+@export var attack_strike_frame: int = -1
 ## Radius of the body collision in pixels; the hurtbox is one pixel larger.
 @export var body_radius: float = 6.0
 ## Points of the director's danger budget one spawn of this type costs

@@ -10,6 +10,9 @@ extends CharacterBody2D
 
 ## Emitted once when the enemy dies, just before it is removed.
 signal defeated(enemy: Enemy)
+## Emitted when a wound-up attack lands (not when the windup is cut short). The look
+## plays the blow then.
+signal struck
 
 enum State { IDLE, CHASE, RETREAT, WINDUP, RECOVER, STAGGER, FALLING }
 
@@ -28,8 +31,9 @@ const OWNER_SEARCH_DEPTH: int = 4
 @export var hurtbox_shape: CollisionShape2D
 ## Physics layers that block the enemy's sight (world).
 @export_flags_2d_physics var sight_mask: int = 1
-## Tint during the windup, so the player sees the attack coming.
-@export var windup_color: Color = Color(1.0, 0.45, 0.2)
+## Tint during the windup. White (none) since stage 41: the wind-up pose of the art
+## shows the attack coming; a colour brings the old orange warning back.
+@export var windup_color: Color = Color.WHITE
 ## A hit flashes the enemy white (values above 1 brighten the sprite).
 @export var hit_color: Color = Color(3.0, 3.0, 3.0)
 ## Seconds for the hit tint to fade.
@@ -67,6 +71,8 @@ var damage_multiplier: float = 1.0
 var _target: Node2D = null
 var _level: Level = null
 var _state_time_left: float = 0.0
+## Length of the current windup (bosses set their own), for get_windup_progress().
+var _windup_total: float = 0.0
 var _retreat_cooldown_left: float = 0.0
 ## Fixed at the start of the windup, so the player can dodge the telegraphed hit.
 var _attack_direction: Vector2 = Vector2.RIGHT
@@ -382,7 +388,21 @@ func _update_windup(delta: float) -> void:
 	if weapon != null:
 		weapon.try_attack(_attack_direction)
 		weapon.release_attack(_attack_direction)
+	struck.emit()
 	_enter(State.RECOVER)
+
+
+## Share of the current windup already done, 0-1 (0 when not winding up).
+func get_windup_progress() -> float:
+	if state != State.WINDUP or _windup_total <= 0.0:
+		return 0.0
+	return clampf(1.0 - _state_time_left / _windup_total, 0.0, 1.0)
+
+
+## Name of the animation of the attack being wound up ("<name>_<dir>"); the boss has
+## one per attack.
+func get_attack_animation() -> String:
+	return "attack"
 
 
 func _update_recover(delta: float) -> void:
@@ -415,6 +435,7 @@ func _enter(new_state: State) -> void:
 			_state_time_left = data.retreat_time
 		State.WINDUP:
 			_state_time_left = data.windup
+			_windup_total = data.windup
 			_attack_direction = global_position.direction_to(_target.global_position)
 			visual.modulate = windup_color
 		State.RECOVER:
@@ -470,7 +491,8 @@ func _apply_look() -> void:
 			# Drawn at its own size (sprite_scale is for the old still pictures).
 			animated.scale = Vector2.ONE
 			var frame_height: float = float(_frame_height(data.sprite_frames))
-			animated.offset = Vector2(0.0, feet_below_centre * data.body_radius / 6.0 - (frame_height * 0.5 - 2.0))
+			var feet: float = float(data.feet_row) if data.feet_row >= 0 else frame_height - 2.0
+			animated.offset = Vector2(0.0, feet_below_centre * data.body_radius / 6.0 - (feet - frame_height * 0.5))
 		elif data.sprite != null:
 			# No animations yet: the old still picture as a one-frame placeholder.
 			var still: SpriteFrames = SpriteFrames.new()

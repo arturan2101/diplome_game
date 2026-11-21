@@ -78,7 +78,7 @@ func _test_slam() -> void:
 			"close to the player the Guardian winds up a slam")
 	var early: float = guardian.get_windup_progress()
 	await physics_frames(20)
-	check(guardian.get_windup_progress() > early, "the slam's telegraph fills up during the windup")
+	check(guardian.get_windup_progress() > early, "the slam's windup progresses (the wind-up pose follows it)")
 	await physics_frames(roundi(_data.windup * Engine.physics_ticks_per_second))
 	var slam: int = (_data.weapon as MeleeWeaponData).combo[0].damage
 	check(BIG_HP - player.health.hp == slam, "a slam that is not avoided hits for %d" % slam)

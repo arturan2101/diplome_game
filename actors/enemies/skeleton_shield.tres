@@ -19,6 +19,7 @@ move_speed = 38.0
 detection_range = 160.0
 attack_range = 18.0
 windup = 0.6
+attack_strike_frame = 2
 recovery = 0.7
 scene = ExtResource("5")
 sprite_frames = ExtResource("4")

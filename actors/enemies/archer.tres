@@ -19,6 +19,7 @@ move_speed = 40.0
 detection_range = 190.0
 attack_range = 140.0
 windup = 0.5
+attack_strike_frame = 3
 recovery = 0.9
 preferred_distance = 70.0
 retreat_time = 0.6
