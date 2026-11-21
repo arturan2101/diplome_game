@@ -472,3 +472,13 @@ Drawn in code: `tools/art/make_batch12.py`. The drowned and the ember imp come f
 | C | Shop goods icons: whetstone, dice, heart elixir, lucky charm, rune key | assets/art/ui/shop_icons2.png | 16x16 each (80x16) | same frame as shop_icons.png; region x = index * 16 | generated |
 | C | Merchant sign for the glade: post with a hanging board and a gold coin, red pennant | assets/art/props/merchant_sign.png | 16x24, 1 | bottom row 23 (shadow), post at x 6-7 | generated |
 | N | Depth banner plates: ruins (purple runes), flooded (water line, drips), fire (basalt, lava sparks) | assets/art/ui/floor_plates.png | 64x16 each, stacked (64x48) | plain middle x 12-51, y 5-10 for the title text | generated |
+
+## Title screen (batch 13, part 6)
+
+Generator `tools/art/make_title.py` (32-colour palette plus the camp's nature colours).
+
+| P | Asset | File | Size / frames | Anchor / use | Status |
+|---|---|---|---|---|---|
+| C | "RUINS" logo: blocky carved stone letters with a front face, cracks, moss, purple runes cut in and a purple glow | assets/art/ui/title_logo.png | 160x48, 1 | centre it at the top of the menu (e.g. top-left at (240, 24)) | generated |
+| C | Menu background: the arch into the ruins at dusk on the right (purple glow inside, warm firelight on its left side), the camp on the left (tent, campfire with stones and a warm patch of grass), ruined towers and an aqueduct against a banded dusk sky, stars and a thin moon; the upper middle is left calm for the logo | assets/art/ui/menu_background.png | 640x360, 1 | full screen | generated |
+| C | Campfire flames for the background | assets/art/ui/menu_fire.png | 32x32, 3 (96x32), loop 8 fps | draw at (178, 278) on the background (the fire's base is at (194, 306)) | generated |
