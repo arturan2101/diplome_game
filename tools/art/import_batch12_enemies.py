@@ -86,17 +86,62 @@ FLOOR = {hexc(h)[:3] for h in ("#1f1e29", "#2a2935", "#343442", "#3f4050", "#4c4
 
 
 def clean(img):
-    """Palette snap; the shadow pixels and PixelLab's own grey shadow (floor colours in
-    the lowest rows) are dropped, the game draws its own."""
+    """Palette snap; the shadow pixels and PixelLab's own grey shadow are dropped (the
+    game draws its own): in the lowest rows, floor-coloured pixels outside the span of
+    the legs just above. Then lone specks (at most one neighbour) are removed."""
     out = snap(img)
     px = out.load()
-    rows = [y for y in range(out.height) if any(px[x, y][3] for x in range(out.width))]
-    low = max(rows) - 2 if rows else 0
-    for y in range(out.height):
-        for x in range(out.width):
-            p = px[x, y]
-            if p == SHADOW or (y >= low and p[3] and p[:3] in FLOOR):
+    w, h = out.size
+    for y in range(h):
+        for x in range(w):
+            if px[x, y] == SHADOW:
                 px[x, y] = (0, 0, 0, 0)
+    rows = [y for y in range(h) if any(px[x, y][3] for x in range(w))]
+    if rows:
+        bottom = max(rows)
+        legs = [x for y in range(bottom - 7, bottom - 3) for x in range(w) if 0 <= y < h and px[x, y][3]]
+        if legs:
+            l0, l1 = min(legs) - 1, max(legs) + 1
+            for y in range(bottom - 3, bottom + 1):
+                for x in range(w):
+                    p = px[x, y]
+                    if p[3] and p[:3] in FLOOR and not (l0 <= x <= l1):
+                        px[x, y] = (0, 0, 0, 0)
+    src = out.copy().load()
+    for y in range(h):
+        for x in range(w):
+            if src[x, y][3]:
+                n = sum(1 for dx in (-1, 0, 1) for dy in (-1, 0, 1) if (dx or dy) and 0 <= x + dx < w
+                        and 0 <= y + dy < h and src[x + dx, y + dy][3])
+                if n <= 1:
+                    px[x, y] = (0, 0, 0, 0)
+    return out
+
+
+# The drowned's skin: the source's bone white read as a skull, so it becomes a pale,
+# sickly green-yellow (bloated, long in the water); the darkest pixels of the face turn
+# into white dead eyes.
+SKIN = {hexc("#d8d4c4")[:3]: hexc("#c8c088"), hexc("#f4f0e0")[:3]: hexc("#c8c088"),
+        hexc("#9aa2ad")[:3]: hexc("#9a9470")}
+EYE_DARK = {hexc(h)[:3] for h in ("#17161f", "#1f1e29", "#08070b")}
+
+
+def drowned_look(img):
+    out = img.copy()
+    px = out.load()
+    src = img.load()
+    pts = [(x, y) for y in range(F) for x in range(F) if src[x, y][3] and src[x, y] != SHADOW]
+    if not pts:
+        return out
+    top = min(y for _, y in pts)
+    for x, y in pts:
+        p = src[x, y][:3]
+        if p in SKIN:
+            px[x, y] = SKIN[p]
+        elif p in EYE_DARK and top + 3 <= y <= top + 6:
+            around = [src[x + dx, y + dy][:3] for dx, dy in ((1, 0), (-1, 0), (0, -1)) if 0 <= x + dx < F]
+            if sum(1 for q in around if q in SKIN) >= 2:
+                px[x, y] = hexc("#f4f0e0")
     return out
 
 
@@ -239,6 +284,8 @@ def main():
             walk = place(find(std, walk_a, direction), rot, scale, lift)
             big_frames = find(big, attack_a, direction)
             attack = place(big_frames, rot, 0.5, lift)       # 2x art: every second pixel
+            if name == "drowned":
+                idle, walk, attack = ([drowned_look(f) for f in strip] for strip in (idle, walk, attack))
             if name == "ember_imp":
                 idle = [flicker(bob(f, d), i % 2) for i, (f, d) in enumerate(zip(idle, (0, 1, 1, 0)))]
                 walk = [flicker(f, i % 2) for i, f in enumerate(walk)]
