@@ -475,13 +475,13 @@ Drawn in code: `tools/art/make_batch12.py`. The drowned and the ember imp come f
 
 ## Title screen (batch 13, part 6)
 
-Generator `tools/art/make_title.py` (32-colour palette plus the camp's nature colours).
+Generators `tools/art/make_title.py` (logo) and `tools/art/make_menu_background.py` (background and flames), 32-colour palette plus the camp's nature colours.
 
 | P | Asset | File | Size / frames | Anchor / use | Status |
 |---|---|---|---|---|---|
 | C | "RUINS" logo: blocky carved stone letters with a front face, cracks, moss, purple runes cut in and a purple glow | assets/art/ui/title_logo.png | 160x48, 1 | centre it at the top of the menu (e.g. top-left at (240, 24)) | generated |
-| C | Menu background: the arch into the ruins at dusk on the right (purple glow inside, warm firelight on its left side), the camp on the left (tent, campfire with stones and a warm patch of grass), ruined towers and an aqueduct against a banded dusk sky, stars and a thin moon; the upper middle is left calm for the logo | assets/art/ui/menu_background.png | 640x360, 1 | full screen | generated |
-| C | Campfire flames for the background | assets/art/ui/menu_fire.png | 32x32, 3 (96x32), loop 8 fps | draw at (178, 278) on the background (the fire's base is at (194, 306)) | generated |
+| C | Menu background (second take): striped retro sun setting behind an aqueduct, rays and clouds lit from below, far mountains with a stepped temple, ruined towers rimmed with sunset light, mist; on the right the ruins gate: ruined wall with ivy, pilasters with torches, purple runes in the arch stones, a tunnel going down (receding arches, steps, a faint purple doorway far below); on the left the camp: an A-frame canvas tent (flaps tied back, guy ropes), backpack, log seats, the fire pit with its warm light; cobbled path, dark foreground bushes and grass, a vignette; the upper middle stays calm for the logo | assets/art/ui/menu_background.png | 640x360, 1 | full screen; generator tools/art/make_menu_background.py (called by make_title.py) | generated |
+| C | Campfire flames for the background | assets/art/ui/menu_fire.png | 32x32, 3 (96x32), loop 8 fps | draw at (180, 284) on the background (the fire's base is at (196, 312)) | generated |
 
 Integrated in stage 42: warden_boulder(+_hit) in `actors/projectiles/stone.tscn`, drowned / tide_crab / ember_imp / magma_beetle frames in `actors/enemies/<id>.tres`, imp_fireball in `actors/projectiles/imp_fireball.tscn`, flooded_decals in `level/flooded_theme.tres`, shop_icons2 in `shop/shop.tres` (ShopData.goods_icons). Not used yet: floor_plates.png, merchant_sign.png.
 
