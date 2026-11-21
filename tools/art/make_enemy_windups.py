@@ -10,7 +10,8 @@ the colours of the actor's own idle and walk strips (this keeps the golem's gras
 ghost's single teal body), and each frame is put down with its lowest body pixel on the idle's feet
 row (PixelLab keeps the hips in place, so a crouch would sink) and the idle's shadow.
     skeleton  27ba5699-fe99-4ccb-a253-9862aec4207a  "attack_windup"  6 frames:
-              sword raised high behind the head 0-1 (hold 1), slash down 2-3, recover 4-5
+              sword raised high behind the head 0-1 (hold 1), slash down 2-3, recover 4-5;
+              left: PixelLab smeared frames 2-4, they are drawn here (hand_strike_left)
     archer    1b5bae75-a812-48bf-bf7a-f3d439691239  "attack_draw"    6 frames:
               bow up 0, draw to the cheek 1-2 (hold 2), release 3, recoil 4, lower 5
     ghost     e7152b47-c05e-4158-a3dc-a418cd4b0287  "attack_reach"   6 frames:
@@ -29,6 +30,7 @@ Any actor left out keeps its strips; the beetle is always redrawn. Rewrites the
 <actor>_frames.tres of every actor it touches.
 """
 import io
+import math
 import os
 import sys
 import zipfile
@@ -192,6 +194,49 @@ def mandibles(img, short, closed=False):
     return out
 
 
+def hand_strike_left(strip, idle):
+    """The skeleton's left strike, drawn: the body of wind-up frame 0 without the raised
+    sword, lunging 1 px left; 2 the blade cuts down-left with a white arc, 3 the blade
+    low by the ground, 4 back to the idle pose (sword held forward)."""
+    o, steel, edge, white = (8, 7, 11, 255), (154, 162, 173, 255), (244, 240, 224, 255), (216, 212, 196, 255)
+    body = strip[0].copy()
+    px = body.load()
+    top = min(y for y in range(24) for x in range(24) if px[x, y][3] and px[x, y] != SHADOW)
+    for y in range(top, top + 2):                      # the raised sword above the head
+        for x in range(24):
+            px[x, y] = (0, 0, 0, 0)
+    shadow = actions.shadow_of(strip[0])
+    lunge = Image.new("RGBA", (24, 24))
+    lunge.alpha_composite(shadow)
+    moved = actions.body_only(body).transform((24, 24), Image.AFFINE, (1, 0, 1, 0, 1, 0))
+    lunge.alpha_composite(moved)
+
+    def blade(img, a, b):
+        out = img.copy()
+        q = out.load()
+        (x0, y0), (x1, y1) = a, b
+        n = max(abs(x1 - x0), abs(y1 - y0))
+        pts = [(round(x0 + (x1 - x0) * i / n), round(y0 + (y1 - y0) * i / n)) for i in range(n + 1)]
+        for x, y in pts:
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                if 0 <= x + dx < 24 and 0 <= y + dy < 23 and not q[x + dx, y + dy][3]:
+                    q[x + dx, y + dy] = o
+        for i, (x, y) in enumerate(pts):
+            q[x, y] = edge if i > 1 else steel
+        return out
+
+    strike = blade(lunge, (11, 15), (5, 20))
+    q = strike.load()
+    for i in range(7):                                  # the slash arc in front of the cut
+        ang = math.radians(150 + i * 14)
+        x, y = round(10 + math.cos(ang) * 8), round(14 + math.sin(ang) * 7)
+        if 0 <= x < 24 and 0 <= y < 23 and not q[x, y][3]:
+            q[x, y] = white if i in (0, 6) else edge
+    low = blade(lunge, (11, 17), (4, 20))
+    strip[2], strip[3], strip[4] = strike, low, idle.copy()
+    return strip
+
+
 def write(actor, F):
     actions.F = F
     actions.write_frames(SRC, actor, os.path.join(SRC, f"{actor}_frames.tres"))
@@ -208,6 +253,8 @@ def main():
         for direction, short in DIRS.items():
             idle = actions.frame(os.path.join(SRC, f"{actor}_idle_{short}.png"))
             strip = import_strip(frames[direction], idle, F, colours, REMAP.get(actor, {}))
+            if actor == "skeleton" and short == "left":
+                strip = hand_strike_left(strip, idle)
             if actor == "golem":
                 strip = [overgrow(f) for f in strip]  # the grass of finish_golem.py
             actions.strip(strip, os.path.join(SRC, f"{actor}_attack_{short}.png"))

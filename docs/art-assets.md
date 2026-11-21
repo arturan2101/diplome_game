@@ -419,7 +419,7 @@ Generator `tools/art/make_enemy_windups.py` (PixelLab ids, steps and frame meani
 
 | P | Asset | File | Frames | Wind-up / hit | Status |
 |---|---|---|---|---|---|
-| C | Skeleton: sword raised high behind the head, slash down | assets/art/enemies/skeleton_attack_<dir>.png | 6 (24x24) | wind-up 0-1 (hold 1), slash 2-3, recover 4-5 | generated |
+| C | Skeleton: sword raised high behind the head, slash down (left view: strike frames 2-4 drawn by hand, the generated ones were smeared) | assets/art/enemies/skeleton_attack_<dir>.png | 6 (24x24) | wind-up 0-1 (hold 1), slash 2-3, recover 4-5 | generated |
 | C | Shield skeleton (elite): the same, red armour, the shield stays where the idle has it | skeleton_elite_attack_<dir>.png | 6 (24x24) | as the skeleton | generated |
 | C | Archer: bow up, draw to the cheek, release | archer_attack_<dir>.png | 6 (24x24) | bow up 0, draw 1-2 (hold 2), release 3 (spawn the arrow), recoil 4, lower 5 | generated; from the front the bow is hidden by the body, the arm movement shows |
 | C | Triple-shot archer (elite): the same, purple cloth, gold eyes | archer_elite_attack_<dir>.png | 6 (24x24) | as the archer | generated |
