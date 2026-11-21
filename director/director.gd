@@ -211,6 +211,10 @@ func buy_traps(plan: SectionPlan, rng: RandomNumberGenerator) -> int:
 func _can_buy(enemy_data: EnemyData, depth: int) -> bool:
 	if enemy_data.is_extra and not (settings.extra_enemies and depth >= enemy_data.min_depth):
 		return false
+	# A floor's own enemies (stage 42): only with floor styles on, only on their floors.
+	if enemy_data.floor_style != &"" and (settings.floor_styles == null or depth < 0
+			or settings.floor_styles.style_at(depth) != enemy_data.floor_style):
+		return false
 	return not enemy_data.is_elite or (settings.elites_enabled and depth >= enemy_data.min_depth)
 
 

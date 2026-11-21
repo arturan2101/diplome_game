@@ -37,6 +37,8 @@ const MIN_SECTIONS_PER_DEPTH: int = 3
 const MAX_SECTIONS_PER_DEPTH: int = 4
 const DEFAULT_WEAPON: WeaponData = preload("res://combat/weapons/sword.tres")
 const DEFAULT_SKILL: SkillData = preload("res://combat/skills/dash.tres")
+## Floor styles by depth (stage 42), shared by the game (looks) and the director (enemies).
+const FLOOR_STYLES: FloorStyleTable = preload("res://level/floor_styles.tres")
 ## The full game's tuning after the playtest (ExperimentConfig.full_game_tuning).
 const FULL_GAME_FEWER_PACKS: int = 1
 const FULL_GAME_COIN_SCALE: float = 0.5
@@ -99,7 +101,8 @@ func make_director() -> Director:
 func _apply_config(director: Director) -> void:
 	if config.boss_enabled and config.spells_enabled and config.spike_traps and config.combat_rooms \
 			and config.elite_enemies and config.secret_rooms and not config.merchant_glade and not config.soft_waves \
-			and not config.depth_pressure and not config.extra_enemies and not config.full_game_tuning:
+			and not config.depth_pressure and not config.extra_enemies and not config.full_game_tuning \
+			and not config.floor_styles:
 		return
 	director.settings = director.settings.duplicate() as DirectorSettings
 	if not config.boss_enabled:
@@ -121,6 +124,8 @@ func _apply_config(director: Director) -> void:
 		director.settings.depth_pressure = true
 	if config.extra_enemies:
 		director.settings.extra_enemies = true
+	if config.floor_styles:
+		director.settings.floor_styles = FLOOR_STYLES
 	if config.full_game_tuning:
 		director.settings.health_packs_fewer = FULL_GAME_FEWER_PACKS
 		director.settings.coin_scale = FULL_GAME_COIN_SCALE

@@ -62,6 +62,16 @@ extends Resource
 ## A type added after the comparison series (stage 29 on: the golem, the ghost): bought
 ## only with DirectorSettings.extra_enemies, from min_depth on.
 @export var is_extra: bool = false
+## A floor's own enemy (stage 42): bought only on floors of this style (TileTheme.style_id,
+## &"flooded", &"fire"), with ExperimentConfig.floor_styles. &"" = any floor.
+@export var floor_style: StringName = &""
+## Its blow, when it lands, slows the player: walking at hit_slow_multiplier for
+## hit_slow_time seconds (the drowned's grip). 0 = no slowing.
+@export var hit_slow_multiplier: float = 1.0
+@export var hit_slow_time: float = 0.0
+## A patch left where it dies (the magma beetle's lava), hurting the player who steps
+## in; null = none.
+@export var death_zone: ZoneData
 ## Ruin shards it drops when killed, with the progress between runs on (stage 33).
 @export var shard_drop: int = 0
 @export var min_depth: int = 0

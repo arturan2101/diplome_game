@@ -4,7 +4,12 @@ extends RefCounted
 ## next level of a spell the player has, or the merging of two spells (stage 26), and
 ## its price in coins.
 
-enum Kind { HEAL, WEAPON, SPELL, SPELL_LEVEL, FUSION }
+enum Kind { HEAL, WEAPON, SPELL, SPELL_LEVEL, FUSION, GOODS }
+
+## Titles of the goods (stage 42).
+const GOODS_TITLES: Dictionary = {&"whetstone": "Whetstone (weapon level up)", &"elixir": "Heart elixir (+%d max HP)",
+		&"charm": "Lucky charm (rarer chest weapons)", &"rune_key": "Rune key (opens the next hidden room)",
+		&"dice": "Dice (new goods)"}
 
 const HEAL_ICON: Texture2D = preload("res://assets/sprites/shop_heal_icon.tres")
 
@@ -19,6 +24,12 @@ var spell_level: int = 1
 var recipe: FusionRecipe = null
 ## A new spell while both slots are full: buying it asks which spell to forget.
 var replaces: bool = false
+## Goods offers: which good, its picture, the elixir's HP, and a check the game sets
+## (the whetstone: the weapon in hand is not at its top level yet).
+var goods: StringName = &""
+var goods_icon: Texture2D = null
+var goods_amount: int = 0
+var goods_check: Callable = Callable()
 var sold: bool = false
 
 
@@ -31,6 +42,8 @@ func get_id() -> String:
 			return "%s_%d" % [spell.id, spell_level]
 		Kind.FUSION:
 			return recipe.get_id()
+		Kind.GOODS:
+			return String(goods)
 	return "heal"
 
 
@@ -44,6 +57,9 @@ func get_title() -> String:
 			return "%s, level %d" % [spell.display_name, spell_level]
 		Kind.FUSION:
 			return "Merge into %s" % recipe.result.display_name
+		Kind.GOODS:
+			var title: String = GOODS_TITLES.get(goods, String(goods))
+			return title % goods_amount if title.contains("%d") else title
 	return "Healing (+%d HP)" % heal_amount
 
 
@@ -55,6 +71,8 @@ func get_icon() -> Texture2D:
 			return spell.icon
 		Kind.FUSION:
 			return recipe.result.icon
+		Kind.GOODS:
+			return goods_icon
 	return HEAL_ICON
 
 
@@ -73,4 +91,6 @@ func is_available(book: SpellBook) -> bool:
 			return book != null and book.level_of(spell.id) == spell_level - 1
 		Kind.FUSION:
 			return book != null and book.can_fuse(recipe)
+		Kind.GOODS:
+			return not goods_check.is_valid() or goods_check.call()
 	return true

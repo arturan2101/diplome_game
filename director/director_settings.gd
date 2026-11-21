@@ -42,6 +42,9 @@ extends Resource
 ## Enemy types added after the comparison series (EnemyData.is_extra: the golem, the
 ## ghost). Off in the clean series and the playtest (ExperimentConfig.extra_enemies).
 @export var extra_enemies: bool = false
+## Floor styles by depth (ExperimentConfig.floor_styles, stage 42): enemies of a style
+## (EnemyData.floor_style) are bought only on its floors. Null = none of them.
+@export var floor_styles: FloorStyleTable
 
 @export_group("Depth pressure")
 ## Full game (ExperimentConfig.depth_pressure, stage 28): every depth is harder than the

@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/enemy_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/tide_crab_frames.tres" id="frames"]
+[ext_resource type="Resource" path="res://actors/enemies/tide_crab_claw.tres" id="weapon"]
+
+
+[resource]
+script = ExtResource("1")
+id = &"tide_crab"
+display_name = "Tide crabs"
+sprite_frames = ExtResource("frames")
+weapon = ExtResource("weapon")
+danger_cost = 3
+pack_min = 3
+pack_max = 4
+body_radius = 5.0
+max_hp = 16
+move_speed = 90.0
+detection_range = 150.0
+attack_range = 13.0
+windup = 0.3
+attack_strike_frame = 2
+recovery = 0.5
+floor_style = &"flooded"

@@ -75,6 +75,9 @@ var _aim_query: PhysicsShapeQueryParameters2D = PhysicsShapeQueryParameters2D.ne
 var _aim_shape: CircleShape2D = CircleShape2D.new()
 ## Seconds left in which the next hit is a sure critical hit (after a parry).
 var _sure_crit_left: float = 0.0
+## Slowed by an enemy's grip (the drowned, stage 42): seconds left and the multiplier.
+var _slow_left: float = 0.0
+var _slow_multiplier: float = 1.0
 
 
 func _ready() -> void:
@@ -107,6 +110,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_sure_crit_left = maxf(_sure_crit_left - delta, 0.0)
+	_slow_left = maxf(_slow_left - delta, 0.0)
 	_move(delta)
 	_handle_skill_input()
 	if Input.is_action_just_pressed("swap_weapon"):
@@ -220,6 +224,30 @@ func raise_weapon_levels() -> int:
 	if raised > 0:
 		weapon_changed.emit(_active_slot, weapon.data)
 	return raised
+
+
+## Walks at multiplier of its speed for this many seconds (the drowned's grip). The
+## stronger slow wins while both last.
+func slow(multiplier: float, seconds: float) -> void:
+	if seconds <= 0.0:
+		return
+	if _slow_left <= 0.0 or multiplier < _slow_multiplier:
+		_slow_multiplier = clampf(multiplier, 0.0, 1.0)
+	_slow_left = maxf(_slow_left, seconds)
+
+
+func is_slowed() -> bool:
+	return _slow_left > 0.0
+
+
+## The weapon in hand gains a level (a whetstone, stage 42). False at its top level.
+func raise_active_weapon_level() -> bool:
+	if weapon == null or weapon.data.is_max_level():
+		return false
+	weapon.data = weapon.data.with_level(weapon.data.level + 1)
+	weapon.damage_multiplier = weapon.data.get_damage_multiplier() * damage_bonus
+	weapon_changed.emit(_active_slot, weapon.data)
+	return true
 
 
 ## The next hit within this many seconds is a sure critical hit (a successful parry).
@@ -338,6 +366,8 @@ func _move(delta: float) -> void:
 		speed *= weapon.get_move_speed_multiplier()
 	if skill != null:
 		speed *= skill.get_move_speed_multiplier()
+	if is_slowed():
+		speed *= _slow_multiplier
 	if input_dir != Vector2.ZERO:
 		facing = input_dir.normalized()
 		velocity = velocity.move_toward(input_dir * speed, acceleration * delta)

@@ -13,6 +13,7 @@ merchant_glade = false
 full_game_tuning = false
 arsenal = false
 floor_styles = false
+shop_goods = false
 meta_progression = false
 extra_enemies = false
 depth_pressure = false

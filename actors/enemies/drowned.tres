@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/enemy_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/drowned_frames.tres" id="frames"]
+[ext_resource type="Resource" path="res://actors/enemies/drowned_grip.tres" id="weapon"]
+
+
+[resource]
+script = ExtResource("1")
+id = &"drowned"
+display_name = "Drowned"
+sprite_frames = ExtResource("frames")
+weapon = ExtResource("weapon")
+danger_cost = 3
+max_hp = 60
+move_speed = 32.0
+detection_range = 150.0
+attack_range = 20.0
+windup = 0.65
+attack_strike_frame = 2
+recovery = 0.8
+floor_style = &"flooded"
+hit_slow_multiplier = 0.5
+hit_slow_time = 1.2

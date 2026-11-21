@@ -14,7 +14,7 @@ extends RefCounted
 ## fusions = null: no merging in the series.
 static func make_offers(data: ShopData, depth: int, rng: RandomNumberGenerator, weapons: WeaponPool,
 		rarity_table: RarityTable, spells: SpellPool, book: SpellBook, wandering: bool,
-		fusions: FusionTable = null) -> Array[ShopOffer]:
+		fusions: FusionTable = null, goods: Array[StringName] = []) -> Array[ShopOffer]:
 	var offers: Array[ShopOffer] = []
 	var offered_spells: Dictionary = {}
 	if fusions != null:
@@ -29,6 +29,11 @@ static func make_offers(data: ShopData, depth: int, rng: RandomNumberGenerator, 
 	if spells != null and not spells.spells.is_empty():
 		kinds.append(ShopOffer.Kind.SPELL)
 		weights.append(data.spell_weight)
+	# Goods (stage 42): only when the game passes some; otherwise nothing changes.
+	var goods_left: Array[StringName] = goods.duplicate()
+	if not goods_left.is_empty():
+		kinds.append(ShopOffer.Kind.GOODS)
+		weights.append(data.goods_weight)
 	for _i in rng.randi_range(data.min_offers, data.max_offers):
 		var offer: ShopOffer = ShopOffer.new()
 		offer.kind = kinds[_pick(weights, rng)]
@@ -41,6 +46,9 @@ static func make_offers(data: ShopData, depth: int, rng: RandomNumberGenerator, 
 		elif offer.kind == ShopOffer.Kind.SPELL and _choose_spell(offer, spells, book, offered_spells, rng, fusions):
 			base = data.spell_level_price * (offer.spell_level - 1) if offer.kind == ShopOffer.Kind.SPELL_LEVEL else data.spell_price
 			offered_spells[offer.spell.id] = true
+		elif offer.kind == ShopOffer.Kind.GOODS and not goods_left.is_empty():
+			_make_goods(offer, goods_left.pop_at(rng.randi_range(0, goods_left.size() - 1)), data)
+			base = float(data.goods_prices.get(offer.goods, data.heal_price))
 		else:
 			offer.kind = ShopOffer.Kind.HEAL
 		if offer.kind == ShopOffer.Kind.HEAL:
@@ -48,7 +56,21 @@ static func make_offers(data: ShopData, depth: int, rng: RandomNumberGenerator, 
 			base = data.heal_price
 		offer.price = data.price_for(base, depth, wandering)
 		offers.append(offer)
+	if not goods.is_empty():
+		# The dice: always the last offer, buying it brings new goods.
+		var dice: ShopOffer = ShopOffer.new()
+		_make_goods(dice, &"dice", data)
+		dice.price = data.price_for(float(data.goods_prices.get(&"dice", 1)), depth, wandering)
+		offers.append(dice)
 	return offers
+
+
+static func _make_goods(offer: ShopOffer, good: StringName, data: ShopData) -> void:
+	offer.kind = ShopOffer.Kind.GOODS
+	offer.goods = good
+	offer.goods_icon = data.goods_icon(good)
+	if good == &"elixir":
+		offer.goods_amount = data.elixir_max_hp
 
 
 ## A level for a spell the player has (below the top), else a new spell (for a free slot,

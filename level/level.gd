@@ -61,7 +61,8 @@ func _ready() -> void:
 		region_themes = DEFAULT_REGION_THEMES.duplicate()
 	for region_name: StringName in region_themes:
 		_region_names.append(region_name)
-	_region_names.sort()
+	# By text, not by StringName order (that follows memory, see SectionBuilder).
+	_region_names.sort_custom(func(a: StringName, b: StringName) -> bool: return String(a) < String(b))
 	_ground = TileMapLayer.new()
 	_ground.name = "Ground"
 	add_child(_ground)

@@ -84,12 +84,9 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 @export var fusion_table: FusionTable
 ## The camp's permanent skills (stage 35). Empty = progression/perks.tres.
 @export var perk_tree: PerkTree
-## Floor styles by depth (ExperimentConfig.floor_styles, stage 42), in order; each
-## lasts depths_per_floor_style depths, then the next one, and after the last the
-## first again. Empty = the level keeps its own theme.
-@export var floor_themes: Array[TileTheme] = [preload("res://level/ruins_theme.tres"),
-		preload("res://level/flooded_theme.tres"), preload("res://level/fire_theme.tres")]
-@export var depths_per_floor_style: int = 2
+## Floor styles by depth (ExperimentConfig.floor_styles, stage 42). Empty =
+## level/floor_styles.tres.
+@export var floor_styles: FloorStyleTable
 ## The merchant's glade between depths. Empty = generation/glade.tres.
 @export var glade_data: GladeData
 ## The full game's tuning (ExperimentConfig.full_game_tuning): shop prices times this,
@@ -145,6 +142,10 @@ var _bot: BotPlayer = null
 ## Servants the boss called that are still alive, including ones not yet added to the
 ## section (they are added deferred, so get_enemies() may not show them yet).
 var _servants: Array[Enemy] = []
+## Goods bought this run (stage 42): depths a chest's rarity is rolled ahead (lucky
+## charms), and rune keys waiting for the next hidden room.
+var _bought_chest_luck: int = 0
+var _rune_keys: int = 0
 
 
 func _ready() -> void:
@@ -170,6 +171,8 @@ func _ready() -> void:
 		perk_tree = DEFAULT_PERKS
 	if glade_data == null:
 		glade_data = DEFAULT_GLADE
+	if floor_styles == null:
+		floor_styles = GameManager.FLOOR_STYLES
 	if shop_screen == null:
 		shop_screen = SHOP_SCREEN_SCENE.instantiate() as ShopScreen
 		add_child(shop_screen)
@@ -325,7 +328,7 @@ func _start_section() -> void:
 ## The floor style of the current depth (floor styles on): the level draws with its
 ## theme from now on; the first section of a new style shows its name.
 func _apply_floor_style() -> void:
-	if not GameManager.config.floor_styles or floor_themes.is_empty():
+	if not GameManager.config.floor_styles or floor_styles.themes.is_empty():
 		return
 	var style: TileTheme = floor_theme_for(GameManager.depth)
 	if style == level.theme:
@@ -338,8 +341,7 @@ func _apply_floor_style() -> void:
 
 ## The floor style of a depth (depth counted from 0).
 func floor_theme_for(depth: int) -> TileTheme:
-	var index: int = (depth / maxi(depths_per_floor_style, 1)) % floor_themes.size()
-	return floor_themes[index]
+	return floor_styles.theme_at(depth)
 
 
 ## The merchant's glade between depths: a quiet clearing with the merchant, props and
@@ -452,7 +454,8 @@ func _spawn_item(entry: Dictionary, shop_rng: RandomNumberGenerator = null) -> v
 		merchant.offers = ShopStock.make_offers(shop_data, GameManager.depth, stock_rng,
 				chest_weapons, rarity_table if GameManager.config.rarity_enabled else null,
 				_run_spells if GameManager.config.spells_enabled else null, player.spell_book, merchant.wandering,
-				get_shop_fusions())
+				get_shop_fusions(), get_shop_goods())
+		_check_goods(merchant.offers)
 		merchant.shop_requested.connect(_on_shop_requested)
 	_contents.add_child(item)
 
@@ -480,6 +483,19 @@ func _spawn_secret() -> void:
 	# Full game: a secret in a combat room (or the arena) waits until the fight is over.
 	if GameManager.config.full_game_tuning and _is_fight_room(int(layout.secret.get("room", -1))):
 		wall.health.make_invulnerable(INF)
+	# A rune key from the merchant opens the next hidden room by itself.
+	if _rune_keys > 0:
+		_rune_keys -= 1
+		_break_with_key.call_deferred(wall)
+
+
+func _break_with_key(wall: BreakableWall) -> void:
+	if not is_instance_valid(wall):
+		return
+	var key: DamageInfo = DamageInfo.new(wall.health.hp, null, &"rune_key")
+	key.ignores_invulnerability = true
+	wall.health.take_damage(key)
+	hud.show_banner("The rune key opens a hidden room")
 
 
 ## True if the room locks for a fight: a combat room of this section or the arena.
@@ -538,6 +554,49 @@ func _open_secret() -> void:
 	_contents.add_child(light)
 
 
+## The goods merchants sell (stage 42), empty when the series has none. The whetstone
+## needs weapon levels (ExperimentConfig.arsenal).
+func get_shop_goods() -> Array[StringName]:
+	var goods: Array[StringName] = []
+	if not GameManager.config.shop_goods:
+		return goods
+	for good: StringName in shop_data.goods:
+		if good != &"whetstone" or GameManager.config.arsenal:
+			goods.append(good)
+	return goods
+
+
+## The whetstone is off while the weapon in hand is at its top level.
+func _check_goods(offers: Array[ShopOffer]) -> void:
+	for offer: ShopOffer in offers:
+		if offer.kind == ShopOffer.Kind.GOODS and offer.goods == &"whetstone":
+			offer.goods_check = func() -> bool: return player.weapon != null and not player.weapon.data.is_max_level()
+
+
+## What a good does when bought.
+func _use_goods(offer: ShopOffer) -> void:
+	match offer.goods:
+		&"whetstone":
+			player.raise_active_weapon_level()
+		&"elixir":
+			player.health.max_hp += offer.goods_amount
+			player.health.heal(offer.goods_amount)
+		&"charm":
+			_bought_chest_luck += 1
+		&"rune_key":
+			_rune_keys += 1
+		&"dice":
+			# New goods from the same merchant, drawn from this section's loot stream.
+			var merchant: Merchant = shop_screen.merchant
+			var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+			rng.seed = _loot_rng.randi()
+			merchant.offers = ShopStock.make_offers(shop_data, GameManager.depth, rng, chest_weapons,
+					rarity_table if GameManager.config.rarity_enabled else null,
+					_run_spells if GameManager.config.spells_enabled else null, player.spell_book, merchant.wandering,
+					get_shop_fusions(), get_shop_goods())
+			_check_goods(merchant.offers)
+
+
 ## The fusion table merchants use, or null when the series has no merging.
 func get_shop_fusions() -> FusionTable:
 	if GameManager.config.spells_enabled and GameManager.config.spell_fusion:
@@ -579,6 +638,8 @@ func _on_shop_bought(offer: ShopOffer) -> void:
 			player.spell_book.learn(offer.spell)
 		ShopOffer.Kind.FUSION:
 			_merge_pending = player.spell_book.fuse(offer.recipe) or _merge_pending
+		ShopOffer.Kind.GOODS:
+			_use_goods(offer)
 	Telemetry.record_purchase(offer.get_id(), offer.price)
 	shop_screen.refresh(GameManager.coins)
 
@@ -679,9 +740,10 @@ func _apply_perks() -> void:
 
 ## Depths a chest's weapon rarity is rolled ahead (permanent skill), 0 without it.
 func _chest_luck() -> int:
-	if not GameManager.config.meta_progression:
-		return 0
-	return roundi(perk_tree.total(PerkData.Effect.CHEST_LUCK))
+	var luck: int = _bought_chest_luck
+	if GameManager.config.meta_progression:
+		luck += roundi(perk_tree.total(PerkData.Effect.CHEST_LUCK))
+	return luck
 
 
 ## Ruin shards from elite enemies, the golem and the boss (progress between runs on).

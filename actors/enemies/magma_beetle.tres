@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/enemy_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/magma_beetle_frames.tres" id="frames"]
+[ext_resource type="Resource" path="res://actors/enemies/magma_beetle_bite.tres" id="weapon"]
+[ext_resource type="Script" path="res://combat/spells/zone_data.gd" id="zone"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/element2_frames.tres" id="fx"]
+
+[sub_resource type="Resource" id="lava"]
+script = ExtResource("zone")
+id = &"magma_beetle"
+color = Color(1, 0.38, 0.1, 1)
+tick_damage = PackedInt32Array(3, 3, 3)
+tick_interval = 0.5
+duration = PackedFloat32Array(2.5, 2.5, 2.5)
+radius = PackedFloat32Array(12, 12, 12)
+frames = ExtResource("fx")
+level_animations = Array[StringName]([&"lava_pool_l1", &"lava_pool_l1", &"lava_pool_l1"])
+look_radius = PackedFloat32Array(11, 11, 11)
+
+[resource]
+script = ExtResource("1")
+id = &"magma_beetle"
+display_name = "Magma beetles"
+sprite_frames = ExtResource("frames")
+weapon = ExtResource("weapon")
+danger_cost = 4
+pack_min = 4
+pack_max = 5
+body_radius = 4.0
+max_hp = 14
+move_speed = 75.0
+detection_range = 150.0
+attack_range = 12.0
+windup = 0.3
+attack_strike_frame = 2
+recovery = 0.4
+floor_style = &"fire"
+death_zone = SubResource("lava")

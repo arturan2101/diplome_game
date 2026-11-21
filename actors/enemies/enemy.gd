@@ -31,6 +31,8 @@ const OWNER_SEARCH_DEPTH: int = 4
 @export var hurtbox_shape: CollisionShape2D
 ## Physics layers that block the enemy's sight (world).
 @export_flags_2d_physics var sight_mask: int = 1
+## Physics layers its death patch hurts (player_hurtbox).
+@export_flags_2d_physics var death_zone_mask: int = 8
 ## Tint during the windup. White (none) since stage 41: the wind-up pose of the art
 ## shows the attack coming; a colour brings the old orange warning back.
 @export var windup_color: Color = Color.WHITE
@@ -528,6 +530,15 @@ func _create_weapon() -> void:
 	weapon.setup(data.weapon, self, data.id)
 	weapon.damage_multiplier = damage_multiplier
 	add_child(weapon)
+	if data.hit_slow_time > 0.0:
+		weapon.attack_performed.connect(_on_attack_performed)
+
+
+## The drowned's grip: a blow that landed slows the player.
+func _on_attack_performed(_step: int, hits: int) -> void:
+	var player: Player = _target as Player
+	if hits > 0 and player != null and is_instance_valid(player):
+		player.slow(data.hit_slow_multiplier, data.hit_slow_time)
 
 
 func _on_hit_received(info: DamageInfo) -> void:
@@ -550,6 +561,9 @@ func _on_damaged(_info: DamageInfo) -> void:
 
 
 func _on_died(_info: DamageInfo) -> void:
+	if data.death_zone != null and get_parent() != null:
+		# The magma beetle's lava: hurts the player (source: this enemy type), not enemies.
+		SpellZone.spawn(get_parent(), global_position, data.death_zone, 1, null, data.id, death_zone_mask, sight_mask)
 	set_physics_process(false)
 	defeated.emit(self)
 	queue_free()

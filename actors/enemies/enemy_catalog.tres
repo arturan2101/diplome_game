@@ -10,6 +10,10 @@
 [ext_resource type="Resource" path="res://actors/enemies/archer_triple.tres" id="8"]
 [ext_resource type="Resource" path="res://actors/enemies/golem.tres" id="9"]
 [ext_resource type="Resource" path="res://actors/enemies/ghost.tres" id="10"]
+[ext_resource type="Resource" path="res://actors/enemies/drowned.tres" id="11"]
+[ext_resource type="Resource" path="res://actors/enemies/tide_crab.tres" id="12"]
+[ext_resource type="Resource" path="res://actors/enemies/ember_imp.tres" id="13"]
+[ext_resource type="Resource" path="res://actors/enemies/magma_beetle.tres" id="14"]
 
 [resource]
 script = ExtResource("1")
@@ -17,4 +21,4 @@ hp_growth_per_depth = 0.15
 damage_growth_per_depth = 0.1
 pressure_hp_growth_per_depth = 0.25
 pressure_damage_growth_per_depth = 0.15
-enemies = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("8"), ExtResource("9"), ExtResource("10")])
+enemies = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("8"), ExtResource("9"), ExtResource("10"), ExtResource("11"), ExtResource("12"), ExtResource("13"), ExtResource("14")])

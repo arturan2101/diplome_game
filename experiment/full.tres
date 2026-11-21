@@ -13,6 +13,7 @@ merchant_glade = true
 full_game_tuning = true
 arsenal = true
 floor_styles = true
+shop_goods = true
 meta_progression = true
 extra_enemies = true
 depth_pressure = true

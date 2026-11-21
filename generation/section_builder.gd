@@ -698,7 +698,10 @@ func _place_enemies(layout: SectionLayout, path: Array[PlacedRoom], branches: Ar
 		_shuffle(room_slots, rng)
 		slots[room.index] = room_slots
 	var ids: Array = plan.enemy_mix.keys()
-	ids.sort()
+	# By the text of the names: sort() orders StringNames by where they sit in memory,
+	# which depends on what the game loaded before, so the same seed could place the
+	# enemies differently (found and fixed in stage 42).
+	ids.sort_custom(func(a: StringName, b: StringName) -> bool: return String(a) < String(b))
 	var spawns: Array[StringName] = []
 	for id: StringName in ids:
 		for _i in int(plan.enemy_mix[id]):

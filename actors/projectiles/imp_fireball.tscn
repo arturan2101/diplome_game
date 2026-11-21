@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://actors/projectiles/arrow.gd" id="1"]
+[ext_resource type="Script" path="res://actors/effects/strip_sprite.gd" id="2"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/imp_fireball.png" id="3"]
+
+[node name="ImpFireball" type="Node2D"]
+script = ExtResource("1")
+target_mask = 8
+length = 0.0
+
+[node name="Look" type="Sprite2D" parent="."]
+position = Vector2(-1, 0)
+texture = ExtResource("3")
+hframes = 4
+script = ExtResource("2")
+fps = 12.0

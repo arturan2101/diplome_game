@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/enemy_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/ember_imp_frames.tres" id="frames"]
+[ext_resource type="Resource" path="res://actors/enemies/ember_imp_fire.tres" id="weapon"]
+
+
+[resource]
+script = ExtResource("1")
+id = &"ember_imp"
+display_name = "Ember imp"
+sprite_frames = ExtResource("frames")
+weapon = ExtResource("weapon")
+danger_cost = 3
+max_hp = 26
+move_speed = 42.0
+detection_range = 190.0
+attack_range = 130.0
+windup = 0.6
+attack_strike_frame = 3
+recovery = 1.0
+preferred_distance = 70.0
+floor_style = &"fire"

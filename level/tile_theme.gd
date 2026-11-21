@@ -6,6 +6,9 @@ extends Resource
 
 ## Name of the style, shown in a banner when a run reaches it (stage 42); "" = none.
 @export var display_name: String = ""
+## Id of the style for the enemies of its floors (EnemyData.floor_style): &"ruins",
+## &"flooded", &"fire".
+@export var style_id: StringName = &""
 ## Size of one tile in pixels.
 @export var tile_size: int = 16
 ## Main atlas (Kenney Tiny Dungeon).

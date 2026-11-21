@@ -19,6 +19,10 @@ const GROUP: StringName = &"projectiles"
 @export var length: float = 8.0
 @export var width: float = 2.0
 @export var color: Color = Color(0.95, 0.85, 0.55)
+## A strip played once where it lands (the Warden's boulder: dust and chips); null = none.
+@export var hit_effect: Texture2D
+@export var hit_effect_frames: int = 4
+@export var hit_effect_fps: float = 12.0
 
 ## How many targets the arrow flies through after hitting one (the crossbow bolt sets
 ## it before setup()); 0 = it stops at the first target.
@@ -84,6 +88,8 @@ func _draw() -> void:
 
 
 func _land(hit: bool) -> void:
+	if hit_effect != null and get_parent() != null:
+		StripSprite.spawn(get_parent(), global_position, hit_effect, hit_effect_frames, hit_effect_fps)
 	landed.emit(hit)
 	queue_free()
 	set_physics_process(false)
