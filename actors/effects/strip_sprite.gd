@@ -15,6 +15,9 @@ extends Sprite2D
 ## A one-off effect (a burst): freed after its last frame.
 @export var free_when_done: bool = false
 
+## Emitted when a run that does not loop reaches its last frame.
+signal finished
+
 var _playing: bool = false
 var _time: float = 0.0
 
@@ -75,5 +78,6 @@ func _process(delta: float) -> void:
 		frame = mini(first_frame + step, last)
 		if first_frame + step > last:
 			_playing = false
+			finished.emit()
 			if free_when_done:
 				queue_free()

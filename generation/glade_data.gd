@@ -18,5 +18,9 @@ extends Resource
 ## Props (no collision) along the edges, and how many of them.
 @export var props: Array[Texture2D] = []
 @export var prop_count: int = 6
+## A sign beside the merchant (stage 42), this many cells from him; null = none. Only
+## a look, no collision; it draws nothing from the glade's random stream.
+@export var merchant_sign: Texture2D = preload("res://assets/art/props/merchant_sign.png")
+@export var merchant_sign_offset: Vector2i = Vector2i(-2, 0)
 ## Tile theme of the glade, a key of Level.region_themes.
 @export var theme: StringName = &"glade"

@@ -36,7 +36,7 @@ extends Node2D
 ## Rubble drawn on door cells that turned into walls (sealed doors).
 @export var door_seal: Texture2D = preload("res://assets/art/tiles/door_seal.png")
 
-enum WallPiece { TORCH, PILLAR, STATUE }
+enum WallPiece { TORCH, PILLAR, STATUE, DETAIL }
 
 var _level: Level = null
 var _grid: LevelGrid = null
@@ -46,6 +46,10 @@ var _decals: Texture2D = null
 var _floor: Dictionary = {}
 ## {cell: WallPiece}.
 var _wall: Dictionary = {}
+## Wall details: {cell: slot of the theme's wall_details strip}.
+var _details: Dictionary = {}
+## Obstacles on cover cells: {cell: picture} (Level.cover_piece).
+var _obstacles: Dictionary = {}
 var _torches: Array[Vector2i] = []
 ## Door cells walled up while the level runs: {cell: true}.
 var _sealed: Dictionary = {}
@@ -92,6 +96,8 @@ func _rebuild() -> void:
 	_decals = _level.theme.floor_decals if _level != null and _level.theme != null and _level.theme.floor_decals != null else floor_decals
 	_floor.clear()
 	_wall.clear()
+	_details.clear()
+	_obstacles.clear()
 	_torches.clear()
 	_sealed.clear()
 	if _grid != null:
@@ -113,6 +119,13 @@ func _rebuild() -> void:
 						_wall[cell] = WallPiece.PILLAR
 					elif roll < torch_chance + pillar_chance + statue_chance:
 						_wall[cell] = WallPiece.STATUE
+					elif roll < torch_chance + pillar_chance + statue_chance + _detail_chance() and _detail_slots() > 0:
+						_wall[cell] = WallPiece.DETAIL
+						_details[cell] = kind % _detail_slots()
+				elif _grid.get_cell(cell) == LevelGrid.Cell.COVER:
+					var piece: Texture2D = _level.cover_piece(cell)
+					if piece != null:
+						_obstacles[cell] = piece
 	queue_redraw()
 	_lights.queue_redraw()
 
@@ -128,6 +141,19 @@ func _torch_near(cell: Vector2i) -> bool:
 ## A wall cell showing its brick front: plain floor right below it.
 func _is_wall_front(cell: Vector2i) -> bool:
 	return _grid.get_cell(cell) == LevelGrid.Cell.WALL and _grid.is_floor(cell + Vector2i.DOWN)
+
+
+func _wall_details() -> Texture2D:
+	return _level.theme.wall_details if _level != null and _level.theme != null else null
+
+
+func _detail_chance() -> float:
+	return _level.theme.wall_detail_chance if _wall_details() != null else 0.0
+
+
+func _detail_slots() -> int:
+	var strip: Texture2D = _wall_details()
+	return strip.get_width() / _tile() if strip != null else 0
 
 
 func _decal_count() -> int:
@@ -174,6 +200,15 @@ func _draw() -> void:
 				_draw_standing(pillar, bottom)
 			WallPiece.STATUE:
 				_draw_standing(statue, bottom)
+			WallPiece.DETAIL:
+				var details: Texture2D = _wall_details()
+				if details != null:
+					draw_texture_rect_region(details, Rect2(Vector2(cell) * size, Vector2(size, size)),
+							Rect2(int(_details.get(cell, 0)) * size, 0.0, size, size))
+	# Obstacles: the bottom-left of the picture on the bottom-left of the cell.
+	for cell: Vector2i in _obstacles:
+		var picture: Texture2D = _obstacles[cell]
+		draw_texture(picture, Vector2(cell.x * size, (cell.y + 1) * size - picture.get_height()))
 	if door_seal != null:
 		for cell: Vector2i in _sealed:
 			draw_texture(door_seal, Vector2(cell) * size)

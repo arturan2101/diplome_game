@@ -53,6 +53,13 @@ extends CanvasLayer
 ## Text over the screen for a moment (the arena locking, the gate opening).
 @export var banner: Label
 @export var banner_time: float = 1.6
+## Stone plates behind a floor style's name (stage 42): a strip of plates stacked one
+## above the other, each plate_size; drawn plate_scale times bigger (a whole number keeps
+## the pixels sharp), its text field (plate_text_centre) behind the banner's text.
+@export var floor_plates: Texture2D = preload("res://assets/art/ui/floor_plates.png")
+@export var plate_size: Vector2 = Vector2(64.0, 16.0)
+@export var plate_scale: float = 5.0
+@export var plate_text_centre: Vector2 = Vector2(31.5, 7.5)
 ## Full-screen rectangle faded in and out between sections.
 @export var fade: ColorRect
 ## Seconds one fade takes.
@@ -76,6 +83,8 @@ var _shards_label: Label = null
 ## Card of the weapon lying next to the player, and that weapon (null = none near).
 var weapon_card: WeaponCard = null
 var _card_target: WeaponPickup = null
+## The plate behind the banner (created when first needed).
+var _plate: TextureRect = null
 
 
 func _ready() -> void:
@@ -152,9 +161,10 @@ func _on_boss_hp_changed(hp: int, max_hp: int) -> void:
 
 
 ## Shows a short message in the middle of the screen.
-func show_banner(text: String) -> void:
+func show_banner(text: String, plate: int = -1) -> void:
 	if banner == null:
 		return
+	_show_plate(plate)
 	banner.text = text
 	banner.visible = true
 	banner.modulate.a = 1.0
@@ -162,6 +172,28 @@ func show_banner(text: String) -> void:
 	tween.tween_interval(banner_time)
 	tween.tween_property(banner, "modulate:a", 0.0, fade_time)
 	tween.tween_callback(banner.hide)
+
+
+## The stone plate of a floor style behind the banner, or none (plate < 0).
+func _show_plate(plate: int) -> void:
+	if floor_plates == null or (plate < 0 and _plate == null):
+		return
+	if _plate == null:
+		_plate = TextureRect.new()
+		_plate.name = "Plate"
+		_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_plate.show_behind_parent = true
+		_plate.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		_plate.texture = AtlasTexture.new()
+		(_plate.texture as AtlasTexture).atlas = floor_plates
+		_plate.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		banner.add_child(_plate)
+	_plate.visible = plate >= 0
+	if plate < 0:
+		return
+	(_plate.texture as AtlasTexture).region = Rect2(Vector2(0.0, plate * plate_size.y), plate_size)
+	_plate.size = plate_size * plate_scale
+	_plate.position = banner.size * 0.5 - plate_text_centre * plate_scale
 
 
 func _on_interaction_changed(target: Interactable) -> void:

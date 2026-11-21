@@ -31,12 +31,24 @@ const RANDOM_SEED_TEXT: String = ""
 @export var playtest_button: Button
 @export var export_button: Button
 @export var status_label: Label
+## The title screen's art (stage 42): the background over the whole screen, the
+## campfire flames on it (a strip of fire_frames looping at fire_fps, top-left at
+## fire_position) and the logo in place of the title text. Null = the plain colour and
+## the text title.
+@export var background_texture: Texture2D = preload("res://assets/art/ui/menu_background.png")
+@export var fire_texture: Texture2D = preload("res://assets/art/ui/menu_fire.png")
+@export var fire_frames: int = 3
+@export var fire_fps: float = 8.0
+@export var fire_position: Vector2 = Vector2(180.0, 284.0)
+@export var logo_texture: Texture2D = preload("res://assets/art/ui/title_logo.png")
 ## Seconds to hold the title to open the experiment panel.
 @export var debug_hold_time: float = 1.5
 
 var _selected_weapon: WeaponData = null
 var _selected_skill: SkillData = null
 var _title_held_time: float = -1.0
+var _fire: AtlasTexture = null
+var _fire_time: float = 0.0
 
 
 func _ready() -> void:
@@ -57,10 +69,57 @@ func _ready() -> void:
 	_selected_weapon = _fill_row(weapon_row, weapons, GameManager.starting_weapon, _on_weapon_chosen)
 	_refresh_skill_row()
 	_setup_debug_panel()
+	_make_art()
 	_show_loadout(false)
 
 
+## The background with its flickering fire behind everything, and the logo as the title
+## (the title label stays: holding it opens the experiment panel).
+func _make_art() -> void:
+	if background_texture != null:
+		var back: TextureRect = TextureRect.new()
+		back.name = "Art"
+		back.texture = background_texture
+		back.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		back.set_anchors_preset(Control.PRESET_FULL_RECT)
+		back.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		back.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		add_child(back)
+		move_child(back, 1)
+		if fire_texture != null:
+			_fire = AtlasTexture.new()
+			_fire.atlas = fire_texture
+			var frame_size: Vector2 = Vector2(fire_texture.get_width() / float(maxi(fire_frames, 1)), fire_texture.get_height())
+			_fire.region = Rect2(Vector2.ZERO, frame_size)
+			var flames: TextureRect = TextureRect.new()
+			flames.name = "Fire"
+			flames.texture = _fire
+			flames.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			flames.position = fire_position
+			flames.size = frame_size
+			back.add_child(flames)
+	if logo_texture != null and title_label is Label:
+		(title_label as Label).text = ""
+		title_label.custom_minimum_size = logo_texture.get_size()
+		var logo: TextureRect = TextureRect.new()
+		logo.name = "Logo"
+		logo.texture = logo_texture
+		logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		logo.set_anchors_preset(Control.PRESET_FULL_RECT)
+		logo.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
+		title_label.add_child(logo)
+
+
+func _animate_fire(delta: float) -> void:
+	if _fire == null:
+		return
+	_fire_time += delta
+	var frame: int = int(_fire_time * fire_fps) % maxi(fire_frames, 1)
+	_fire.region.position.x = frame * _fire.region.size.x
+
+
 func _process(delta: float) -> void:
+	_animate_fire(delta)
 	if _title_held_time < 0.0:
 		return
 	_title_held_time += delta

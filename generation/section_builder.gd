@@ -18,6 +18,9 @@ extends RefCounted
 ## All randomness comes from the generator passed to build(), so the same seed,
 ## section index and plan always give the same section.
 
+## Size of the exit portal in cells (stage 42): two wide, three tall (its art is 32x48).
+const GATE_WIDTH: int = 2
+const GATE_HEIGHT: int = 3
 const CATALOG_PATH: String = "res://actors/enemies/enemy_catalog.tres"
 const HAZARDS_PATH: String = "res://level/hazards.tres"
 ## A timed wave keeps this many cells of free tunnel before and after it.
@@ -125,8 +128,9 @@ func _build_once(plan: SectionPlan, rng: RandomNumberGenerator) -> SectionLayout
 	layout.entrance = _free_spot(layout.grid, path[0], taken)
 	taken[layout.entrance] = true
 	var last: PlacedRoom = path[path.size() - 1]
-	layout.exit = _free_spot(layout.grid, last, taken)
-	taken[layout.exit] = true
+	layout.exit = _exit_spot(layout.grid, last, taken)
+	for cell: Vector2i in gate_footprint(layout.exit):
+		taken[cell] = true
 	if plan.is_arena:
 		layout.arena_room = last.index
 		for side: RoomTemplate.DoorSide in last.used_doors:
@@ -368,6 +372,44 @@ func _outside(room: PlacedRoom, side: RoomTemplate.DoorSide) -> Vector2i:
 
 ## A free floor cell for the player's start or for the gate: just inside one of the
 ## walled-up doors of the room, or else near the middle of the room.
+## Cells the exit portal stands on (stage 42): it is two cells wide (the exit cell and
+## the one to its right) and rises two cells above them, and the two cells in front of it
+## stay free so it can be walked into. Nothing else is placed there.
+static func gate_footprint(exit: Vector2i) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for dy in range(-GATE_HEIGHT + 1, 2):
+		for dx in GATE_WIDTH:
+			cells.append(exit + Vector2i(dx, dy))
+	return cells
+
+
+## The exit: the floor cell nearest to the old spot (by an unused door, else the middle)
+## whose whole gate footprint is plain floor inside the room, so the portal never
+## stands in a wall. No random draws. Without such a cell, the old spot.
+func _exit_spot(grid: LevelGrid, room: PlacedRoom, taken: Dictionary) -> Vector2i:
+	var preferred: Vector2i = _free_spot(grid, room, taken)
+	var inside: Rect2i = room.get_rect()
+	var best: Vector2i = preferred
+	var best_distance: int = -1
+	for y in range(inside.position.y, inside.end.y):
+		for x in range(inside.position.x, inside.end.x):
+			var cell: Vector2i = Vector2i(x, y)
+			if not _gate_fits(grid, cell, inside, taken):
+				continue
+			var distance: int = absi(cell.x - preferred.x) + absi(cell.y - preferred.y)
+			if best_distance < 0 or distance < best_distance:
+				best = cell
+				best_distance = distance
+	return best
+
+
+func _gate_fits(grid: LevelGrid, exit: Vector2i, inside: Rect2i, taken: Dictionary) -> bool:
+	for cell: Vector2i in gate_footprint(exit):
+		if not inside.has_point(cell) or grid.get_cell(cell) != LevelGrid.Cell.FLOOR or taken.has(cell):
+			return false
+	return true
+
+
 func _free_spot(grid: LevelGrid, room: PlacedRoom, taken: Dictionary) -> Vector2i:
 	for side: RoomTemplate.DoorSide in SIDES:
 		if not room.template.has_door(side) or side in room.used_doors:
@@ -401,7 +443,7 @@ func build_glade(data: GladeData, rng: RandomNumberGenerator) -> SectionLayout:
 			layout.grid.set_cell(Vector2i(x, y), LevelGrid.Cell.WALL)
 			layout.grid.set_cell(Vector2i(x + 1, y), LevelGrid.Cell.WALL)
 	layout.entrance = Vector2i(inner.position.x + 1, middle.y)
-	layout.exit = Vector2i(inner.end.x - 2, middle.y)
+	layout.exit = Vector2i(inner.end.x - 3, middle.y)
 	layout.room_rects.append(inner.grow(1))
 	layout.room_names.append(&"glade")
 	layout.path_room_count = 1

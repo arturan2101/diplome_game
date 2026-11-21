@@ -336,7 +336,7 @@ func _apply_floor_style() -> void:
 	var first: bool = level.theme == null or level.is_node_ready() and level.grid == null
 	level.set_theme(style)
 	if not first and style.display_name != "":
-		hud.show_banner(style.display_name)
+		hud.show_banner(style.display_name, style.plate_index)
 
 
 ## The floor style of a depth (depth counted from 0).
@@ -369,10 +369,30 @@ func _start_glade() -> void:
 		prop.offset = Vector2(0.0, 8.0 - prop.texture.get_height() * 0.5)
 		prop.position = level.to_local(level.cell_center(entry["cell"]))
 		_contents.add_child(prop)
+	_place_merchant_sign()
 	player.teleport(level.cell_center(layout.entrance))
 	Telemetry.begin_glade(GameManager.depth)
 	hud.show_glade(GameManager.depth)
 	hud.show_banner("A quiet glade")
+
+
+## The glade's sign beside the merchant, on floor (stage 42).
+func _place_merchant_sign() -> void:
+	if glade_data.merchant_sign == null:
+		return
+	for entry: Dictionary in layout.items:
+		if entry["id"] != SectionLayout.ITEM_MERCHANT:
+			continue
+		var cell: Vector2i = entry["cell"] + glade_data.merchant_sign_offset
+		if not level.grid.is_floor(cell):
+			return
+		var sign_post: Sprite2D = Sprite2D.new()
+		sign_post.name = "MerchantSign"
+		sign_post.texture = glade_data.merchant_sign
+		sign_post.offset = Vector2(0.0, 8.0 - sign_post.texture.get_height() * 0.5)
+		sign_post.position = level.to_local(level.cell_center(cell))
+		_contents.add_child(sign_post)
+		return
 
 
 func _make_player_state() -> PlayerState:
@@ -416,7 +436,11 @@ func _clear_section() -> void:
 
 func _spawn_gate() -> void:
 	gate = GATE_SCENE.instantiate() as Gate
-	gate.position = level.to_local(level.cell_center(layout.exit))
+	# The boss portal rises from the floor once the boss is beaten (not on the glade,
+	# which comes right after the arena while `plan` is still the arena's).
+	gate.rises = not _in_glade and plan != null and plan.is_boss
+	# The portal is two cells wide: it stands between the exit cell and the one to its right.
+	gate.position = level.to_local(level.cell_center(layout.exit) + Vector2(level.theme.tile_size * 0.5, 0.0))
 	gate.entered.connect(_on_gate_entered)
 	_contents.add_child(gate)
 

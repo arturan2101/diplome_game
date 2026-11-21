@@ -9,6 +9,9 @@ extends Resource
 ## Id of the style for the enemies of its floors (EnemyData.floor_style): &"ruins",
 ## &"flooded", &"fire".
 @export var style_id: StringName = &""
+## Plate behind the style's name in the banner: index in the HUD's floor_plates strip
+## (0 ruins, 1 flooded, 2 fire); -1 = the name without a plate.
+@export var plate_index: int = -1
 ## Size of one tile in pixels.
 @export var tile_size: int = 16
 ## Main atlas (Kenney Tiny Dungeon).
@@ -47,6 +50,17 @@ extends Resource
 @export var lava_texture: Texture2D
 @export var lava_frames: int = 4
 @export var lava_fps: float = 6.0
+## Free-standing obstacles drawn on cover cells instead of cover_tile (stage 42: column,
+## broken column, rocks, sarcophagus), on cover_piece_chance of them. The bottom-left of
+## a picture sits on the bottom-left of its cell; a picture taller than a tile is only
+## used where the cell above is not floor (nothing walks behind it), one two tiles wide
+## only at the start of a run of two cover cells. Only the look: the cell stays solid.
+@export var cover_pieces: Array[Texture2D] = []
+@export_range(0.0, 1.0) var cover_piece_chance: float = 0.0
+## Details over the brick fronts of walls (crack, chain, niche with a skull, banner,
+## ivy): a strip of 16x16 overlays, on wall_detail_chance of the fronts. Null = none.
+@export var wall_details: Texture2D
+@export_range(0.0, 1.0) var wall_detail_chance: float = 0.0
 ## Floor decals of this style (a strip of 16x16 pieces); null = the decor's own.
 @export var floor_decals: Texture2D
 ## Physics layers of walls and cover (world).

@@ -9,6 +9,7 @@
 script = ExtResource("1")
 display_name = "The Flooded Halls"
 style_id = &"flooded"
+plate_index = 1
 tile_size = 16
 texture = ExtResource("2")
 hazard_texture = ExtResource("3")

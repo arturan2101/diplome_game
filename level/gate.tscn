@@ -1,30 +1,15 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://level/gate.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/art/level/gate_closed.png" id="2"]
-[ext_resource type="Texture2D" path="res://assets/art/level/gate_open.png" id="3"]
-[ext_resource type="Texture2D" path="res://assets/art/fx/portal_open.png" id="4"]
-[ext_resource type="Script" path="res://actors/effects/strip_sprite.gd" id="strip"]
 
 [sub_resource type="CircleShape2D" id="shape"]
-radius = 7.0
+radius = 8.0
 
 [node name="Gate" type="Area2D" node_paths=PackedStringArray("sprite")]
 script = ExtResource("1")
 sprite = NodePath("Sprite")
-closed_texture = ExtResource("2")
-open_texture = ExtResource("3")
-open_frames = 4
-open_burst = ExtResource("4")
-open_burst_frames = 5
-open_pulse_scale = 1.1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("shape")
 
 [node name="Sprite" type="Sprite2D" parent="."]
-texture = ExtResource("2")
-offset = Vector2(0, -8)
-script = ExtResource("strip")
-fps = 8.0
-autoplay = false

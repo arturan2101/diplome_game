@@ -1,13 +1,19 @@
-[gd_resource type="Resource" script_class="TileTheme" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="TileTheme" load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://level/tile_theme.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/art/tiles/ruins_tiles_atlas.png" id="2"]
 [ext_resource type="Texture2D" path="res://assets/art/tiles/ruins_hazards.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/art/level/obstacle_column.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/art/level/obstacle_column_broken.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/art/level/obstacle_rocks.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/art/level/obstacle_sarcophagus.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/art/tiles/wall_details.png" id="8"]
 
 [resource]
 script = ExtResource("1")
 display_name = "The Ruins"
 style_id = &"ruins"
+plate_index = 0
 tile_size = 16
 texture = ExtResource("2")
 hazard_texture = ExtResource("3")
@@ -21,4 +27,8 @@ cracked_wall_top_tile = Vector2i(7, 0)
 pit_tile = Vector2i(0, 0)
 pit_inner_tile = Vector2i(7, 0)
 spikes_tile = Vector2i(1, 0)
+cover_pieces = Array[Texture2D]([ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7")])
+cover_piece_chance = 0.6
+wall_details = ExtResource("8")
+wall_detail_chance = 0.07
 solid_collision_layer = 1

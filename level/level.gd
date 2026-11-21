@@ -24,6 +24,9 @@ const MAIN_SOURCE: int = 0
 const HAZARD_SOURCE: int = 1
 ## Atlas id of the animated pits (TileTheme.lava_texture) of the main theme.
 const LAVA_SOURCE: int = 1000
+## Atlas id of an invisible solid tile: a cover cell drawn as an obstacle picture
+## (TileTheme.cover_pieces) keeps its collision through it.
+const BLOCKER_SOURCE: int = 1001
 ## How far (in cells) to look for floor around a blocked cell.
 const NEAREST_FLOOR_RADIUS: int = 6
 
@@ -276,7 +279,40 @@ func _paint_cell(cell: Vector2i) -> void:
 			_ground.set_cell(cell, main, _floor_tile(cell, look))
 		LevelGrid.Cell.COVER:
 			_ground.set_cell(cell, main, _floor_tile(cell, look))
-			_props.set_cell(cell, main, look.cover_tile)
+			if region < 0 and (cover_piece(cell) != null or _covered_by_left(cell)):
+				# The decor draws the obstacle; the cell stays solid.
+				_props.set_cell(cell, BLOCKER_SOURCE, Vector2i.ZERO)
+			else:
+				_props.set_cell(cell, main, look.cover_tile)
+
+
+## The obstacle picture of a cover cell (TileTheme.cover_pieces), or null for the plain
+## cover tile. Picked from the cell coordinates, so a grid always looks the same.
+func cover_piece(cell: Vector2i) -> Texture2D:
+	if theme.cover_pieces.is_empty() or grid.get_cell(cell) != LevelGrid.Cell.COVER or _covered_by_left(cell):
+		return null
+	if float(absi(hash([cell, "cover"])) % 1000) / 1000.0 >= theme.cover_piece_chance:
+		return null
+	var fits: Array[Texture2D] = []
+	for piece: Texture2D in theme.cover_pieces:
+		if piece.get_width() > theme.tile_size and not (grid.get_cell(cell + Vector2i.RIGHT) == LevelGrid.Cell.COVER
+				and grid.get_cell(cell + Vector2i.LEFT) != LevelGrid.Cell.COVER):
+			continue
+		if piece.get_height() > theme.tile_size and grid.get_cell(cell + Vector2i.UP) == LevelGrid.Cell.FLOOR:
+			continue
+		fits.append(piece)
+	if fits.is_empty():
+		return null
+	return fits[absi(hash([cell, "piece"])) % fits.size()]
+
+
+## True if the cover cell on the left carries a two-tile obstacle over this one.
+func _covered_by_left(cell: Vector2i) -> bool:
+	var left: Vector2i = cell + Vector2i.LEFT
+	if grid.get_cell(left) != LevelGrid.Cell.COVER or grid.get_cell(cell) != LevelGrid.Cell.COVER:
+		return false
+	var piece: Texture2D = cover_piece(left)
+	return piece != null and piece.get_width() > theme.tile_size
 
 
 ## The theme's cracked wall tile over a crack cell (front or top, like the wall itself).
@@ -359,6 +395,7 @@ func _make_tile_set() -> TileSet:
 	_add_theme_sources(tile_set, theme, MAIN_SOURCE, HAZARD_SOURCE)
 	if theme.lava_texture != null:
 		_add_lava_source(tile_set, theme)
+	_add_blocker_source(tile_set)
 	for i in _region_names.size():
 		_add_theme_sources(tile_set, region_themes[_region_names[i]] as TileTheme,
 				REGION_SOURCE_BASE + 2 * i, REGION_SOURCE_BASE + 2 * i + 1)
@@ -398,6 +435,13 @@ func _add_lava_source(tile_set: TileSet, look: TileTheme) -> void:
 		source.set_tile_animation_frames_count(coords, look.lava_frames)
 		for i in look.lava_frames:
 			source.set_tile_animation_frame_duration(coords, i, 1.0 / maxf(look.lava_fps, 0.1))
+
+
+## One transparent tile with full collision (an obstacle's cell).
+func _add_blocker_source(tile_set: TileSet) -> void:
+	var image: Image = Image.create_empty(theme.tile_size, theme.tile_size, false, Image.FORMAT_RGBA8)
+	var source: TileSetAtlasSource = _make_source(tile_set, BLOCKER_SOURCE, ImageTexture.create_from_image(image))
+	_add_tile(source, Vector2i.ZERO, true)
 
 
 func _make_source(tile_set: TileSet, source_id: int, texture: Texture2D) -> TileSetAtlasSource:

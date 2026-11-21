@@ -10,6 +10,7 @@
 script = ExtResource("1")
 display_name = "The Burning Depths"
 style_id = &"fire"
+plate_index = 2
 tile_size = 16
 texture = ExtResource("2")
 hazard_texture = ExtResource("3")

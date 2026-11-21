@@ -29,9 +29,9 @@ func run() -> void:
 	check(decor._torches.size() > 3 and spaced, "torches stand at least %d cells apart (%d torches)" % [decor.torch_min_spacing, decor._torches.size()])
 	var wall_statues: bool = false
 	for cell: Vector2i in decor._wall:
-		if decor._wall[cell] != LevelDecor.WallPiece.TORCH:
+		if decor._wall[cell] == LevelDecor.WallPiece.PILLAR or decor._wall[cell] == LevelDecor.WallPiece.STATUE:
 			wall_statues = true
-	check(not wall_statues, "no half-columns or statues on the walls")
+	check(not wall_statues, "no half-columns or statues on the walls (flat details are fine, stage 42)")
 	var first: Array[Vector2i] = decor._torches.duplicate()
 	decor._rebuild()
 	check(decor._torches == first, "the same grid gets the same decor")
