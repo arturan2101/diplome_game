@@ -84,6 +84,12 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 @export var fusion_table: FusionTable
 ## The camp's permanent skills (stage 35). Empty = progression/perks.tres.
 @export var perk_tree: PerkTree
+## Floor styles by depth (ExperimentConfig.floor_styles, stage 42), in order; each
+## lasts depths_per_floor_style depths, then the next one, and after the last the
+## first again. Empty = the level keeps its own theme.
+@export var floor_themes: Array[TileTheme] = [preload("res://level/ruins_theme.tres"),
+		preload("res://level/flooded_theme.tres"), preload("res://level/fire_theme.tres")]
+@export var depths_per_floor_style: int = 2
 ## The merchant's glade between depths. Empty = generation/glade.tres.
 @export var glade_data: GladeData
 ## The full game's tuning (ExperimentConfig.full_game_tuning): shop prices times this,
@@ -299,6 +305,7 @@ func _start_section() -> void:
 	_is_arena_sealed = false
 	_is_arena_cleared = false
 	_clear_section()
+	_apply_floor_style()
 	level.build(layout.grid)
 	_contents = Node2D.new()
 	_contents.name = "Contents"
@@ -313,6 +320,26 @@ func _start_section() -> void:
 	section_started.emit(plan, layout)
 	if not is_arena():
 		gate.open()
+
+
+## The floor style of the current depth (floor styles on): the level draws with its
+## theme from now on; the first section of a new style shows its name.
+func _apply_floor_style() -> void:
+	if not GameManager.config.floor_styles or floor_themes.is_empty():
+		return
+	var style: TileTheme = floor_theme_for(GameManager.depth)
+	if style == level.theme:
+		return
+	var first: bool = level.theme == null or level.is_node_ready() and level.grid == null
+	level.set_theme(style)
+	if not first and style.display_name != "":
+		hud.show_banner(style.display_name)
+
+
+## The floor style of a depth (depth counted from 0).
+func floor_theme_for(depth: int) -> TileTheme:
+	var index: int = (depth / maxi(depths_per_floor_style, 1)) % floor_themes.size()
+	return floor_themes[index]
 
 
 ## The merchant's glade between depths: a quiet clearing with the merchant, props and

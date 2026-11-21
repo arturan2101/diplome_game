@@ -40,6 +40,8 @@ enum WallPiece { TORCH, PILLAR, STATUE }
 
 var _level: Level = null
 var _grid: LevelGrid = null
+## The decals drawn now: the level theme's own (a floor style) or floor_decals.
+var _decals: Texture2D = null
 ## {cell: decal index}.
 var _floor: Dictionary = {}
 ## {cell: WallPiece}.
@@ -87,6 +89,7 @@ func _process(delta: float) -> void:
 
 
 func _rebuild() -> void:
+	_decals = _level.theme.floor_decals if _level != null and _level.theme != null and _level.theme.floor_decals != null else floor_decals
 	_floor.clear()
 	_wall.clear()
 	_torches.clear()
@@ -128,7 +131,7 @@ func _is_wall_front(cell: Vector2i) -> bool:
 
 
 func _decal_count() -> int:
-	var strip: int = floor_decals.get_width() / _tile() if floor_decals != null else 0
+	var strip: int = _decals.get_width() / _tile() if _decals != null else 0
 	return strip + extra_decals.size()
 
 
@@ -149,12 +152,12 @@ func _draw() -> void:
 	if _level == null or _grid == null:
 		return
 	var size: float = float(_tile())
-	var strip: int = floor_decals.get_width() / _tile() if floor_decals != null else 0
+	var strip: int = _decals.get_width() / _tile() if _decals != null else 0
 	for cell: Vector2i in _floor:
 		var index: int = int(_floor[cell])
 		var spot: Rect2 = Rect2(Vector2(cell) * size, Vector2(size, size))
 		if index < strip:
-			draw_texture_rect_region(floor_decals, spot, Rect2(index * size, 0.0, size, size))
+			draw_texture_rect_region(_decals, spot, Rect2(index * size, 0.0, size, size))
 		else:
 			draw_texture_rect(extra_decals[index - strip], spot, false)
 	var flame: int = int(_time * flame_fps)

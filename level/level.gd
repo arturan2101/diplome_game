@@ -22,6 +22,8 @@ const REGION_SOURCE_BASE: int = 2
 ## Ids of the two atlases inside the generated TileSet.
 const MAIN_SOURCE: int = 0
 const HAZARD_SOURCE: int = 1
+## Atlas id of the animated pits (TileTheme.lava_texture) of the main theme.
+const LAVA_SOURCE: int = 1000
 ## How far (in cells) to look for floor around a blocked cell.
 const NEAREST_FLOOR_RADIUS: int = 6
 
@@ -71,9 +73,7 @@ func _ready() -> void:
 	timed_spikes = TimedSpikeField.new()
 	timed_spikes.name = "TimedSpikes"
 	add_child(timed_spikes)
-	var tile_set: TileSet = _make_tile_set()
-	_ground.tile_set = tile_set
-	_props.tile_set = tile_set
+	_apply_tile_set()
 	if grid == null and debug_map.strip_edges() != "":
 		build(LevelGrid.from_text(debug_map))
 
@@ -81,6 +81,22 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	section_time += delta
 	timed_spikes.update_look(section_time)
+
+
+## Draws the following builds with another theme (a new floor style, stage 42). Call
+## it before build(): the cells already drawn keep the old tiles until then.
+func set_theme(new_theme: TileTheme) -> void:
+	if new_theme == null or new_theme == theme:
+		return
+	theme = new_theme
+	if is_node_ready():
+		_apply_tile_set()
+
+
+func _apply_tile_set() -> void:
+	var tile_set: TileSet = _make_tile_set()
+	_ground.tile_set = tile_set
+	_props.tile_set = tile_set
 
 
 ## Draws the grid and prepares pathfinding. Replaces whatever was built before.
@@ -247,7 +263,11 @@ func _paint_cell(cell: Vector2i) -> void:
 					_draw_crack(cell, main, look)
 		LevelGrid.Cell.PIT:
 			var below_pit: bool = grid.get_cell(cell + Vector2i.UP) == LevelGrid.Cell.PIT
-			_ground.set_cell(cell, hazard, look.pit_inner_tile if below_pit else look.pit_tile)
+			if region < 0 and look.lava_texture != null:
+				# Animated lava: row 0 the edge, row 1 the inside.
+				_ground.set_cell(cell, LAVA_SOURCE, Vector2i(0, 1 if below_pit else 0))
+			else:
+				_ground.set_cell(cell, hazard, look.pit_inner_tile if below_pit else look.pit_tile)
 		LevelGrid.Cell.SPIKES:
 			_ground.set_cell(cell, hazard, look.spikes_tile)
 		LevelGrid.Cell.SPIKES_TIMED:
@@ -336,6 +356,8 @@ func _make_tile_set() -> TileSet:
 	tile_set.set_physics_layer_collision_layer(0, theme.solid_collision_layer)
 	tile_set.set_physics_layer_collision_mask(0, 0)
 	_add_theme_sources(tile_set, theme, MAIN_SOURCE, HAZARD_SOURCE)
+	if theme.lava_texture != null:
+		_add_lava_source(tile_set, theme)
 	for i in _region_names.size():
 		_add_theme_sources(tile_set, region_themes[_region_names[i]] as TileTheme,
 				REGION_SOURCE_BASE + 2 * i, REGION_SOURCE_BASE + 2 * i + 1)
@@ -362,6 +384,19 @@ func _add_theme_sources(tile_set: TileSet, look: TileTheme, main_id: int, hazard
 	_add_tile(hazards, look.pit_tile, false)
 	_add_tile(hazards, look.pit_inner_tile, false)
 	_add_tile(hazards, look.spikes_tile, false)
+
+
+## The animated pit tiles: the edge at (0, 0) and the inside at (0, 1), each running
+## through lava_frames columns of its row.
+func _add_lava_source(tile_set: TileSet, look: TileTheme) -> void:
+	var source: TileSetAtlasSource = _make_source(tile_set, LAVA_SOURCE, look.lava_texture)
+	for row in 2:
+		var coords: Vector2i = Vector2i(0, row)
+		source.create_tile(coords)
+		source.set_tile_animation_columns(coords, look.lava_frames)
+		source.set_tile_animation_frames_count(coords, look.lava_frames)
+		for i in look.lava_frames:
+			source.set_tile_animation_frame_duration(coords, i, 1.0 / maxf(look.lava_fps, 0.1))
 
 
 func _make_source(tile_set: TileSet, source_id: int, texture: Texture2D) -> TileSetAtlasSource:

@@ -6,6 +6,7 @@
 
 [resource]
 script = ExtResource("1")
+display_name = "The Ruins"
 tile_size = 16
 texture = ExtResource("2")
 hazard_texture = ExtResource("3")

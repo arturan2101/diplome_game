@@ -4,6 +4,8 @@ extends Resource
 ## cell types (LevelGrid.Cell); this resource maps them to tiles of two atlases.
 ## A new ruin style is a new .tres of this class.
 
+## Name of the style, shown in a banner when a run reaches it (stage 42); "" = none.
+@export var display_name: String = ""
 ## Size of one tile in pixels.
 @export var tile_size: int = 16
 ## Main atlas (Kenney Tiny Dungeon).
@@ -36,5 +38,13 @@ extends Resource
 @export var pit_tile: Vector2i = Vector2i.ZERO
 @export var pit_inner_tile: Vector2i = Vector2i.ZERO
 @export var spikes_tile: Vector2i = Vector2i.ZERO
+## Pits drawn as an animation (the fire ruins' lava): a strip with the edge on row 0
+## and the inside on row 1, lava_frames frames each at lava_fps. Null = still pit tiles.
+## Only for the main theme of a level, not for region themes.
+@export var lava_texture: Texture2D
+@export var lava_frames: int = 4
+@export var lava_fps: float = 6.0
+## Floor decals of this style (a strip of 16x16 pieces); null = the decor's own.
+@export var floor_decals: Texture2D
 ## Physics layers of walls and cover (world).
 @export_flags_2d_physics var solid_collision_layer: int = 1
