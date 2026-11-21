@@ -13,7 +13,8 @@ row (PixelLab keeps the hips in place, so a crouch would sink) and the idle's sh
               sword raised high behind the head 0-1 (hold 1), slash down 2-3, recover 4-5;
               left: PixelLab smeared frames 2-4, they are drawn here (hand_strike_left)
     archer    1b5bae75-a812-48bf-bf7a-f3d439691239  "attack_draw"    6 frames:
-              bow up 0, draw to the cheek 1-2 (hold 2), release 3, recoil 4, lower 5
+              bow up 0, draw to the cheek 1-2 (hold 2), release 3, recoil 4, lower 5;
+              from the front the body hid the bow, it is drawn here (archer_bow_front)
     ghost     e7152b47-c05e-4158-a3dc-a418cd4b0287  "attack_reach"   6 frames:
               pulls back, arms raised 0-1 (hold 1), reaches out 2-3 (touch), back 4-5
     golem     8ea0e44b-b497-4bdb-a549-8df612a3ed38  "attack_slam"    8 frames:
@@ -237,6 +238,35 @@ def hand_strike_left(strip, idle):
     return strip
 
 
+def archer_bow_front(strip):
+    """From the front the generated frames lost the bow behind the body: a vertical bow
+    is drawn in front of the chest on the bow side (screen right), its string straight
+    on frames 1 and 4 and pulled to the drawing hand at the cheek on frames 2-3."""
+    o, wood, dark, string = (8, 7, 11, 255), (122, 74, 44, 255), (74, 47, 34, 255), (216, 212, 196, 255)
+    hands = {2: (8, 11), 3: (7, 10)}
+    for i in (1, 2, 3, 4):
+        f = strip[i]
+        q = f.load()
+        top, bottom = 7, 17
+        arc = [(16 + round(2 * math.sin(math.pi * (y - top) / (bottom - top))), y) for y in range(top, bottom + 1)]
+        for x, y in arc:
+            for dx, dy in ((1, 0), (-1, 0), (0, -1), (0, 1)):
+                if not q[x + dx, y + dy][3]:
+                    q[x + dx, y + dy] = o
+        for j, (x, y) in enumerate(arc):
+            q[x, y] = wood if j < len(arc) / 2 else dark
+        if i in hands:
+            hx, hy = hands[i]
+            for a, b in (((16, top), (hx, hy)), ((hx, hy), (16, bottom))):
+                n = max(abs(b[0] - a[0]), abs(b[1] - a[1]))
+                for t in range(1, n):
+                    q[round(a[0] + (b[0] - a[0]) * t / n), round(a[1] + (b[1] - a[1]) * t / n)] = string
+        else:
+            for y in range(top + 1, bottom):
+                q[16, y] = string
+    return strip
+
+
 def write(actor, F):
     actions.F = F
     actions.write_frames(SRC, actor, os.path.join(SRC, f"{actor}_frames.tres"))
@@ -253,6 +283,8 @@ def main():
         for direction, short in DIRS.items():
             idle = actions.frame(os.path.join(SRC, f"{actor}_idle_{short}.png"))
             strip = import_strip(frames[direction], idle, F, colours, REMAP.get(actor, {}))
+            if actor == "archer" and short == "down":
+                strip = archer_bow_front(strip)
             if actor == "skeleton" and short == "left":
                 strip = hand_strike_left(strip, idle)
             if actor == "golem":
