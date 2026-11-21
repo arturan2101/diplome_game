@@ -142,3 +142,10 @@ Ruins that nature broke into: the same pixel art, 16x16 tiles, 1 px #08070b outl
 - Wall top: grass (#5a8a4a) with a few stones showing through, always much lighter than the floor.
 - Light from above: never a random floor variant; a whole sunlit patch (a lighter, warmer floor area, no dynamic light) placed on purpose, e.g. in the middle of the glade.
 - Files: `assets/art/tiles/nature_tiles_atlas.png` (slots 0-2 floor, 3 wall front, 4 wall top, 5 cover: a small tree, 6 sunlit floor), theme `level/nature_theme.tres`, generator `tools/art/make_nature_tiles.py`, preview `tests/manual/theme_preview.tscn`.
+
+## Elemental Wardens (batch 15, extra colours)
+
+Two recoloured variants of the Ruins Warden for the flooded and the fire floors. Colours on top of the 32-colour palette, used only by these two bosses (generator `tools/art/make_elemental_wardens.py`):
+
+- Tide Warden, wet green-grey marble: #cfe0d2 (light), #a6c0b0, #7c9a8c, #5a786c, #3f5a50 (shadow). Seaweed sash in the nature greens #5a8a4a / #8ac060 with moss #3b5a45 in the shadows; eyes and cracks teal #2aa8a0; corals #e85a3a / #e0a070 / #a82a30, drops #7ac0f0 / #3a7ac0 from the main palette.
+- Molten Warden uses only the main palette: basalt #1f1e29 / #17161f with lit faces #5d6072 / #767a8c (the body stays out of the floor range: darker than the floor, rim lighter), lava #e85a3a / #e09a20 / #ffd860 in the cracks, sparks.

@@ -625,3 +625,26 @@ Generators: `tools/art/make_batch14.py` (everything but the player poses; the du
 | C | Seaweed grip: strands rising round the legs and curling in, a wrap round the shins, drops falling | assets/art/fx/grip_seaweed.png | 16x8, 4 frames (64x8), loop 8 fps | over the player while slowed by the drowned; bottom row on the player's feet row (row 22 of the 24x24 frame), centred: offset (4, 15) in the player frame | generated |
 | C | HUD status icons: 0 slowed (a boot wrapped in weed), 1 rune key held, 2 lucky charm active, 3 sure critical hit ready (sword with gold sparks) | assets/art/ui/status_icons.png | 12x12 x 4 (48x12) | region x = index * 12 | generated |
 | C | Training dummy: idle, then two hit frames that wobble on the post (top bent 2 px away from the blow, then swinging 1 px back past the middle) while straw flies off | assets/art/enemies/training_dummy.png | 24x24, 3 frames (72x24): idle, hit, hit | hit = frames 1-2 at 12 fps, then back to frame 0 | generated |
+
+## Batch 15 (boss chest, elemental Wardens)
+
+Drawn in code: `tools/art/make_batch15.py` (chest and effects), `tools/art/make_elemental_wardens.py` (the two Wardens, recoloured from warden_* so the silhouette, the frame counts and the wind-up / strike frames are the same as in the Warden table above; extra colours in docs/art-style.md "Elemental Wardens"). Parts 3-5 (fungal and sand styles, sound) are not made yet.
+
+| Prio | What | File | Size / frames | Anchor / notes | Status |
+| --- | --- | --- | --- | --- | --- |
+| C | Boss chest: dark stone, gold straps and rim, purple runes, gold lock plate | assets/art/pickups/chest_boss.png | 24x24, 4 (96x24): closed, lid ajar (light leaks out), open (gold and purple glow), open with a flash | bottom row 22, shadow row 23 | generated |
+| C | Tide Warden: wet green-grey marble, corals and shells on the shoulders, barnacles, seaweed sash, teal eyes and cracks, drops | assets/art/enemies/tide_warden_{idle,walk,slam,throw,wave,summon,roar,hurt}_<dir>.png, tide_warden_death.png | 96x96, frames and fps as warden_* | feet (48, 92); the shield and the held boulder are recoloured with the body (green stone, no separate water ball in the hands) | generated |
+| C | Tide Warden geyser: fist raised with water gathering round it, then palms slammed into the floor in a crouch | assets/art/enemies/tide_warden_geyser_<dir>.png | 96x96, 8 (10 fps) | wind-up 1-3 (hold 3), **impact 4** (splash at the hands), 5-7 back; feet (48, 92); poses: warden summon 0-3 + slam 4-7 | generated |
+| C | SpriteFrames of the Tide Warden (`<anim>_<dir>`, `death`, `geyser_<dir>`) | assets/art/enemies/tide_warden_frames.tres | - | idle/walk loop | generated |
+| C | Molten Warden: black basalt, lava in the cracks, orange eyes, sparks | assets/art/enemies/molten_warden_{idle,walk,slam,throw,wave,summon,roar,hurt}_<dir>.png, molten_warden_death.png | 96x96, frames and fps as warden_* | feet (48, 92); the shield is basalt with lava cracks like the body (no separate red-hot colour, see the generator) | generated |
+| C | Molten Warden meteor: both arms up, a fireball grows over the hands and is thrown up | assets/art/enemies/molten_warden_meteor_<dir>.png | 96x96, 8 (10 fps) | wind-up 1-3 (fire grows, hold 3), **throw 4** (fireball leaves the top of the frame), 5-7 back; poses: warden slam 0-3-0 | generated |
+| C | SpriteFrames of the Molten Warden (`<anim>_<dir>`, `death`, `meteor_<dir>`) | assets/art/enemies/molten_warden_frames.tres | - | idle/walk loop | generated |
+| C | Water orb (Tide Warden's throw) | assets/art/fx/water_orb.png | 16x16, 4, loop | flies right, centre (8, 8) | generated |
+| C | Water orb burst: splash crown, drops, ends as a puddle | assets/art/fx/water_orb_burst.png | 32x32, 5, once | centre (16, 18); spawn tide_puddle after it | generated |
+| C | Tide puddle zone: dark water, bright rim, ripples | assets/art/fx/tide_puddle.png | 32x32, 4, loop | centre (16, 16), reach 14 x 10 px | generated |
+| C | Geyser warning: ripples and bubbles on the floor | assets/art/fx/geyser_warn.png | 16x16, 4, loop | centre (8, 9) | generated |
+| C | Geyser: water column from the floor up | assets/art/fx/geyser.png | 16x32, 6, once | bottom on row 31, centre x 8; full height on frames 2-3 | generated |
+| C | Tide ring: water wave ring (like golem_shockwave) | assets/art/fx/tide_ring.png | 64x64, 6, once | centre (32, 32), ring radius 6 ... 30 | generated |
+| C | Molten boulder: basalt with turning lava cracks, sparks behind | assets/art/fx/molten_boulder.png | 16x16, 4, loop | flies right, centre (8, 8) | generated |
+| C | Lava crack pool: cracks with lava after the impact | assets/art/fx/lava_crack_pool.png | 32x32, 7 (224x32) | 0-3 loop (lava pulses), 4-6 cooling once; centre (16, 16) | generated |
+| C | Molten ring: fire wave ring with embers, scorched cracks | assets/art/fx/molten_ring.png | 64x64, 6, once | centre (32, 32), ring radius 6 ... 30 | generated |
