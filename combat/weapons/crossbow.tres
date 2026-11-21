@@ -9,7 +9,7 @@
 
 [resource]
 script = ExtResource("1")
-damage = 22
+damage = 20
 reload_time = 1.1
 bolt_speed = 420.0
 bolt_range = 260.0
@@ -25,5 +25,5 @@ rarity_icons = {
 auto_aim_radius = 170.0
 weapon_scene = ExtResource("2")
 attack_animation = &"crossbow"
-crit_chance = 0.12
-crit_multiplier = 2.5
+crit_chance = 0.08
+crit_multiplier = 2.0

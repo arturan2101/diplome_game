@@ -62,6 +62,11 @@ extends Resource
 ## elixir (+max HP), lucky charm (rarer chest weapons), rune key (the next secret room
 ## opens by itself) and dice (new goods). Off in the clean series and the playtest.
 @export var shop_goods: bool = true
+## Stage 43: until the first boss falls, a legendary weapon is rare in every chest and
+## shop whatever the chest luck (Game.early_legendary_chance); the fallen boss leaves a
+## chest with a rare or legendary weapon (Game.boss_rarity_table). Needs the boss. Off
+## in the clean series and the playtest.
+@export var boss_chest: bool = true
 ## Soft tension waves of the rules director: a peak of x1.15 and a rest of x0.5
 ## (DirectorSettings.soft_peak_multiplier, soft_rest_multiplier) instead of x1.3 and
 ## x0.3. The other modes have no wave and do not change.
@@ -74,4 +79,5 @@ func to_dictionary() -> Dictionary:
 			"spike_traps": spike_traps, "combat_rooms": combat_rooms, "elite_enemies": elite_enemies,
 			"secret_rooms": secret_rooms, "merchant_glade": merchant_glade, "spell_fusion": spell_fusion,
 			"depth_pressure": depth_pressure, "extra_enemies": extra_enemies, "meta_progression": meta_progression,
-			"full_game_tuning": full_game_tuning, "arsenal": arsenal, "floor_styles": floor_styles, "shop_goods": shop_goods}
+			"full_game_tuning": full_game_tuning, "arsenal": arsenal, "floor_styles": floor_styles, "shop_goods": shop_goods,
+			"boss_chest": boss_chest}

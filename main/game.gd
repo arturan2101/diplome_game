@@ -21,6 +21,8 @@ const DEFAULT_CHEST_WEAPONS: WeaponPool = preload("res://combat/weapons/chest_we
 ## daggers and the crossbow.
 const ARSENAL_CHEST_WEAPONS: WeaponPool = preload("res://combat/weapons/chest_weapons_arsenal.tres")
 const DEFAULT_RARITY_TABLE: RarityTable = preload("res://combat/weapons/rarity_table.tres")
+const DEFAULT_BOSS_RARITY_TABLE: RarityTable = preload("res://combat/weapons/boss_rarity_table.tres")
+const CHEST_SCENE: PackedScene = preload("res://actors/pickups/chest.tscn")
 const DEFAULT_SPELL_POOL: SpellPool = preload("res://combat/spells/spell_pool.tres")
 const SPELL_PICKUP_SCENE: PackedScene = preload("res://actors/pickups/spell_pickup.tscn")
 const SPELL_CHOICE_SCENE: PackedScene = preload("res://ui/spell_choice.tscn")
@@ -68,6 +70,19 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 ## How many coins fall out of a chest.
 @export var chest_coins_min: int = 3
 @export var chest_coins_max: int = 6
+@export_group("Boss chest (stage 43)")
+## Until the first boss falls (ExperimentConfig.boss_chest), the chance of a legendary
+## weapon in any chest or shop, whatever the chest luck.
+@export_range(0.0, 1.0) var early_legendary_chance: float = 0.01
+## Rarities of the weapon in the chest the fallen boss leaves. Empty =
+## combat/weapons/boss_rarity_table.tres (rare or legendary).
+@export var boss_rarity_table: RarityTable
+## The boss chest holds this many times the coins of an ordinary chest.
+@export var boss_chest_coin_scale: float = 2.0
+## Look of the boss chest until it has its own picture: larger and golden.
+@export var boss_chest_scale: float = 1.4
+@export var boss_chest_tint: Color = Color(1.0, 0.85, 0.45)
+@export_group("")
 ## Spells of shrines and chest scrolls. Empty = combat/spells/spell_pool.tres.
 @export var spell_pool: SpellPool
 ## Chance that a chest also holds a spell scroll.
@@ -146,6 +161,10 @@ var _servants: Array[Enemy] = []
 ## charms), and rune keys waiting for the next hidden room.
 var _bought_chest_luck: int = 0
 var _rune_keys: int = 0
+## Bosses beaten this run (stage 43: legendary weapons stay rare until the first).
+var _bosses_defeated: int = 0
+## rarity_table with the legendary chance held down, made on first use.
+var _early_rarity_table: RarityTable = null
 
 
 func _ready() -> void:
@@ -153,6 +172,8 @@ func _ready() -> void:
 		chest_weapons = ARSENAL_CHEST_WEAPONS if GameManager.config.arsenal else DEFAULT_CHEST_WEAPONS
 	if rarity_table == null:
 		rarity_table = DEFAULT_RARITY_TABLE
+	if boss_rarity_table == null:
+		boss_rarity_table = DEFAULT_BOSS_RARITY_TABLE
 	if spell_pool == null:
 		spell_pool = DEFAULT_SPELL_POOL
 	_run_spells = spell_pool.unlocked() if GameManager.config.meta_progression else spell_pool
@@ -476,7 +497,7 @@ func _spawn_item(entry: Dictionary, shop_rng: RandomNumberGenerator = null) -> v
 		merchant.wandering = entry.get("secret", false)
 		var stock_rng: RandomNumberGenerator = shop_rng if shop_rng != null else GameManager.make_shop_rng(GameManager.section_index)
 		merchant.offers = ShopStock.make_offers(shop_data, GameManager.depth, stock_rng,
-				chest_weapons, rarity_table if GameManager.config.rarity_enabled else null,
+				chest_weapons, current_rarity_table() if GameManager.config.rarity_enabled else null,
 				_run_spells if GameManager.config.spells_enabled else null, player.spell_book, merchant.wandering,
 				get_shop_fusions(), get_shop_goods())
 		_check_goods(merchant.offers)
@@ -615,7 +636,7 @@ func _use_goods(offer: ShopOffer) -> void:
 			var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 			rng.seed = _loot_rng.randi()
 			merchant.offers = ShopStock.make_offers(shop_data, GameManager.depth, rng, chest_weapons,
-					rarity_table if GameManager.config.rarity_enabled else null,
+					current_rarity_table() if GameManager.config.rarity_enabled else null,
 					_run_spells if GameManager.config.spells_enabled else null, player.spell_book, merchant.wandering,
 					get_shop_fusions(), get_shop_goods())
 			_check_goods(merchant.offers)
@@ -739,7 +760,7 @@ func _on_enemy_defeated(enemy: Enemy) -> void:
 		Telemetry.record_kill()
 	_enemies_left -= 1
 	if enemy is Guardian:
-		_on_boss_defeated()
+		_on_boss_defeated(enemy)
 	if _is_arena_sealed and _enemies_left <= 0:
 		_advance_arena()
 
@@ -804,7 +825,10 @@ func _on_boss_phase_changed(_phase: int) -> void:
 
 
 ## The servants crumble with the boss; the player may choose a spell as a reward.
-func _on_boss_defeated() -> void:
+func _on_boss_defeated(boss: Node2D) -> void:
+	_bosses_defeated += 1
+	if GameManager.config.boss_chest:
+		spawn_boss_chest(boss.global_position)
 	for servant: Enemy in _servants:
 		servant.defeated.disconnect(_on_enemy_defeated)
 		_enemies_left -= 1
@@ -866,8 +890,44 @@ func _roll_chest_weapon() -> WeaponData:
 	var base: WeaponData = chest_weapons.pick(_loot_rng)
 	if base == null or not GameManager.config.rarity_enabled:
 		return base
-	var rarity: WeaponRarity = rarity_table.pick(GameManager.depth + _chest_luck(), _loot_rng)
+	var rarity: WeaponRarity = current_rarity_table().pick(GameManager.depth + _chest_luck(), _loot_rng)
 	return base.with_rarity(rarity) if rarity != null else base
+
+
+## The rarity table chests and merchants use now: until the first boss falls
+## (ExperimentConfig.boss_chest) the legendary chance is held at early_legendary_chance,
+## so chest luck cannot bring legendaries to the first floors.
+func current_rarity_table() -> RarityTable:
+	var config: ExperimentConfig = GameManager.config
+	if not config.boss_chest or not config.boss_enabled or _bosses_defeated > 0:
+		return rarity_table
+	if _early_rarity_table == null:
+		_early_rarity_table = rarity_table.limited(&"legendary", early_legendary_chance)
+	return _early_rarity_table
+
+
+## The chest the fallen boss leaves (ExperimentConfig.boss_chest): on free floor next to
+## where it fell, with a rare or legendary weapon and more coins. Returns the chest.
+func spawn_boss_chest(at: Vector2) -> Chest:
+	var cells: Array[Vector2i] = level.free_floor_cells_near(at, 12)
+	var gate_cells: Array[Vector2i] = SectionBuilder.gate_footprint(layout.exit) if layout != null else []
+	var spot: Vector2i = level.cell_at(at)
+	for cell: Vector2i in cells:
+		if not cell in gate_cells:
+			spot = cell
+			break
+	var chest: Chest = CHEST_SCENE.instantiate() as Chest
+	chest.position = level.to_local(level.cell_center(spot))
+	chest.scale = Vector2.ONE * boss_chest_scale
+	chest.modulate = boss_chest_tint
+	var base: WeaponData = chest_weapons.pick(_loot_rng)
+	var rarity: WeaponRarity = boss_rarity_table.pick(0, _loot_rng) if GameManager.config.rarity_enabled else null
+	chest.loot_weapon = base.with_rarity(rarity) if base != null and rarity != null else base
+	chest.loot_coins = roundi(_loot_rng.randi_range(chest_coins_min, chest_coins_max) * boss_chest_coin_scale)
+	chest.opened.connect(_on_chest_opened)
+	# Deferred: the boss falls inside a physics callback.
+	_contents.add_child.call_deferred(chest)
+	return chest
 
 
 ## The weapon falls next to the opened chest (taken with the interact button), then

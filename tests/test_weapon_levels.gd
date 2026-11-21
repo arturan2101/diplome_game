@@ -112,7 +112,7 @@ func _test_levels_in_game() -> void:
 	check(pips != null and pips.visible and (pips.texture as AtlasTexture).region.position.x == 0.0,
 			"one level mark under the weapon in hand")
 	check(game.player.critical_hits and game.player.weapon.crit_chance > 0.0, "the game switches critical hits on")
-	game._on_boss_defeated()
+	game._on_boss_defeated(game.player)
 	check(game.player.weapon.data.level == 2 and (pips.texture as AtlasTexture).region.position.x == game.hud.level_pip_size.x,
 			"after the boss the weapon is level 2 and shows two marks")
 	game.queue_free()

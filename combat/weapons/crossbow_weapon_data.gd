@@ -6,7 +6,7 @@ extends WeaponData
 ## The behaviour lives in CrossbowWeapon, the projectile is an Arrow.
 
 ## Damage of every bolt.
-@export var damage: int = 22
+@export var damage: int = 20
 ## Seconds from a shot until the crossbow is loaded again.
 @export var reload_time: float = 1.1
 ## Bolt speed in pixels per second, and the distance after which it disappears.

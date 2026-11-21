@@ -14,6 +14,7 @@ full_game_tuning = false
 arsenal = false
 floor_styles = false
 shop_goods = false
+boss_chest = false
 meta_progression = false
 extra_enemies = false
 depth_pressure = false
