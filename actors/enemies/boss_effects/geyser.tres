@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ZoneData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/zone_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/boss_fx_frames.tres" id="frames"]
+
+[resource]
+script = ExtResource("1")
+id = &"tide_warden"
+display_name = "Geyser"
+color = Color(0.16, 0.66, 0.63, 1)
+tick_damage = PackedInt32Array(0, 0, 0)
+duration = PackedFloat32Array(0, 0, 0)
+radius = PackedFloat32Array(10, 10, 10)
+impact_delay = 0.8
+impact_damage = PackedInt32Array(11, 11, 11)
+impact_radius = 11.0
+impact_knockback = 140.0
+frames = ExtResource("frames")
+shadow_animation = &"geyser_warn"
+impact_animation = &"geyser"
+impact_pivot = Vector2(8, 29)

@@ -23,6 +23,9 @@ const GROUP: StringName = &"projectiles"
 @export var hit_effect: Texture2D
 @export var hit_effect_frames: int = 4
 @export var hit_effect_fps: float = 12.0
+## A patch left where it lands (stage 45: the Tide Warden's puddle, the Molten Warden's
+## lava cracks); it hurts what the arrow hurts. null = none.
+@export var landing_zone: ZoneData
 
 ## How many targets the arrow flies through after hitting one (the crossbow bolt sets
 ## it before setup()); 0 = it stops at the first target.
@@ -118,6 +121,10 @@ func _draw() -> void:
 func _land(hit: bool) -> void:
 	if hit_effect != null and get_parent() != null:
 		StripSprite.spawn(get_parent(), global_position, hit_effect, hit_effect_frames, hit_effect_fps)
+	if landing_zone != null and get_parent() != null:
+		var caster: Node = _info.source if _info != null and is_instance_valid(_info.source) else null
+		SpellZone.spawn(get_parent(), global_position, landing_zone, 1, caster,
+				_info.source_id if _info != null else &"", target_mask, wall_mask)
 	landed.emit(hit)
 	queue_free()
 	set_physics_process(false)

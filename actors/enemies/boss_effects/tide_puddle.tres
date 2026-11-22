@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ZoneData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/zone_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/boss_fx_frames.tres" id="frames"]
+
+[resource]
+script = ExtResource("1")
+id = &"tide_warden"
+display_name = "Tide puddle"
+color = Color(0.16, 0.66, 0.63, 1)
+tick_damage = PackedInt32Array(0, 0, 0)
+tick_interval = 0.25
+duration = PackedFloat32Array(4, 4, 4)
+radius = PackedFloat32Array(14, 14, 14)
+slow_multiplier = 0.55
+slow_time = 0.4
+frames = ExtResource("frames")
+level_animations = Array[StringName]([&"tide_puddle", &"tide_puddle", &"tide_puddle"])
+look_radius = PackedFloat32Array(14, 14, 14)

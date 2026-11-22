@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="ZoneData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/zone_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/element2_frames.tres" id="frames"]
+
+[resource]
+script = ExtResource("1")
+id = &"molten_warden"
+display_name = "Meteor"
+color = Color(1, 0.45, 0.15, 1)
+tick_damage = PackedInt32Array(3, 3, 3)
+tick_interval = 0.5
+duration = PackedFloat32Array(2.5, 2.5, 2.5)
+radius = PackedFloat32Array(14, 14, 14)
+impact_delay = 1.1
+impact_damage = PackedInt32Array(13, 13, 13)
+impact_radius = 18.0
+impact_knockback = 160.0
+frames = ExtResource("frames")
+level_animations = Array[StringName]([&"lava_pool_l1", &"lava_pool_l1", &"lava_pool_l1"])
+look_radius = PackedFloat32Array(11, 11, 11)
+fall_animation = &"meteor"
+shadow_animation = &"meteor_shadow"
+impact_animation = &"meteor_impact"

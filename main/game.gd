@@ -22,7 +22,7 @@ const DEFAULT_CHEST_WEAPONS: WeaponPool = preload("res://combat/weapons/chest_we
 const ARSENAL_CHEST_WEAPONS: WeaponPool = preload("res://combat/weapons/chest_weapons_arsenal.tres")
 const DEFAULT_RARITY_TABLE: RarityTable = preload("res://combat/weapons/rarity_table.tres")
 const DEFAULT_BOSS_RARITY_TABLE: RarityTable = preload("res://combat/weapons/boss_rarity_table.tres")
-const CHEST_SCENE: PackedScene = preload("res://actors/pickups/chest.tscn")
+const BOSS_CHEST_SCENE: PackedScene = preload("res://actors/pickups/chest_boss.tscn")
 const DEFAULT_SPELL_POOL: SpellPool = preload("res://combat/spells/spell_pool.tres")
 const SPELL_PICKUP_SCENE: PackedScene = preload("res://actors/pickups/spell_pickup.tscn")
 const SPELL_CHOICE_SCENE: PackedScene = preload("res://ui/spell_choice.tscn")
@@ -79,9 +79,6 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 @export var boss_rarity_table: RarityTable
 ## The boss chest holds this many times the coins of an ordinary chest.
 @export var boss_chest_coin_scale: float = 2.0
-## Look of the boss chest until it has its own picture: larger and golden.
-@export var boss_chest_scale: float = 1.4
-@export var boss_chest_tint: Color = Color(1.0, 0.85, 0.45)
 @export_group("")
 ## Spells of shrines and chest scrolls. Empty = combat/spells/spell_pool.tres.
 @export var spell_pool: SpellPool
@@ -732,7 +729,7 @@ func _spawn_enemy(entry: Dictionary) -> void:
 	var guardian: Guardian = enemy as Guardian
 	if guardian != null:
 		guardian.summon_requested.connect(_on_summon_requested)
-		guardian.phase_changed.connect(_on_boss_phase_changed)
+		guardian.phase_changed.connect(_on_boss_phase_changed.bind(guardian))
 	_contents.add_child(enemy)
 
 
@@ -820,8 +817,14 @@ func _on_summon_requested(guardian: Guardian, count: int) -> void:
 		_contents.add_child.call_deferred(summoned)
 
 
-func _on_boss_phase_changed(_phase: int) -> void:
-	hud.show_banner("The Warden calls its servants!")
+func _on_boss_phase_changed(_phase: int, boss: Guardian) -> void:
+	hud.show_banner("%s calls its servants!" % _boss_name(boss))
+
+
+## The boss's name for banners ("Ruins Warden", "Tide Warden"...).
+func _boss_name(boss: Node) -> String:
+	var enemy: Enemy = boss as Enemy
+	return enemy.data.display_name if enemy != null and enemy.data != null else "The Warden"
 
 
 ## The servants crumble with the boss; the player may choose a spell as a reward.
@@ -841,10 +844,10 @@ func _on_boss_defeated(boss: Node2D) -> void:
 	hud.hide_boss()
 	# Batch 8: the weapons the player carries grow a level with every boss.
 	if GameManager.config.arsenal and player.raise_weapon_levels() > 0:
-		hud.show_banner("The Warden has fallen
-Your weapons grow stronger")
+		hud.show_banner("%s has fallen
+Your weapons grow stronger" % _boss_name(boss))
 	else:
-		hud.show_banner("The Warden has fallen")
+		hud.show_banner("%s has fallen" % _boss_name(boss))
 	# With the glade, spells are bought from its merchant instead.
 	if _bot == null and GameManager.config.spells_enabled and not GameManager.config.merchant_glade:
 		spell_choice.open_offers.call_deferred(_run_spells.offer(shrine_offer_count, _loot_rng), player.spell_book)
@@ -916,10 +919,8 @@ func spawn_boss_chest(at: Vector2) -> Chest:
 		if not cell in gate_cells:
 			spot = cell
 			break
-	var chest: Chest = CHEST_SCENE.instantiate() as Chest
+	var chest: Chest = BOSS_CHEST_SCENE.instantiate() as Chest
 	chest.position = level.to_local(level.cell_center(spot))
-	chest.scale = Vector2.ONE * boss_chest_scale
-	chest.modulate = boss_chest_tint
 	var base: WeaponData = chest_weapons.pick(_loot_rng)
 	var rarity: WeaponRarity = boss_rarity_table.pick(0, _loot_rng) if GameManager.config.rarity_enabled else null
 	chest.loot_weapon = base.with_rarity(rarity) if base != null and rarity != null else base

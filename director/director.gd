@@ -126,7 +126,7 @@ func fill_contents(plan: SectionPlan, state: PlayerState) -> void:
 func finish_arena(plan: SectionPlan, rng: RandomNumberGenerator) -> void:
 	if not plan.is_arena:
 		return
-	var boss: EnemyData = catalog.get_by_id(settings.boss_id) if plan.is_boss else null
+	var boss: EnemyData = boss_for_depth(plan.depth) if plan.is_boss else null
 	if boss != null:
 		plan.enemy_mix = buy_enemies(maxi(0, plan.budget - boss.danger_cost), rng, {}, plan.depth)
 		plan.enemy_mix[boss.id] = 1
@@ -134,6 +134,17 @@ func finish_arena(plan: SectionPlan, rng: RandomNumberGenerator) -> void:
 		return
 	plan.is_boss = false
 	plan.waves = 2 if plan.budget >= settings.arena_two_waves_budget else 1
+
+
+## The boss of a boss arena at this depth: the floor style's own boss when
+## DirectorSettings.style_bosses is on and the catalog has one, else boss_id.
+func boss_for_depth(depth: int) -> EnemyData:
+	if settings.style_bosses and settings.floor_styles != null and depth >= 0:
+		var style: StringName = settings.floor_styles.style_at(depth)
+		for enemy_data: EnemyData in catalog.enemies:
+			if enemy_data.is_boss and enemy_data.floor_style != &"" and enemy_data.floor_style == style:
+				return enemy_data
+	return catalog.get_by_id(settings.boss_id)
 
 
 ## Index picked with the given weights (they need not add up to 1).

@@ -112,6 +112,11 @@ extends Resource
 @export var boss_every_depths: int = 2
 ## Enemy id of the boss in the enemy catalog.
 @export var boss_id: StringName = &"guardian"
+## Stage 45 (ExperimentConfig.elemental_bosses, needs floor_styles): a floor whose style
+## has its own boss in the catalog (EnemyData.floor_style on a boss) gets that boss
+## instead of boss_id (the Tide Warden on the flooded floors, the Molten Warden on the
+## fire floors).
+@export var style_bosses: bool = false
 
 @export_group("Spells")
 ## Chance that an ordinary (not arena) section has a shrine with a spell choice.

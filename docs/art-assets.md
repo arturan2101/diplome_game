@@ -648,3 +648,5 @@ Drawn in code: `tools/art/make_batch15.py` (chest and effects), `tools/art/make_
 | C | Molten boulder: basalt with turning lava cracks, sparks behind | assets/art/fx/molten_boulder.png | 16x16, 4, loop | flies right, centre (8, 8) | generated |
 | C | Lava crack pool: cracks with lava after the impact | assets/art/fx/lava_crack_pool.png | 32x32, 7 (224x32) | 0-3 loop (lava pulses), 4-6 cooling once; centre (16, 16) | generated |
 | C | Molten ring: fire wave ring with embers, scorched cracks | assets/art/fx/molten_ring.png | 64x64, 6, once | centre (32, 32), ring radius 6 ... 30 | generated |
+
+Integrated in stage 45: chest_boss.png (`actors/pickups/chest_boss.tscn`), tide_warden_* and molten_warden_* (`actors/enemies/tide_warden.tres`, `molten_warden.tres`), water_orb / water_orb_burst (`actors/projectiles/water_orb.tscn`), molten_boulder (`molten_boulder.tscn`), tide_puddle / lava_crack_pool (frames 0-3) / geyser_warn / geyser (`assets/art/fx/boss_fx_frames.tres`, built by `tools/art/make_boss_fx_frames.py`), tide_ring / molten_ring (shockwave). Not used: lava_crack_pool cooling frames 4-6 (the patch fades out instead).

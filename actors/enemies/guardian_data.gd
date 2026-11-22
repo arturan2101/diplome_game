@@ -36,3 +36,44 @@ extends EnemyData
 @export var summon_count: int = 2
 @export var summon_interval: float = 9.0
 @export var summon_max_alive: int = 4
+
+## Where the special attack's strikes fall (stage 45): in a line from the boss towards
+## the player (geysers), or on the player and around them (meteors).
+enum SpecialPattern { LINE, AROUND_TARGET }
+
+@export_group("Element (stage 45)")
+## A patch the slam leaves in front of the boss (the Molten Warden's lava cracks),
+## this far ahead; null = none.
+@export var slam_zone: ZoneData
+@export var slam_zone_distance: float = 20.0
+## A ring drawn by the shockwave: a strip of square frames whose ring reaches
+## shockwave_ring_art_radius pixels at the end (scaled to shockwave_radius); null = none.
+@export var shockwave_ring: Texture2D
+@export var shockwave_ring_frames: int = 6
+@export var shockwave_ring_fps: float = 14.0
+@export var shockwave_ring_art_radius: float = 30.0
+## The shockwave also slows the player it hits (the Tide Warden's water); 0 s = no.
+@export_range(0.0, 1.0) var shockwave_slow_multiplier: float = 1.0
+@export var shockwave_slow_time: float = 0.0
+
+@export_group("Special attack (stage 45)")
+## The strikes of the special attack: each is a patch that falls after a warning on the
+## floor (geyser, meteor). null = the boss has no special attack.
+@export var special_zone: ZoneData
+## Animation of the special attack ("<name>_<dir>"), with its wind-up and strike frame
+## like the other attacks (attack_strike_frame).
+@export var special_animation: String = ""
+@export var special_pattern: SpecialPattern = SpecialPattern.LINE
+## How many strikes; LINE: the distance between them (the first this far from the boss);
+## AROUND_TARGET: the first on the player, the rest within special_spread of them.
+@export var special_count: int = 4
+@export var special_count_phase_two: int = 5
+@export var special_spacing: float = 26.0
+@export var special_spread: float = 44.0
+## Seconds between one strike landing and the next.
+@export var special_stagger: float = 0.15
+@export var special_windup: float = 0.9
+@export var special_cooldown: float = 7.0
+## Used when the player is at least special_min_distance and at most special_range away.
+@export var special_min_distance: float = 40.0
+@export var special_range: float = 170.0

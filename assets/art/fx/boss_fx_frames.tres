@@ -1,0 +1,155 @@
+[gd_resource type="SpriteFrames" load_steps=23 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/fx/tide_puddle.png" id="tide_puddle"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/lava_crack_pool.png" id="lava_crack"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/geyser_warn.png" id="geyser_warn"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/geyser.png" id="geyser"]
+
+[sub_resource type="AtlasTexture" id="tide_puddle_0"]
+atlas = ExtResource("tide_puddle")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="tide_puddle_1"]
+atlas = ExtResource("tide_puddle")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="tide_puddle_2"]
+atlas = ExtResource("tide_puddle")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="tide_puddle_3"]
+atlas = ExtResource("tide_puddle")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="lava_crack_0"]
+atlas = ExtResource("lava_crack")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="lava_crack_1"]
+atlas = ExtResource("lava_crack")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="lava_crack_2"]
+atlas = ExtResource("lava_crack")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="lava_crack_3"]
+atlas = ExtResource("lava_crack")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="geyser_warn_0"]
+atlas = ExtResource("geyser_warn")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="geyser_warn_1"]
+atlas = ExtResource("geyser_warn")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="geyser_warn_2"]
+atlas = ExtResource("geyser_warn")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="geyser_warn_3"]
+atlas = ExtResource("geyser_warn")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="geyser_0"]
+atlas = ExtResource("geyser")
+region = Rect2(0, 0, 16, 32)
+
+[sub_resource type="AtlasTexture" id="geyser_1"]
+atlas = ExtResource("geyser")
+region = Rect2(16, 0, 16, 32)
+
+[sub_resource type="AtlasTexture" id="geyser_2"]
+atlas = ExtResource("geyser")
+region = Rect2(32, 0, 16, 32)
+
+[sub_resource type="AtlasTexture" id="geyser_3"]
+atlas = ExtResource("geyser")
+region = Rect2(48, 0, 16, 32)
+
+[sub_resource type="AtlasTexture" id="geyser_4"]
+atlas = ExtResource("geyser")
+region = Rect2(64, 0, 16, 32)
+
+[sub_resource type="AtlasTexture" id="geyser_5"]
+atlas = ExtResource("geyser")
+region = Rect2(80, 0, 16, 32)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("tide_puddle_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("tide_puddle_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("tide_puddle_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("tide_puddle_3")
+}],
+"loop": true,
+"name": &"tide_puddle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("lava_crack_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("lava_crack_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("lava_crack_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("lava_crack_3")
+}],
+"loop": true,
+"name": &"lava_crack",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("geyser_warn_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("geyser_warn_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("geyser_warn_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("geyser_warn_3")
+}],
+"loop": true,
+"name": &"geyser_warn",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("geyser_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("geyser_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("geyser_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("geyser_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("geyser_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("geyser_5")
+}],
+"loop": false,
+"name": &"geyser",
+"speed": 12.0
+}]

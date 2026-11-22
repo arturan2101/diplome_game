@@ -103,7 +103,7 @@ func _apply_config(director: Director) -> void:
 	if config.boss_enabled and config.spells_enabled and config.spike_traps and config.combat_rooms \
 			and config.elite_enemies and config.secret_rooms and not config.merchant_glade and not config.soft_waves \
 			and not config.depth_pressure and not config.extra_enemies and not config.full_game_tuning \
-			and not config.floor_styles:
+			and not config.floor_styles and not config.elemental_bosses:
 		return
 	director.settings = director.settings.duplicate() as DirectorSettings
 	if not config.boss_enabled:
@@ -127,6 +127,7 @@ func _apply_config(director: Director) -> void:
 		director.settings.extra_enemies = true
 	if config.floor_styles:
 		director.settings.floor_styles = FLOOR_STYLES
+		director.settings.style_bosses = config.elemental_bosses
 	if config.full_game_tuning:
 		director.settings.health_packs_fewer = FULL_GAME_FEWER_PACKS
 		director.settings.coin_scale = FULL_GAME_COIN_SCALE

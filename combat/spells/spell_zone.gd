@@ -2,7 +2,9 @@ class_name SpellZone
 extends Node2D
 ## One patch of a ZoneData spell on the floor (stage 40): optionally falls first and
 ## hits where it lands (the meteor), then hurts, roots or slows the enemies on it every
-## tick until its time is up, then frees itself. Lives in the level, not on the caster.
+## tick until its time is up, then frees itself. Since stage 45 the bosses' patches use
+## it too (target_mask = the player's hurtbox): it then slows the player, and a patch
+## without tick damage only slows (the Tide Warden's puddle). Lives in the level, not on the caster.
 ## Look: the level's animation scaled to the patch (the meteor also falls as a rock over
 ## a growing shadow and ends in an impact burst); without art a circle in the spell's
 ## colour is drawn.
@@ -32,8 +34,9 @@ var _shadow: AnimatedSprite2D = null
 
 ## A new patch at a world position, added to parent. source_id goes to the damage
 ## (the spell that made it, e.g. &"volcanic_lightning" for its small pools).
+## delay: extra seconds before a falling patch lands (a boss's strikes one after another).
 static func spawn(parent: Node, at: Vector2, stats: ZoneData, level: int, caster: Node, source_id: StringName,
-		target_mask: int, wall_mask: int) -> SpellZone:
+		target_mask: int, wall_mask: int, delay: float = 0.0) -> SpellZone:
 	var zone: SpellZone = SpellZone.new()
 	zone._stats = stats
 	zone._level = level
@@ -41,7 +44,7 @@ static func spawn(parent: Node, at: Vector2, stats: ZoneData, level: int, caster
 	zone._source_id = source_id
 	zone._target_mask = target_mask
 	zone._wall_mask = wall_mask
-	zone._fall_left = stats.impact_delay
+	zone._fall_left = stats.impact_delay + (delay if stats.impact_delay > 0.0 else 0.0)
 	zone._time_left = SpellData.float_at(stats.duration, level)
 	zone._ticks_left = stats.ticks_at(level)
 	# Cleared between sections together with arrows and fireballs.
@@ -62,7 +65,7 @@ func _make_look() -> void:
 		if _shadow != null:
 			# One pass of the shadow over the whole fall.
 			var pass_time: float = float(frames.get_frame_count(_stats.shadow_animation)) / maxf(frames.get_animation_speed(_stats.shadow_animation), 1.0)
-			_shadow.speed_scale = pass_time / maxf(_stats.impact_delay, 0.01)
+			_shadow.speed_scale = pass_time / maxf(_fall_left, 0.01)
 			_shadow.scale = Vector2.ONE * (_stats.impact_radius * 2.0 / maxf(SpellData.frame_size(frames, _stats.shadow_animation).x, 1.0))
 		_rock = _sprite(_stats.fall_animation, _stats.fall_pivot)
 		if _rock != null:
@@ -154,11 +157,22 @@ func _impact() -> void:
 func _tick() -> void:
 	var source: Node = _caster if is_instance_valid(_caster) else null
 	var on_hit: Callable = _on_hit if _stats.root_time > 0.0 or _stats.slow_time > 0.0 else Callable()
+	if SpellData.int_at(_stats.tick_damage, _level) <= 0:
+		# No damage: the patch only slows or roots whoever stands on it.
+		if on_hit.is_valid():
+			for hurtbox: Hurtbox in AreaDamage.targets(get_world_2d().direct_space_state, global_position, radius(), _target_mask, _wall_mask):
+				on_hit.call(hurtbox)
+		return
 	damage_dealt.emit(AreaDamage.hit(get_world_2d().direct_space_state, global_position, radius(),
 			SpellData.int_at(_stats.tick_damage, _level), source, _source_id, 0.0, _target_mask, _wall_mask, on_hit))
 
 
 func _on_hit(hurtbox: Hurtbox) -> void:
+	var player: Player = hurtbox.get_parent() as Player
+	if player != null:
+		if _stats.slow_time > 0.0:
+			player.slow(_stats.slow_multiplier, _stats.slow_time)
+		return
 	var enemy: Enemy = Enemy.owner_of(hurtbox)
 	if enemy == null or not is_instance_valid(enemy):
 		return

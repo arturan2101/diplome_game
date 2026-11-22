@@ -11,12 +11,16 @@ extends Enemy
 ## throw: a boulder cocked behind the head; shockwave: arms wide, knee up), so nothing
 ## is drawn on the ground. Knockback does not move the Guardian and it does not fall
 ## into pits.
+## Stage 45: the same class plays the elemental Wardens of the flooded and fire floors
+## (GuardianData decides): the thrown projectile may leave a patch, the slam lava cracks,
+## the shockwave a ring that slows; and a special attack drops strikes on the floor
+## after a warning (geysers in a line, meteors on and around the player).
 
 signal phase_changed(phase: int)
 ## The game spawns the servants: it owns the enemies of the section.
 signal summon_requested(guardian: Guardian, count: int)
 
-enum Attack { SLAM, THROW, SHOCKWAVE }
+enum Attack { SLAM, THROW, SHOCKWAVE, SPECIAL }
 
 ## Physics layers the stone and the shockwave hurt (player_hurtbox).
 @export_flags_2d_physics var player_hurtbox_mask: int = 8
@@ -32,6 +36,9 @@ var _roar_left: float = 0.0
 var _summon_left: float = 0.0
 var _throw_cooldown_left: float = 0.0
 var _shockwave_next: bool = false
+var _special_cooldown_left: float = 0.0
+## The patches with damage_multiplier applied, made on first use.
+var _scaled_zones: Dictionary = {}
 
 
 func _ready() -> void:
@@ -45,12 +52,15 @@ func _ready() -> void:
 	if hazards != null:
 		hazards.process_mode = Node.PROCESS_MODE_DISABLED
 	health.damaged.connect(_check_phase)
+	# The first special attack waits half its cooldown after the boss wakes.
+	_special_cooldown_left = _stats.special_cooldown * 0.5
 
 
 func _physics_process(delta: float) -> void:
 	if is_dormant:
 		return
 	_throw_cooldown_left = maxf(_throw_cooldown_left - delta, 0.0)
+	_special_cooldown_left = maxf(_special_cooldown_left - delta, 0.0)
 	if phase == 2:
 		_summon_left -= delta
 		if _summon_left <= 0.0:
@@ -69,11 +79,18 @@ func get_windup_reach() -> float:
 			return _stats.throw_range
 		Attack.SHOCKWAVE:
 			return _stats.shockwave_radius
+		Attack.SPECIAL:
+			return _stats.special_range
 	return data.attack_range
 
 
 func is_windup_ranged() -> bool:
-	return attack == Attack.THROW
+	return attack == Attack.THROW or attack == Attack.SPECIAL
+
+
+## True when this boss has a special attack (the elemental Wardens).
+func has_special() -> bool:
+	return _stats != null and _stats.special_zone != null
 
 
 func is_roaring() -> bool:
@@ -86,6 +103,8 @@ func get_roar_time() -> float:
 
 
 func get_attack_animation() -> String:
+	if attack == Attack.SPECIAL and _stats.special_animation != "":
+		return _stats.special_animation
 	return String(attack_animations.get(attack, "attack"))
 
 
@@ -106,6 +125,9 @@ func _update_chase(delta: float) -> void:
 		if distance <= data.attack_range:
 			_start_attack(Attack.SLAM)
 			return
+		if has_special() and _special_cooldown_left <= 0.0 and distance >= _stats.special_min_distance 				and distance <= _stats.special_range:
+			_start_attack(Attack.SPECIAL)
+			return
 		if distance >= _stats.throw_min_distance and distance <= _stats.throw_range and _throw_cooldown_left <= 0.0:
 			_start_attack(Attack.THROW)
 			return
@@ -122,6 +144,8 @@ func _start_attack(kind: Attack) -> void:
 			_state_time_left = _stats.throw_windup
 		Attack.SHOCKWAVE:
 			_state_time_left = _stats.shockwave_windup
+		Attack.SPECIAL:
+			_state_time_left = _stats.special_windup
 	_windup_total = _state_time_left
 
 
@@ -135,14 +159,21 @@ func _update_windup(delta: float) -> void:
 				weapon.try_attack(_attack_direction)
 				weapon.release_attack(_attack_direction)
 			_shockwave_next = phase == 2
+			if _stats.slam_zone != null:
+				_spawn_zone(_stats.slam_zone, global_position + _attack_direction * _stats.slam_zone_distance)
 		Attack.THROW:
 			_throw()
 			_throw_cooldown_left = _stats.throw_cooldown
 		Attack.SHOCKWAVE:
+			var on_hit: Callable = _slow_player if _stats.shockwave_slow_time > 0.0 else Callable()
 			AreaDamage.hit(get_world_2d().direct_space_state, global_position, _stats.shockwave_radius,
 					roundi(_stats.shockwave_damage * damage_multiplier), self, data.id, _stats.shockwave_knockback,
-					player_hurtbox_mask, sight_mask)
+					player_hurtbox_mask, sight_mask, on_hit)
+			_show_ring()
 			_shockwave_next = false
+		Attack.SPECIAL:
+			_special()
+			_special_cooldown_left = _stats.special_cooldown
 	struck.emit()
 	_enter(State.RECOVER)
 	if phase == 2:
@@ -158,6 +189,82 @@ func _throw() -> void:
 	# Next to the Guardian in the section, so the stone is cleared with it.
 	get_parent().add_child(stone)
 	stone.global_position = global_position
+
+
+## The special attack: its strikes on plain floor, one after another.
+func _special() -> void:
+	var level: Level = get_tree().get_first_node_in_group(Level.GROUP) as Level
+	var spots: Array[Vector2] = special_spots(level)
+	for i in spots.size():
+		_spawn_zone(_stats.special_zone, spots[i], _stats.special_stagger * i)
+
+
+## Where the special attack's strikes fall now: a line towards the player (it stops at
+## the first wall or pit), or the player's spot and a few around it. Spots off plain
+## floor are left out.
+func special_spots(level: Level) -> Array[Vector2]:
+	var spots: Array[Vector2] = []
+	var count: int = _stats.special_count_phase_two if phase == 2 else _stats.special_count
+	if _stats.special_pattern == GuardianData.SpecialPattern.LINE:
+		for i in count:
+			var spot: Vector2 = global_position + _attack_direction * _stats.special_spacing * (i + 1)
+			if not _on_floor(spot, level):
+				break
+			spots.append(spot)
+		return spots
+	var center: Vector2 = _target.global_position if is_instance_valid(_target) else global_position + _attack_direction * _stats.special_spacing
+	for i in count:
+		var spot: Vector2 = center
+		if i > 0:
+			var angle: float = GameManager.rng.randf() * TAU
+			spot += Vector2.from_angle(angle) * _stats.special_spread * GameManager.rng.randf_range(0.4, 1.0)
+		if _on_floor(spot, level):
+			spots.append(spot)
+	return spots
+
+
+func _on_floor(spot: Vector2, level: Level) -> bool:
+	return level == null or level.cell_type_at(spot) == LevelGrid.Cell.FLOOR
+
+
+## A boss patch at a spot, with this boss's damage multiplier; delay before it lands.
+func _spawn_zone(zone: ZoneData, at: Vector2, delay: float = 0.0) -> void:
+	if zone == null or get_parent() == null:
+		return
+	SpellZone.spawn(get_parent(), at, _scaled(zone), 1, self, data.id, player_hurtbox_mask, sight_mask, delay)
+
+
+## The patch's damage times damage_multiplier (deeper floors hit harder).
+func _scaled(zone: ZoneData) -> ZoneData:
+	if is_equal_approx(damage_multiplier, 1.0):
+		return zone
+	if not _scaled_zones.has(zone):
+		var copy: ZoneData = zone.duplicate() as ZoneData
+		copy.impact_damage = _times(zone.impact_damage)
+		copy.tick_damage = _times(zone.tick_damage)
+		_scaled_zones[zone] = copy
+	return _scaled_zones[zone]
+
+
+func _times(values: PackedInt32Array) -> PackedInt32Array:
+	var scaled: PackedInt32Array = PackedInt32Array()
+	for value: int in values:
+		scaled.append(roundi(value * damage_multiplier))
+	return scaled
+
+
+## The shockwave's ring, scaled to its reach.
+func _show_ring() -> void:
+	var ring: StripSprite = StripSprite.spawn(get_parent(), global_position, _stats.shockwave_ring,
+			_stats.shockwave_ring_frames, _stats.shockwave_ring_fps)
+	if ring != null:
+		ring.scale = Vector2.ONE * (_stats.shockwave_radius / maxf(_stats.shockwave_ring_art_radius, 1.0))
+
+
+func _slow_player(hurtbox: Hurtbox) -> void:
+	var player: Player = hurtbox.get_parent() as Player
+	if player != null:
+		player.slow(_stats.shockwave_slow_multiplier, _stats.shockwave_slow_time)
 
 
 func _check_phase(_info: DamageInfo) -> void:

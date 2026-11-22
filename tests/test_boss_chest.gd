@@ -61,7 +61,7 @@ func _test_in_game() -> void:
 	check(game.current_rarity_table() == game.rarity_table, "after the boss the usual table is back")
 	var boss_chest: Chest = null
 	for chest: Chest in _chests(game):
-		if chest.scale.x > 1.0:
+		if chest.scene_file_path.ends_with("chest_boss.tscn"):
 			boss_chest = chest
 	check(_count_chests(game) == chests_before + 1 and boss_chest != null, "the fallen boss leaves a larger chest")
 	if boss_chest != null:
