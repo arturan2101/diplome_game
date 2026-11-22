@@ -17,6 +17,16 @@ const COMMON_RARITY: WeaponRarity = preload("res://combat/weapons/rarity/common.
 ## The wielder aims at the nearest visible enemy within this distance, in pixels.
 ## 0 turns auto-aim off.
 @export var auto_aim_radius: float = 56.0
+
+@export_group("Sounds")
+## Sound ids (stage 46): assets/audio/sfx/<id>.ogg or its variants <id>_1, _2...; &"" = silent.
+## Every attack (a swing, a shot); the last step of a combo plays finisher_sound if set.
+@export var attack_sound: StringName = &""
+@export var finisher_sound: StringName = &""
+## The bow starts drawing; the crossbow is loaded again.
+@export var charge_sound: StringName = &""
+@export var reload_sound: StringName = &""
+@export_group("")
 ## Scene with the weapon behaviour (root node is a Weapon), created when the weapon is equipped.
 @export var weapon_scene: PackedScene
 ## How rare this copy of the weapon is; empty = common. The base .tres files stay

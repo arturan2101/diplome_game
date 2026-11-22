@@ -8,6 +8,8 @@
 
 [resource]
 script = ExtResource("1")
+use_sound = &"teleport_out"
+arrive_sound = &"teleport_in"
 distance = 72.0
 search_step = 4.0
 body_radius = 6.0

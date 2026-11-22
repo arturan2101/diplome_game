@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1")
+cast_sound = &"magma_hiss"
 id = &"lava"
 display_name = "Lava"
 description = "a pool of lava burns whoever stands in it (fire + earth)"

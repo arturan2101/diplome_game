@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1")
+impact_sound = &"meteor_impact"
 id = &"molten_warden"
 display_name = "Meteor"
 color = Color(1, 0.45, 0.15, 1)

@@ -109,6 +109,7 @@ func _ready() -> void:
 	health.reset()
 	health.damaged.connect(_on_damaged)
 	health.died.connect(_on_died)
+	struck.connect(_on_struck_sound)
 	hurtbox.hit_received.connect(_on_hit_received)
 	if hazards != null:
 		hazards.fall_started.connect(_on_fall_started)
@@ -202,6 +203,7 @@ func freeze(seconds: float) -> void:
 	if seconds <= 0.0 or data == null or data.is_boss or is_dormant or state == State.FALLING:
 		return
 	if not is_frozen():
+		Sound.play_at(&"ice_freeze", global_position)
 		if weapon != null:
 			weapon.cancel_attack()
 		_enter(State.IDLE)
@@ -438,6 +440,7 @@ func _enter(new_state: State) -> void:
 		State.WINDUP:
 			_state_time_left = data.windup
 			_windup_total = data.windup
+			Sound.play_at(data.windup_sound, global_position)
 			_attack_direction = global_position.direction_to(_target.global_position)
 			visual.modulate = windup_color
 		State.RECOVER:
@@ -551,7 +554,8 @@ func _on_hit_received(info: DamageInfo) -> void:
 			_enter(State.CHASE)
 
 
-func _on_damaged(_info: DamageInfo) -> void:
+func _on_damaged(info: DamageInfo) -> void:
+	_play_hurt_sound(info)
 	if _flash_tween != null:
 		_flash_tween.kill()
 	# self_modulate, so the hit flash does not fight the windup tint in modulate.
@@ -560,7 +564,30 @@ func _on_damaged(_info: DamageInfo) -> void:
 	_flash_tween.tween_property(visual, "self_modulate", Color.WHITE, hit_flash_duration)
 
 
+## The sound of the blow that just landed (its strike frame); bosses pick by attack.
+func get_attack_sound() -> StringName:
+	return data.attack_sound
+
+
+func _on_struck_sound() -> void:
+	Sound.play_at(get_attack_sound(), global_position)
+
+
+## A hit by the player: this enemy's hurt sound, else a blade or an arrow on flesh; a
+## critical hit rings over it.
+func _play_hurt_sound(info: DamageInfo) -> void:
+	if not info.source is Player:
+		return
+	var sound: StringName = data.hurt_sound
+	if sound == &"":
+		sound = &"arrow_hit_flesh" if info.projectile != null else &"sword_hit"
+	Sound.play_at(sound, global_position)
+	if info.is_critical:
+		Sound.play_at(&"crit_hit", global_position)
+
+
 func _on_died(_info: DamageInfo) -> void:
+	Sound.play_at(data.death_sound, global_position)
 	if data.death_zone != null and get_parent() != null:
 		# The magma beetle's lava: hurts the player (source: this enemy type), not enemies.
 		SpellZone.spawn(get_parent(), global_position, data.death_zone, 1, null, data.id, death_zone_mask, sight_mask)

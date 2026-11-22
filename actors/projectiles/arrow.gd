@@ -26,6 +26,9 @@ const GROUP: StringName = &"projectiles"
 ## A patch left where it lands (stage 45: the Tide Warden's puddle, the Molten Warden's
 ## lava cracks); it hurts what the arrow hurts. null = none.
 @export var landing_zone: ZoneData
+## Sounds (stage 46): when it stops at a wall, and whenever it lands (the boulder).
+@export var wall_sound: StringName = &"arrow_hit_wall"
+@export var land_sound: StringName = &""
 
 ## How many targets the arrow flies through after hitting one (the crossbow bolt sets
 ## it before setup()); 0 = it stops at the first target.
@@ -77,6 +80,8 @@ func _physics_process(delta: float) -> void:
 			global_position = result["position"]
 			return
 		if hurtbox == null or pierce <= 0:
+			if hurtbox == null:
+				Sound.play_at(wall_sound, global_position)
 			_land(_has_hit)
 			return
 		# Through this target and on: the rest of the flight starts where it was hit.
@@ -125,6 +130,7 @@ func _land(hit: bool) -> void:
 		var caster: Node = _info.source if _info != null and is_instance_valid(_info.source) else null
 		SpellZone.spawn(get_parent(), global_position, landing_zone, 1, caster,
 				_info.source_id if _info != null else &"", target_mask, wall_mask)
+	Sound.play_at(land_sound, global_position)
 	landed.emit(hit)
 	queue_free()
 	set_physics_process(false)

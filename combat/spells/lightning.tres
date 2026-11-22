@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1")
+cast_sound = &"lightning_strike"
 id = &"lightning"
 display_name = "Lightning"
 description = "chain lightning jumps from enemy to enemy, wet ones take more (water + air)"

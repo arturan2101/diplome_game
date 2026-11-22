@@ -21,6 +21,8 @@ const WALL_OFFSET: float = 4.0
 
 ## Flies through enemies, hurting each (the plasma); set by the spell before setup().
 var pierce: bool = false
+## Sound of the blast, set by the spell (stage 46).
+var explode_sound: StringName = &""
 
 var _info: DamageInfo = null
 var _direction: Vector2 = Vector2.RIGHT
@@ -179,6 +181,7 @@ func _pierce(hurtbox: Hurtbox) -> void:
 
 
 func _explode() -> void:
+	Sound.play_at(explode_sound, global_position)
 	var dealt: int = _pierce_dealt + AreaDamage.hit(get_world_2d().direct_space_state, global_position, _radius,
 			_info.amount, _info.source if is_instance_valid(_info.source) else null, _info.source_id, _knockback,
 			_target_mask, _wall_mask, Callable(), Vector2.ZERO, 360.0, _passed)

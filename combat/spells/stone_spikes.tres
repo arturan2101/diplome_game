@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1")
+cast_sound = &"stone_spikes"
 id = &"stone_spikes"
 display_name = "Stone Spikes"
 description = "a line of spikes breaks out of the floor and stuns"

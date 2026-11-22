@@ -9,6 +9,9 @@ signal collected(pickup: Pickup, collector: Player)
 ## Physics layers of the bodies that can take the pickup (player).
 @export_flags_2d_physics var collector_mask: int = 2
 
+## Sound when taken (stage 46); subclasses set it in _init().
+var collect_sound: StringName = &""
+
 
 func _ready() -> void:
 	collision_layer = 0
@@ -20,6 +23,7 @@ func _on_body_entered(body: Node2D) -> void:
 	var player: Player = body as Player
 	if player == null or not _collect(player):
 		return
+	Sound.play(collect_sound)
 	collected.emit(self, player)
 	_after_collect()
 

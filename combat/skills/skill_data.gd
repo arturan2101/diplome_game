@@ -11,3 +11,7 @@ extends Resource
 @export var cooldown: float = 1.0
 ## Scene with the skill behaviour (root node is a Skill), created when the run starts.
 @export var skill_scene: PackedScene
+## Sound ids (stage 46): assets/audio/sfx/<id>.ogg or its variants <id>_1, _2...; &"" = silent.
+## The skill is used; a hit it turns aside (the shield, the parry).
+@export var use_sound: StringName = &""
+@export var block_sound: StringName = &""

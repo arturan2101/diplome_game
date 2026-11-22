@@ -9,6 +9,8 @@
 
 [resource]
 script = ExtResource("1")
+attack_sound = &"crossbow_shot"
+reload_sound = &"crossbow_reload"
 damage = 20
 reload_time = 1.1
 bolt_speed = 420.0

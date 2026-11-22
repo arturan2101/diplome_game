@@ -74,4 +74,14 @@ extends Resource
 @export var death_zone: ZoneData
 ## Ruin shards it drops when killed, with the progress between runs on (stage 33).
 @export var shard_drop: int = 0
+
+@export_group("Sounds")
+## Sound ids (stage 46): assets/audio/sfx/<id>.ogg or its variants <id>_1, _2...; &"" = silent.
+## The blow lands (its strike frame), the wind-up starts, it is hurt by the player, it dies.
+## Without hurt_sound a weapon hit sounds like a blade or an arrow on flesh.
+@export var attack_sound: StringName = &""
+@export var windup_sound: StringName = &""
+@export var hurt_sound: StringName = &""
+@export var death_sound: StringName = &""
+@export_group("")
 @export var min_depth: int = 0

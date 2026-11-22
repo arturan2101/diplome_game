@@ -40,6 +40,16 @@ const GROUP: StringName = &"player"
 ## Things closer than this can be used with the interact button, in pixels.
 @export var interact_radius: float = 20.0
 
+@export_group("Sounds (stage 46)")
+## Ids of Sound: hurt, death, a weapon growing a level, a footstep every step_distance
+## pixels walked.
+@export var hurt_sound: StringName = &"player_hurt"
+@export var death_sound: StringName = &"player_death"
+@export var level_up_sound: StringName = &"weapon_level_up"
+@export var step_sound: StringName = &"footstep_stone"
+@export var step_distance: float = 22.0
+@export_group("")
+
 ## Bonuses of the camp's permanent skills (set by the game at the start of a run; all
 ## neutral by default): weapon damage, what health packs heal, the basic skill's
 ## cooldown, and the radius in which coins fly to the player.
@@ -77,6 +87,7 @@ var _aim_shape: CircleShape2D = CircleShape2D.new()
 var _sure_crit_left: float = 0.0
 ## Slowed by an enemy's grip (the drowned, stage 42): seconds left and the multiplier.
 var _slow_left: float = 0.0
+var _step_left: float = 0.0
 var _slow_multiplier: float = 1.0
 
 
@@ -90,6 +101,9 @@ func _ready() -> void:
 	_aim_query.collide_with_bodies = false
 	if health != null:
 		health.died.connect(_on_died)
+		health.damaged.connect(_on_hurt_sound)
+	if hurtbox != null:
+		hurtbox.hit_blocked.connect(_on_hit_blocked_sound)
 	else:
 		push_warning("Player has no Health assigned")
 	if hazards != null:
@@ -222,6 +236,7 @@ func raise_weapon_levels() -> int:
 		carried.damage_multiplier = carried.data.get_damage_multiplier() * damage_bonus
 		raised += 1
 	if raised > 0:
+		Sound.play(level_up_sound)
 		weapon_changed.emit(_active_slot, weapon.data)
 	return raised
 
@@ -246,6 +261,7 @@ func raise_active_weapon_level() -> bool:
 		return false
 	weapon.data = weapon.data.with_level(weapon.data.level + 1)
 	weapon.damage_multiplier = weapon.data.get_damage_multiplier() * damage_bonus
+	Sound.play(level_up_sound)
 	weapon_changed.emit(_active_slot, weapon.data)
 	return true
 
@@ -374,6 +390,16 @@ func _move(delta: float) -> void:
 	else:
 		velocity = velocity.move_toward(Vector2.ZERO, deceleration * delta)
 	move_and_slide()
+	_step_sounds(delta)
+
+
+## A soft footstep every step_distance pixels while walking.
+func _step_sounds(delta: float) -> void:
+	_step_left -= get_real_velocity().length() * delta
+	if _step_left <= 0.0:
+		_step_left = step_distance
+		if get_real_velocity().length() > 1.0:
+			Sound.play(step_sound)
 
 
 func _handle_skill_input() -> void:
@@ -437,7 +463,19 @@ func _find_aim_target(radius: float = -1.0) -> Hurtbox:
 
 
 ## The player only reports its death; GameManager decides what happens next.
+func _on_hurt_sound(info: DamageInfo) -> void:
+	if not health.is_dead() and info.amount > 0:
+		Sound.play(hurt_sound)
+
+
+## The shield or the parry turned a hit aside.
+func _on_hit_blocked_sound(_info: DamageInfo) -> void:
+	if skill != null and skill.data != null:
+		Sound.play(skill.data.block_sound)
+
+
 func _on_died(info: DamageInfo) -> void:
+	Sound.play(death_sound)
 	_stop_acting()
 	GameManager.report_player_death(info)
 

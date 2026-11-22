@@ -12,6 +12,14 @@
 
 [resource]
 script = ExtResource("1")
+attack_sound = &"warden_slam"
+death_sound = &"warden_death"
+throw_sound = &"warden_throw"
+throw_land_sound = &"water_wave"
+shockwave_sound = &"water_wave"
+roar_sound = &"warden_roar"
+summon_sound = &"warden_summon"
+special_sound = &"warden_slam"
 shard_drop = 5
 id = &"tide_warden"
 display_name = "Tide Warden"

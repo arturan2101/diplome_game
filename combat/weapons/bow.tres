@@ -9,6 +9,8 @@
 
 [resource]
 script = ExtResource("1_30041")
+attack_sound = &"bow_release"
+charge_sound = &"bow_draw"
 arrow_scene = ExtResource("1_hmisi")
 id = &"bow"
 icon = ExtResource("icon_tex")

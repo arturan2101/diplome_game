@@ -62,6 +62,7 @@ var shelf: CampStation = null
 
 
 func _ready() -> void:
+	Sound.play_music(&"menu_camp")
 	level.build(read_map())
 	player.add_weapon(GameManager.starting_weapon)
 	player.set_skill(GameManager.starting_skill)

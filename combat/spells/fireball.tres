@@ -8,6 +8,8 @@
 
 [resource]
 script = ExtResource("1")
+cast_sound = &"fireball_cast"
+explode_sound = &"fireball_explode"
 id = &"fireball"
 display_name = "Fireball"
 description = "explodes on impact"

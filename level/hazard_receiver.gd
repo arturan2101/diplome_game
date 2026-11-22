@@ -19,6 +19,8 @@ const PIT_SOURCE: StringName = &"pit"
 ## Visual shrunk while falling.
 @export var visual: Node2D
 @export var data: HazardData
+## Sound of falling into a pit (stage 46).
+@export var fall_sound: StringName = &"pit_fall"
 
 ## True while the owner is carried over the ground (dash): hazards are ignored.
 var suspended: bool = false
@@ -85,6 +87,7 @@ func _on_spikes(trap: SpikeTrapData, delta: float) -> void:
 
 
 func _start_fall() -> void:
+	Sound.play_at(fall_sound, body.global_position)
 	StripSprite.spawn(body.get_parent(), body.global_position, fall_effect, fall_effect_frames, 10.0)
 	_is_falling = true
 	_fall_time_left = data.fall_delay

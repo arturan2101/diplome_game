@@ -11,6 +11,7 @@ func _cast(direction: Vector2) -> void:
 		push_error("FireballSpell needs FireballData with a projectile_scene: %s" % data)
 		return
 	var ball: Fireball = stats.projectile_scene.instantiate() as Fireball
+	ball.explode_sound = stats.explode_sound
 	var info: DamageInfo = DamageInfo.new(SpellData.int_at(stats.damage, level), caster, stats.id)
 	ball.setup(info, direction, stats.speed, stats.max_range, SpellData.float_at(stats.radius, level),
 			stats.knockback, target_mask, wall_mask)

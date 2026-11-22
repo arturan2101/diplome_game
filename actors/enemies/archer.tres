@@ -8,6 +8,9 @@
 
 [resource]
 script = ExtResource("1")
+attack_sound = &"archer_release"
+hurt_sound = &"bones_hit"
+death_sound = &"skeleton_death"
 sprite = ExtResource("2")
 sprite_frames = ExtResource("frames")
 weapon = ExtResource("3")

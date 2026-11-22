@@ -341,6 +341,7 @@ func _start_section() -> void:
 	section_started.emit(plan, layout)
 	if not is_arena():
 		gate.open()
+	Sound.play_music(section_music())
 
 
 ## The floor style of the current depth (floor styles on): the level draws with its
@@ -355,6 +356,16 @@ func _apply_floor_style() -> void:
 	level.set_theme(style)
 	if not first and style.display_name != "":
 		hud.show_banner(style.display_name, style.plate_index)
+
+
+## The music of the section or glade the player is in: the glade's, else the floor
+## style's "<style>_explore" (ruins_explore without floor styles or its own track).
+func section_music() -> StringName:
+	if _in_glade:
+		return &"glade_merchant"
+	var style: StringName = level.theme.style_id if GameManager.config.floor_styles and level.theme != null else &"ruins"
+	var track: StringName = StringName("%s_explore" % style)
+	return track if Sound.has_music(track) else &"ruins_explore"
 
 
 ## The floor style of a depth (depth counted from 0).
@@ -392,6 +403,7 @@ func _start_glade() -> void:
 	Telemetry.begin_glade(GameManager.depth)
 	hud.show_glade(GameManager.depth)
 	hud.show_banner("A quiet glade")
+	Sound.play_music(section_music())
 
 
 ## The glade's sign beside the merchant, on floor (stage 42).
@@ -565,6 +577,7 @@ func _enemies_chasing_near(at: Vector2) -> bool:
 
 func _on_secret_wall_broken(_wall: BreakableWall) -> void:
 	Telemetry.record_secret_found()
+	Sound.play(&"secret_wall_break")
 	hud.show_banner("A hidden room!")
 	# Deferred: the hit comes in the middle of the sword's physics query.
 	_open_secret.call_deferred()
@@ -655,6 +668,7 @@ func _on_shop_requested(merchant: Merchant) -> void:
 
 func _on_shop_bought(offer: ShopOffer) -> void:
 	if offer.sold or not offer.is_available(player.spell_book) or offer.price > GameManager.coins:
+		Sound.play(&"shop_denied")
 		return
 	if offer.kind == ShopOffer.Kind.SPELL and player.spell_book.check_learn(offer.spell) == SpellBook.LearnResult.SLOTS_FULL:
 		# Which spell to forget: the shop steps aside for the choice screen.
@@ -683,6 +697,7 @@ func _on_shop_bought(offer: ShopOffer) -> void:
 		ShopOffer.Kind.GOODS:
 			_use_goods(offer)
 	Telemetry.record_purchase(offer.get_id(), offer.price)
+	Sound.play(&"shop_buy")
 	shop_screen.refresh(GameManager.coins)
 
 
@@ -691,6 +706,7 @@ func _on_shop_closed() -> void:
 	if not _merge_pending:
 		return
 	_merge_pending = false
+	Sound.play(&"spell_fusion")
 	EffectSprite.spawn(_contents if _contents != null else self, player.global_position, MERGE_FRAMES, MERGE_ANIMATION)
 
 
@@ -972,9 +988,11 @@ func _seal_arena() -> void:
 	if boss != null:
 		boss.awaken()
 		hud.show_boss(boss)
-		hud.show_banner("The Ruins Warden awakens")
+		hud.show_banner("%s awakens" % _boss_name(boss))
+		Sound.play_music((boss.data as GuardianData).boss_music)
 	else:
 		hud.show_banner("The doors are sealed")
+		Sound.play_music(&"combat")
 	if _enemies_left <= 0:
 		_advance_arena()
 
@@ -996,16 +1014,19 @@ func _return_arena_strays(on_floor_too: bool) -> void:
 
 func _on_combat_room_sealed(_room: CombatRoom) -> void:
 	hud.show_banner("The doors are sealed")
+	Sound.play_music(&"combat")
 
 
 func _on_combat_wave_started(_room: CombatRoom, wave: int) -> void:
 	if wave > 0:
 		hud.show_banner("Another wave!")
+		Sound.play(&"enemy_spawn")
 
 
 func _on_combat_room_cleared(room: CombatRoom) -> void:
 	_unlock_secret_wall(room.index)
 	hud.show_banner("The way is open")
+	Sound.play_music(section_music())
 
 
 func _find_boss() -> Guardian:
@@ -1020,6 +1041,7 @@ func _advance_arena() -> void:
 	if not _pending_waves.is_empty():
 		var wave: Array = _pending_waves.pop_front()
 		hud.show_banner("Another wave!")
+		Sound.play(&"enemy_spawn")
 		for entry: Dictionary in wave:
 			_spawn_enemy.call_deferred(entry)
 		return
@@ -1028,6 +1050,8 @@ func _advance_arena() -> void:
 	_unlock_secret_wall(layout.arena_room)
 	level.set_cells(layout.arena_doors, LevelGrid.Cell.FLOOR)
 	gate.open()
+	Sound.play(&"gate_open")
+	Sound.play_music(section_music())
 	hud.show_banner("The way down is open")
 
 
@@ -1036,6 +1060,7 @@ func _on_gate_entered(_player: Player) -> void:
 		return
 	_is_changing_section = true
 	player.set_controls_enabled(false)
+	Sound.play(&"portal_enter")
 	await hud.fade_out()
 	if _in_glade:
 		# Off the glade into the first section of the new depth (already counted).
@@ -1064,6 +1089,7 @@ func _on_gate_entered(_player: Player) -> void:
 
 func _on_player_died(_killing_blow: DamageInfo) -> void:
 	Telemetry.end_section(true)
+	Sound.play_music(&"death_jingle")
 	if not death_screen_enabled or death_screen == null:
 		return
 	await get_tree().create_timer(GameManager.DEATH_SCREEN_DELAY).timeout

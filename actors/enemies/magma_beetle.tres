@@ -20,6 +20,8 @@ look_radius = PackedFloat32Array(11, 11, 11)
 
 [resource]
 script = ExtResource("1")
+attack_sound = &"beetle_bite"
+death_sound = &"magma_hiss"
 id = &"magma_beetle"
 display_name = "Magma beetles"
 sprite_frames = ExtResource("frames")

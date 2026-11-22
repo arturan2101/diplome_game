@@ -120,6 +120,8 @@ func _start_step(direction: Vector2) -> void:
 	_busy_left = (_step.duration + _step.recovery) / attack_speed_multiplier
 	if is_last_step:
 		_busy_left += _stats.combo_end_cooldown / attack_speed_multiplier
+	var sound: StringName = _stats.finisher_sound if is_last_step and _stats.finisher_sound != &"" else _stats.attack_sound
+	Sound.play_at(sound, global_position)
 	_idle_time = 0.0
 	_reach_shape.radius = _step.reach
 	_hit_this_step.clear()

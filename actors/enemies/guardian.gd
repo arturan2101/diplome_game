@@ -65,6 +65,7 @@ func _physics_process(delta: float) -> void:
 		_summon_left -= delta
 		if _summon_left <= 0.0:
 			_summon_left = _stats.summon_interval
+			Sound.play_at(_stats.summon_sound, global_position)
 			summon_requested.emit(self, _stats.summon_count)
 	if _roar_left > 0.0:
 		_roar_left -= delta
@@ -100,6 +101,17 @@ func is_roaring() -> bool:
 ## Seconds it stands and roars going into the second phase.
 func get_roar_time() -> float:
 	return _stats.roar_time if _stats != null else 0.0
+
+
+func get_attack_sound() -> StringName:
+	match attack:
+		Attack.THROW:
+			return _stats.throw_sound
+		Attack.SHOCKWAVE:
+			return _stats.shockwave_sound
+		Attack.SPECIAL:
+			return _stats.special_sound
+	return data.attack_sound
 
 
 func get_attack_animation() -> String:
@@ -184,6 +196,8 @@ func _throw() -> void:
 	if _stats.projectile_scene == null:
 		return
 	var stone: Arrow = _stats.projectile_scene.instantiate() as Arrow
+	stone.land_sound = _stats.throw_land_sound
+	stone.wall_sound = &""
 	var info: DamageInfo = DamageInfo.new(roundi(_stats.throw_damage * damage_multiplier), self, data.id)
 	stone.setup(info, _attack_direction, _stats.throw_speed, _stats.throw_range)
 	# Next to the Guardian in the section, so the stone is cleared with it.
@@ -280,6 +294,7 @@ func _enter_phase_two() -> void:
 	_roar_left = _stats.roar_time
 	_summon_left = _stats.summon_interval
 	_shockwave_next = true
+	Sound.play(_stats.roar_sound)
 	phase_changed.emit(phase)
 	summon_requested.emit(self, _stats.summon_count)
 

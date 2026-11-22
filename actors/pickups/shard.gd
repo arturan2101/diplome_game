@@ -21,3 +21,7 @@ func _process(delta: float) -> void:
 func _collect(_player: Player) -> bool:
 	Progress.add_shards(value)
 	return true
+
+
+func _init() -> void:
+	collect_sound = &"shard_pickup"

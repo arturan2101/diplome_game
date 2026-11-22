@@ -19,3 +19,7 @@ func _physics_process(delta: float) -> void:
 func _collect(_player: Player) -> bool:
 	GameManager.add_coins(value)
 	return true
+
+
+func _init() -> void:
+	collect_sound = &"coin_pickup"

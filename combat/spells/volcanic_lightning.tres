@@ -20,6 +20,7 @@ look_radius = PackedFloat32Array(11, 11, 11)
 
 [resource]
 script = ExtResource("1")
+cast_sound = &"lightning_strike"
 id = &"volcanic_lightning"
 display_name = "Volcanic Lightning"
 description = "chain lightning that leaves lava under every enemy it strikes (lava + lightning)"

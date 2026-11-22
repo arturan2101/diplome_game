@@ -28,6 +28,8 @@ const MAX_LEVEL: int = 3
 ## the camp's shelf for this many ruin shards. Only unlocked spells turn up in a run.
 @export var unlocked_from_start: bool = false
 @export var unlock_cost: int = 6
+## Sound ids (stage 46): assets/audio/sfx/<id>.ogg or its variants <id>_1, _2...; &"" = silent.
+@export var cast_sound: StringName = &""
 @export_group("Look by level")
 ## Art of the effect, one look per level (index 0 = level 1): animations in frames
 ## (the flying fireball, the ring of wind) or one picture per level (an ice block).

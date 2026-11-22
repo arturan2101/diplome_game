@@ -7,3 +7,7 @@ extends Pickup
 
 func _collect(player: Player) -> bool:
 	return player.health != null and player.health.heal(roundi(heal_amount * player.heal_multiplier)) > 0
+
+
+func _init() -> void:
+	collect_sound = &"health_pickup"

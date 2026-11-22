@@ -650,3 +650,5 @@ Drawn in code: `tools/art/make_batch15.py` (chest and effects), `tools/art/make_
 | C | Molten ring: fire wave ring with embers, scorched cracks | assets/art/fx/molten_ring.png | 64x64, 6, once | centre (32, 32), ring radius 6 ... 30 | generated |
 
 Integrated in stage 45: chest_boss.png (`actors/pickups/chest_boss.tscn`), tide_warden_* and molten_warden_* (`actors/enemies/tide_warden.tres`, `molten_warden.tres`), water_orb / water_orb_burst (`actors/projectiles/water_orb.tscn`), molten_boulder (`molten_boulder.tscn`), tide_puddle / lava_crack_pool (frames 0-3) / geyser_warn / geyser (`assets/art/fx/boss_fx_frames.tres`, built by `tools/art/make_boss_fx_frames.py`), tide_ring / molten_ring (shockwave). Not used: lava_crack_pool cooling frames 4-6 (the patch fades out instead).
+
+Integrated in stage 46 (autoload `Sound`, ids = file names without `_N`): every sfx of batch 13 except beetle_swarm_loop, lava_bubble_loop, spikes_out, death_sting, ui_click (loops, per-tile spikes and menu clicks are left for later); all 8 music tracks.

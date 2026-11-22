@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1")
+cast_sound = &"sandstorm_loop"
 id = &"sandstorm"
 display_name = "Sandstorm"
 description = "a storm of sand around you wears enemies down and slows them (earth + air)"

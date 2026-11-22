@@ -9,6 +9,8 @@
 
 [resource]
 script = ExtResource("1")
+cast_sound = &"plasma_shot"
+explode_sound = &"fireball_explode"
 id = &"plasma"
 display_name = "Plasma"
 description = "a ball of plasma flies through every enemy in its way (fire + air)"

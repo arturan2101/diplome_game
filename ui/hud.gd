@@ -164,6 +164,7 @@ func _on_boss_hp_changed(hp: int, max_hp: int) -> void:
 func show_banner(text: String, plate: int = -1) -> void:
 	if banner == null:
 		return
+	Sound.play(&"banner")
 	_show_plate(plate)
 	banner.text = text
 	banner.visible = true

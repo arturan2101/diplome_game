@@ -7,6 +7,7 @@
 
 [resource]
 script = ExtResource("1")
+cast_sound = &"whirlwind_loop"
 id = &"whirlwind"
 display_name = "Whirlwind"
 description = "hurts and pushes away"

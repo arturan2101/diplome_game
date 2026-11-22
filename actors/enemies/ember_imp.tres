@@ -7,6 +7,7 @@
 
 [resource]
 script = ExtResource("1")
+attack_sound = &"imp_cast"
 id = &"ember_imp"
 display_name = "Ember imp"
 sprite_frames = ExtResource("frames")

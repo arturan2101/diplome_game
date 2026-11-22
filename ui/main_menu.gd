@@ -53,6 +53,7 @@ var _fire_time: float = 0.0
 
 func _ready() -> void:
 	get_tree().paused = false
+	Sound.play_music(&"menu_camp")
 	# Coming back to the menu ends a playtest session (the experimenter left it).
 	if Playtest.is_active:
 		Playtest.cancel()

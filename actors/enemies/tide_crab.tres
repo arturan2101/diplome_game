@@ -7,6 +7,7 @@
 
 [resource]
 script = ExtResource("1")
+attack_sound = &"crab_snap"
 id = &"tide_crab"
 display_name = "Tide crabs"
 sprite_frames = ExtResource("frames")

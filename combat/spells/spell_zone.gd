@@ -136,6 +136,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _impact() -> void:
+	Sound.play_at(_stats.impact_sound, global_position)
 	for falling: AnimatedSprite2D in [_rock, _shadow]:
 		if falling != null:
 			falling.queue_free()

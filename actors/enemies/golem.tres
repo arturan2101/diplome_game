@@ -6,6 +6,9 @@
 
 [resource]
 script = ExtResource("1")
+attack_sound = &"golem_slam"
+windup_sound = &"golem_windup"
+hurt_sound = &"boulder_hit"
 shard_drop = 1
 id = &"golem"
 display_name = "Stone golem"

@@ -56,6 +56,17 @@ enum SpecialPattern { LINE, AROUND_TARGET }
 @export_range(0.0, 1.0) var shockwave_slow_multiplier: float = 1.0
 @export var shockwave_slow_time: float = 0.0
 
+@export_group("Sounds by attack (stage 46)")
+## The slam is EnemyData.attack_sound; the thrown projectile lands with throw_land_sound.
+@export var throw_sound: StringName = &""
+@export var throw_land_sound: StringName = &""
+@export var shockwave_sound: StringName = &""
+@export var special_sound: StringName = &""
+@export var roar_sound: StringName = &""
+@export var summon_sound: StringName = &""
+## Music while it fights.
+@export var boss_music: StringName = &"boss_warden"
+
 @export_group("Special attack (stage 45)")
 ## The strikes of the special attack: each is a patch that falls after a warning on the
 ## floor (geyser, meteor). null = the boss has no special attack.

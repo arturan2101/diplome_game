@@ -8,6 +8,8 @@
 
 [resource]
 script = ExtResource("1")
+cast_sound = &"steam_burst"
+explode_sound = &"steam_burst"
 id = &"steam"
 display_name = "Steam Burst"
 description = "a cloud of boiling steam bursts on impact (fire + water)"

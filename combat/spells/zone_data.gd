@@ -24,6 +24,8 @@ const TICK_EPSILON: float = 0.001
 @export var slow_multiplier: float = 1.0
 @export var slow_time: float = 0.0
 @export_group("Impact")
+## Sound of the impact (the meteor, a geyser), stage 46.
+@export var impact_sound: StringName = &""
 ## The meteor: seconds of falling before the impact (its shadow grows on the floor),
 ## the impact's damage at levels 1, 2, 3, its radius and push. 0 damage = no impact.
 @export var impact_delay: float = 0.0

@@ -6,6 +6,7 @@
 
 [resource]
 script = ExtResource("1")
+use_sound = &"dash"
 distance = 56.0
 duration = 0.16
 invulnerability_margin = 0.05

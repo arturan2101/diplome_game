@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1")
+cast_sound = &"thunder_rumble"
 id = &"storm_cloud"
 display_name = "Storm Cloud"
 description = "a thundercloud follows you and strikes the nearest enemy (lightning + steam)"

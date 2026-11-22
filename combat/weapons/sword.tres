@@ -34,6 +34,8 @@ metadata/_custom_type_script = "uid://dqcnjt2pkdxkd"
 
 [resource]
 script = ExtResource("1_dljjw")
+attack_sound = &"sword_swing"
+finisher_sound = &"heavy_slash"
 combo = Array[ExtResource("1_f8ocv")]([SubResource("Resource_03pyg"), SubResource("Resource_f8ocv"), SubResource("Resource_qg0wa")])
 id = &"sword"
 icon = ExtResource("icon_tex")

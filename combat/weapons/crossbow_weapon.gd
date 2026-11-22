@@ -59,6 +59,8 @@ func _on_attack_released(_direction: Vector2) -> void:
 func _physics_process(delta: float) -> void:
 	if _reload_left > 0.0:
 		_reload_left = maxf(_reload_left - delta, 0.0)
+		if _reload_left <= 0.0 and is_active and _stats != null:
+			Sound.play_at(_stats.reload_sound, global_position)
 		queue_redraw()
 	if _is_holding and is_active and is_loaded() and _stats != null:
 		var player: Player = wielder as Player
@@ -75,6 +77,7 @@ func _draw() -> void:
 
 
 func _shoot() -> void:
+	Sound.play_at(_stats.attack_sound, global_position)
 	var bolt: Arrow = _stats.bolt_scene.instantiate() as Arrow
 	bolt.pierce = _stats.pierce
 	bolt.setup(make_hit(_stats.damage), _aim, _stats.bolt_speed, _stats.bolt_range)

@@ -53,6 +53,7 @@ slash_flip = true
 
 [resource]
 script = ExtResource("1")
+attack_sound = &"dagger_stab"
 combo = Array[ExtResource("2")]([SubResource("stab_1"), SubResource("stab_2"), SubResource("stab_3"), SubResource("stab_4")])
 combo_window = 0.35
 combo_end_cooldown = 0.2

@@ -46,6 +46,7 @@ func _physics_process(delta: float) -> void:
 	var showing: bool = state == State.WINDUP or state == State.RECOVER or _exposed_left > 0.0
 	if showing != _shown:
 		_shown = showing
+		Sound.play_at(&"ghost_fade", global_position)
 		_fade(showing)
 		_set_vulnerable(showing)
 

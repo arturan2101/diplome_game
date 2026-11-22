@@ -26,6 +26,7 @@ func press(direction: Vector2) -> void:
 	if not is_ready():
 		return
 	_activate(direction)
+	Sound.play(data.use_sound)
 	used.emit()
 
 

@@ -71,7 +71,10 @@ func get_draw_progress() -> float:
 func _physics_process(delta: float) -> void:
 	_cooldown_left = maxf(_cooldown_left - delta, 0.0)
 	if _is_holding and _cooldown_left <= 0.0:
+		var was_drawing: bool = _hold_time >= _stats.tap_threshold
 		_hold_time += delta
+		if not was_drawing and _hold_time >= _stats.tap_threshold:
+			Sound.play_at(_stats.charge_sound, global_position)
 		queue_redraw()
 
 
@@ -103,6 +106,7 @@ func is_ranged() -> bool:
 ## One arrow, or a fan of arrow_count arrows over spread_degrees around the direction.
 ## Every arrow is its own hit (its own chance of a critical hit).
 func _shoot(direction: Vector2, base_damage: float) -> void:
+	Sound.play_at(_stats.attack_sound, global_position)
 	var count: int = maxi(1, _stats.arrow_count)
 	var spread: float = deg_to_rad(_stats.spread_degrees)
 	for i in count:

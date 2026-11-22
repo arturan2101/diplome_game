@@ -42,6 +42,7 @@ func _activate(direction: Vector2) -> void:
 		wielder.global_position = landing
 		wielder.velocity = Vector2.ZERO
 		StripSprite.spawn(wielder.get_parent(), landing, _stats.in_effect, _stats.effect_frames, _stats.effect_fps)
+		Sound.play(_stats.arrive_sound)
 	wielder.health.make_invulnerable(_stats.invulnerability)
 	_start_cooldown()
 

@@ -8,6 +8,8 @@
 
 [resource]
 script = ExtResource("1")
+cast_sound = &"meteor_fall"
+impact_sound = &"meteor_impact"
 id = &"meteor"
 display_name = "Meteor"
 description = "a burning rock falls from above and leaves a pool of lava (lava + sandstorm)"

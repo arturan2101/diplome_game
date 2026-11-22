@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1")
+cast_sound = &"vines_grow"
 id = &"vines"
 display_name = "Vines"
 description = "vines grow out of the floor and hold enemies in place (water + earth)"

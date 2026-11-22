@@ -36,6 +36,7 @@ slash_pivot = Vector2(0, 8)
 
 [resource]
 script = ExtResource("1")
+attack_sound = &"spear_thrust"
 combo = Array[ExtResource("2")]([SubResource("thrust_1"), SubResource("thrust_2")])
 combo_window = 0.4
 combo_end_cooldown = 0.3

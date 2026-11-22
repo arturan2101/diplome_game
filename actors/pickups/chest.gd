@@ -31,6 +31,8 @@ func _collect(player: Player) -> bool:
 	if is_open:
 		return false
 	if lock_check.is_valid() and lock_check.call(global_position):
+		if _waiting == null:
+			Sound.play(&"chest_locked")
 		_waiting = player
 		locked_touch.emit(self)
 		return false
@@ -60,3 +62,6 @@ func _physics_process(_delta: float) -> void:
 	if not lock_check.call(global_position):
 		_on_body_entered(_waiting)
 
+
+func _init() -> void:
+	collect_sound = &"chest_open"

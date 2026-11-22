@@ -14,5 +14,7 @@ extends SkillData
 ## Strips played where the wielder leaves and where they appear (once each).
 @export var out_effect: Texture2D
 @export var in_effect: Texture2D
+## Sound where the wielder appears (the vanish is SkillData.use_sound), stage 46.
+@export var arrive_sound: StringName = &""
 @export var effect_frames: int = 5
 @export var effect_fps: float = 20.0

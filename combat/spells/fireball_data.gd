@@ -10,6 +10,8 @@ extends SpellData
 ## Flight speed in pixels per second and range in pixels.
 @export var speed: float = 220.0
 @export var max_range: float = 200.0
+## Sound of the blast (stage 46).
+@export var explode_sound: StringName = &""
 ## Push away from the centre of the blast, pixels per second.
 @export var knockback: float = 150.0
 ## The flying ball (root node is a Fireball).

@@ -34,6 +34,7 @@ func try_cast(direction: Vector2) -> bool:
 	if data == null or not is_ready() or direction.is_zero_approx():
 		return false
 	_cast(direction.normalized())
+	Sound.play(data.cast_sound)
 	_cooldown_left = data.cooldown_at(level)
 	cast_performed.emit(data.id)
 	return true

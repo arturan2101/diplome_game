@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1")
+attack_sound = &"beetle_bite"
 sprite = ExtResource("2")
 sprite_frames = ExtResource("frames")
 weapon = ExtResource("3")

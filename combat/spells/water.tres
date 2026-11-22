@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1")
+cast_sound = &"water_wave"
 id = &"water"
 display_name = "Water"
 description = "a wave pushes enemies back and soaks them; at level 3 it turns to ice and freezes them"
