@@ -27,7 +27,11 @@ PAL = {
     "b": "#4a2f22", "B": "#7a4a2c", "c": "#b07040", "u": "#e0a070",
     "r": "#5a1820", "R": "#a82a30", "q": "#e85a3a", "y": "#8a4a10", "Y": "#e09a20", "Z": "#ffd860",
     "j": "#1e3f6a", "l": "#3a7ac0", "L": "#7ac0f0", "h": "#4a2a78", "H": "#9a5ae0",
-    "a": "#2aa8a0", "A": "#9af0e0",
+    "a": "#2aa8a0", "A": "#9af0e0", "G": "#5a8a4a", "V": "#8ac060",
+    # fungal theme extras (docs/art-style.md "Fungal theme")
+    "1": "#2e2622", "2": "#3a3029", "3": "#4a3e33", "p": "#d0a0f0", "x": "#6ae0c0", "v": "#b8e050",
+    # sand temple extras (docs/art-style.md "Sand temple theme")
+    "6": "#2e251c", "7": "#3a2f24", "8": "#4a3c2c", "9": "#8a7048", "S": "#b0905c", "D": "#d8bc84",
 }
 
 

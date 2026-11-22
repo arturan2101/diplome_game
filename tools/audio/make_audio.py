@@ -249,6 +249,26 @@ SFX = {
     "ui_close": ([L("k_interface:close_002.ogg")], {"room": False}),
     "banner": ([L("k_jingles:8-Bit jingles/jingles_NES13.ogg", 0, 0, 0.85)], {"max": 1.4, "lp": 6000}),
     "death_sting": ([L("k_jingles:8-Bit jingles/jingles_NES00.ogg", 0, 0, 0.75)], {"max": 2.5, "lp": 5000, "fade": 300}),
+    # 5. batch 15: fungal and sand styles, elemental Wardens, boss chest
+    "spore_burst": ([L("k_scifi:slime_001.ogg", 0, 0, 1.3), L("j512:sfx_sound_vaporizing.wav", -4, 0, 1.4)], {"max": 0.7, "hp": 200}),
+    "vine_lash": ([L("j512:sfx_wpn_sword1.wav", 0, 0, 1.25), L("k_rpg:creak3.ogg", -6, 0, 1.6)], {"max": 0.5}),
+    "bat_screech": ([L("j512:sfx_deathscream_alien3.wav", 0, 0, 1.6)], {"max": 0.5, "lp": 8000}),
+    "mushroom_squish": ([L("k_scifi:slime_000.ogg", 0, 0, 1.4), L("k_impact:impactSoft_medium_001.ogg", -3)], {"max": 0.5}),
+    "root_burst": ([L("k_impact:impactWood_heavy_002.ogg", 0, 0, 0.8), L("k_impact:impactMining_001.ogg", -4, 0.03, 0.8),
+                    L("k_rpg:creak2.ogg", -6, 0, 0.7)], {"max": 0.9}),
+    "mother_roar": ([L("k_scifi:spaceEngineLarge_001.ogg", 0, 0, 0.5), L("j512:sfx_deathscream_alien5.wav", -6, 0.1, 0.5)],
+                    {"max": 2.6, "lp": 2500, "fade": 500}),
+    "quicksand_loop": ([L("j512:sfx_sound_noise.wav", 0, 0, 0.6)], {"loop": 2.0, "lp": 1800, "hp": 150}),
+    "mummy_groan": ([L("j512:sfx_deathscream_human4.wav", 0, 0, 0.6)], {"max": 1.0, "lp": 2500}),
+    "scarab_burrow": ([L("k_rpg:cloth4.ogg", 0, 0, 0.8), L("j512:sfx_sound_noise.wav", -8, 0, 1.2)], {"max": 0.6, "lp": 3500}),
+    "serpent_emerge": ([L("k_scifi:thrusterFire_004.ogg", 0, 0, 0.7), L("j512:sfx_sound_depressurizing.wav", -4, 0.05, 1.3)], {"max": 0.9}),
+    "sun_beam_loop": ([L("k_scifi:forceField_001.ogg", 0, 0, 0.9)], {"loop": 2.0, "lp": 6000}),
+    "pharaoh_roar": ([L("k_scifi:spaceEngineLarge_003.ogg", 0, 0, 0.5), L("j512:sfx_deathscream_human9.wav", -6, 0.1, 0.5)],
+                     {"max": 2.6, "lp": 2500, "fade": 500}),
+    "geyser": ([L("k_scifi:thrusterFire_002.ogg", 0, 0, 0.6), L("k_scifi:slime_001.ogg", -3, 0, 0.7)], {"max": 1.2, "lp": 3500}),
+    "lava_crack": ([L("k_impact:impactMining_002.ogg", 0, 0, 0.7), L("k_scifi:thrusterFire_000.ogg", -4, 0.05, 0.6)], {"max": 1.0, "lp": 4000}),
+    "boss_chest_open": ([L("k_rpg:doorOpen_1.ogg", 0, 0, 0.8), L("k_impact:impactBell_heavy_002.ogg", -4, 0.15, 1.2),
+                         L("j512:sfx_sounds_fanfare1.wav", -6, 0.25)], {"max": 1.6, "lp": 8000}),
 }
 
 
@@ -313,6 +333,13 @@ MUSIC = {
     "combat": ("jret:Juhani Junkala [Retro Game Music Pack] Level 3.wav", 1.0, 6000, (120, 0.2)),
     "boss_warden": ("jadv:Juhani Junkala [Chiptune Adventures] 3. Boss Fight.ogg", 0.92, 4500, (160, 0.25)),
     "glade_merchant": ("jret:Juhani Junkala [Retro Game Music Pack] Level 1.wav", 1.0, 5000, (120, 0.2)),
+    # batch 15: the packs have only nine tracks, so the new pieces are slower / faster,
+    # darker or brighter versions of them (fungal and sand use the two tracks not used yet)
+    "fungal_explore": ("jret:Juhani Junkala [Retro Game Music Pack] Title Screen.wav", 0.75, 2400, (320, 0.45)),
+    "sand_explore": ("jret:Juhani Junkala [Retro Game Music Pack] Ending.wav", 0.8, 3000, (200, 0.3)),
+    "boss_elemental": ("jadv:Juhani Junkala [Chiptune Adventures] 3. Boss Fight.ogg", 1.06, 5500, (110, 0.2)),
+    "boss_mother": ("jadv:Juhani Junkala [Chiptune Adventures] 3. Boss Fight.ogg", 0.78, 2600, (300, 0.4)),
+    "boss_pharaoh": ("jret:Juhani Junkala [Retro Game Music Pack] Level 3.wav", 0.86, 3800, (180, 0.3)),
 }
 
 

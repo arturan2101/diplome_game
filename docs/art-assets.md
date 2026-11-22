@@ -628,7 +628,7 @@ Generators: `tools/art/make_batch14.py` (everything but the player poses; the du
 
 ## Batch 15 (boss chest, elemental Wardens)
 
-Drawn in code: `tools/art/make_batch15.py` (chest and effects), `tools/art/make_elemental_wardens.py` (the two Wardens, recoloured from warden_* so the silhouette, the frame counts and the wind-up / strike frames are the same as in the Warden table above; extra colours in docs/art-style.md "Elemental Wardens"). Parts 3-5 (fungal and sand styles, sound) are not made yet.
+Drawn in code: `tools/art/make_batch15.py` (chest and effects), `tools/art/make_elemental_wardens.py` (the two Wardens, recoloured from warden_* so the silhouette, the frame counts and the wind-up / strike frames are the same as in the Warden table above; extra colours in docs/art-style.md "Elemental Wardens"). Parts 3-5 (fungal and sand styles, sound): see "Batch 15, parts 3-5" below.
 
 | Prio | What | File | Size / frames | Anchor / notes | Status |
 | --- | --- | --- | --- | --- | --- |
@@ -652,3 +652,83 @@ Drawn in code: `tools/art/make_batch15.py` (chest and effects), `tools/art/make_
 Integrated in stage 45: chest_boss.png (`actors/pickups/chest_boss.tscn`), tide_warden_* and molten_warden_* (`actors/enemies/tide_warden.tres`, `molten_warden.tres`), water_orb / water_orb_burst (`actors/projectiles/water_orb.tscn`), molten_boulder (`molten_boulder.tscn`), tide_puddle / lava_crack_pool (frames 0-3) / geyser_warn / geyser (`assets/art/fx/boss_fx_frames.tres`, built by `tools/art/make_boss_fx_frames.py`), tide_ring / molten_ring (shockwave). Not used: lava_crack_pool cooling frames 4-6 (the patch fades out instead).
 
 Integrated in stage 46 (autoload `Sound`, ids = file names without `_N`): every sfx of batch 13 except beetle_swarm_loop, lava_bubble_loop, spikes_out, death_sting, ui_click (loops, per-tile spikes and menu clicks are left for later); all 8 music tracks.
+
+## Batch 15, parts 3-5 (fungal catacombs, sand temple, sound)
+
+Tiles, props and floor effects: `tools/art/make_biome_tiles.py`; small enemies and their effects: `tools/art/make_biome_enemies.py` (the mummy is the drowned recoloured, the scarab the beetle recoloured, so their frames and strike frames are the same; the rest is drawn in code); bosses from PixelLab: `tools/art/finish_biome_bosses.py` (character ids in its docstring). Theme colours: docs/art-style.md "Fungal theme" and "Sand temple theme". Enemy strips are `<enemy>_<anim>_<dir>.png` plus one `<enemy>_death.png`, with `<enemy>_frames.tres` (animations `<anim>_<dir>` and `death`; idle 6 fps, walk 10, attacks / emerge / sink / burrow 12, hurt 12, death 10; idle, walk and hidden loop). **Strike frame**: as before, the code holds the wind-up and plays the rest from the strike frame.
+
+### Fungal catacombs (id fungal)
+
+| Prio | What | File | Size / frames | Anchor / notes | Status |
+| --- | --- | --- | --- | --- | --- |
+| C | Tiles: 0-2 earth floor (1 mycelium threads, 2 tiny mushrooms), 3 wall front with roots, 4 mossy wall top, 5 cover (stone stump with mushrooms), 6-7 cracked front / top, 8 wall front with glowing shelf fungi | assets/art/tiles/fungal_tiles_atlas.png | 16x16 slots, 9 in a row (144x16) | ruins layout + slot 8 (wall_tiles = [3, 8]) | generated |
+| C | Hazards: 0 pit edge (earth rim, roots hanging into the dark), 1 thorn spikes, 2 spore puffball on the floor (still frame of spore_puff), 7 pit inside | assets/art/tiles/fungal_hazards.png | 16x16 slots (128x16) | | generated |
+| C | Decals: tiny glowing mushrooms, mycelium web, fallen broken cap, moss with spores | assets/art/tiles/fungal_decals.png | 16x16 each (64x16) | | generated |
+| C | Wall details: hanging roots, glowing shelf fungi, moss curtain, skull with a mushroom, glowing mycelium vein | assets/art/tiles/fungal_wall_details.png | 16x16 each (80x16) | rows 6-14 of the wall front | generated |
+| C | Door seal: rubble overgrown with roots | assets/art/tiles/fungal_door_seal.png | 16x16 | | generated |
+| C | Wall light: cluster of glowing mushrooms on a root bracket | assets/art/level/fungal_lamp.png | 16x16, 4, loop (8 fps) | light colour teal #6ae0c0 (light_torch.png, low energy) | generated |
+| C | Cover: giant mushroom | assets/art/level/fungal_obstacle_mushroom_tall.png | 16x32 | bottom row 31 (shadow) | generated |
+| C | Cover: tree stump with mushrooms | assets/art/level/fungal_obstacle_stump.png | 16x16 | bottom row 15 (shadow) | generated |
+| C | Cover: arch of roots | assets/art/level/fungal_obstacle_root_arch.png | 32x16 | the feet of the arch on row 14 at x 2-5 and 27-30 | generated |
+| C | Spore trap: puffball breathing, then bursting | assets/art/level/spore_puff.png | 16x16, 10 (160x16): 0-3 breathing (loop), 4-9 burst | burst: squeeze 4, **release 5** (spawn spore_cloud), 6-9 deflate | generated |
+| C | Spore cloud: toxic green cloud | assets/art/fx/spore_cloud.png | 32x32, 6, loop | centre (16, 16) | generated |
+| C | Floor plate, row 4: fungal (earth, mushrooms on the top edge, roots under it) | assets/art/ui/floor_plates.png | 64x16 each, now 64x80 | plain middle x 12-51, y 5-10 for the title | generated |
+| C | Sporeling: squat mushroom man, violet cap with glowing spots, pale stalk | assets/art/enemies/sporeling_{idle,walk,attack,hurt}_<dir>.png, sporeling_death.png, sporeling_frames.tres | 24x24; idle 4, walk 6, attack 6, hurt 2, death 5 (bursts into a spore cloud) | attack: leans back 0-1 (hold 1), **strike 2** (cap headbutt), 3 hold, 4-5 back; feet row 22, shadow row 23 | generated |
+| C | Vine lurker: bud mouth on a stem, red petals, green stem | assets/art/enemies/vine_lurker_{hidden,emerge,idle,attack,hurt}_<dir>.png, vine_lurker_death.png, vine_lurker_frames.tres | 24x24; hidden 1, emerge 4, idle 4, attack 6, hurt 2, death 5 (wilts) | attack: rears back 0-1 (hold 1), **lash 2**, 3 hold, 4-5 back; stem foot row 22, shadow row 23 | generated |
+| C | Vine lash: the vine shoots out with the bud open and pulls back | assets/art/fx/vine_lash.png | 48x8, 4, once | points right, starts at x 0, row 4; full reach 46 px on frames 1-2 (scale x for longer) | generated |
+| C | Spore bat: violet bat with glowing spots on the wings | assets/art/enemies/spore_bat_{idle,attack,hurt}_<dir>.png, spore_bat_death.png, spore_bat_frames.tres | 16x16; idle (= flight) 4, attack 4, hurt 2, death 4 (falls, spore puff) | attack: rises 0-1 (hold 1), **dive 2**, 3 back; flies 3 px over its shadow on row 14 | generated |
+| C | Mycelium Mother (boss): mushroom matriarch on roots, glowing violet cap-hood, teal eyes | assets/art/enemies/mycelium_mother_{idle,walk,spores,roots,summon,roar,hurt}_<dir>.png, mycelium_mother_death.png, mycelium_mother_frames.tres | 96x96; idle 4 (6 fps), walk 6 (10), spores 8 (10), roots 8 (10), summon 6 (8), roar 8 (10), hurt 4 (12), death 8 (10) | feet (48, 92). spores: wind-up 1-3 (cap glows, hold 3), **release 4** (arms thrown wide), burst 5-6, 7 back. roots: arms raised 1-3 (hold 3), **plunge 4** (spawn root_spike), 5-7 back. summon: raise 1, hold 2-4 (spawn), lower 5. roar: crouch 0-3, burst 4-7 | generated |
+| C | Root spike: a root bursting from the floor and sinking back | assets/art/fx/root_spike.png | 16x24, 6, once | bottom row 23; full height on frames 2-3 (deal damage there) | generated |
+| C | Root warning: a crack opening in the floor | assets/art/fx/root_warn.png | 16x16, 4, loop | centre (8, 9) | generated |
+
+### Sand temple (id sand)
+
+| Prio | What | File | Size / frames | Anchor / notes | Status |
+| --- | --- | --- | --- | --- | --- |
+| C | Tiles: 0-2 dark sandstone floor (1 sand drift, 2 turquoise tile fragment), 3 sandstone wall front with a gold line, 4 sandstone wall top with sand, 5 cover (block with turquoise tiles), 6-7 cracked front / top, 8 wall front with a turquoise tile band | assets/art/tiles/sand_tiles_atlas.png | 16x16 slots, 9 in a row (144x16) | ruins layout + slot 8 | generated |
+| C | Hazards: 0 pit edge (sand trickling in), 1 spikes, 2 quicksand still frame, 7 pit inside | assets/art/tiles/sand_hazards.png | 16x16 slots (128x16) | quicksand is walkable (slows), animated by sand_quicksand.png | generated |
+| C | Quicksand: sand swirling into the centre | assets/art/tiles/sand_quicksand.png | 16x16, 4, loop | seamless | generated |
+| C | Decals: sand drift, broken turquoise tiles, pottery shards, bones in the sand | assets/art/tiles/sand_decals.png | 16x16 each (64x16) | | generated |
+| C | Wall details: hieroglyphs (eye, bird), turquoise tile inlay, gold sun disc, torn sand banner with an eye, sand pouring from a crack | assets/art/tiles/sand_wall_details.png | 16x16 each (80x16) | rows 6-14 of the wall front | generated |
+| C | Door seal: sandstone rubble half buried in sand | assets/art/tiles/sand_door_seal.png | 16x16 | | generated |
+| C | Wall light: bronze brazier with a warm flame | assets/art/level/sand_lamp.png | 16x16, 4, loop (8 fps) | light colour warm gold #e09a20 | generated |
+| C | Cover: obelisk with a gold cap and turquoise glyphs | assets/art/level/sand_obstacle_obelisk.png | 16x32 | bottom row 31 (shadow) | generated |
+| C | Cover: urn | assets/art/level/sand_obstacle_urn.png | 16x16 | bottom row 15 (shadow) | generated |
+| C | Cover: fallen statue with a gold mask | assets/art/level/sand_obstacle_fallen_statue.png | 32x16 | bottom row 15 (shadow) | generated |
+| C | Floor plate, row 5: sand (sandstone, gold dashes, sand heaps) | assets/art/ui/floor_plates.png | 64x16 each, now 64x80 | as above | generated |
+| C | Mummy: the drowned rewrapped in sand-coloured bandages, glowing eyes, turquoise amulet | assets/art/enemies/mummy_{idle,walk,attack,hurt}_<dir>.png, mummy_death.png, mummy_frames.tres | 24x24; idle 4, walk 6, attack 6, hurt 2, death 5 (crumbles into sand and bandages) | attack: arms back 0-1 (hold 1), **strike 2** (bandage ends lash forward on 2-3), 4-5 back; feet row 22, shadow row 23 | generated |
+| C | Bandage grip (slow): bandages wrapping the shins | assets/art/fx/grip_bandage.png | 16x8, 4, loop | like grip_seaweed: offset (4, 15) in the player frame | generated |
+| C | Scarab: gold beetle with a turquoise stripe | assets/art/enemies/scarab_{idle,walk,attack,hurt}_<dir>.png, scarab_death.png, scarab_burrow.png, scarab_emerge.png, scarab_frames.tres | 16x16; idle 4, walk 4, attack 4, hurt 2, death 4, burrow 4, emerge 4 (no directions) | attack **strike 2**; shell bottom row 13, shadow row 14; emerge is burrow backwards | generated |
+| C | Sand serpent: sandy snake with turquoise bands and a hood, gold eyes | assets/art/enemies/sand_serpent_{hidden,emerge,sink,hurt}_<dir>.png, sand_serpent_death.png, sand_serpent_frames.tres | 32x32; hidden 4 (loop), emerge 6, sink 4, hurt 2, death 5 | emerge: bump 0, head out 1, rears back 2 (hold 2), **strike 3** (bite), 4-5 upright. Sand line row 28, shadow row 29 | generated |
+| C | Sand ripple: warning ring on the floor | assets/art/fx/sand_ripple.png | 16x16, 4, loop | centre (8, 8) | generated |
+| C | Sun Pharaoh (boss): mummy pharaoh, gold mask, turquoise nemes, sun staff | assets/art/enemies/sun_pharaoh_{idle,walk,beam,storm,sink,emerge,summon,roar,hurt}_<dir>.png, sun_pharaoh_death.png, sun_pharaoh_frames.tres | 96x96; idle 4 (6 fps), walk 6 (10), beam 8 (10), storm 8 (10), sink 6 (10), emerge 6 (10), summon 6 (8), roar 8 (10), hurt 4 (12), death 8 (10) | feet (48, 92). beam: staff raised 1-3 (hold 3), **beam 4-6**, 7 back. storm: wind-up 1-3 (hold 3), **slam 4** (spawn sand_ring), 5-7 back. emerge = sink backwards. summon: raise 1, hold 2-4, lower 5. roar: crouch 0-3, burst 4-7 | generated |
+| C | Sun beam: a piece of the beam, repeated along its length | assets/art/fx/sun_beam.png | 16x8, 4, loop | seamless left-right; tile along x, rotate for the direction | generated |
+| C | Sun beam warning: thin blinking line | assets/art/fx/sun_beam_warn.png | 16x8, 2, loop | as sun_beam | generated |
+| C | Sand ring: sand wave ring | assets/art/fx/sand_ring.png | 64x64, 6, once | centre (32, 32), ring radius 6 ... 30 | generated |
+
+### Sound (part 5)
+
+Built by `tools/audio/make_audio.py` (same CC0 packs and treatment as batch 13). The packs hold only nine music tracks, so the new pieces are slower / faster, darker or brighter versions of them; fungal and sand use the two tracks not used before. One shared boss track for the Tide and Molten Wardens.
+
+| Prio | File | Length | Use | Status |
+| --- | --- | --- | --- | --- |
+| C | assets/audio/sfx/spore_burst.ogg | 0.70 s | puffball / sporeling bursts | generated |
+| C | assets/audio/sfx/vine_lash.ogg | 0.18 s | vine lurker lash | generated |
+| C | assets/audio/sfx/bat_screech.ogg | 0.50 s | spore bat dives | generated |
+| C | assets/audio/sfx/mushroom_squish.ogg | 0.38 s | hit on a fungal enemy | generated |
+| C | assets/audio/sfx/root_burst.ogg | 0.90 s | roots burst from the floor | generated |
+| C | assets/audio/sfx/mother_roar.ogg | 2.60 s | Mycelium Mother roar (phase 2) | generated |
+| C | assets/audio/sfx/quicksand_loop.ogg | 2.00 s | quicksand, seamless loop | generated |
+| C | assets/audio/sfx/mummy_groan.ogg | 0.84 s | mummy attack / alert | generated |
+| C | assets/audio/sfx/scarab_burrow.ogg | 0.60 s | scarab burrows or emerges | generated |
+| C | assets/audio/sfx/serpent_emerge.ogg | 0.90 s | sand serpent bursts out | generated |
+| C | assets/audio/sfx/sun_beam_loop.ogg | 2.00 s | sun beam, seamless loop | generated |
+| C | assets/audio/sfx/pharaoh_roar.ogg | 2.60 s | Sun Pharaoh roar (phase 2) | generated |
+| C | assets/audio/sfx/geyser.ogg | 1.20 s | Tide Warden geyser | generated |
+| C | assets/audio/sfx/lava_crack.ogg | 1.00 s | Molten Warden's lava cracks | generated |
+| C | assets/audio/sfx/boss_chest_open.ogg | 1.13 s | boss chest opens | generated |
+| C | assets/audio/music/fungal_explore.ogg | 60 s loop | fungal floors | generated |
+| C | assets/audio/music/sand_explore.ogg | 112 s loop | sand floors | generated |
+| C | assets/audio/music/boss_elemental.ogg | 68 s loop | Tide and Molten Wardens | generated |
+| C | assets/audio/music/boss_mother.ogg | 92 s loop | Mycelium Mother | generated |
+| C | assets/audio/music/boss_pharaoh.ogg | 95 s loop | Sun Pharaoh | generated |

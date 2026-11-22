@@ -149,3 +149,23 @@ Two recoloured variants of the Ruins Warden for the flooded and the fire floors.
 
 - Tide Warden, wet green-grey marble: #cfe0d2 (light), #a6c0b0, #7c9a8c, #5a786c, #3f5a50 (shadow). Seaweed sash in the nature greens #5a8a4a / #8ac060 with moss #3b5a45 in the shadows; eyes and cracks teal #2aa8a0; corals #e85a3a / #e0a070 / #a82a30, drops #7ac0f0 / #3a7ac0 from the main palette.
 - Molten Warden uses only the main palette: basalt #1f1e29 / #17161f with lit faces #5d6072 / #767a8c (the body stays out of the floor range: darker than the floor, rim lighter), lava #e85a3a / #e09a20 / #ffd860 in the cracks, sparks.
+
+## Fungal theme (batch 15, id fungal)
+
+An underground garden: dark earth and stone, glowing mushrooms (teal and violet), roots in the walls, moss and mycelium. Same layout and rules as the other styles (generator `tools/art/make_biome_tiles.py`).
+
+- Extra colours, this theme only: earth #3a3029 (floor base), earth seam #2e2622, earth light #4a3e33 (all three in the floor value range 5-8); glowing cap light #d0a0f0; spore glow mint #6ae0c0; toxic spores #b8e050. Caps use purple #4a2a78 / #9a5ae0 with #d0a0f0, glow teal #2aa8a0 / #9af0e0 with #6ae0c0, roots bark #4a2f22 / #7a4a2c / #b07040, moss #263a32 / #3b5a45, grass #5a8a4a / #8ac060 (nature theme).
+- Floor: earth instead of stone, a few pebbles, mycelium threads (#4c4e5f) and rare tiny mushrooms; values stay 5-8.
+- Wall front: the dark bricks with roots crossing them and moss in the mortar; the second front (slot 8) has glowing shelf fungi. Wall top: the light stone with moss and grass, always much lighter than the floor.
+- Light: glowing mushrooms, light colour teal #6ae0c0 (level/fungal_lamp.png).
+- Readability: enemies have bright violet caps / pale stalks / green stems, never earth-coloured main masses.
+
+## Sand temple theme (batch 15, id sand)
+
+A buried temple: sandstone, gold, turquoise tiles, obelisks, sand drifting into the corners. Warm colours are used only in this theme; the floor is still dark (values 5-8). Generator `tools/art/make_biome_tiles.py`.
+
+- Extra colours, this theme only: floor sandstone #3a2f24 (base), #4a3c2c (light), #2e251c (seams, shadow) — all in the floor range; sandstone #8a7048 (shadow), #b0905c (mid, wall top, bandages), sand / lit sandstone #d8bc84. Gold #8a4a10 / #e09a20 / #ffd860 and turquoise #2aa8a0 / #9af0e0 come from the main palette.
+- Floor: dark sandstone slabs without a visible grid (same rule as the ruins floor), a sand drift in a corner, a rare turquoise tile fragment.
+- Wall front: dark sandstone bricks with a gold line under the lip; the second front (slot 8) carries a band of turquoise tiles. Wall top: light sandstone #b0905c with sand #d8bc84.
+- Light: a bronze brazier, light colour warm gold #e09a20 (level/sand_lamp.png).
+- Readability: mummies and the serpent are light sand (#b0905c / #d8bc84), the scarab gold; all far above the dark floor.
