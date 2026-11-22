@@ -108,7 +108,7 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 ## chest coins times this, and a chest stays shut while an enemy chasing the player is
 ## within chest_lock_radius pixels.
 @export var tuned_shop_price: float = 1.5
-@export var tuned_chest_coin_scale: float = 0.5
+@export var tuned_chest_coin_scale: float = 0.575
 @export var chest_lock_radius: float = 80.0
 ## With the glade (spells are bought there), a secret room's chest holds a spell
 ## scroll with this chance, as a reward for finding it; other chests hold none.

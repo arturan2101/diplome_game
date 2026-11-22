@@ -35,6 +35,9 @@ var _distance_left: float = 0.0
 ## True once a target took damage; hurtboxes already flown through are not hit again.
 var _has_hit: bool = false
 var _passed: Array[RID] = []
+var _range: float = 0.0
+## Set by reflect() while a hurtbox is handling this arrow's hit: it flies on instead.
+var _turned: bool = false
 
 
 ## Called by the bow before adding the arrow to the scene.
@@ -42,8 +45,10 @@ func setup(info: DamageInfo, direction: Vector2, speed: float, max_distance: flo
 	_direction = direction.normalized()
 	_info = info
 	_info.direction = _direction
+	_info.projectile = self
 	_speed = speed
 	_distance_left = max_distance
+	_range = max_distance
 	add_to_group(GROUP)
 	rotation = _direction.angle()
 
@@ -63,6 +68,11 @@ func _physics_process(delta: float) -> void:
 		# A wall or an absorbed hit (invulnerable target) is a miss; the arrow is spent either way.
 		if hurtbox != null and hurtbox.receive_hit(_info if _passed.is_empty() else _info.copy()):
 			_has_hit = true
+		if _turned:
+			# Parried: it flies back from where it was caught.
+			_turned = false
+			global_position = result["position"]
+			return
 		if hurtbox == null or pierce <= 0:
 			_land(_has_hit)
 			return
@@ -79,6 +89,24 @@ func _physics_process(delta: float) -> void:
 	_distance_left -= travel
 	if _distance_left <= 0.0:
 		_land(_has_hit)
+
+
+## Turns the arrow back (a parry, stage 44): it now carries info, flies along direction
+## this many times faster for its full range again, and hurts the hurtboxes of mask.
+## Called while a hurtbox handles its hit; the arrow then flies on instead of landing.
+func reflect(info: DamageInfo, direction: Vector2, speed_multiplier: float, mask: int) -> void:
+	_direction = direction.normalized()
+	_info = info
+	_info.direction = _direction
+	_info.projectile = self
+	_speed *= speed_multiplier
+	_distance_left = _range
+	target_mask = mask
+	pierce = 0
+	_has_hit = false
+	_passed.clear()
+	_turned = true
+	rotation = _direction.angle()
 
 
 func _draw() -> void:

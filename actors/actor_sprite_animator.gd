@@ -116,8 +116,11 @@ func _show_player_pose(player: Player) -> bool:
 		if skill is DashSkill:
 			_face(player.velocity)
 			return _hold_pose("dash")
-		if skill is BlockSkill or skill is ParrySkill:
-			# The parry window holds the weapon up like the shield.
+		if skill is ParrySkill:
+			# Its own pose (batch 14), else the weapon held up like the shield.
+			_face(player.get_look_direction())
+			return _hold_pose("parry") or _hold_pose("block")
+		if skill is BlockSkill:
 			_face(player.get_look_direction())
 			return _hold_pose("block")
 	var bow: BowWeapon = player.weapon as BowWeapon

@@ -41,7 +41,8 @@ const DEFAULT_SKILL: SkillData = preload("res://combat/skills/dash.tres")
 const FLOOR_STYLES: FloorStyleTable = preload("res://level/floor_styles.tres")
 ## The full game's tuning after the playtest (ExperimentConfig.full_game_tuning).
 const FULL_GAME_FEWER_PACKS: int = 1
-const FULL_GAME_COIN_SCALE: float = 0.5
+## Stage 44: 0.5 -> 0.575, 15% more coins than after the playtest of stage 38.
+const FULL_GAME_COIN_SCALE: float = 0.575
 
 ## Director mode of the next runs (debug menu or --mode=).
 var director_mode: DirectorMode = DirectorMode.RULES

@@ -43,7 +43,7 @@ func _test_parry() -> void:
 	var parried: Array[int] = [0]
 	skill.parried.connect(func(_info: DamageInfo) -> void: parried[0] += 1)
 	skill.press(Vector2.RIGHT)
-	check(skill.is_active() and skill.blocks_attacks() and is_equal_approx(skill.get_move_speed_multiplier(), 0.5),
+	check(skill.is_active() and skill.blocks_attacks() and is_equal_approx(skill.get_move_speed_multiplier(), parry.move_speed_multiplier),
 			"the window is open: slowed, no attacks")
 	var blocked: Array[int] = [0]
 	player.hurtbox.hit_blocked.connect(func(info: DamageInfo) -> void: blocked[0] += info.amount)

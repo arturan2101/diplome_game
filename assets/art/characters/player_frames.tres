@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=216 format=3]
+[gd_resource type="SpriteFrames" load_steps=232 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_attack_down.png" id="attack_down"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_attack_left.png" id="attack_left"]
@@ -42,6 +42,11 @@
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_walk_left.png" id="walk_left"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_walk_right.png" id="walk_right"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/player_walk_up.png" id="walk_up"]
+
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_parry_down.png" id="parry_down"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_parry_left.png" id="parry_left"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_parry_right.png" id="parry_right"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/player_parry_up.png" id="parry_up"]
 
 [sub_resource type="AtlasTexture" id="attack_down_0"]
 atlas = ExtResource("attack_down")
@@ -734,6 +739,54 @@ region = Rect2(96, 0, 24, 24)
 [sub_resource type="AtlasTexture" id="walk_up_5"]
 atlas = ExtResource("walk_up")
 region = Rect2(120, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="parry_down_0"]
+atlas = ExtResource("parry_down")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="parry_down_1"]
+atlas = ExtResource("parry_down")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="parry_down_2"]
+atlas = ExtResource("parry_down")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="parry_left_0"]
+atlas = ExtResource("parry_left")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="parry_left_1"]
+atlas = ExtResource("parry_left")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="parry_left_2"]
+atlas = ExtResource("parry_left")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="parry_right_0"]
+atlas = ExtResource("parry_right")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="parry_right_1"]
+atlas = ExtResource("parry_right")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="parry_right_2"]
+atlas = ExtResource("parry_right")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="parry_up_0"]
+atlas = ExtResource("parry_up")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="parry_up_1"]
+atlas = ExtResource("parry_up")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="parry_up_2"]
+atlas = ExtResource("parry_up")
+region = Rect2(48, 0, 24, 24)
 
 [resource]
 animations = [{
@@ -1465,4 +1518,60 @@ animations = [{
 "loop": true,
 "name": &"walk_up",
 "speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("parry_down_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("parry_down_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("parry_down_2")
+}],
+"loop": false,
+"name": &"parry_down",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("parry_left_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("parry_left_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("parry_left_2")
+}],
+"loop": false,
+"name": &"parry_left",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("parry_right_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("parry_right_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("parry_right_2")
+}],
+"loop": false,
+"name": &"parry_right",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("parry_up_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("parry_up_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("parry_up_2")
+}],
+"loop": false,
+"name": &"parry_up",
+"speed": 12.0
 }]

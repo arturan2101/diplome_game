@@ -7,9 +7,9 @@
 
 [resource]
 script = ExtResource("1")
-window = 0.3
+window = 0.5
 arc_degrees = 180.0
-move_speed_multiplier = 0.5
+move_speed_multiplier = 0.8
 stun_time = 1.2
 stun_range = 48.0
 push_speed = 90.0
@@ -22,5 +22,5 @@ flash_fps = 12.0
 id = &"parry"
 display_name = "Parry"
 icon = ExtResource("icon_tex")
-cooldown = 1.0
+cooldown = 0.6
 skill_scene = ExtResource("2")

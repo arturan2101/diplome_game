@@ -20,6 +20,9 @@ var direction: Vector2 = Vector2.ZERO
 var ignores_invulnerability: bool = false
 ## True for a critical hit (stage 39): its number is drawn bigger and golden.
 var is_critical: bool = false
+## The projectile that carries this hit (an Arrow: arrows, bolts, fireballs, boulders),
+## null for melee hits and hazards. The parry turns it back (stage 44).
+var projectile: Node2D = null
 
 
 func _init(damage_amount: int = 0, damage_source: Node = null, damage_source_id: StringName = &"",
@@ -36,4 +39,5 @@ func copy() -> DamageInfo:
 	info.direction = direction
 	info.ignores_invulnerability = ignores_invulnerability
 	info.is_critical = is_critical
+	info.projectile = projectile
 	return info
