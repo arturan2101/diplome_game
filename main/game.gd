@@ -112,7 +112,7 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 @export var chest_lock_radius: float = 80.0
 ## With the glade (spells are bought there), a secret room's chest holds a spell
 ## scroll with this chance, as a reward for finding it; other chests hold none.
-@export_range(0.0, 1.0) var secret_chest_spell_chance: float = 0.25
+@export_range(0.0, 1.0) var secret_chest_spell_chance: float = 0.5
 ## While the arena is sealed, this often (seconds) an enemy that ended up outside it
 ## (knocked through a door in the moment it closed) is put back where it started;
 ## otherwise nobody could reach it and the arena would never open.
