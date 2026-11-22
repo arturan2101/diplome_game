@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://tests/manual/boss_preview.gd" id="1"]
 
-[node name="BossPreview" type="Node"]
+[node name="BossPreview" type="Node2D"]
 script = ExtResource("1")
