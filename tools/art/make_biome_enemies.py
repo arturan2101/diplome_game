@@ -17,6 +17,7 @@ Fungal:
   fx/vine_lash.png  48x8 x 4: the vine shoots right from x 0 (row 4) and pulls back.
   fx/root_spike.png 16x24 x 6, root bursting from the floor, bottom row 23.
   fx/root_warn.png  16x16 x 4, loop: a crack opening in the floor, centre (8, 9).
+  fx/spore_ring.png 64x64 x 6, once, centre (32, 32), ring radius 6 ... 30 (Mother, phase 2).
 Sand:
   mummy       24x24, recoloured from the drowned (same frames and timing): idle 4, walk 6,
               attack 6 (arms back 0-1, strike 2: the bandages lash forward), hurt 2,
@@ -31,7 +32,9 @@ Sand:
   fx/sun_beam.png 16x8 x 4, loop, repeats along the beam (seamless left-right).
   fx/sun_beam_warn.png 16x8 x 2, loop, a thin blinking line.
   fx/sand_ring.png 64x64 x 6, once, centre (32, 32), ring radius 6 ... 30.
+  fx/sun_beam_hit.png 16x16 x 4, loop, centre (8, 8): the beam's flash on a wall.
 Run from the project root: python tools/art/make_biome_enemies.py
+(only the two late effects: python tools/art/make_biome_enemies.py extra)
 """
 import glob
 import math
@@ -765,6 +768,89 @@ def sand_ring():
     return strip(frames)
 
 
+def spore_ring():
+    """Mycelium Mother's phase-2 wave: a toxic green spore ring with violet sparks,
+    built like sand_ring (radius 6 ... 30, gaps open as it fades)."""
+    size, cc = 64, 32.0
+    radii = [6, 12, 18, 23, 27, 30]
+    rnd = random.Random(19)
+    sparks = [(rnd.uniform(0, math.tau), rnd.uniform(0, 2)) for _ in range(24)]
+    frames = []
+    for i, radius in enumerate(radii):
+        c = Canvas(size, size)
+        thick = 4.0 if i < 4 else 2.5
+        for y in range(size):
+            for x in range(size):
+                dx, dy = x + 0.5 - cc, y + 0.5 - cc
+                r = math.hypot(dx, dy)
+                ang = math.atan2(dy, dx)
+                # puffy edge: round bumps like little spore clouds
+                wave = abs(math.sin(ang * 6 + i * 0.7)) * 1.4 - 0.5
+                if not (radius - thick + wave * 0.3 <= r <= radius + wave):
+                    continue
+                seg = int((ang + math.pi) / math.tau * 24)
+                gaps = 0 if i < 3 else 1 if i < 5 else 2
+                if gaps and (seg + i) % 4 < gaps:
+                    continue
+                outer = radius + wave - r
+                k = "v" if outer < 1 else "V" if outer < 2.2 else "G"
+                if i >= 4:
+                    k = "V" if outer < 1 else "G"
+                if outer >= 1 and (x * 7 + y * 13 + i * 5) % 17 == 0:
+                    k = "H"  # violet spores inside the band
+                c.set(x, y, k)
+        c.outline(skip=())
+        for y in range(size):  # gas, not a solid: dark green rim instead of black
+            for x in range(size):
+                if c.get(x, y) == "o":
+                    c.set(x, y, "N")
+        if i > 0:
+            for n, (ang, off) in enumerate(sparks):
+                rr = radius + 1 + off + (n % 3) - (i % 2)
+                x, y = cc + math.cos(ang + i * 0.05) * rr, cc + math.sin(ang + i * 0.05) * rr
+                if n % 3 == 0:
+                    c.set(x, y, "p" if i < 4 else "H")
+                elif n % 3 == 1 and i < 5:
+                    c.set(x, y, "H")
+                elif i < 3:
+                    c.set(x, y, "x")
+                if n % 4 == 0 and i < 4:  # bright violet crosses on the strongest frames
+                    for ddx, ddy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                        c.set(x + ddx, y + ddy, "H")
+                    c.set(x, y, "p")
+        frames.append(c.img)
+    return strip(frames)
+
+
+def sun_beam_hit(frame):
+    """Flash where the sun beam meets a wall, loop of 4: white-gold core, rays that flicker,
+    sparks thrown back. Centre (8, 8)."""
+    c = Canvas(16, 16)
+    core = (3.2, 4.2, 3.6, 4.6)[frame]
+    rnd = random.Random(23 + frame)
+    for y in range(16):
+        for x in range(16):
+            d = math.hypot(x + 0.5 - 8, y + 0.5 - 8)
+            if d <= core:
+                c.set(x, y, "W" if d < core - 2.2 else "Z" if d < core - 1 else "Y")
+    rays = ((1, 0), (-1, 0), (0, 1), (0, -1)) if frame % 2 == 0 else ((1, 1), (-1, -1), (1, -1), (-1, 1))
+    reach = 6 + frame % 2
+    for dx, dy in rays:
+        start = int(core)
+        for t in range(start, reach + 1):
+            c.set(8 + dx * t - (dx < 0) * 0, 8 + dy * t, "Z" if t < reach - 1 else "q")
+    for _ in range(3):
+        a = rnd.uniform(0, math.tau)
+        rr = rnd.uniform(5, 7)
+        c.set(8 + math.cos(a) * rr, 8 + math.sin(a) * rr, rnd.choice("YZq"))
+    return c.img
+
+
+def make_extra():
+    spore_ring().save(f"{FX}/spore_ring.png")
+    strip([sun_beam_hit(i) for i in range(4)]).save(f"{FX}/sun_beam_hit.png")
+
+
 def main():
     make_sporeling()
     make_vine_lurker()
@@ -780,8 +866,13 @@ def main():
     strip([sun_beam(i) for i in range(4)]).save(f"{FX}/sun_beam.png")
     strip([sun_beam_warn(i) for i in range(2)]).save(f"{FX}/sun_beam_warn.png")
     sand_ring().save(f"{FX}/sand_ring.png")
+    make_extra()
     print("biome enemies done")
 
 
 if __name__ == "__main__":
-    main()
+    if sys.argv[1:] == ["extra"]:
+        make_extra()
+        print("spore_ring, sun_beam_hit done")
+    else:
+        main()

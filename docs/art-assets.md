@@ -680,6 +680,7 @@ Tiles, props and floor effects: `tools/art/make_biome_tiles.py`; small enemies a
 | C | Mycelium Mother (boss): mushroom matriarch on roots, glowing violet cap-hood, teal eyes | assets/art/enemies/mycelium_mother_{idle,walk,spores,roots,summon,roar,hurt}_<dir>.png, mycelium_mother_death.png, mycelium_mother_frames.tres | 96x96; idle 4 (6 fps), walk 6 (10), spores 8 (10), roots 8 (10), summon 6 (8), roar 8 (10), hurt 4 (12), death 8 (10) | feet (48, 92). spores: wind-up 1-3 (cap glows, hold 3), **release 4** (arms thrown wide), burst 5-6, 7 back. roots: arms raised 1-3 (hold 3), **plunge 4** (spawn root_spike), 5-7 back. summon: raise 1, hold 2-4 (spawn), lower 5. roar: crouch 0-3, burst 4-7 | generated |
 | C | Root spike: a root bursting from the floor and sinking back | assets/art/fx/root_spike.png | 16x24, 6, once | bottom row 23; full height on frames 2-3 (deal damage there) | generated |
 | C | Root warning: a crack opening in the floor | assets/art/fx/root_warn.png | 16x16, 4, loop | centre (8, 9) | generated |
+| C | Spore ring: Mycelium Mother's phase-2 wave ring, toxic green spores with violet sparks (like tide_ring / molten_ring / sand_ring) | assets/art/fx/spore_ring.png | 64x64, 6, once | centre (32, 32), ring radius 6 ... 30 | generated |
 
 ### Sand temple (id sand)
 
@@ -704,6 +705,7 @@ Tiles, props and floor effects: `tools/art/make_biome_tiles.py`; small enemies a
 | C | Sun Pharaoh (boss): mummy pharaoh, gold mask, turquoise nemes, sun staff | assets/art/enemies/sun_pharaoh_{idle,walk,beam,storm,sink,emerge,summon,roar,hurt}_<dir>.png, sun_pharaoh_death.png, sun_pharaoh_frames.tres | 96x96; idle 4 (6 fps), walk 6 (10), beam 8 (10), storm 8 (10), sink 6 (10), emerge 6 (10), summon 6 (8), roar 8 (10), hurt 4 (12), death 8 (10) | feet (48, 92). beam: staff raised 1-3 (hold 3), **beam 4-6**, 7 back. storm: wind-up 1-3 (hold 3), **slam 4** (spawn sand_ring), 5-7 back. emerge = sink backwards. summon: raise 1, hold 2-4, lower 5. roar: crouch 0-3, burst 4-7 | generated |
 | C | Sun beam: a piece of the beam, repeated along its length | assets/art/fx/sun_beam.png | 16x8, 4, loop | seamless left-right; tile along x, rotate for the direction | generated |
 | C | Sun beam warning: thin blinking line | assets/art/fx/sun_beam_warn.png | 16x8, 2, loop | as sun_beam | generated |
+| N | Sun beam hit: white-gold flash with flickering rays where the beam meets a wall | assets/art/fx/sun_beam_hit.png | 16x16, 4, loop | centre (8, 8) | generated |
 | C | Sand ring: sand wave ring | assets/art/fx/sand_ring.png | 64x64, 6, once | centre (32, 32), ring radius 6 ... 30 | generated |
 
 ### Sound (part 5)
