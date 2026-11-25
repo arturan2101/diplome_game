@@ -57,6 +57,10 @@ extends Resource
 ## only at the start of a run of two cover cells. Only the look: the cell stays solid.
 @export var cover_pieces: Array[Texture2D] = []
 @export_range(0.0, 1.0) var cover_piece_chance: float = 0.0
+## Health of an obstacle when they break (ExperimentConfig.breakable_cover, stage 47):
+## 20 = two sword blows (10 each for the first two). Plain cover tiles (gravestones)
+## never break.
+@export var cover_piece_hp: int = 20
 ## Details over the brick fronts of walls (crack, chain, niche with a skull, banner,
 ## ivy): a strip of 16x16 overlays, on wall_detail_chance of the fronts. Null = none.
 @export var wall_details: Texture2D

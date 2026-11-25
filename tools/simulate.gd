@@ -97,6 +97,9 @@ func _ready() -> void:
 		_write_calibration()
 	print("Done: %d runs, %.1f sections per run on average, %d deaths, %d reached the limit of %d sections" % [
 			_runs, float(total_sections) / float(maxi(_runs, 1)), deaths, at_limit, _max_sections])
+	Sound.stop_all()
+	for _i in 3:
+		await get_tree().process_frame
 	get_tree().quit()
 
 

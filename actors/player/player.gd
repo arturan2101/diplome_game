@@ -215,7 +215,10 @@ func _update_interaction() -> void:
 		if thing == null or thing.is_queued_for_deletion() or not thing.can_interact(self):
 			continue
 		var distance: float = global_position.distance_to(thing.global_position)
-		if distance <= nearest_distance:
+		if distance > interact_radius:
+			continue
+		# Higher priority first (the merchant), then the nearest.
+		if nearest == null or thing.interact_priority > nearest.interact_priority 				or (thing.interact_priority == nearest.interact_priority and distance <= nearest_distance):
 			nearest = thing
 			nearest_distance = distance
 	var nearest_id: int = nearest.get_instance_id() if nearest != null else 0

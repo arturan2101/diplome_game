@@ -171,6 +171,9 @@ func _on_cells_changed(cells: Array[Vector2i], type: LevelGrid.Cell) -> void:
 			_sealed[cell] = true
 		else:
 			_sealed.erase(cell)
+		# A broken obstacle (stage 47) is gone with its cell.
+		if type != LevelGrid.Cell.COVER:
+			_obstacles.erase(cell)
 	queue_redraw()
 
 

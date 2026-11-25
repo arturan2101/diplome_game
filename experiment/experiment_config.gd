@@ -71,6 +71,10 @@ extends Resource
 ## Molten Warden (their own throws, rings, summons and a special attack: geysers,
 ## meteors). Needs the boss and floor styles. Off in the clean series and the playtest.
 @export var elemental_bosses: bool = true
+## Stage 47: the obstacles on cover cells (columns, rocks, sarcophagi, barrels...) break
+## under melee blows and leave floor; plain gravestones stay. Off in the clean series
+## and the playtest.
+@export var breakable_cover: bool = true
 ## Soft tension waves of the rules director: a peak of x1.15 and a rest of x0.5
 ## (DirectorSettings.soft_peak_multiplier, soft_rest_multiplier) instead of x1.3 and
 ## x0.3. The other modes have no wave and do not change.
@@ -84,4 +88,5 @@ func to_dictionary() -> Dictionary:
 			"secret_rooms": secret_rooms, "merchant_glade": merchant_glade, "spell_fusion": spell_fusion,
 			"depth_pressure": depth_pressure, "extra_enemies": extra_enemies, "meta_progression": meta_progression,
 			"full_game_tuning": full_game_tuning, "arsenal": arsenal, "floor_styles": floor_styles, "shop_goods": shop_goods,
-			"boss_chest": boss_chest, "elemental_bosses": elemental_bosses}
+			"boss_chest": boss_chest, "elemental_bosses": elemental_bosses,
+			"breakable_cover": breakable_cover}

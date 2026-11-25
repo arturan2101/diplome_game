@@ -78,14 +78,21 @@ func _ready() -> void:
 	load_settings()
 
 
-## On quit: stop and let go of every stream (a track still playing at exit would leak).
-func _exit_tree() -> void:
+## Stops every effect and the music at once and lets go of the streams. Call it a
+## couple of frames before quitting: the audio server lets a stopped stream go only on
+## its next mix, and a stream still held at exit is reported as a leak.
+func stop_all() -> void:
 	if _music_tween != null and _music_tween.is_valid():
 		_music_tween.kill()
 	for player: AudioStreamPlayer in _players + _music_players:
 		player.stop()
 		player.stream = null
+	_music_id = &""
 	_streams.clear()
+
+
+func _exit_tree() -> void:
+	stop_all()
 
 
 ## True if a sound with this id exists (with or without variants).

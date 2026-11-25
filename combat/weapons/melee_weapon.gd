@@ -11,6 +11,9 @@ const ARC_SEGMENTS: int = 12
 @export_flags_2d_physics var target_mask: int = 16
 ## Physics layers that block hits (world).
 @export_flags_2d_physics var wall_mask: int = 1
+## The "breakable" layer (cracked walls, obstacles): hits there do not count for
+## accuracy (stage 47).
+@export_flags_2d_physics var breakable_mask: int = 32
 ## Colour of the placeholder swing arc.
 @export var arc_color: Color = Color(1.0, 1.0, 1.0, 0.5)
 
@@ -165,7 +168,7 @@ func _hit_targets_in_arc() -> void:
 			continue
 		if not _is_in_arc(hurtbox.global_position):
 			continue
-		if not _has_line_of_sight(space, hurtbox.global_position):
+		if not _has_line_of_sight(space, hurtbox):
 			continue
 		_hit_this_step.append(hurtbox)
 		var push_direction: Vector2 = (hurtbox.global_position - global_position).normalized()
@@ -173,7 +176,8 @@ func _hit_targets_in_arc() -> void:
 			push_direction = _swing_direction
 		var info: DamageInfo = make_hit(_step.damage, push_direction * _step.knockback)
 		info.direction = push_direction
-		if hurtbox.receive_hit(info):
+		# Only enemies count for accuracy: walls and obstacles are not targets.
+		if hurtbox.receive_hit(info) and hurtbox.collision_layer & breakable_mask == 0:
 			_hits_landed += 1
 
 
@@ -184,8 +188,12 @@ func _is_in_arc(target_position: Vector2) -> bool:
 	return absf(_swing_direction.angle_to(to_target)) <= deg_to_rad(_step.arc_degrees) * 0.5
 
 
-## True if no wall lies on the straight line from the wielder to the target.
-func _has_line_of_sight(space: PhysicsDirectSpaceState2D, target_position: Vector2) -> bool:
+## True if no wall lies on the straight line from the wielder to the target (for a
+## target inside an obstacle: no wall before the obstacle itself).
+func _has_line_of_sight(space: PhysicsDirectSpaceState2D, hurtbox: Hurtbox) -> bool:
 	var ray: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(
-			global_position, target_position, wall_mask)
-	return space.intersect_ray(ray).is_empty()
+			global_position, hurtbox.global_position, wall_mask)
+	var hit: Dictionary = space.intersect_ray(ray)
+	if hit.is_empty():
+		return true
+	return hurtbox.solid_rect.has_area() and hurtbox.solid_rect.grow(1.0).has_point(hit["position"])

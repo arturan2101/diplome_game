@@ -8,6 +8,10 @@ extends Area2D
 ## Group of everything the player can interact with.
 const GROUP: StringName = &"interactables"
 
+## Within reach, the one with the highest priority is used, the nearest among equals
+## (stage 47: the merchant before a weapon lying at his feet).
+@export var interact_priority: int = 0
+
 
 func _ready() -> void:
 	add_to_group(GROUP)

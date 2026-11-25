@@ -48,12 +48,18 @@ var grid: LevelGrid = null
 ## grows by the physics step, so a section replays the same way for the same seed.
 var section_time: float = 0.0
 var timed_spikes: TimedSpikeField = null
+## Patches on the floor (lava, puddles, spell zones; stage 47): over the tiles, under
+## everything added to the level later (the section's actors).
+var floor_effects: Node2D = null
 ## Names of the region themes in atlas order.
 var _region_names: Array[StringName] = []
 
 var _ground: TileMapLayer = null
 var _props: TileMapLayer = null
 var _astar: AStarGrid2D = AStarGrid2D.new()
+## Obstacle picture of each cover cell as it was when the level was built: a broken
+## neighbour (stage 47) must not change the pictures around it.
+var _pieces: Dictionary = {}
 
 
 func _ready() -> void:
@@ -77,6 +83,9 @@ func _ready() -> void:
 	timed_spikes = TimedSpikeField.new()
 	timed_spikes.name = "TimedSpikes"
 	add_child(timed_spikes)
+	floor_effects = Node2D.new()
+	floor_effects.name = "FloorEffects"
+	add_child(floor_effects)
 	_apply_tile_set()
 	if grid == null and debug_map.strip_edges() != "":
 		build(LevelGrid.from_text(debug_map))
@@ -107,6 +116,7 @@ func _apply_tile_set() -> void:
 func build(new_grid: LevelGrid) -> void:
 	grid = new_grid
 	section_time = 0.0
+	_pieces.clear()
 	_ground.clear()
 	_props.clear()
 	for y in grid.height:
@@ -289,7 +299,32 @@ func _paint_cell(cell: Vector2i) -> void:
 ## The obstacle picture of a cover cell (TileTheme.cover_pieces), or null for the plain
 ## cover tile. Picked from the cell coordinates, so a grid always looks the same.
 func cover_piece(cell: Vector2i) -> Texture2D:
-	if theme.cover_pieces.is_empty() or grid.get_cell(cell) != LevelGrid.Cell.COVER or _covered_by_left(cell):
+	if grid.get_cell(cell) != LevelGrid.Cell.COVER:
+		return null
+	if not _pieces.has(cell):
+		_pieces[cell] = _pick_cover_piece(cell)
+	return _pieces[cell]
+
+
+## The obstacles of the level (stage 47): each is {"cells": the cover cells it stands on
+## (two for a wide one), "piece": its picture}.
+func obstacles() -> Array[Dictionary]:
+	var found: Array[Dictionary] = []
+	for y in grid.height:
+		for x in grid.width:
+			var cell: Vector2i = Vector2i(x, y)
+			var piece: Texture2D = cover_piece(cell)
+			if piece == null:
+				continue
+			var cells: Array[Vector2i] = [cell]
+			if piece.get_width() > theme.tile_size:
+				cells.append(cell + Vector2i.RIGHT)
+			found.append({"cells": cells, "piece": piece})
+	return found
+
+
+func _pick_cover_piece(cell: Vector2i) -> Texture2D:
+	if theme.cover_pieces.is_empty() or _covered_by_left(cell):
 		return null
 	if float(absi(hash([cell, "cover"])) % 1000) / 1000.0 >= theme.cover_piece_chance:
 		return null

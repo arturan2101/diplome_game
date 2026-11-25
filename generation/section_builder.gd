@@ -21,6 +21,8 @@ extends RefCounted
 ## Size of the exit portal in cells (stage 42): two wide, three tall (its art is 32x48).
 const GATE_WIDTH: int = 2
 const GATE_HEIGHT: int = 3
+## Cells kept between the portal and the cell in front of a secret room's crack (stage 47).
+const SECRET_GATE_CLEARANCE: int = 1
 const CATALOG_PATH: String = "res://actors/enemies/enemy_catalog.tres"
 const HAZARDS_PATH: String = "res://level/hazards.tres"
 ## A timed wave keeps this many cells of free tunnel before and after it.
@@ -537,6 +539,12 @@ func _secret_fits(layout: SectionLayout, crack: Vector2i, out: Vector2i, interio
 	var grid: LevelGrid = layout.grid
 	if grid.get_cell(crack) != LevelGrid.Cell.WALL or not grid.is_floor(crack - out):
 		return false
+	# The player must be able to stand in front of the crack without stepping into the
+	# exit portal (stage 47): no portal cell next to the cell in front of it.
+	var front: Vector2i = crack - out
+	for cell: Vector2i in gate_footprint(layout.exit):
+		if absi(cell.x - front.x) <= SECRET_GATE_CLEARANCE and absi(cell.y - front.y) <= SECRET_GATE_CLEARANCE:
+			return false
 	var block: Rect2i = interior.grow(1)
 	if not Rect2i(Vector2i.ZERO, Vector2i(grid.width, grid.height)).grow(-1).encloses(block):
 		return false

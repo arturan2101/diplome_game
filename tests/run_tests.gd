@@ -42,6 +42,9 @@ func _ready() -> void:
 		await get_tree().physics_frame
 		await get_tree().physics_frame
 	print("ALL PASSED (%d checks)" % total_checks if total_failures == 0 else "%d FAILED" % total_failures)
+	Sound.stop_all()
+	for _i in 3:
+		await get_tree().process_frame
 	get_tree().quit(total_failures)
 
 

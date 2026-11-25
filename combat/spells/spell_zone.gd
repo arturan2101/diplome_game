@@ -49,8 +49,13 @@ static func spawn(parent: Node, at: Vector2, stats: ZoneData, level: int, caster
 	zone._ticks_left = stats.ticks_at(level)
 	# Cleared between sections together with arrows and fireballs.
 	zone.add_to_group(Arrow.GROUP)
-	# A child of the level, after its tile layers: over the floor, under the actors.
-	parent.add_child(zone)
+	# On the level's floor-effects layer: over the floor, under the actors (stage 47:
+	# the magma beetle's lava no longer hides the beetles walking on it).
+	var host: Node = parent
+	var floor_level: Level = parent.get_tree().get_first_node_in_group(Level.GROUP) as Level if parent.is_inside_tree() else null
+	if floor_level != null and floor_level.floor_effects != null:
+		host = floor_level.floor_effects
+	host.add_child(zone)
 	zone.global_position = at
 	zone._make_look()
 	return zone

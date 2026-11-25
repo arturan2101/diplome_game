@@ -14,6 +14,11 @@ signal hit_blocked(info: DamageInfo)
 ## Health that receives the damage, usually a sibling node.
 @export var health: Health
 
+## For a hurtbox inside something solid (a breakable obstacle, stage 47): the global
+## rect of that solid thing. A melee blow's line of sight may end on it (the first wall
+## it meets is the obstacle itself). Empty = an ordinary hurtbox.
+var solid_rect: Rect2 = Rect2()
+
 ## Callables (info: DamageInfo) -> bool; true means "I blocked this hit".
 var _guards: Array[Callable] = []
 

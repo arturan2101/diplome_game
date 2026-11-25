@@ -22,6 +22,8 @@ const DEFAULT_CHEST_WEAPONS: WeaponPool = preload("res://combat/weapons/chest_we
 const ARSENAL_CHEST_WEAPONS: WeaponPool = preload("res://combat/weapons/chest_weapons_arsenal.tres")
 const DEFAULT_RARITY_TABLE: RarityTable = preload("res://combat/weapons/rarity_table.tres")
 const DEFAULT_BOSS_RARITY_TABLE: RarityTable = preload("res://combat/weapons/boss_rarity_table.tres")
+## How far (cells) a bought weapon lands from the merchant (stage 47).
+const BOUGHT_WEAPON_DISTANCE: int = 2
 const BOSS_CHEST_SCENE: PackedScene = preload("res://actors/pickups/chest_boss.tscn")
 const DEFAULT_SPELL_POOL: SpellPool = preload("res://combat/spells/spell_pool.tres")
 const SPELL_PICKUP_SCENE: PackedScene = preload("res://actors/pickups/spell_pickup.tscn")
@@ -334,6 +336,7 @@ func _start_section() -> void:
 	_spawn_gate()
 	_spawn_items()
 	_spawn_secret()
+	_spawn_breakable_cover()
 	_combat.setup(layout)
 	_spawn_enemies()
 	player.teleport(level.cell_center(layout.entrance))
@@ -522,6 +525,26 @@ func _chest_spell_chance(entry: Dictionary) -> float:
 	return secret_chest_spell_chance if entry.get("secret", false) else 0.0
 
 
+## Obstacles on cover cells that break under melee blows (ExperimentConfig.breakable_cover,
+## stage 47); plain gravestones stay.
+func _spawn_breakable_cover() -> void:
+	if not GameManager.config.breakable_cover:
+		return
+	var tile: float = float(level.theme.tile_size)
+	for obstacle: Dictionary in level.obstacles():
+		var cells: Array[Vector2i] = obstacle["cells"]
+		var rect: Rect2 = Rect2(level.to_global(Vector2(cells[0]) * tile), Vector2(tile * cells.size(), tile))
+		var cover: BreakableCover = BreakableCover.new()
+		cover.setup(cells, rect, level.theme.cover_piece_hp)
+		cover.broken.connect(_on_cover_broken)
+		_contents.add_child(cover)
+
+
+func _on_cover_broken(cover: BreakableCover) -> void:
+	# Deferred: the blow comes in the middle of the weapon's physics query.
+	level.set_cells.call_deferred(cover.cells, LevelGrid.Cell.FLOOR)
+
+
 ## The cracked wall in front of the secret room, if the section has one.
 func _spawn_secret() -> void:
 	if layout.secret.is_empty():
@@ -684,10 +707,9 @@ func _on_shop_bought(offer: ShopOffer) -> void:
 		ShopOffer.Kind.HEAL:
 			player.health.heal(offer.heal_amount)
 		ShopOffer.Kind.WEAPON:
-			var cells: Array[Vector2i] = level.free_floor_cells_near(shop_screen.merchant.global_position, 1)
 			var weapon_pickup: WeaponPickup = WEAPON_PICKUP_SCENE.instantiate() as WeaponPickup
 			weapon_pickup.weapon_data = offer.weapon
-			var cell: Vector2i = cells[0] if not cells.is_empty() else level.cell_at(player.global_position)
+			var cell: Vector2i = _cell_away_from(shop_screen.merchant.global_position, BOUGHT_WEAPON_DISTANCE)
 			weapon_pickup.position = level.to_local(level.cell_center(cell))
 			_contents.add_child(weapon_pickup)
 		ShopOffer.Kind.SPELL, ShopOffer.Kind.SPELL_LEVEL:
@@ -699,6 +721,16 @@ func _on_shop_bought(offer: ShopOffer) -> void:
 	Telemetry.record_purchase(offer.get_id(), offer.price)
 	Sound.play(&"shop_buy")
 	shop_screen.refresh(GameManager.coins)
+
+
+## A free floor cell near a spot but at least min_cells from it (a bought weapon lands
+## clear of the merchant, so talking to him stays easy); the player's cell if none.
+func _cell_away_from(spot: Vector2, min_cells: int) -> Vector2i:
+	var center: Vector2i = level.cell_at(spot)
+	for cell: Vector2i in level.free_floor_cells_near(spot, 24):
+		if maxi(absi(cell.x - center.x), absi(cell.y - center.y)) >= min_cells:
+			return cell
+	return level.cell_at(player.global_position)
 
 
 ## After a merge the flash plays on the player once the game runs again.

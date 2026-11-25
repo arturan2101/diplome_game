@@ -30,6 +30,11 @@ var offers: Array[ShopOffer] = []
 var wandering: bool = false
 
 
+func _init() -> void:
+	# Talking to him wins over a weapon lying at his feet (stage 47).
+	interact_priority = 1
+
+
 func _ready() -> void:
 	super()
 	var look: SpriteFrames = wandering_frames if wandering else frames
