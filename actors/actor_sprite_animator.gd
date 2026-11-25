@@ -14,6 +14,8 @@ extends AnimatedSprite2D
 ## the enemy reports `struck`; a cut-short windup drops it. The boss names its attack
 ## animation (slam, throw, wave) and also roars ("roar") going into its second phase and
 ## raises a fist ("summon") when it calls servants.
+## An enemy can hold a pose instead (Enemy.get_pose(), stage 48: the vine lurker hidden
+## in the floor); an actor without "walk_<dir>" moves with its idle (a flier).
 ## Never changes movement or combat. Animations missing from sprite_frames are skipped.
 
 ## Frames of the bow strip: drawing (0 .. BOW_DRAW_FRAMES - 1), then the release.
@@ -81,6 +83,13 @@ func _process(delta: float) -> void:
 	if _body == null or sprite_frames == null:
 		return
 	var enemy: Enemy = _body as Enemy
+	if enemy != null and enemy.get_pose() != &"":
+		var pose: String = String(enemy.get_pose())
+		# Turned to the player once, as the pose starts (it does not restart while held).
+		if not String(animation).begins_with(pose):
+			_face(_to_player())
+		if _hold_pose(pose):
+			return
 	if enemy != null:
 		var winding: bool = enemy.state == Enemy.State.WINDUP
 		if winding and not _was_winding_up:
@@ -105,6 +114,9 @@ func _process(delta: float) -> void:
 	if moving:
 		_face(v)
 	var anim: StringName = StringName(("walk_" if moving else "idle_") + _direction)
+	# A flier has no walk (stage 48: the spore bat's idle is its flight).
+	if moving and not sprite_frames.has_animation(anim):
+		anim = StringName("idle_" + _direction)
 	if (anim != animation or not is_playing()) and sprite_frames.has_animation(anim):
 		play(anim)
 

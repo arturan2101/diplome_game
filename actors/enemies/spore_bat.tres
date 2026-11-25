@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="SporeBatData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/spore_bat_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/spore_bat_frames.tres" id="frames"]
+[ext_resource type="Resource" path="res://actors/enemies/spore_bat_bite.tres" id="weapon"]
+[ext_resource type="PackedScene" path="res://actors/enemies/spore_bat.tscn" id="scene"]
+
+[resource]
+script = ExtResource("1")
+dive_speed = 170.0
+dive_time = 0.25
+bite_reach = 14.0
+attack_sound = &"bat_screech"
+death_sound = &"spore_burst"
+id = &"spore_bat"
+display_name = "Spore bats"
+sprite_frames = ExtResource("frames")
+feet_row = 14
+attack_strike_frame = 2
+body_radius = 4.0
+danger_cost = 3
+pack_min = 2
+pack_max = 3
+max_hp = 10
+move_speed = 80.0
+detection_range = 170.0
+attack_range = 40.0
+windup = 0.45
+recovery = 0.6
+weapon = ExtResource("weapon")
+scene = ExtResource("scene")
+floor_style = &"fungal"

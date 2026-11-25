@@ -708,7 +708,7 @@ Tiles, props and floor effects: `tools/art/make_biome_tiles.py`; small enemies a
 | N | Sun beam hit: white-gold flash with flickering rays where the beam meets a wall | assets/art/fx/sun_beam_hit.png | 16x16, 4, loop | centre (8, 8) | generated |
 | C | Sand ring: sand wave ring | assets/art/fx/sand_ring.png | 64x64, 6, once | centre (32, 32), ring radius 6 ... 30 | generated |
 
-Integrated in stage 48 part 1: the fungal tiles, hazards, decals, wall details, door seal, lamp, the three obstacles and floor plate row 4 (`level/fungal_theme.tres`); spore_puff and spore_cloud (`level/traps/`, frames in `assets/art/fx/biome_fx_frames.tres`, built by `tools/art/make_biome_fx_frames.py`, which also holds root_warn and root_spike for the Mycelium Mother); sounds spore_burst, geyser, lava_crack, boss_chest_open and music fungal_explore, boss_elemental. Not used: hazard slot 2 (puffball still frame; the puffball is an animated node).
+Integrated in stage 48 part 1: the fungal tiles, hazards, decals, wall details, door seal, lamp, the three obstacles and floor plate row 4 (`level/fungal_theme.tres`); spore_puff and spore_cloud (`level/traps/`, frames in `assets/art/fx/biome_fx_frames.tres`, built by `tools/art/make_biome_fx_frames.py`, which also holds root_warn and root_spike for the Mycelium Mother); sounds spore_burst, geyser, lava_crack, boss_chest_open and music fungal_explore, boss_elemental. Not used: hazard slot 2 (puffball still frame; the puffball is an animated node). Integrated in stage 48 part 2: sporeling, spore_bat, vine_lurker (with vine_lash) and sounds mushroom_squish, bat_screech, vine_lash (`actors/enemies/*.tres`).
 
 ### Sound (part 5)
 

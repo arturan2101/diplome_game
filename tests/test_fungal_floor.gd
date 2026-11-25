@@ -205,8 +205,7 @@ func _test_puff() -> void:
 
 func _test_game() -> void:
 	var saved: ExperimentConfig = GameManager.config
-	var full_count: int = 0
-	var clean_count: int = 0
+	var trap: SporeTrapData = (load(FUNGAL) as TileTheme).floor_trap
 	for config: ExperimentConfig in [saved, load(CLEAN) as ExperimentConfig]:
 		GameManager.config = config
 		GameManager.start_run(4810)
@@ -214,22 +213,21 @@ func _test_game() -> void:
 		game.death_screen_enabled = false
 		add_child(game)
 		await physics_frames(2)
-		var count: int = 0
-		for section in 4:
-			GameManager.depth = 2
-			GameManager.section_index = 10 + section
-			game._start_section()
-			await physics_frames(2)
-			for child: Node in game._contents.get_children():
-				if child is SporePuff:
-					count += 1
+		GameManager.depth = 2
+		GameManager.section_index = 10
+		game._start_section()
+		await physics_frames(2)
+		var cells: Array[Vector2i] = []
+		for child: Node in game._contents.get_children():
+			if child is SporePuff:
+				cells.append(game.level.cell_at((child as SporePuff).global_position))
 		if config == saved:
-			full_count = count
+			var expected: Array[Vector2i] = SporePuff.pick_cells(game.layout, trap, GameManager.make_hazard_rng(10))
 			check(game.level.theme == load(FUNGAL), "the full game draws the third depth as the fungal catacombs")
+			check(not cells.is_empty() and cells == expected,
+					"its section has the puffballs picked from the run's hazard stream: %s" % [cells])
 		else:
-			clean_count = count
+			check(cells.is_empty(), "the clean series has none")
 		game.queue_free()
 		await physics_frames(2)
 	GameManager.config = saved
-	check(full_count > 0, "the fungal floors have puffballs (%d in 4 sections)" % full_count)
-	check(clean_count == 0, "the clean series has none")

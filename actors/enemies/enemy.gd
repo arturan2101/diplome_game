@@ -403,6 +403,13 @@ func get_windup_progress() -> float:
 	return clampf(1.0 - _state_time_left / _windup_total, 0.0, 1.0)
 
 
+## A pose the sprite holds instead of idle and walk ("<pose>_<dir>", played once and
+## held on its last frame), &"" = none. Stage 48: the vine lurker hidden in the floor
+## ("hidden") and coming out of it ("emerge").
+func get_pose() -> StringName:
+	return &""
+
+
 ## Name of the animation of the attack being wound up ("<name>_<dir>"); the boss has
 ## one per attack.
 func get_attack_animation() -> String:

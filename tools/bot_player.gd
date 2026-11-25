@@ -390,7 +390,14 @@ func _direction_along_path(player: Player, goal: Vector2, delta: float) -> Vecto
 	if _path_index < _path.size():
 		return player.global_position.direction_to(_path[_path_index])
 	if player.global_position.distance_to(goal) > waypoint_reach:
-		return player.global_position.direction_to(goal)
+		var direction: Vector2 = player.global_position.direction_to(goal)
+		# The path ends at the edge when the goal hangs over a pit (stage 48: a spore bat
+		# flying over it): wait there instead of walking in after it.
+		var ahead: Vector2 = player.global_position + direction * minf(player.global_position.distance_to(goal),
+				float(game.level.theme.tile_size) * 0.5)
+		if not _walk_straight and game.level.cell_type_at(ahead) == LevelGrid.Cell.PIT:
+			return Vector2.ZERO
+		return direction
 	return Vector2.ZERO
 
 

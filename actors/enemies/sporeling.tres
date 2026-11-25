@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/enemy_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/sporeling_frames.tres" id="frames"]
+[ext_resource type="Resource" path="res://actors/enemies/sporeling_headbutt.tres" id="weapon"]
+[ext_resource type="Script" path="res://combat/spells/zone_data.gd" id="zone"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/biome_fx_frames.tres" id="fx"]
+
+[sub_resource type="Resource" id="spores"]
+script = ExtResource("zone")
+id = &"sporeling"
+color = Color(0.54, 0.75, 0.38, 1)
+tick_damage = PackedInt32Array(2, 2, 2)
+tick_interval = 0.5
+duration = PackedFloat32Array(2, 2, 2)
+radius = PackedFloat32Array(16, 16, 16)
+frames = ExtResource("fx")
+level_animations = Array[StringName]([&"spore_cloud", &"spore_cloud", &"spore_cloud"])
+look_radius = PackedFloat32Array(14, 14, 14)
+
+[resource]
+script = ExtResource("1")
+hurt_sound = &"mushroom_squish"
+death_sound = &"spore_burst"
+id = &"sporeling"
+display_name = "Sporeling"
+sprite_frames = ExtResource("frames")
+attack_strike_frame = 2
+weapon = ExtResource("weapon")
+danger_cost = 2
+max_hp = 38
+move_speed = 40.0
+detection_range = 150.0
+attack_range = 18.0
+windup = 0.55
+recovery = 0.7
+floor_style = &"fungal"
+death_zone = SubResource("spores")
