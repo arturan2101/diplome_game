@@ -20,4 +20,3 @@ frames = ExtResource("frames")
 shadow_animation = &"root_warn"
 impact_animation = &"root_spike"
 impact_pivot = Vector2(8, 23)
-shadow_modulate = Color(3, 3, 3, 1)

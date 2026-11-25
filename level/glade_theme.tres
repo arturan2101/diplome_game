@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://level/tile_theme.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/art/tiles/nature_tiles_atlas.png" id="2"]
 [ext_resource type="Texture2D" path="res://assets/art/tiles/ruins_hazards.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/art/tiles/glade_backdrop.png" id="backdrop"]
 
 [resource]
 script = ExtResource("1")
@@ -20,3 +21,4 @@ pit_tile = Vector2i(0, 0)
 pit_inner_tile = Vector2i(7, 0)
 spikes_tile = Vector2i(1, 0)
 solid_collision_layer = 1
+backdrop = ExtResource("backdrop")

@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/tiles/fire_hazards.png" id="3"]
 [ext_resource type="Texture2D" path="res://assets/art/tiles/fire_lava.png" id="4"]
 [ext_resource type="Texture2D" path="res://assets/art/tiles/fire_decals.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/art/tiles/fire_backdrop.png" id="backdrop"]
 
 [resource]
 script = ExtResource("1")
@@ -27,3 +28,4 @@ spikes_tile = Vector2i(1, 0)
 lava_texture = ExtResource("4")
 floor_decals = ExtResource("5")
 solid_collision_layer = 1
+backdrop = ExtResource("backdrop")

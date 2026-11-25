@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/level/fungal_lamp.png" id="9"]
 [ext_resource type="Texture2D" path="res://assets/art/tiles/fungal_door_seal.png" id="10"]
 [ext_resource type="Resource" path="res://level/traps/spore_trap.tres" id="11"]
+[ext_resource type="Texture2D" path="res://assets/art/tiles/fungal_backdrop.png" id="backdrop"]
 
 [resource]
 script = ExtResource("1")
@@ -41,3 +42,4 @@ wall_light_color = Color(0.42, 0.88, 0.75, 0.16)
 door_seal = ExtResource("10")
 floor_trap = ExtResource("11")
 solid_collision_layer = 1
+backdrop = ExtResource("backdrop")

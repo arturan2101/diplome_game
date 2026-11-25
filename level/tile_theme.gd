@@ -78,5 +78,10 @@ extends Resource
 ## A floor trap the style adds after a section is built (stage 48: the fungal
 ## puffballs, SporePuff); null = none.
 @export var floor_trap: SporeTrapData
+## The rock behind the walls (stage 48, batch 16): a seamless texture repeated under the
+## whole level, seen where no tile is drawn; tint multiplies it. Null = the plain
+## clear colour.
+@export var backdrop: Texture2D
+@export var backdrop_tint: Color = Color.WHITE
 ## Physics layers of walls and cover (world).
 @export_flags_2d_physics var solid_collision_layer: int = 1

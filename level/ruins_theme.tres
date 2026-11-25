@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/level/obstacle_rocks.png" id="6"]
 [ext_resource type="Texture2D" path="res://assets/art/level/obstacle_sarcophagus.png" id="7"]
 [ext_resource type="Texture2D" path="res://assets/art/tiles/wall_details.png" id="8"]
+[ext_resource type="Texture2D" path="res://assets/art/tiles/ruins_backdrop.png" id="backdrop"]
 
 [resource]
 script = ExtResource("1")
@@ -32,3 +33,4 @@ cover_piece_chance = 0.6
 wall_details = ExtResource("8")
 wall_detail_chance = 0.07
 solid_collision_layer = 1
+backdrop = ExtResource("backdrop")

@@ -39,6 +39,9 @@ const NEAREST_FLOOR_RADIUS: int = 6
 ## Tile themes of parts of the level by name (LevelGrid.theme_regions): nature broke
 ## into the secret rooms. Empty = DEFAULT_REGION_THEMES.
 @export var region_themes: Dictionary = {}
+## Cells of backdrop drawn around the grid on each side, for a level smaller than the
+## screen (the camera then shows past its edges).
+@export var backdrop_margin: int = 24
 ## Path cost of a timed spike cell for enemies and the bot: they walk around a wave
 ## when there is a way around, and cross it (in rhythm) when there is not.
 @export var timed_spikes_path_weight: float = 8.0
@@ -54,6 +57,8 @@ var floor_effects: Node2D = null
 ## Names of the region themes in atlas order.
 var _region_names: Array[StringName] = []
 
+## The theme's backdrop under the tiles (TileTheme.backdrop).
+var _backdrop: Sprite2D = null
 var _ground: TileMapLayer = null
 var _props: TileMapLayer = null
 var _astar: AStarGrid2D = AStarGrid2D.new()
@@ -72,6 +77,13 @@ func _ready() -> void:
 		_region_names.append(region_name)
 	# By text, not by StringName order (that follows memory, see SectionBuilder).
 	_region_names.sort_custom(func(a: StringName, b: StringName) -> bool: return String(a) < String(b))
+	# First child, so it is drawn under the tiles and everything else of the level.
+	_backdrop = Sprite2D.new()
+	_backdrop.name = "Backdrop"
+	_backdrop.centered = false
+	_backdrop.region_enabled = true
+	_backdrop.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	add_child(_backdrop)
 	_ground = TileMapLayer.new()
 	_ground.name = "Ground"
 	add_child(_ground)
@@ -133,6 +145,7 @@ func build(new_grid: LevelGrid) -> void:
 			_update_path_cell(Vector2i(x, y))
 	timed_spikes.rebuild(grid, hazards.timed_spikes, theme.tile_size)
 	timed_spikes.update_look(section_time)
+	_update_backdrop()
 
 
 ## Changes cells while the level is running (the doors of an arena lock and unlock).
@@ -243,6 +256,34 @@ func nearest_safe_position(world_position: Vector2) -> Vector2:
 	if not grid.in_bounds(cell):
 		return world_position
 	return cell_center(cell)
+
+
+## The theme that gives the backdrop: a visible region theme over the whole grid (the
+## merchant's glade), else the level's own.
+func backdrop_theme() -> TileTheme:
+	for region: Dictionary in grid.theme_regions:
+		var rect: Rect2i = region["rect"]
+		if not region.get("hidden", false) and rect.has_point(Vector2i.ZERO) 				and rect.end.x >= grid.width and rect.end.y >= grid.height and region_themes.has(region["theme"]):
+			return region_themes[region["theme"]] as TileTheme
+	return theme
+
+
+## The backdrop texture repeated over the grid and backdrop_margin cells around it.
+func _update_backdrop() -> void:
+	var look: TileTheme = backdrop_theme()
+	_backdrop.texture = look.backdrop if look != null else null
+	_backdrop.visible = _backdrop.texture != null
+	if not _backdrop.visible:
+		return
+	var margin: Vector2 = Vector2.ONE * float(backdrop_margin * theme.tile_size)
+	_backdrop.position = -margin
+	_backdrop.region_rect = Rect2(Vector2.ZERO, Vector2(grid.width, grid.height) * float(theme.tile_size) + margin * 2.0)
+	_backdrop.modulate = look.backdrop_tint
+
+
+## The backdrop's sprite (tests).
+func get_backdrop() -> Sprite2D:
+	return _backdrop
 
 
 ## Rectangle of the whole level in world coordinates (camera limits).
