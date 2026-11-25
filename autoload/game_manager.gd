@@ -44,6 +44,9 @@ const FULL_GAME_FEWER_PACKS: int = 1
 ## Stage 44: 0.5 -> 0.575, 15% more coins than after the playtest of stage 38.
 const FULL_GAME_COIN_SCALE: float = 0.575
 
+## FLOOR_STYLES without the stage 48 styles (made when first needed).
+var _older_floor_styles: FloorStyleTable = null
+
 ## Director mode of the next runs (debug menu or --mode=).
 var director_mode: DirectorMode = DirectorMode.RULES
 ## Which parts of the game the runs include (--config=); the whole game by default.
@@ -126,7 +129,7 @@ func _apply_config(director: Director) -> void:
 	if config.extra_enemies:
 		director.settings.extra_enemies = true
 	if config.floor_styles:
-		director.settings.floor_styles = FLOOR_STYLES
+		director.settings.floor_styles = floor_style_table()
 		director.settings.style_bosses = config.elemental_bosses
 	if config.full_game_tuning:
 		director.settings.health_packs_fewer = FULL_GAME_FEWER_PACKS
@@ -226,6 +229,25 @@ func make_bot_rng() -> RandomNumberGenerator:
 
 ## Returns a new generator for the loot of one section (what chests hold).
 ## Separate from the section generator, so loot does not change the tunnels.
+## The floor styles of this config (stage 48): FLOOR_STYLES, without the newer styles
+## (FloorStyleTable.extra_styles) when ExperimentConfig.extra_floor_styles is off.
+func floor_style_table() -> FloorStyleTable:
+	if config.extra_floor_styles or FLOOR_STYLES.extra_styles.is_empty():
+		return FLOOR_STYLES
+	if _older_floor_styles == null:
+		_older_floor_styles = FLOOR_STYLES.without_styles(FLOOR_STYLES.extra_styles)
+	return _older_floor_styles
+
+
+## Returns a new generator for the floor traps a floor style adds after a section is
+## built (stage 48: the fungal puffballs). Its own stream, so the section, the loot and
+## the director draw exactly as without it.
+func make_hazard_rng(index: int) -> RandomNumberGenerator:
+	var hazard_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	hazard_rng.seed = hash([run_seed, "hazards", index])
+	return hazard_rng
+
+
 func make_loot_rng(index: int) -> RandomNumberGenerator:
 	var loot_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	loot_rng.seed = hash([run_seed, "loot", index])

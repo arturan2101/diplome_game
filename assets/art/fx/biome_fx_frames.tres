@@ -1,0 +1,216 @@
+[gd_resource type="SpriteFrames" load_steps=31 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/fx/spore_cloud.png" id="tex0"]
+[ext_resource type="Texture2D" path="res://assets/art/level/spore_puff.png" id="tex1"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/root_warn.png" id="tex2"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/root_spike.png" id="tex3"]
+
+[sub_resource type="AtlasTexture" id="spore_cloud_0"]
+atlas = ExtResource("tex0")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="spore_cloud_1"]
+atlas = ExtResource("tex0")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="spore_cloud_2"]
+atlas = ExtResource("tex0")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="spore_cloud_3"]
+atlas = ExtResource("tex0")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="spore_cloud_4"]
+atlas = ExtResource("tex0")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="spore_cloud_5"]
+atlas = ExtResource("tex0")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="spore_puff_breathe_0"]
+atlas = ExtResource("tex1")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="spore_puff_breathe_1"]
+atlas = ExtResource("tex1")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="spore_puff_breathe_2"]
+atlas = ExtResource("tex1")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="spore_puff_breathe_3"]
+atlas = ExtResource("tex1")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="spore_puff_burst_0"]
+atlas = ExtResource("tex1")
+region = Rect2(64, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="spore_puff_burst_1"]
+atlas = ExtResource("tex1")
+region = Rect2(80, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="spore_puff_burst_2"]
+atlas = ExtResource("tex1")
+region = Rect2(96, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="spore_puff_burst_3"]
+atlas = ExtResource("tex1")
+region = Rect2(112, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="spore_puff_burst_4"]
+atlas = ExtResource("tex1")
+region = Rect2(128, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="spore_puff_burst_5"]
+atlas = ExtResource("tex1")
+region = Rect2(144, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="root_warn_0"]
+atlas = ExtResource("tex2")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="root_warn_1"]
+atlas = ExtResource("tex2")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="root_warn_2"]
+atlas = ExtResource("tex2")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="root_warn_3"]
+atlas = ExtResource("tex2")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="root_spike_0"]
+atlas = ExtResource("tex3")
+region = Rect2(0, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="root_spike_1"]
+atlas = ExtResource("tex3")
+region = Rect2(16, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="root_spike_2"]
+atlas = ExtResource("tex3")
+region = Rect2(32, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="root_spike_3"]
+atlas = ExtResource("tex3")
+region = Rect2(48, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="root_spike_4"]
+atlas = ExtResource("tex3")
+region = Rect2(64, 0, 16, 24)
+
+[sub_resource type="AtlasTexture" id="root_spike_5"]
+atlas = ExtResource("tex3")
+region = Rect2(80, 0, 16, 24)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("spore_cloud_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("spore_cloud_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("spore_cloud_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("spore_cloud_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("spore_cloud_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("spore_cloud_5")
+}],
+"loop": true,
+"name": &"spore_cloud",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("spore_puff_breathe_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("spore_puff_breathe_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("spore_puff_breathe_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("spore_puff_breathe_3")
+}],
+"loop": true,
+"name": &"spore_puff_breathe",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("spore_puff_burst_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("spore_puff_burst_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("spore_puff_burst_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("spore_puff_burst_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("spore_puff_burst_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("spore_puff_burst_5")
+}],
+"loop": false,
+"name": &"spore_puff_burst",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("root_warn_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("root_warn_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("root_warn_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("root_warn_3")
+}],
+"loop": true,
+"name": &"root_warn",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("root_spike_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("root_spike_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("root_spike_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("root_spike_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("root_spike_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("root_spike_5")
+}],
+"loop": false,
+"name": &"root_spike",
+"speed": 12.0
+}]

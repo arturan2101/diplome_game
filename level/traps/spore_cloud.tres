@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ZoneData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/zone_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/biome_fx_frames.tres" id="frames"]
+
+[resource]
+script = ExtResource("1")
+id = &"spore_trap"
+display_name = "Spore cloud"
+color = Color(0.54, 0.75, 0.38, 1)
+tick_damage = PackedInt32Array(3, 3, 3)
+tick_interval = 0.5
+duration = PackedFloat32Array(2.5, 2.5, 2.5)
+radius = PackedFloat32Array(16, 16, 16)
+frames = ExtResource("frames")
+level_animations = Array[StringName]([&"spore_cloud", &"spore_cloud", &"spore_cloud"])
+look_radius = PackedFloat32Array(14, 14, 14)

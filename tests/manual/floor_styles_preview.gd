@@ -1,13 +1,14 @@
 extends Node
 ## Manual preview of the floor styles (stage 42): the real full game at the first section
-## of depths 1, 3 and 5 (ruins, flooded halls, burning depths), the player next to a pit
+## of depths 1, 3, 5 and 7 (ruins, fungal catacombs since stage 48, flooded halls,
+## burning depths), the player next to a pit
 ## if the section has one. Saves style_<depth>.png for each, then quits. Not part of the
 ## test suite.
 ## Usage: godot --path . res://tests/manual/floor_styles_preview.tscn -- <folder>
 
 const GAME_SCENE: PackedScene = preload("res://main/main.tscn")
 const RUN_SEED: int = 5003
-const DEPTHS: Array[int] = [0, 2, 4]
+const DEPTHS: Array[int] = [0, 2, 4, 6]
 const SETTLE_FRAMES: int = 20
 ## Sections tried per depth until one has a pit to show.
 const TRIES: int = 6

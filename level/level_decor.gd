@@ -143,6 +143,19 @@ func _is_wall_front(cell: Vector2i) -> bool:
 	return _grid.get_cell(cell) == LevelGrid.Cell.WALL and _grid.is_floor(cell + Vector2i.DOWN)
 
 
+## The wall light of the level's style (TileTheme.wall_light), else the torch.
+func _light_strip() -> Texture2D:
+	return _level.theme.wall_light if _level != null and _level.theme != null and _level.theme.wall_light != null else torch
+
+
+func _light_frames() -> int:
+	return maxi(_level.theme.wall_light_frames if _light_strip() != torch else torch_frames, 1)
+
+
+func _light_color() -> Color:
+	return _level.theme.wall_light_color if _light_strip() != torch else torch_light_color
+
+
 func _wall_details() -> Texture2D:
 	return _level.theme.wall_details if _level != null and _level.theme != null else null
 
@@ -194,11 +207,13 @@ func _draw() -> void:
 		var bottom: Vector2 = Vector2(cell) * size + Vector2(size * 0.5, size)
 		match _wall[cell]:
 			WallPiece.TORCH:
-				if torch != null:
-					var frame: int = (flame + absi(hash(cell))) % maxi(torch_frames, 1)
-					var w: float = float(torch.get_width()) / maxi(torch_frames, 1)
-					draw_texture_rect_region(torch, Rect2(bottom - Vector2(w * 0.5, size), Vector2(w, size)),
-							Rect2(frame * w, 0.0, w, torch.get_height()))
+				var light: Texture2D = _light_strip()
+				if light != null:
+					var frames: int = _light_frames()
+					var frame: int = (flame + absi(hash(cell))) % frames
+					var w: float = float(light.get_width()) / frames
+					draw_texture_rect_region(light, Rect2(bottom - Vector2(w * 0.5, size), Vector2(w, size)),
+							Rect2(frame * w, 0.0, w, light.get_height()))
 			WallPiece.PILLAR:
 				_draw_standing(pillar, bottom)
 			WallPiece.STATUE:
@@ -212,9 +227,10 @@ func _draw() -> void:
 	for cell: Vector2i in _obstacles:
 		var picture: Texture2D = _obstacles[cell]
 		draw_texture(picture, Vector2(cell.x * size, (cell.y + 1) * size - picture.get_height()))
-	if door_seal != null:
+	var seal: Texture2D = _level.theme.door_seal if _level.theme != null and _level.theme.door_seal != null else door_seal
+	if seal != null:
 		for cell: Vector2i in _sealed:
-			draw_texture(door_seal, Vector2(cell) * size)
+			draw_texture(seal, Vector2(cell) * size)
 
 
 ## A picture whose bottom stands on the bottom of the cell.
@@ -231,4 +247,4 @@ func _draw_lights() -> void:
 		var breathe: float = 1.0 + torch_light_flicker * sin(_time * 7.0 + float(absi(hash(cell)) % 100))
 		var extent: Vector2 = torch_light.get_size() * breathe
 		var centre: Vector2 = Vector2(cell) * size + Vector2(size * 0.5, size * 0.6)
-		_lights.draw_texture_rect(torch_light, Rect2(centre - extent * 0.5, extent), false, torch_light_color)
+		_lights.draw_texture_rect(torch_light, Rect2(centre - extent * 0.5, extent), false, _light_color())

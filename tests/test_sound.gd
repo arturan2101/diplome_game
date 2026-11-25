@@ -112,8 +112,10 @@ func _test_section_music() -> void:
 	check(game.section_music() == &"ruins_explore" and Sound.get_music() == &"ruins_explore",
 			"the first floor plays the ruins' music")
 	game.level.set_theme(game.floor_theme_for(2))
-	check(game.section_music() == &"flooded_explore", "the flooded floors their own (%s)" % game.section_music())
+	check(game.section_music() == &"fungal_explore", "the fungal floors their own (%s)" % game.section_music())
 	game.level.set_theme(game.floor_theme_for(4))
+	check(game.section_music() == &"flooded_explore", "the flooded floors theirs (%s)" % game.section_music())
+	game.level.set_theme(game.floor_theme_for(6))
 	check(game.section_music() == &"fire_explore", "and the fire floors theirs")
 	game.queue_free()
 	await physics_frames(2)

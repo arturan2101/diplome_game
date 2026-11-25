@@ -29,7 +29,10 @@ func _test_buying() -> void:
 	var fire: Array[StringName] = [&"ember_imp", &"magma_beetle"]
 	check(not _has_any(by_depth[0], flooded + fire) and not _has_any(by_depth[2], flooded + fire),
 			"without floor styles no floor enemy is ever bought")
-	settings.floor_styles = load(STYLES) as FloorStyleTable
+	# The stage 42 order (ruins, flooded, fire): the stage 48 styles are tested in
+	# test_fungal_floor.gd.
+	var table: FloorStyleTable = load(STYLES) as FloorStyleTable
+	settings.floor_styles = table.without_styles(table.extra_styles)
 	for depth: int in [0, 2, 4, 6]:
 		by_depth[depth] = _bought(director, depth)
 	check(not _has_any(by_depth[0], flooded + fire) and not _has_any(by_depth[6], flooded + fire),

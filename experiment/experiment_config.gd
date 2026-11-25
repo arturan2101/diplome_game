@@ -75,6 +75,11 @@ extends Resource
 ## under melee blows and leave floor; plain gravestones stay. Off in the clean series
 ## and the playtest.
 @export var breakable_cover: bool = true
+## Stage 48: two more floor styles with their own traps, enemies and bosses: the fungal
+## catacombs (after the ruins) and later the sand temple (after the flooded halls).
+## Without it the styles go ruins, flooded, fire as before. Needs floor styles. Off in
+## the clean series and the playtest.
+@export var extra_floor_styles: bool = true
 ## Soft tension waves of the rules director: a peak of x1.15 and a rest of x0.5
 ## (DirectorSettings.soft_peak_multiplier, soft_rest_multiplier) instead of x1.3 and
 ## x0.3. The other modes have no wave and do not change.
@@ -89,4 +94,4 @@ func to_dictionary() -> Dictionary:
 			"depth_pressure": depth_pressure, "extra_enemies": extra_enemies, "meta_progression": meta_progression,
 			"full_game_tuning": full_game_tuning, "arsenal": arsenal, "floor_styles": floor_styles, "shop_goods": shop_goods,
 			"boss_chest": boss_chest, "elemental_bosses": elemental_bosses,
-			"breakable_cover": breakable_cover}
+			"breakable_cover": breakable_cover, "extra_floor_styles": extra_floor_styles}

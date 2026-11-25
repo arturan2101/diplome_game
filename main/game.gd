@@ -81,6 +81,8 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 @export var boss_rarity_table: RarityTable
 ## The boss chest holds this many times the coins of an ordinary chest.
 @export var boss_chest_coin_scale: float = 2.0
+## Sound of the boss chest opening (stage 48, batch 15 part 5).
+@export var boss_chest_sound: StringName = &"boss_chest_open"
 @export_group("")
 ## Spells of shrines and chest scrolls. Empty = combat/spells/spell_pool.tres.
 @export var spell_pool: SpellPool
@@ -99,7 +101,7 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 ## The camp's permanent skills (stage 35). Empty = progression/perks.tres.
 @export var perk_tree: PerkTree
 ## Floor styles by depth (ExperimentConfig.floor_styles, stage 42). Empty =
-## level/floor_styles.tres.
+## GameManager.floor_style_table() (level/floor_styles.tres, stage 48 styles by the flag).
 @export var floor_styles: FloorStyleTable
 ## The merchant's glade between depths. Empty = generation/glade.tres.
 @export var glade_data: GladeData
@@ -192,7 +194,7 @@ func _ready() -> void:
 	if glade_data == null:
 		glade_data = DEFAULT_GLADE
 	if floor_styles == null:
-		floor_styles = GameManager.FLOOR_STYLES
+		floor_styles = GameManager.floor_style_table()
 	if shop_screen == null:
 		shop_screen = SHOP_SCREEN_SCENE.instantiate() as ShopScreen
 		add_child(shop_screen)
@@ -337,6 +339,7 @@ func _start_section() -> void:
 	_spawn_items()
 	_spawn_secret()
 	_spawn_breakable_cover()
+	_spawn_floor_traps()
 	_combat.setup(layout)
 	_spawn_enemies()
 	player.teleport(level.cell_center(layout.entrance))
@@ -538,6 +541,17 @@ func _spawn_breakable_cover() -> void:
 		cover.setup(cells, rect, level.theme.cover_piece_hp)
 		cover.broken.connect(_on_cover_broken)
 		_contents.add_child(cover)
+
+
+## The floor style's own trap (stage 48: the fungal puffballs), placed after the
+## section is built from its own random stream (GameManager.make_hazard_rng).
+func _spawn_floor_traps() -> void:
+	var trap: SporeTrapData = level.theme.floor_trap if level.theme != null else null
+	if trap == null:
+		return
+	var rng: RandomNumberGenerator = GameManager.make_hazard_rng(GameManager.section_index)
+	for cell: Vector2i in SporePuff.pick_cells(layout, trap, rng):
+		SporePuff.spawn(_contents, level.cell_center(cell), trap)
 
 
 func _on_cover_broken(cover: BreakableCover) -> void:
@@ -973,6 +987,7 @@ func spawn_boss_chest(at: Vector2) -> Chest:
 	var rarity: WeaponRarity = boss_rarity_table.pick(0, _loot_rng) if GameManager.config.rarity_enabled else null
 	chest.loot_weapon = base.with_rarity(rarity) if base != null and rarity != null else base
 	chest.loot_coins = roundi(_loot_rng.randi_range(chest_coins_min, chest_coins_max) * boss_chest_coin_scale)
+	chest.collect_sound = boss_chest_sound
 	chest.opened.connect(_on_chest_opened)
 	# Deferred: the boss falls inside a physics callback.
 	_contents.add_child.call_deferred(chest)

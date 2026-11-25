@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-impact_sound = &"water_wave"
+impact_sound = &"geyser"
 id = &"tide_warden"
 display_name = "Geyser"
 color = Color(0.16, 0.66, 0.63, 1)

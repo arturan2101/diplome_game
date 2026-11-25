@@ -1,11 +1,13 @@
-[gd_resource type="Resource" script_class="FloorStyleTable" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="FloorStyleTable" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://level/floor_style_table.gd" id="1"]
 [ext_resource type="Resource" path="res://level/ruins_theme.tres" id="2"]
 [ext_resource type="Resource" path="res://level/flooded_theme.tres" id="3"]
 [ext_resource type="Resource" path="res://level/fire_theme.tres" id="4"]
+[ext_resource type="Resource" path="res://level/fungal_theme.tres" id="5"]
 
 [resource]
 script = ExtResource("1")
-themes = Array[Resource]([ExtResource("2"), ExtResource("3"), ExtResource("4")])
+themes = Array[Resource]([ExtResource("2"), ExtResource("5"), ExtResource("3"), ExtResource("4")])
 depths_per_style = 2
+extra_styles = Array[StringName]([&"fungal", &"sand"])

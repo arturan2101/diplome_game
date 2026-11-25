@@ -67,5 +67,16 @@ extends Resource
 @export_range(0.0, 1.0) var wall_detail_chance: float = 0.0
 ## Floor decals of this style (a strip of 16x16 pieces); null = the decor's own.
 @export var floor_decals: Texture2D
+## The style's wall light instead of the decor's torch (stage 48: glowing mushrooms, a
+## lantern, a brazier): a strip of wall_light_frames 16x16 frames and the colour of its
+## glow. Null = the torch.
+@export var wall_light: Texture2D
+@export var wall_light_frames: int = 4
+@export var wall_light_color: Color = Color(1.0, 0.62, 0.3, 0.22)
+## Rubble on doors walled up while the level runs; null = the decor's own.
+@export var door_seal: Texture2D
+## A floor trap the style adds after a section is built (stage 48: the fungal
+## puffballs, SporePuff); null = none.
+@export var floor_trap: SporeTrapData
 ## Physics layers of walls and cover (world).
 @export_flags_2d_physics var solid_collision_layer: int = 1

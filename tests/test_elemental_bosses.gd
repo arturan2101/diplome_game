@@ -41,8 +41,13 @@ func _test_boss_by_floor() -> void:
 	check(GameManager.config.elemental_bosses, "the default config has the elemental bosses on")
 	var director: Director = GameManager.make_director()
 	var ids: Array[StringName] = []
-	for depth in [1, 3, 5]:
-		ids.append(director.boss_for_depth(depth).id)
+	# The last depth of each style (stage 48 moved the flooded and fire floors deeper).
+	var table: FloorStyleTable = GameManager.floor_style_table()
+	for style: StringName in [&"ruins", &"flooded", &"fire"]:
+		var depth: int = 0
+		while table.style_at(depth) != style:
+			depth += 1
+		ids.append(director.boss_for_depth(depth + table.depths_per_style - 1).id)
 	check(ids == ([&"guardian", &"tide_warden", &"molten_warden"] as Array[StringName]),
 			"ruins, flooded and fire floors end with their own boss: %s" % [ids])
 	GameManager.config = load(CLEAN) as ExperimentConfig
