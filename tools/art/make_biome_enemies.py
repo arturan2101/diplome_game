@@ -16,7 +16,8 @@ Fungal:
               (rise 0-1, dive and strike 2, back 3), hurt 2, death 4. Shadow row 14.
   fx/vine_lash.png  48x8 x 4: the vine shoots right from x 0 (row 4) and pulls back.
   fx/root_spike.png 16x24 x 6, root bursting from the floor, bottom row 23.
-  fx/root_warn.png  16x16 x 4, loop: a crack opening in the floor, centre (8, 9).
+  fx/root_warn.png  16x16 x 4, loop, centre (8, 9) (v2): a crack glowing mint inside grows
+                    over the frames until it spans the cell, heaved earth and rootlets.
   fx/spore_ring.png 64x64 x 6, once, centre (32, 32), ring radius 6 ... 30 (Mother, phase 2).
 Sand:
   mummy       24x24, recoloured from the drowned (same frames and timing): idle 4, walk 6,
@@ -337,20 +338,86 @@ def root_spike(frame):
     return c.img
 
 
+def _seg_dist(px, py, ax, ay, bx, by):
+    """Distance from a point to a segment and the position along it (0 ... 1)."""
+    vx, vy = bx - ax, by - ay
+    t = max(0.0, min(1.0, ((px - ax) * vx + (py - ay) * vy) / (vx * vx + vy * vy)))
+    return math.hypot(px - ax - vx * t, py - ay - vy * t), t
+
+
 def root_warn(frame):
+    """v2: a crack that grows over the 4 frames until it spans the cell, glowing mint inside
+    (#6ae0c0), a black rim, heaved earth on its lips (lit upper-left, dark lower-right) and
+    dark rootlets poking out. Loop, centre (8, 9)."""
     c = Canvas(16, 16)
-    path = [(4, 9), (5, 9), (6, 8), (7, 9), (8, 9), (9, 10), (10, 9), (11, 9), (12, 8)]
-    n = (3, 5, 7, 9)[frame]
-    for x, y in path[:n]:
-        c.set(x, y, "1")
-    for x, y in path[1:n:3]:
-        c.set(x, y + 1, "1")
-    if frame >= 2:
-        for x, y in ((7, 10), (8, 8)):
-            c.set(x, y, "x" if frame == 3 else "a")
-    for k, (x, y) in enumerate(((5, 7), (10, 7), (8, 11))):
-        if (k + frame) % 2:
-            c.set(x, y - frame % 2, "3")
+    # (polyline, frame it appears on, width at its middle)
+    main = [(1, 11), (3, 10), (5, 10), (6, 9), (8, 9), (10, 8), (11, 9), (13, 8), (14, 7)]
+    branches = [([(6, 9), (5, 7), (5, 5), (4, 3)], 1, 1.1),
+                ([(10, 8), (11, 10), (12, 12), (13, 14)], 1, 1.1),
+                ([(8, 9), (8, 11), (7, 13)], 2, 0.9),
+                ([(11, 9), (12, 6), (12, 4)], 3, 0.8)]
+    reach = (0.5, 0.7, 0.88, 1.0)[frame]
+
+    def polyline_len(pts):
+        return sum(math.dist(pts[i], pts[i + 1]) for i in range(len(pts) - 1))
+
+    cracks = []  # (points, revealed length, max width, centred taper?)
+    total = polyline_len(main)
+    cracks.append((main, total * reach, (1.3, 1.5, 1.7, 1.8)[frame], True))
+    for pts, first, w in branches:
+        if frame >= first:
+            grow = (frame - first + 1) / (4 - first)
+            cracks.append((pts, polyline_len(pts) * min(1.0, 0.5 + grow * 0.5), w, False))
+
+    def crack_at(x, y):
+        """Smallest (distance - half width) over all revealed crack pieces."""
+        best = 99.0
+        for pts, length, wmax, centred in cracks:
+            full = polyline_len(pts)
+            run = 0.0
+            for i in range(len(pts) - 1):
+                (ax, ay), (bx, by) = pts[i], pts[i + 1]
+                seg = math.dist(pts[i], pts[i + 1])
+                d, t = _seg_dist(x, y, ax, ay, bx, by)
+                pos = run + t * seg
+                run += seg
+                if centred:  # the main crack grows from the middle out to both ends
+                    if abs(pos - full / 2) > length / 2:
+                        continue
+                    w = wmax * (1 - abs(pos - full / 2) / (length / 2 + 1.5))
+                else:  # a branch grows from its root on the main crack
+                    if pos > length:
+                        continue
+                    w = wmax * (1 - pos / (length + 1.5))
+                best = min(best, d - max(w, 0.35))
+        return best
+
+    field = {(x, y): crack_at(x + 0.5, y + 0.5) for y in range(16) for x in range(16)}
+    glow_core = "A" if frame == 3 else "x"
+    for (x, y), d in field.items():
+        if d <= -0.6:
+            c.set(x, y, glow_core if d <= -1.0 else "x")
+        elif d <= 0.15:
+            c.set(x, y, "x" if d <= -0.25 else "a")
+    # black rim right around the glow
+    for (x, y), d in field.items():
+        if 0.15 < d <= 0.95 and c.get(x, y) == ".":
+            c.set(x, y, "o")
+    # heaved earth on the lips: lit above / left of the crack, dark below / right
+    for (x, y), d in field.items():
+        if 0.95 < d <= 1.9 and c.get(x, y) == ".":
+            above = field.get((x, y + 1), 9) < d or field.get((x + 1, y), 9) < d
+            c.set(x, y, "3" if above else "1")
+    # rootlets: short dark curls poking out of the crack, more as it opens
+    roots = [((3, 12), (2, 13), (2, 14)), ((13, 6), (14, 5), (14, 4)), ((9, 11), (10, 12), (10, 13)),
+             ((4, 8), (3, 7), (2, 7)), ((6, 11), (5, 12))]
+    for k, root in enumerate(roots[:(1, 2, 4, 5)[frame]]):
+        for x, y in root:
+            if c.get(x, y) in (".", "3", "1"):
+                c.set(x, y, "b")
+        tx, ty = root[-1]
+        if c.get(tx, ty + 1) == ".":
+            c.set(tx, ty + 1, "o")
     return c.img
 
 
