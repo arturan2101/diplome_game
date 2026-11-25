@@ -78,6 +78,9 @@ extends Resource
 ## A floor trap the style adds after a section is built (stage 48: the fungal
 ## puffballs, SporePuff); null = none.
 @export var floor_trap: SporeTrapData
+## Quicksand patches the style lays after a section is built (stage 49: the sand
+## temple, Quicksand); null = none.
+@export var quicksand: QuicksandData
 ## The rock behind the walls (stage 48, batch 16): a seamless texture repeated under the
 ## whole level, seen where no tile is drawn; tint multiplies it. Null = the plain
 ## clear colour.

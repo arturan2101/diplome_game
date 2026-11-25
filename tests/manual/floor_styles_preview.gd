@@ -1,14 +1,15 @@
 extends Node
 ## Manual preview of the floor styles (stage 42): the real full game at the first section
-## of depths 1, 3, 5 and 7 (ruins, fungal catacombs since stage 48, flooded halls,
-## burning depths), the player next to a pit
-## if the section has one. Saves style_<depth>.png for each, then quits. Not part of the
+## of depths 1, 3, 5, 7 and 9 (ruins, fungal catacombs since stage 48, flooded halls,
+## buried temple since stage 49, burning depths), the player next to a pit
+## if the section has one. Saves style_<depth>.png for each (and style_<depth>_quicksand.png
+## on the first quicksand patch of a sand floor), then quits. Not part of the
 ## test suite.
 ## Usage: godot --path . res://tests/manual/floor_styles_preview.tscn -- <folder>
 
 const GAME_SCENE: PackedScene = preload("res://main/main.tscn")
 const RUN_SEED: int = 5003
-const DEPTHS: Array[int] = [0, 2, 4, 6]
+const DEPTHS: Array[int] = [0, 2, 4, 6, 8]
 const SETTLE_FRAMES: int = 20
 ## Sections tried per depth until one has a pit to show.
 const TRIES: int = 6
@@ -48,6 +49,16 @@ func _ready() -> void:
 		var path: String = _out_dir.path_join("style_%d.png" % (depth + 1))
 		get_viewport().get_texture().get_image().save_png(path)
 		print("Saved ", ProjectSettings.globalize_path(path))
+		# The sand temple (stage 49): the player on the first quicksand patch too.
+		for child: Node in game._contents.get_children():
+			if child is Quicksand:
+				game.player.teleport(game.level.cell_center((child as Quicksand).cells[0]))
+				await _frames(SETTLE_FRAMES)
+				await RenderingServer.frame_post_draw
+				path = _out_dir.path_join("style_%d_quicksand.png" % (depth + 1))
+				get_viewport().get_texture().get_image().save_png(path)
+				print("Saved ", ProjectSettings.globalize_path(path))
+				break
 	get_tree().quit()
 
 

@@ -35,10 +35,10 @@ func _test_config_and_order() -> void:
 	check(GameManager.config.extra_floor_styles and not (load(CLEAN) as ExperimentConfig).extra_floor_styles,
 			"the new floor styles: on in the full game, off in the clean series")
 	var styles: Array[StringName] = []
-	for depth in 8:
+	for depth in 10:
 		styles.append(GameManager.floor_style_table().style_at(depth))
-	check(styles == ([&"ruins", &"ruins", &"fungal", &"fungal", &"flooded", &"flooded", &"fire", &"fire"] as Array[StringName]),
-			"the fungal catacombs come after the ruins: %s" % [styles])
+	check(styles == ([&"ruins", &"ruins", &"fungal", &"fungal", &"flooded", &"flooded", &"sand", &"sand", &"fire", &"fire"] as Array[StringName]),
+			"the fungal catacombs come after the ruins, the sand temple before the fire (stage 49): %s" % [styles])
 	var without: ExperimentConfig = GameManager.config.duplicate() as ExperimentConfig
 	without.extra_floor_styles = false
 	GameManager.config = without

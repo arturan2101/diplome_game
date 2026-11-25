@@ -58,10 +58,11 @@ func _test_game() -> void:
 	add_child(game)
 	await physics_frames(2)
 	var styles: Array[String] = []
-	for depth in 9:
+	for depth in 11:
 		styles.append(game.floor_theme_for(depth).display_name)
 	check(styles == (["The Ruins", "The Ruins", "The Fungal Catacombs", "The Fungal Catacombs", "The Flooded Halls",
-			"The Flooded Halls", "The Burning Depths", "The Burning Depths", "The Ruins"] as Array[String]),
+			"The Flooded Halls", "The Buried Temple", "The Buried Temple", "The Burning Depths", "The Burning Depths",
+			"The Ruins"] as Array[String]),
 			"two depths per style, then round again: %s" % [styles])
 	check(game.level.theme == load(RUINS), "a run starts in the ruins")
 	GameManager.depth = 4

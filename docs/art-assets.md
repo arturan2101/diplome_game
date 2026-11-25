@@ -708,6 +708,8 @@ Tiles, props and floor effects: `tools/art/make_biome_tiles.py`; small enemies a
 | N | Sun beam hit: white-gold flash with flickering rays where the beam meets a wall | assets/art/fx/sun_beam_hit.png | 16x16, 4, loop | centre (8, 8) | generated |
 | C | Sand ring: sand wave ring | assets/art/fx/sand_ring.png | 64x64, 6, once | centre (32, 32), ring radius 6 ... 30 | generated |
 
+Integrated in stage 49 part 1: the sand tiles, hazards, decals, wall details, door seal, brazier, the three obstacles, floor plate row 5 and the backdrop (`level/sand_theme.tres`); sand_quicksand.png as the quicksand patches (`level/traps/quicksand.tres`, `level/quicksand.gd`); sounds quicksand_loop, music sand_explore. Not used: hazard slot 2 (quicksand still frame; the patches are animated nodes).
+
 Integrated in stage 48 part 1: the fungal tiles, hazards, decals, wall details, door seal, lamp, the three obstacles and floor plate row 4 (`level/fungal_theme.tres`); spore_puff and spore_cloud (`level/traps/`, frames in `assets/art/fx/biome_fx_frames.tres`, built by `tools/art/make_biome_fx_frames.py`, which also holds root_warn and root_spike for the Mycelium Mother); sounds spore_burst, geyser, lava_crack, boss_chest_open and music fungal_explore, boss_elemental. Not used: hazard slot 2 (puffball still frame; the puffball is an animated node). Integrated in stage 48 part 2: sporeling, spore_bat, vine_lurker (with vine_lash) and sounds mushroom_squish, bat_screech, vine_lash (`actors/enemies/*.tres`). Integrated in stage 48 part 3: Mycelium Mother (`actors/enemies/mycelium_mother.tres`, Guardian class; spores = close burst, roots = special line, roar = phase-two spore ring), root_warn / root_spike (`actors/enemies/boss_effects/root_spike.tres`), spore_ring, sounds root_burst, mother_roar, music boss_mother. root_warn is too small and dark to read on the fungal floor (5-15 dark pixels); the art session redrew it after stage 48 (a bright teal crack), so the game no longer brightens it.
 
 ### Sound (part 5)
@@ -750,6 +752,6 @@ The rock behind the one-tile walls, instead of the flat near-black clear colour.
 | C | Sand: dark sandstone, soft sand drifts, small stones, cracks | assets/art/tiles/sand_backdrop.png | 64x64, seamless | 42 / 49 / 146 | generated |
 | C | Glade (the merchant's glade): dense dark grass and bush clumps seen from above, at dusk | assets/art/tiles/glade_backdrop.png | 64x64, seamless | 53 / 117 / 115 | generated |
 
-Integrated after stage 48: `TileTheme.backdrop` of ruins, fungal, flooded, fire and glade themes (`level/*_theme.tres`); the level repeats it under its tiles (`Level._update_backdrop`). sand_backdrop waits for the sand theme (stage 49).
+Integrated after stage 48: `TileTheme.backdrop` of ruins, fungal, flooded, fire and glade themes (`level/*_theme.tres`); the level repeats it under its tiles (`Level._update_backdrop`). sand_backdrop is used by the sand theme since stage 49.
 
 Not wired in: the level code (a repeating texture under the TileMapLayers, chosen by the style id) is for the code session.

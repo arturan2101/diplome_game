@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="QuicksandData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://level/quicksand_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/tiles/sand_quicksand.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+per_section = Vector2i(1, 3)
+patch_size = Vector2i(2, 3)
+min_spacing = 3
+clearance = 2
+item_clearance = 1
+slow_multiplier = 0.5
+slow_linger = 0.15
+strip = ExtResource("2")
+strip_frames = 4
+strip_fps = 6.0
+step_sound = &"quicksand_loop"
+sound_cooldown = 2.5

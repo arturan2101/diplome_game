@@ -543,15 +543,20 @@ func _spawn_breakable_cover() -> void:
 		_contents.add_child(cover)
 
 
-## The floor style's own trap (stage 48: the fungal puffballs), placed after the
+## The floor style's own traps (stage 48: the fungal puffballs; stage 49: the sand temple's quicksand), placed after the
 ## section is built from its own random stream (GameManager.make_hazard_rng).
 func _spawn_floor_traps() -> void:
-	var trap: SporeTrapData = level.theme.floor_trap if level.theme != null else null
-	if trap == null:
+	if level.theme == null:
 		return
 	var rng: RandomNumberGenerator = GameManager.make_hazard_rng(GameManager.section_index)
-	for cell: Vector2i in SporePuff.pick_cells(layout, trap, rng):
-		SporePuff.spawn(_contents, level.cell_center(cell), trap)
+	var trap: SporeTrapData = level.theme.floor_trap
+	if trap != null:
+		for cell: Vector2i in SporePuff.pick_cells(layout, trap, rng):
+			SporePuff.spawn(_contents, level.cell_center(cell), trap)
+	var sand: QuicksandData = level.theme.quicksand
+	if sand != null:
+		for rect: Rect2i in Quicksand.pick_patches(layout, sand, rng):
+			Quicksand.spawn(_contents, level, Quicksand.rect_cells(rect), sand)
 
 
 func _on_cover_broken(cover: BreakableCover) -> void:
