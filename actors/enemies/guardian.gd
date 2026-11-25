@@ -15,6 +15,8 @@ extends Enemy
 ## (GuardianData decides): the thrown projectile may leave a patch, the slam lava cracks,
 ## the shockwave a ring that slows; and a special attack drops strikes on the floor
 ## after a warning (geysers in a line, meteors on and around the player).
+## Stage 48: the Mycelium Mother of the fungal floors too: no throw, a spore burst all
+## round that leaves a cloud, roots bursting from the floor in a line, a spore ring.
 
 signal phase_changed(phase: int)
 ## The game spawns the servants: it owns the enemies of the section.
@@ -117,6 +119,10 @@ func get_attack_sound() -> StringName:
 func get_attack_animation() -> String:
 	if attack == Attack.SPECIAL and _stats.special_animation != "":
 		return _stats.special_animation
+	if attack == Attack.SLAM and _stats.slam_animation != "":
+		return _stats.slam_animation
+	if attack == Attack.SHOCKWAVE and _stats.wave_animation != "":
+		return _stats.wave_animation
 	return String(attack_animations.get(attack, "attack"))
 
 
@@ -140,7 +146,8 @@ func _update_chase(delta: float) -> void:
 		if has_special() and _special_cooldown_left <= 0.0 and distance >= _stats.special_min_distance 				and distance <= _stats.special_range:
 			_start_attack(Attack.SPECIAL)
 			return
-		if distance >= _stats.throw_min_distance and distance <= _stats.throw_range and _throw_cooldown_left <= 0.0:
+		if _stats.projectile_scene != null and distance >= _stats.throw_min_distance and distance <= _stats.throw_range \
+				and _throw_cooldown_left <= 0.0:
 			_start_attack(Attack.THROW)
 			return
 	super(delta)

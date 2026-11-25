@@ -1,0 +1,60 @@
+[gd_resource type="Resource" script_class="GuardianData" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/guardian_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/guardian.tres" id="2"]
+[ext_resource type="Resource" path="res://actors/enemies/mycelium_mother_spores.tres" id="3"]
+[ext_resource type="PackedScene" path="res://actors/enemies/guardian.tscn" id="4"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/spore_ring.png" id="ring"]
+[ext_resource type="Resource" path="res://actors/enemies/boss_effects/root_spike.tres" id="special"]
+[ext_resource type="Resource" path="res://actors/enemies/boss_effects/mother_spores.tres" id="slam_zone"]
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/mycelium_mother_frames.tres" id="frames"]
+
+[resource]
+script = ExtResource("1")
+attack_sound = &"spore_burst"
+hurt_sound = &"mushroom_squish"
+death_sound = &"warden_death"
+shockwave_sound = &"spore_burst"
+roar_sound = &"mother_roar"
+summon_sound = &"warden_summon"
+boss_music = &"boss_mother"
+shard_drop = 5
+id = &"mycelium_mother"
+display_name = "Mycelium Mother"
+sprite = ExtResource("2")
+sprite_frames = ExtResource("frames")
+sprite_scale = 2.0
+body_radius = 11.0
+danger_cost = 16
+max_hp = 180
+move_speed = 32.0
+detection_range = 150.0
+attack_range = 30.0
+windup = 0.8
+attack_strike_frame = 4
+feet_row = 92
+recovery = 0.8
+weapon = ExtResource("3")
+scene = ExtResource("4")
+is_boss = true
+phase_two_speed_multiplier = 1.2
+shockwave_damage = 10
+summon_id = &"sporeling"
+summon_interval = 11.0
+summon_max_alive = 3
+floor_style = &"fungal"
+slam_zone = ExtResource("slam_zone")
+slam_zone_distance = 0.0
+shockwave_ring = ExtResource("ring")
+slam_animation = "spores"
+wave_animation = "roar"
+special_zone = ExtResource("special")
+special_animation = "roots"
+special_pattern = 0
+special_count = 5
+special_count_phase_two = 7
+special_spacing = 22.0
+special_stagger = 0.1
+special_windup = 0.9
+special_cooldown = 5.0
+special_min_distance = 36.0

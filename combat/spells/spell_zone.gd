@@ -72,6 +72,7 @@ func _make_look() -> void:
 			var pass_time: float = float(frames.get_frame_count(_stats.shadow_animation)) / maxf(frames.get_animation_speed(_stats.shadow_animation), 1.0)
 			_shadow.speed_scale = pass_time / maxf(_fall_left, 0.01)
 			_shadow.scale = Vector2.ONE * (_stats.impact_radius * 2.0 / maxf(SpellData.frame_size(frames, _stats.shadow_animation).x, 1.0))
+			_shadow.modulate = _stats.shadow_modulate
 		_rock = _sprite(_stats.fall_animation, _stats.fall_pivot)
 		if _rock != null:
 			_rock.position = Vector2(0.0, -_stats.fall_height)

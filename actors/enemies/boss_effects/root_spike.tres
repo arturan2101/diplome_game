@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ZoneData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://combat/spells/zone_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/fx/biome_fx_frames.tres" id="frames"]
+
+[resource]
+script = ExtResource("1")
+impact_sound = &"root_burst"
+id = &"mycelium_mother"
+display_name = "Roots"
+color = Color(0.45, 0.32, 0.2, 1)
+tick_damage = PackedInt32Array(0, 0, 0)
+duration = PackedFloat32Array(0, 0, 0)
+radius = PackedFloat32Array(10, 10, 10)
+impact_delay = 0.8
+impact_damage = PackedInt32Array(11, 11, 11)
+impact_radius = 10.0
+impact_knockback = 120.0
+frames = ExtResource("frames")
+shadow_animation = &"root_warn"
+impact_animation = &"root_spike"
+impact_pivot = Vector2(8, 23)
+shadow_modulate = Color(3, 3, 3, 1)

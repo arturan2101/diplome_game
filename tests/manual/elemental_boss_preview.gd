@@ -1,14 +1,15 @@
 extends Node
-## Manual preview of the elemental Wardens (stage 45): in a small room of their floor's
+## Manual preview of the elemental Wardens (stage 45) and the Mycelium Mother (stage 48): in a small room of their floor's
 ## style, the player stands still and each boss's attacks are photographed: the special
 ## attack's warning and strikes, the throw and its patch, the slam and the shockwave
-## ring. Not part of the test suite.
+## ring (the Mother does not throw: her shot 4 shows her walking up). Not part of the test suite.
 ## Usage: godot --path . res://tests/manual/elemental_boss_preview.tscn -- <folder>
 
 const PLAYER_SCENE: PackedScene = preload("res://actors/player/player.tscn")
 const BOSSES: Dictionary = {
 	"tide": ["res://actors/enemies/tide_warden.tres", "res://level/flooded_theme.tres"],
 	"molten": ["res://actors/enemies/molten_warden.tres", "res://level/fire_theme.tres"],
+	"mother": ["res://actors/enemies/mycelium_mother.tres", "res://level/fungal_theme.tres"],
 }
 const ROOM_MAP: String = """####################
 #..................#

@@ -44,6 +44,9 @@ const TICK_EPSILON: float = 0.001
 @export var fall_height: float = 80.0
 @export var fall_pivot: Vector2 = Vector2(16.0, 21.0)
 @export var impact_pivot: Vector2 = Vector2(32.0, 36.0)
+## Tint of the shadow (the warning on the floor); above 1 brightens a warning that is
+## too dark to read on its floor (the Mycelium Mother's root cracks, stage 48).
+@export var shadow_modulate: Color = Color.WHITE
 
 
 func ticks_at(level: int) -> int:

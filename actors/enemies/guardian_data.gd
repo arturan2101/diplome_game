@@ -12,7 +12,8 @@ extends EnemyData
 @export var throw_cooldown: float = 3.0
 @export var throw_damage: int = 12
 @export var throw_speed: float = 170.0
-## The stone: an Arrow scene that hurts the player's hurtbox.
+## The stone: an Arrow scene that hurts the player's hurtbox. Null = the boss never
+## throws (the Mycelium Mother, stage 48).
 @export var projectile_scene: PackedScene
 
 @export_group("Second phase")
@@ -66,6 +67,12 @@ enum SpecialPattern { LINE, AROUND_TARGET }
 @export var summon_sound: StringName = &""
 ## Music while it fights.
 @export var boss_music: StringName = &"boss_warden"
+
+@export_group("Own animations (stage 48)")
+## Animation names ("<name>_<dir>") of the slam and the shockwave for a boss whose art
+## names them differently from the Warden's "slam" and "wave"; empty = the Warden's.
+@export var slam_animation: String = ""
+@export var wave_animation: String = ""
 
 @export_group("Special attack (stage 45)")
 ## The strikes of the special attack: each is a patch that falls after a warning on the

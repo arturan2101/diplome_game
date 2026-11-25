@@ -708,7 +708,7 @@ Tiles, props and floor effects: `tools/art/make_biome_tiles.py`; small enemies a
 | N | Sun beam hit: white-gold flash with flickering rays where the beam meets a wall | assets/art/fx/sun_beam_hit.png | 16x16, 4, loop | centre (8, 8) | generated |
 | C | Sand ring: sand wave ring | assets/art/fx/sand_ring.png | 64x64, 6, once | centre (32, 32), ring radius 6 ... 30 | generated |
 
-Integrated in stage 48 part 1: the fungal tiles, hazards, decals, wall details, door seal, lamp, the three obstacles and floor plate row 4 (`level/fungal_theme.tres`); spore_puff and spore_cloud (`level/traps/`, frames in `assets/art/fx/biome_fx_frames.tres`, built by `tools/art/make_biome_fx_frames.py`, which also holds root_warn and root_spike for the Mycelium Mother); sounds spore_burst, geyser, lava_crack, boss_chest_open and music fungal_explore, boss_elemental. Not used: hazard slot 2 (puffball still frame; the puffball is an animated node). Integrated in stage 48 part 2: sporeling, spore_bat, vine_lurker (with vine_lash) and sounds mushroom_squish, bat_screech, vine_lash (`actors/enemies/*.tres`).
+Integrated in stage 48 part 1: the fungal tiles, hazards, decals, wall details, door seal, lamp, the three obstacles and floor plate row 4 (`level/fungal_theme.tres`); spore_puff and spore_cloud (`level/traps/`, frames in `assets/art/fx/biome_fx_frames.tres`, built by `tools/art/make_biome_fx_frames.py`, which also holds root_warn and root_spike for the Mycelium Mother); sounds spore_burst, geyser, lava_crack, boss_chest_open and music fungal_explore, boss_elemental. Not used: hazard slot 2 (puffball still frame; the puffball is an animated node). Integrated in stage 48 part 2: sporeling, spore_bat, vine_lurker (with vine_lash) and sounds mushroom_squish, bat_screech, vine_lash (`actors/enemies/*.tres`). Integrated in stage 48 part 3: Mycelium Mother (`actors/enemies/mycelium_mother.tres`, Guardian class; spores = close burst, roots = special line, roar = phase-two spore ring), root_warn / root_spike (`actors/enemies/boss_effects/root_spike.tres`), spore_ring, sounds root_burst, mother_roar, music boss_mother. root_warn is too small and dark to read on the fungal floor (5-15 dark pixels); the game brightens it 3x for now (`ZoneData.shadow_modulate`) until a clearer warning is drawn.
 
 ### Sound (part 5)
 
@@ -736,3 +736,18 @@ Built by `tools/audio/make_audio.py` (same CC0 packs and treatment as batch 13).
 | C | assets/audio/music/boss_elemental.ogg | 68 s loop | Tide and Molten Wardens | generated |
 | C | assets/audio/music/boss_mother.ogg | 92 s loop | Mycelium Mother | generated |
 | C | assets/audio/music/boss_pharaoh.ogg | 95 s loop | Sun Pharaoh | generated |
+
+## Batch 16 (level backdrops)
+
+The rock behind the one-tile walls, instead of the flat near-black clear colour. One seamless 64x64 texture per style, repeated under the whole level (texture repeat on, Nearest filter) and seen only outside the walls. Drawn in code: `tools/art/make_backdrops.py` (it prints each backdrop's mean brightness next to the floor and the wall top of its style). Rules: no outline, low contrast, light from the top-left very weak (one step lighter on the top-left of a stone, one step darker on the bottom-right), small details scattered unevenly; palette 32 colours plus the theme extras of docs/art-style.md (fungal earth, sand sandstone, nature grass). Brightness: 66-82 % darker than the wall top and also darker than the floor of the style, so both the walls and the floor read over it (at only 40 % darker than the wall top the backdrop would be brighter than the floor; glade: about half the brightness of the glade grass).
+
+| Prio | What | File | Size | Mean brightness: backdrop / floor / wall top | Status |
+| --- | --- | --- | --- | --- | --- |
+| C | Ruins: dark grey-violet stone, brick courses half buried under rock, small stones, cracks, rare brick fragments | assets/art/tiles/ruins_backdrop.png | 64x64, seamless | 33 / 54 / 121 | generated |
+| C | Fungal: dark earth, long roots with rootlets, broken mycelium threads, small stones, rare dim teal dots | assets/art/tiles/fungal_backdrop.png | 64x64, seamless | 41 / 50 / 120 | generated |
+| C | Flooded: wet stone with dark blue-green patches, water streaks running down (a wet glint at the top of some), rare moss clumps | assets/art/tiles/flooded_backdrop.png | 64x64, seamless | 39 / 54 / 120 | generated |
+| C | Fire: black basalt, small stones, cracks, three rare dark-red veins with a dull orange core in places (no glow) | assets/art/tiles/fire_backdrop.png | 64x64, seamless | 17 / 43 / 96 | generated |
+| C | Sand: dark sandstone, soft sand drifts, small stones, cracks | assets/art/tiles/sand_backdrop.png | 64x64, seamless | 42 / 49 / 146 | generated |
+| C | Glade (the merchant's glade): dense dark grass and bush clumps seen from above, at dusk | assets/art/tiles/glade_backdrop.png | 64x64, seamless | 53 / 117 / 115 | generated |
+
+Not wired in: the level code (a repeating texture under the TileMapLayers, chosen by the style id) is for the code session.

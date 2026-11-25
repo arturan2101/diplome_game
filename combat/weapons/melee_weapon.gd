@@ -102,6 +102,11 @@ func _physics_process(delta: float) -> void:
 func _draw() -> void:
 	if _active_left <= 0.0 or _step == null or _step.slash != null:
 		return
+	# A blow all round (the Mycelium Mother's spore burst) is a disc: the arc polygon
+	# would close on its own start and fail to triangulate.
+	if _step.arc_degrees >= 360.0:
+		draw_circle(Vector2.ZERO, _step.reach, arc_color)
+		return
 	var half_arc: float = deg_to_rad(_step.arc_degrees) * 0.5
 	var start_angle: float = _swing_direction.angle() - half_arc
 	var points: PackedVector2Array = PackedVector2Array([Vector2.ZERO])
