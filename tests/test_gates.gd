@@ -16,6 +16,16 @@ const COVER_MAP: String = """###########
 ###########"""
 
 
+## Cover cells under a row of pits (row 2) and under a wall (row 4).
+const PIT_OBSTACLE_MAP: String = """####################
+#~~~~~~~~~~~~~~~~~~#
+#%%%%%%%%%%%%%%%%%%#
+####################
+#%%%%%%%%%%%%%%%%%%#
+#..................#
+####################"""
+
+
 ## A row of cover cells under a wall: tall pieces fit there (nothing walks behind them).
 const OBSTACLE_MAP: String = """##########
 #%%%%%%%%#
@@ -127,4 +137,20 @@ func _test_cover_obstacles() -> void:
 	check(pieces > 0, "some cover cells show obstacles (%d of 8)" % pieces)
 	check(solid, "every cover cell stays solid, obstacle or not")
 	level.queue_free()
+	await physics_frames(1)
+	# After stage 49: under a pit a tall obstacle's top would hang over the void.
+	var pit_level: Level = Level.new()
+	add_child(pit_level)
+	pit_level.set_theme(load("res://level/sand_theme.tres") as TileTheme)
+	pit_level.build(LevelGrid.from_text(PIT_OBSTACLE_MAP))
+	await physics_frames(1)
+	var tall_over_pit: bool = false
+	var tall_under_wall: bool = false
+	for x in range(1, 19):
+		var under_pit: Texture2D = pit_level.cover_piece(Vector2i(x, 2))
+		tall_over_pit = tall_over_pit or (under_pit != null and under_pit.get_height() > pit_level.theme.tile_size)
+		var under_wall: Texture2D = pit_level.cover_piece(Vector2i(x, 4))
+		tall_under_wall = tall_under_wall or (under_wall != null and under_wall.get_height() > pit_level.theme.tile_size)
+	check(not tall_over_pit and tall_under_wall, "tall obstacles stand only under a wall, never under a pit")
+	pit_level.queue_free()
 	await physics_frames(1)

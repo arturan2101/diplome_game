@@ -381,7 +381,9 @@ func _pick_cover_piece(cell: Vector2i) -> Texture2D:
 		if piece.get_width() > theme.tile_size and not (grid.get_cell(cell + Vector2i.RIGHT) == LevelGrid.Cell.COVER
 				and grid.get_cell(cell + Vector2i.LEFT) != LevelGrid.Cell.COVER):
 			continue
-		if piece.get_height() > theme.tile_size and grid.get_cell(cell + Vector2i.UP) == LevelGrid.Cell.FLOOR:
+		# A tall one (a column, an obelisk) leans its top on the wall above; over a pit
+		# or another obstacle its top would hang over the void (after stage 49).
+		if piece.get_height() > theme.tile_size and grid.get_cell(cell + Vector2i.UP) != LevelGrid.Cell.WALL:
 			continue
 		fits.append(piece)
 	if fits.is_empty():

@@ -8,8 +8,10 @@ extends Area2D
 ## Group of everything the player can interact with.
 const GROUP: StringName = &"interactables"
 
-## Within reach, the one with the highest priority is used, the nearest among equals
-## (stage 47: the merchant before a weapon lying at his feet).
+## Within reach, the nearest is used, each priority step counting as
+## Player.interact_priority_step pixels nearer (stage 47: the merchant before a weapon
+## lying at his feet; after stage 49 only a head start, so a thing the player stands on
+## can still be taken).
 @export var interact_priority: int = 0
 
 

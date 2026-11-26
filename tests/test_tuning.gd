@@ -94,6 +94,16 @@ func _test_secret_lock() -> void:
 	check(game._is_fight_room(-1) == false, "a secret outside any room never waits")
 	if arena_room >= 0:
 		check(game._is_fight_room(arena_room), "the arena counts as a fight room")
+	# After stage 49: a secret room already open (a rune key) in a room whose doors seal.
+	var hole: Vector2i = game.level.nearest_floor_cell(game.layout.room_rects[0].get_center() + Vector2i(2, 0))
+	game.layout.secret = {"crack": hole, "room": 0}
+	game._secret_open = true
+	var room: CombatRoom = CombatRoom.new()
+	room.index = 0
+	game._on_combat_room_sealed(room)
+	check(game.level.grid.get_cell(hole) == LevelGrid.Cell.WALL, "an open secret room is walled up while its room fights")
+	game._unlock_secret_wall(0)
+	check(game.level.grid.get_cell(hole) == LevelGrid.Cell.FLOOR, "and open again when the fight is over")
 	await _stop(game)
 
 

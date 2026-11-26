@@ -136,6 +136,8 @@ var _pending_waves: Array[Array] = []
 var _boss_escort: Array[Dictionary] = []
 ## The gate was open when a combat room sealed and is dark until the fight is over.
 var _gate_held: bool = false
+## The secret room of this section has been opened (its crack is floor).
+var _secret_open: bool = false
 var _is_arena_sealed: bool = false
 var _is_arena_cleared: bool = false
 var _stray_check_left: float = 0.0
@@ -606,10 +608,20 @@ func _is_fight_room(room_index: int) -> bool:
 	return room_index == layout.arena_room or _combat.get_room(room_index) != null
 
 
-## The fight of a room is over: its secret wall can break now.
+## The fight of a room is over: its secret wall can break now (and an opened secret
+## room is open again).
 func _unlock_secret_wall(room_index: int) -> void:
 	if is_instance_valid(_secret_wall) and int(layout.secret.get("room", -1)) == room_index:
 		_secret_wall.health.end_invulnerability()
+	_close_secret_during_fight(room_index, false)
+
+
+## A secret room already open (a rune key opened it) in a room whose doors seal: its
+## hole is walled up like the doors, so the fight has no way out, and opens with them.
+func _close_secret_during_fight(room_index: int, sealed: bool) -> void:
+	if _secret_open and int(layout.secret.get("room", -1)) == room_index:
+		var crack: Array[Vector2i] = [layout.secret["crack"]]
+		level.set_cells(crack, LevelGrid.Cell.WALL if sealed else LevelGrid.Cell.FLOOR)
 
 
 ## True if an enemy chasing the player stands within chest_lock_radius of this point.
@@ -648,6 +660,7 @@ func _open_secret() -> void:
 		if room.has_point(cell):
 			level.grid.sunlit[cell] = true
 	level.set_cells(cells, LevelGrid.Cell.FLOOR)
+	_secret_open = true
 	for entry: Dictionary in layout.items:
 		if entry.get("secret", false):
 			_spawn_item(entry)
@@ -773,6 +786,7 @@ func _spawn_enemies() -> void:
 	_pending_waves.clear()
 	_boss_escort.clear()
 	_gate_held = false
+	_secret_open = false
 	for _wave in range(1, layout.wave_count()):
 		_pending_waves.append([])
 	var escort_waits: bool = GameManager.config.boss_escort_on_seal and plan.is_boss and is_arena()
@@ -1045,6 +1059,7 @@ func _is_player_inside_arena() -> bool:
 func _seal_arena() -> void:
 	_is_arena_sealed = true
 	level.set_cells(layout.arena_doors, LevelGrid.Cell.WALL)
+	_close_secret_during_fight(layout.arena_room, true)
 	_return_arena_strays(true)
 	_stray_check_left = arena_stray_check_interval
 	var boss: Guardian = _find_boss()
@@ -1105,7 +1120,8 @@ func _return_arena_strays(on_floor_too: bool) -> void:
 			enemy.global_position = level.cell_center(enemy.get_meta(SPAWN_CELL_META, layout.exit))
 
 
-func _on_combat_room_sealed(_room: CombatRoom) -> void:
+func _on_combat_room_sealed(room: CombatRoom) -> void:
+	_close_secret_during_fight(room.index, true)
 	hud.show_banner("The doors are sealed")
 	Sound.play_music(&"combat")
 	# No way out through an open portal in (or near) the room while the fight is on.

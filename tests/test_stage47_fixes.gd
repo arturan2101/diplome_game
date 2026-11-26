@@ -126,13 +126,18 @@ func _test_merchant_first() -> void:
 	var pickup: WeaponPickup = (load(WEAPON_PICKUP_SCENE) as PackedScene).instantiate() as WeaponPickup
 	pickup.weapon_data = load(SWORD) as WeaponData
 	add_child(pickup)
-	pickup.global_position = Vector2(200.0, 196.0)
+	pickup.global_position = Vector2(210.0, 200.0)
 	await physics_frames(2)
 	player._update_interaction()
-	check(player.interaction_target == merchant, "a weapon lying closer does not hide the merchant")
-	player.global_position = Vector2(200.0, 212.0)
+	check(player.interaction_target == merchant, "a weapon lying a little closer does not hide the merchant")
+	# After stage 49: a spell lying next to him could never be taken; the priority is
+	# only a head start now.
+	player.global_position = pickup.global_position
 	player._update_interaction()
-	check(player.interaction_target == pickup, "stepping away from him, the weapon can be taken")
+	check(player.interaction_target == pickup, "standing on the weapon next to him, it can be taken")
+	player.global_position = Vector2(222.0, 212.0)
+	player._update_interaction()
+	check(player.interaction_target == pickup, "and stepping away from him too")
 	for node: Node in [player, merchant, pickup]:
 		node.queue_free()
 	await physics_frames(2)

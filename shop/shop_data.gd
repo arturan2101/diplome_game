@@ -7,6 +7,11 @@ extends Resource
 ## Offers per merchant, fewest and most.
 @export var min_offers: int = 3
 @export var max_offers: int = 4
+## At most this many cards in the shop (after stage 49: more did not fit on the screen).
+## The dice and up to max_fusion_offers merges always stay; the other offers are cut
+## from the end. 0 = no limit.
+@export var max_shown_offers: int = 4
+@export var max_fusion_offers: int = 1
 ## Relative chance of each kind of offer (a spell offer is a new spell, or the next
 ## level of a spell the player has).
 @export var heal_weight: float = 1.0

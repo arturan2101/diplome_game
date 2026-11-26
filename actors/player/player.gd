@@ -39,6 +39,8 @@ const GROUP: StringName = &"player"
 @export_flags_2d_physics var aim_wall_mask: int = 1
 ## Things closer than this can be used with the interact button, in pixels.
 @export var interact_radius: float = 20.0
+## One step of Interactable.interact_priority counts as this many pixels nearer.
+@export var interact_priority_step: float = 6.0
 
 @export_group("Sounds (stage 46)")
 ## Ids of Sound: hurt, death, a weapon growing a level, a footstep every step_distance
@@ -217,7 +219,7 @@ func _create_weapon(weapon_data: WeaponData) -> Weapon:
 ## Finds the nearest thing to interact with and reports when it changes.
 func _update_interaction() -> void:
 	var nearest: Interactable = null
-	var nearest_distance: float = interact_radius
+	var nearest_score: float = INF
 	for node: Node in get_tree().get_nodes_in_group(Interactable.GROUP):
 		var thing: Interactable = node as Interactable
 		if thing == null or thing.is_queued_for_deletion() or not thing.can_interact(self):
@@ -225,10 +227,13 @@ func _update_interaction() -> void:
 		var distance: float = global_position.distance_to(thing.global_position)
 		if distance > interact_radius:
 			continue
-		# Higher priority first (the merchant), then the nearest.
-		if nearest == null or thing.interact_priority > nearest.interact_priority 				or (thing.interact_priority == nearest.interact_priority and distance <= nearest_distance):
+		# The nearest, each priority step counting as interact_priority_step pixels
+		# nearer: the merchant wins over a weapon at his feet, but stepping onto a
+		# spell lying next to him picks the spell up.
+		var score: float = distance - thing.interact_priority * interact_priority_step
+		if score <= nearest_score:
 			nearest = thing
-			nearest_distance = distance
+			nearest_score = score
 	var nearest_id: int = nearest.get_instance_id() if nearest != null else 0
 	if nearest_id != _interaction_target_id:
 		_interaction_target_id = nearest_id

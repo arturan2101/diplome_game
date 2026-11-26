@@ -156,11 +156,14 @@ func _test_shop() -> void:
 			and offers[0].get_id() == "fuse_steam" and offers[0].price == data.price_for(data.fusion_price, 1, false)
 			and offers[0].is_available(book), "a merge the player can do comes first, priced by depth")
 	var plain: Array[ShopOffer] = ShopStock.make_offers(data, 1, _rng(1), weapons, null, pool, book, false)
-	var same_rest: bool = plain.size() == offers.size() - 1
-	for i in plain.size():
+	# After stage 49 at most max_shown_offers cards: the merge takes the place of the last one.
+	var same_rest: bool = offers.size() - 1 == mini(plain.size(), data.max_shown_offers - 1)
+	for i in offers.size() - 1:
 		if same_rest and (plain[i].kind != offers[i + 1].kind or plain[i].price != offers[i + 1].price):
 			same_rest = false
 	check(same_rest, "the merge draws nothing: the other offers are the same as without fusion")
+	check(offers.size() <= data.max_shown_offers and plain.size() <= data.max_shown_offers,
+			"never more than %d cards" % data.max_shown_offers)
 	var none: bool = true
 	for i in SEEDS:
 		for offer: ShopOffer in ShopStock.make_offers(data, 1, _rng(i), weapons, null, pool, book, false):

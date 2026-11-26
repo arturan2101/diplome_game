@@ -9,7 +9,8 @@ extends RefCounted
 ## spells made by merging can be raised like the others (they are never sold new).
 
 
-## min_offers..max_offers offers. spells = null: the series has no spells.
+## min_offers..max_offers offers (merges and the dice besides), at most
+## ShopData.max_shown_offers in all. spells = null: the series has no spells.
 ## book: the player's spells (null = none known, both slots free).
 ## fusions = null: no merging in the series.
 static func make_offers(data: ShopData, depth: int, rng: RandomNumberGenerator, weapons: WeaponPool,
@@ -56,6 +57,18 @@ static func make_offers(data: ShopData, depth: int, rng: RandomNumberGenerator, 
 			base = data.heal_price
 		offer.price = data.price_for(base, depth, wandering)
 		offers.append(offer)
+	var fusion_count: int = 0
+	for offer: ShopOffer in offers:
+		if offer.kind == ShopOffer.Kind.FUSION:
+			fusion_count += 1
+	if data.max_shown_offers > 0:
+		# What fits on the screen: the first merges, then the other offers in order
+		# (drawn as before, only cut), and room for the dice.
+		var kept_fusions: int = mini(fusion_count, data.max_fusion_offers)
+		var room: int = maxi(data.max_shown_offers - kept_fusions - (0 if goods.is_empty() else 1), 0)
+		var others: Array[ShopOffer] = offers.slice(fusion_count, fusion_count + room)
+		offers = offers.slice(0, kept_fusions)
+		offers.append_array(others)
 	if not goods.is_empty():
 		# The dice: always the last offer, buying it brings new goods.
 		var dice: ShopOffer = ShopOffer.new()
