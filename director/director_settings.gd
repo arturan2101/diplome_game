@@ -37,6 +37,13 @@ extends Resource
 @export var health_packs_fewer: int = 0
 @export var coin_scale: float = 1.0
 @export var cover_jitter: bool = false
+## Denser sections (ExperimentConfig.denser_sections, after stage 49): the danger budget
+## of every section but an arena times this (after the depth floor)...
+@export var section_budget_multiplier: float = 1.0
+## ...and every room of the main path after the first gets at least one spawn (two for
+## a combat room): if the budget bought too few, the cheapest enemies the floor allows
+## are added beyond it.
+@export var enemy_in_every_room: bool = false
 
 @export_group("Extra enemies")
 ## Enemy types added after the comparison series (EnemyData.is_extra: the golem, the

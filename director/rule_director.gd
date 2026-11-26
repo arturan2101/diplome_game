@@ -39,6 +39,7 @@ func choose_next(state: PlayerState) -> SectionPlan:
 	_help_with_problem(plan, state, problem)
 	apply_floor_tuning(plan)
 	plan_combat_rooms(plan, state.rng)
+	fill_every_room(plan, state.rng)
 	finish_arena(plan, state.rng)
 	return plan
 

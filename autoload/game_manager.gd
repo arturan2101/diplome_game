@@ -43,6 +43,11 @@ const FLOOR_STYLES: FloorStyleTable = preload("res://level/floor_styles.tres")
 const FULL_GAME_FEWER_PACKS: int = 1
 ## Stage 44: 0.5 -> 0.575, 15% more coins than after the playtest of stage 38.
 const FULL_GAME_COIN_SCALE: float = 0.575
+## After stage 49 (ExperimentConfig.denser_sections): the budget of every section but
+## an arena times this, and the rest section's share of the budget (the full game's
+## one fewer health pack is given back with it).
+const DENSE_SECTION_BUDGET: float = 1.6
+const DENSE_REST_MULTIPLIER: float = 0.5
 
 ## FLOOR_STYLES without the stage 48 styles (made when first needed).
 var _older_floor_styles: FloorStyleTable = null
@@ -106,7 +111,7 @@ func _apply_config(director: Director) -> void:
 	if config.boss_enabled and config.spells_enabled and config.spike_traps and config.combat_rooms \
 			and config.elite_enemies and config.secret_rooms and not config.merchant_glade and not config.soft_waves \
 			and not config.depth_pressure and not config.extra_enemies and not config.full_game_tuning \
-			and not config.floor_styles and not config.elemental_bosses:
+			and not config.floor_styles and not config.elemental_bosses and not config.denser_sections:
 		return
 	director.settings = director.settings.duplicate() as DirectorSettings
 	if not config.boss_enabled:
@@ -135,6 +140,12 @@ func _apply_config(director: Director) -> void:
 		director.settings.health_packs_fewer = FULL_GAME_FEWER_PACKS
 		director.settings.coin_scale = FULL_GAME_COIN_SCALE
 		director.settings.cover_jitter = true
+	if config.denser_sections:
+		director.settings.section_budget_multiplier = DENSE_SECTION_BUDGET
+		director.settings.rest_multiplier = DENSE_REST_MULTIPLIER
+		director.settings.enemy_in_every_room = true
+		# More enemies, more to heal: the health pack the playtest tuning took is back.
+		director.settings.health_packs_fewer = 0
 	if config.soft_waves:
 		director.settings.peak_multiplier = director.settings.soft_peak_multiplier
 		director.settings.rest_multiplier = director.settings.soft_rest_multiplier

@@ -71,4 +71,5 @@ static func apply(director: Director, plan: SectionPlan, state: PlayerState, ind
 	director.fill_contents(plan, state)
 	director.apply_floor_tuning(plan)
 	director.plan_combat_rooms(plan, state.rng)
+	director.fill_every_room(plan, state.rng)
 	director.finish_arena(plan, state.rng)

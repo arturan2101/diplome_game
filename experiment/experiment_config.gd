@@ -84,6 +84,12 @@ extends Resource
 ## enemies with it come in (with spawn warnings) as the doors seal, so they cannot run
 ## out to the player first. Off in the clean series and the playtest.
 @export var boss_escort_on_seal: bool = true
+## After stage 49: sections are fuller. The danger budget of every section but an arena
+## x1.6, the rest section's share x0.5 instead of x0.3, and every room of the main path
+## gets at least one enemy (the cheapest of the floor, beyond the budget, if needed);
+## the health pack full_game_tuning takes is given back. Off in the clean series and the
+## playtest.
+@export var denser_sections: bool = true
 ## Soft tension waves of the rules director: a peak of x1.15 and a rest of x0.5
 ## (DirectorSettings.soft_peak_multiplier, soft_rest_multiplier) instead of x1.3 and
 ## x0.3. The other modes have no wave and do not change.
@@ -99,4 +105,4 @@ func to_dictionary() -> Dictionary:
 			"full_game_tuning": full_game_tuning, "arsenal": arsenal, "floor_styles": floor_styles, "shop_goods": shop_goods,
 			"boss_chest": boss_chest, "elemental_bosses": elemental_bosses,
 			"breakable_cover": breakable_cover, "extra_floor_styles": extra_floor_styles,
-			"boss_escort_on_seal": boss_escort_on_seal}
+			"boss_escort_on_seal": boss_escort_on_seal, "denser_sections": denser_sections}

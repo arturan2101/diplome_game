@@ -89,9 +89,38 @@ func apply_floor_tuning(plan: SectionPlan) -> void:
 		plan.coins = roundi(plan.coins * settings.coin_scale)
 
 
-## Raises the plan's budget to the depth floor (call before the budget is spent).
+## Raises the plan's budget to the depth floor (call before the budget is spent), then
+## applies the denser sections' multiplier to every section but an arena.
 func apply_depth_floor(plan: SectionPlan, state: PlayerState) -> void:
 	plan.budget = maxi(plan.budget, depth_floor(state.depth, plan.phase))
+	if not plan.is_arena and settings.section_budget_multiplier != 1.0:
+		plan.budget = roundi(plan.budget * settings.section_budget_multiplier)
+
+
+## Denser sections (DirectorSettings.enemy_in_every_room): tops the enemy mix up with
+## the cheapest enemies this floor allows (a random one of them each time) until every
+## room of the path after the first gets a spawn and a combat room two. Not in arenas;
+## draws nothing when off or when the mix is already large enough.
+func fill_every_room(plan: SectionPlan, rng: RandomNumberGenerator) -> void:
+	if not settings.enemy_in_every_room or plan.is_arena:
+		return
+	var wanted: int = maxi(plan.room_count - 1, 0) + (1 if plan.combat_rooms > 0 else 0)
+	var missing: int = wanted - plan.get_spawn_count()
+	if missing <= 0:
+		return
+	var cheapest: Array[EnemyData] = []
+	for enemy_data: EnemyData in catalog.enemies:
+		if enemy_data.is_boss or not _can_buy(enemy_data, plan.depth):
+			continue
+		if cheapest.is_empty() or enemy_data.danger_cost < cheapest[0].danger_cost:
+			cheapest = [enemy_data]
+		elif enemy_data.danger_cost == cheapest[0].danger_cost:
+			cheapest.append(enemy_data)
+	if cheapest.is_empty():
+		return
+	for _i in missing:
+		var chosen: EnemyData = cheapest[rng.randi_range(0, cheapest.size() - 1)]
+		plan.enemy_mix[chosen.id] = int(plan.enemy_mix.get(chosen.id, 0)) + 1
 
 
 ## Contents and layout the adaptive directors (rules and learned) fill the same way,

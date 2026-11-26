@@ -29,5 +29,6 @@ func choose_next(state: PlayerState) -> SectionPlan:
 	apply_floor_tuning(plan)
 	plan.cover_density = rng.randf()
 	plan_combat_rooms(plan, rng)
+	fill_every_room(plan, rng)
 	finish_arena(plan, rng)
 	return plan
