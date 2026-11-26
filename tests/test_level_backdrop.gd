@@ -21,8 +21,8 @@ func _test_themes() -> void:
 	var ok: bool = true
 	for style: String in STYLES:
 		var theme: TileTheme = load("res://level/%s_theme.tres" % style) as TileTheme
-		ok = ok and theme.backdrop != null and theme.backdrop.get_width() == 64 and theme.backdrop.get_height() == 64
-	check(ok, "the four floor styles and the glade have a 64x64 backdrop")
+		ok = ok and theme.backdrop != null and theme.backdrop.get_width() == theme.backdrop.get_height() 				and theme.backdrop.get_width() % theme.tile_size == 0
+	check(ok, "the floor styles and the glade have a square backdrop (64 or 128 pixels, glade v2 of batch 17)")
 
 
 func _test_level() -> void:

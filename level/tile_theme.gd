@@ -27,6 +27,11 @@ extends Resource
 ## Wall-top tiles (top face only) for walls with no open cell directly south.
 ## Empty: every wall uses wall_tiles.
 @export var wall_top_tiles: Array[Vector2i] = []
+## Top of a wall that runs vertically (after stage 49, batch 17): drawn instead of the
+## wall top where the floor is on one side only (left or right, not below). The art has
+## the edge towards the floor on its right; for a floor on the left it is mirrored.
+## (-1, -1) = side walls use wall_top_tiles.
+@export var wall_side_tile: Vector2i = Vector2i(-1, -1)
 ## Wall with a faint crack (the way into a secret room): front and top, like wall_tiles
 ## and wall_top_tiles. (-1, -1) = the crack wall looks like any wall.
 @export var cracked_wall_tile: Vector2i = Vector2i(-1, -1)

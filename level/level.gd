@@ -27,6 +27,9 @@ const LAVA_SOURCE: int = 1000
 ## Atlas id of an invisible solid tile: a cover cell drawn as an obstacle picture
 ## (TileTheme.cover_pieces) keeps its collision through it.
 const BLOCKER_SOURCE: int = 1001
+## Alternative id of the mirrored side-wall tile (TileTheme.wall_side_tile, floor on
+## the left).
+const MIRRORED_ALTERNATIVE: int = 1
 ## How far (in cells) to look for floor around a blocked cell.
 const NEAREST_FLOOR_RADIUS: int = 6
 
@@ -313,7 +316,11 @@ func _paint_cell(cell: Vector2i) -> void:
 			# Solid rock that touches nothing walkable gets no tile and no collision:
 			# big sections stay cheap to draw and to simulate.
 			if _touches_open_cell(cell):
-				_ground.set_cell(cell, main, _wall_tile(cell, look))
+				var side: int = _wall_side(cell, look)
+				if side >= 0:
+					_ground.set_cell(cell, main, look.wall_side_tile, side)
+				else:
+					_ground.set_cell(cell, main, _wall_tile(cell, look))
 				if grid.cracked.has(cell):
 					_draw_crack(cell, main, look)
 		LevelGrid.Cell.PIT:
@@ -449,6 +456,20 @@ func _wall_tile(cell: Vector2i, look: TileTheme) -> Vector2i:
 	return tiles[_cell_hash(cell) % tiles.size()]
 
 
+## A wall that runs vertically: the alternative of TileTheme.wall_side_tile to draw (0 =
+## floor on the right, as drawn; MIRRORED_ALTERNATIVE = floor on the left), or -1 for
+## any other wall (its front faces the floor below, open on both sides or neither, or
+## the theme has no side tile).
+func _wall_side(cell: Vector2i, look: TileTheme) -> int:
+	if look.wall_side_tile.x < 0 or grid.get_cell(cell + Vector2i.DOWN) != LevelGrid.Cell.WALL:
+		return -1
+	var open_right: bool = grid.get_cell(cell + Vector2i.RIGHT) != LevelGrid.Cell.WALL
+	var open_left: bool = grid.get_cell(cell + Vector2i.LEFT) != LevelGrid.Cell.WALL
+	if open_right == open_left:
+		return -1
+	return 0 if open_right else MIRRORED_ALTERNATIVE
+
+
 ## Floor tile for a cell. Variants are picked from the cell coordinates, not from
 ## a random generator, so the same grid always looks the same.
 func _floor_tile(cell: Vector2i, look: TileTheme) -> Vector2i:
@@ -486,6 +507,13 @@ func _add_theme_sources(tile_set: TileSet, look: TileTheme, main_id: int, hazard
 		_add_tile(main, coords, true)
 	for coords: Vector2i in look.wall_top_tiles:
 		_add_tile(main, coords, true)
+	if look.wall_side_tile.x >= 0:
+		_add_tile(main, look.wall_side_tile, true)
+		if not main.has_alternative_tile(look.wall_side_tile, MIRRORED_ALTERNATIVE):
+			main.create_alternative_tile(look.wall_side_tile, MIRRORED_ALTERNATIVE)
+			var mirrored: TileData = main.get_tile_data(look.wall_side_tile, MIRRORED_ALTERNATIVE)
+			mirrored.flip_h = true
+			_make_solid(mirrored)
 	_add_tile(main, look.cover_tile, true)
 	for coords: Vector2i in [look.cracked_wall_tile, look.cracked_wall_top_tile]:
 		if coords.x >= 0:
@@ -532,10 +560,13 @@ func _add_tile(source: TileSetAtlasSource, coords: Vector2i, solid: bool) -> voi
 	if source.has_tile(coords):
 		return
 	source.create_tile(coords)
-	if not solid:
-		return
+	if solid:
+		_make_solid(source.get_tile_data(coords, 0))
+
+
+## Full-cell collision on the solid physics layer.
+func _make_solid(tile_data: TileData) -> void:
 	var half: float = theme.tile_size * 0.5
-	var tile_data: TileData = source.get_tile_data(coords, 0)
 	tile_data.add_collision_polygon(0)
 	tile_data.set_collision_polygon_points(0, 0, PackedVector2Array([
 			Vector2(-half, -half), Vector2(half, -half), Vector2(half, half), Vector2(-half, half)]))
