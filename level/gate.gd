@@ -2,7 +2,8 @@ class_name Gate
 extends Area2D
 ## The exit of a section (stage 42): a rectangular stone portal, two cells wide. It stands
 ## dark until open() is called (when every enemy of the section is dead); then its runes
-## light up and its light loops, and it reports the player stepping in.
+## light up and its light loops, and it reports the player stepping in. close() makes
+## it dark again while a combat room around it is sealed.
 ## After a boss (rises = true) it is not there at first: only purple cracks in the floor.
 ## When it opens it rises smoothly out of the floor with dust, then lights up.
 ## All frames come from one strip (portal_rise.png): 0 cracks, 1 the slot glows, 5 the
@@ -72,6 +73,26 @@ func open() -> void:
 	# The player may already be standing in the gate when the last enemy dies.
 	for body: Node2D in get_overlapping_bodies():
 		_on_body_entered(body)
+
+
+## Goes dark again (an open gate inside a combat room that has just sealed): no light,
+## no travel until open() is called again, which lights it up at once (no rising).
+func close() -> void:
+	if not is_open:
+		return
+	is_open = false
+	rises = false
+	_rise_left = -1.0
+	_light_step = -1
+	if _slot != null:
+		_slot.queue_free()
+		_slot = null
+	var loop: Node = get_node_or_null(^"Loop")
+	if loop != null:
+		remove_child(loop)
+		loop.queue_free()
+	sprite.visible = true
+	_show_frame(dark_frame)
 
 
 func _process(delta: float) -> void:

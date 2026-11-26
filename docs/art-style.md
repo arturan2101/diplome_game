@@ -141,7 +141,8 @@ Ruins that nature broke into: the same pixel art, 16x16 tiles, 1 px #08070b outl
 - Wall front: the same dark bricks with roots crossing them and moss in the mortar; the top strip is grass over warm stone.
 - Wall top: grass (#5a8a4a) with a few stones showing through, always much lighter than the floor.
 - Light from above: never a random floor variant; a whole sunlit patch (a lighter, warmer floor area, no dynamic light) placed on purpose, e.g. in the middle of the glade.
-- Files: `assets/art/tiles/nature_tiles_atlas.png` (slots 0-2 floor, 3 wall front, 4 wall top, 5 cover: a small tree, 6 sunlit floor), theme `level/nature_theme.tres`, generator `tools/art/make_nature_tiles.py`, preview `tests/manual/theme_preview.tscn`.
+- Dusk grass for the glade backdrop (glade_backdrop.png, behind the walls only): #466b3a (the grass #5a8a4a one step darker, same hue) and #34502c (its shadow).
+- Files: `assets/art/tiles/nature_tiles_atlas.png` (slots 0-2 floor, 3 wall front, 4 wall top, 5 cover: a small tree, 6 sunlit floor, 9 wall side), theme `level/nature_theme.tres`, generator `tools/art/make_nature_tiles.py`, preview `tests/manual/theme_preview.tscn`.
 
 ## Elemental Wardens (batch 15, extra colours)
 

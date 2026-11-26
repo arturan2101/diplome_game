@@ -80,6 +80,10 @@ extends Resource
 ## Without it the styles go ruins, flooded, fire as before. Needs floor styles. Off in
 ## the clean series and the playtest.
 @export var extra_floor_styles: bool = true
+## After stage 49: in a boss arena only the boss waits before the doors seal; the
+## enemies with it come in (with spawn warnings) as the doors seal, so they cannot run
+## out to the player first. Off in the clean series and the playtest.
+@export var boss_escort_on_seal: bool = true
 ## Soft tension waves of the rules director: a peak of x1.15 and a rest of x0.5
 ## (DirectorSettings.soft_peak_multiplier, soft_rest_multiplier) instead of x1.3 and
 ## x0.3. The other modes have no wave and do not change.
@@ -94,4 +98,5 @@ func to_dictionary() -> Dictionary:
 			"depth_pressure": depth_pressure, "extra_enemies": extra_enemies, "meta_progression": meta_progression,
 			"full_game_tuning": full_game_tuning, "arsenal": arsenal, "floor_styles": floor_styles, "shop_goods": shop_goods,
 			"boss_chest": boss_chest, "elemental_bosses": elemental_bosses,
-			"breakable_cover": breakable_cover, "extra_floor_styles": extra_floor_styles}
+			"breakable_cover": breakable_cover, "extra_floor_styles": extra_floor_styles,
+			"boss_escort_on_seal": boss_escort_on_seal}

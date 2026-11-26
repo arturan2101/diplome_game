@@ -131,6 +131,11 @@ var _enemies_left: int = 0
 var _is_changing_section: bool = false
 ## Arena: enemies of the waves not spawned yet (index 0 = second wave).
 var _pending_waves: Array[Array] = []
+## Boss arena with ExperimentConfig.boss_escort_on_seal: the first-wave enemies besides
+## the boss, sent in (with spawn warnings) when the doors seal.
+var _boss_escort: Array[Dictionary] = []
+## The gate was open when a combat room sealed and is dark until the fight is over.
+var _gate_held: bool = false
 var _is_arena_sealed: bool = false
 var _is_arena_cleared: bool = false
 var _stray_check_left: float = 0.0
@@ -766,14 +771,20 @@ func _spawn_enemies() -> void:
 	_enemies_left = 0
 	_servants.clear()
 	_pending_waves.clear()
+	_boss_escort.clear()
+	_gate_held = false
 	for _wave in range(1, layout.wave_count()):
 		_pending_waves.append([])
+	var escort_waits: bool = GameManager.config.boss_escort_on_seal and plan.is_boss and is_arena()
 	for entry: Dictionary in layout.enemies:
 		# Enemies of a combat room wait until the player walks in.
 		if _combat.owns(entry):
 			continue
 		if int(entry["wave"]) == 0:
-			_spawn_enemy(entry)
+			if escort_waits and not _director.catalog.get_by_id(entry["id"]).is_boss:
+				_boss_escort.append(entry)
+			else:
+				_spawn_enemy(entry)
 		else:
 			_pending_waves[int(entry["wave"]) - 1].append(entry)
 
@@ -1045,8 +1056,38 @@ func _seal_arena() -> void:
 	else:
 		hud.show_banner("The doors are sealed")
 		Sound.play_music(&"combat")
+	_send_boss_escort()
 	if _enemies_left <= 0:
 		_advance_arena()
+
+
+## The boss's escort comes in as the doors seal: a spawn warning on each planned cell
+## (moved away from the player like a combat room's wave), then the enemy. Each warning
+## counts as alive, so the arena cannot open before they have come and died.
+func _send_boss_escort() -> void:
+	if _boss_escort.is_empty():
+		return
+	Sound.play(&"enemy_spawn")
+	var used: Dictionary = {}
+	for entry: Dictionary in _boss_escort:
+		var cell: Vector2i = _combat.pick_spawn_cell(layout.room_rects[layout.arena_room], entry["cell"], used)
+		used[cell] = true
+		var marker: SpawnMarker = CombatRoomTracker.MARKER_SCENE.instantiate() as SpawnMarker
+		marker.cell = cell
+		marker.start(_combat.warning_time)
+		marker.expired.connect(_on_escort_marker_expired.bind(entry))
+		add_section_node(marker)
+		_contents.move_child(marker, 0)
+		marker.global_position = level.cell_center(cell)
+		_enemies_left += 1
+	_boss_escort.clear()
+
+
+func _on_escort_marker_expired(marker: SpawnMarker, entry: Dictionary) -> void:
+	_enemies_left -= 1
+	var placed: Dictionary = entry.duplicate()
+	placed["cell"] = marker.cell
+	_spawn_enemy(placed)
 
 
 ## An arena enemy that chased the player out (or stands in a doorway) would be shut out
@@ -1067,6 +1108,10 @@ func _return_arena_strays(on_floor_too: bool) -> void:
 func _on_combat_room_sealed(_room: CombatRoom) -> void:
 	hud.show_banner("The doors are sealed")
 	Sound.play_music(&"combat")
+	# No way out through an open portal in (or near) the room while the fight is on.
+	if gate != null and gate.is_open:
+		gate.close()
+		_gate_held = true
 
 
 func _on_combat_wave_started(_room: CombatRoom, wave: int) -> void:
@@ -1079,6 +1124,9 @@ func _on_combat_room_cleared(room: CombatRoom) -> void:
 	_unlock_secret_wall(room.index)
 	hud.show_banner("The way is open")
 	Sound.play_music(section_music())
+	if _gate_held and not _combat.is_fighting():
+		_gate_held = false
+		gate.open()
 
 
 func _find_boss() -> Guardian:

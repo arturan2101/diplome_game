@@ -498,12 +498,12 @@ PixelLab's sound and music tools need a tier 2 subscription; the author chose CC
 | C | assets/audio/sfx/sword_hit_2.ogg | 0.43 s | sword hits an enemy | generated |
 | C | assets/audio/sfx/sword_hit_3.ogg | 0.53 s | sword hits an enemy | generated |
 | C | assets/audio/sfx/heavy_slash.ogg | 0.42 s | third hit of the sword combo | generated |
-| C | assets/audio/sfx/bow_draw.ogg | 0.50 s | drawing the bow (wooden creak) | generated |
+| C | assets/audio/sfx/bow_draw.ogg | 0.46 s | drawing the bow (v2, batch 17: a soft string stretch, synthesised, no creak) | generated (v2) |
 | C | assets/audio/sfx/bow_release.ogg | 0.27 s | arrow released | generated |
 | C | assets/audio/sfx/arrow_hit_flesh.ogg | 0.14 s | arrow hits an enemy | generated |
 | C | assets/audio/sfx/arrow_hit_wall.ogg | 0.50 s | arrow hits a wall or cover | generated |
-| C | assets/audio/sfx/crossbow_shot.ogg | 0.19 s | crossbow fires | generated |
-| C | assets/audio/sfx/crossbow_reload.ogg | 0.65 s | crossbow reloads | generated |
+| C | assets/audio/sfx/crossbow_shot.ogg | 0.33 s | crossbow fires (v2, batch 17: trigger click, low string twang, bolt whoosh, synthesised) | generated (v2) |
+| C | assets/audio/sfx/crossbow_reload.ogg | 0.58 s | crossbow reloads (v2, batch 17: ratchet clicks, then the latch, synthesised) | generated (v2) |
 | C | assets/audio/sfx/spear_thrust_1.ogg | 0.43 s | spear thrust | generated |
 | C | assets/audio/sfx/spear_thrust_2.ogg | 0.51 s | spear thrust | generated |
 | C | assets/audio/sfx/dagger_stab_1.ogg | 0.30 s | dagger stab (fast, short) | generated |
@@ -750,8 +750,39 @@ The rock behind the one-tile walls, instead of the flat near-black clear colour.
 | C | Flooded: wet stone with dark blue-green patches, water streaks running down (a wet glint at the top of some), rare moss clumps | assets/art/tiles/flooded_backdrop.png | 64x64, seamless | 39 / 54 / 120 | generated |
 | C | Fire: black basalt, small stones, cracks, three rare dark-red veins with a dull orange core in places (no glow) | assets/art/tiles/fire_backdrop.png | 64x64, seamless | 17 / 43 / 96 | generated |
 | C | Sand: dark sandstone, soft sand drifts, small stones, cracks | assets/art/tiles/sand_backdrop.png | 64x64, seamless | 42 / 49 / 146 | generated |
-| C | Glade (the merchant's glade): dense dark grass and bush clumps seen from above, at dusk | assets/art/tiles/glade_backdrop.png | 64x64, seamless | 53 / 117 / 115 | generated |
+| C | Glade (the merchant's glade), v2 (batch 17): the glade going on at dusk, see Batch 17 | assets/art/tiles/glade_backdrop.png | 128x128, seamless | 81 / 117 / 115 | generated (v2) |
 
 Integrated after stage 48: `TileTheme.backdrop` of ruins, fungal, flooded, fire and glade themes (`level/*_theme.tres`); the level repeats it under its tiles (`Level._update_backdrop`). sand_backdrop is used by the sand theme since stage 49.
 
 Not wired in: the level code (a repeating texture under the TileMapLayers, chosen by the style id) is for the code session.
+
+## Batch 17 (side walls, glade backdrop v2, bow and crossbow sounds)
+
+### Side walls
+
+`wall_side`: the top of a wall that runs vertically, seen from above, the floor on its right (for a floor on the left the code mirrors the tile). Drawn by `tools/art/make_wall_side.py` from the style's wall top (slot 4), so moss, mushrooms and stones match: the joint row of the wall top is removed, so the tile repeats vertically without a seam; the edge towards the floor is on the right, in the order of the wall front below its lip, squeezed into 3 px: column 13 the lip colour, 14 #17161f, 15 the contact shadow #08070b. **Always slot 9** of the style's atlas; the ruins and nature atlases grew from 8 to 10 slots (slot 8 is empty there), the others from 9 to 10. The atlas generators (make_biome_tiles.py, make_depth_styles.py, make_nature_tiles.py ...) write the atlases without slot 9: run make_wall_side.py after them.
+
+| Prio | Style | Atlas, slot | Size | Edge (column 13 / 14 / 15), details | Status |
+| --- | --- | --- | --- | --- | --- |
+| C | ruins | assets/art/tiles/ruins_tiles_atlas.png, slot 9 (atlas now 160x16) | 16x16, repeats vertically | #5d6072 / #17161f / #08070b | generated |
+| C | fungal | assets/art/tiles/fungal_tiles_atlas.png, slot 9 (160x16) | 16x16, repeats vertically | as ruins; moss and a root on the lip, the wall top's mushrooms and moss | generated |
+| C | flooded | assets/art/tiles/flooded_tiles_atlas.png, slot 9 (160x16) | 16x16, repeats vertically | as ruins; moss on the lip | generated |
+| C | fire | assets/art/tiles/fire_tiles_atlas.png, slot 9 (160x16) | 16x16, repeats vertically | #4c4e5f / #17161f / #08070b; dark-red embers on the lip | generated |
+| C | sand | assets/art/tiles/sand_tiles_atlas.png, slot 9 (160x16) | 16x16, repeats vertically | #8a7048 / #17161f / #08070b; light sand on the lip | generated |
+| C | glade | assets/art/tiles/nature_tiles_atlas.png, slot 9 (atlas now 160x16) | 16x16, repeats vertically | grass to column 11 with tufts over the lip, warm stone #8a8466 (12) and #6a6656 (13), #17161f (14), #08070b (15), like the top of the nature wall front | generated |
+
+### Glade backdrop v2
+
+| Prio | What | File | Size | Notes | Status |
+| --- | --- | --- | --- | --- | --- |
+| C | The merchant's glade going on behind the walls at dusk: grass in the floor's hue one step darker (#466b3a, dark patches and blades #34502c, lit blade tips #5a8a4a, a few dim flowers), a winding trodden path (earth #4a3e33 with dark edges #3a3029 and pebbles #6a6656), tree crowns and bushes in the style of the cover tree one step darker (lit top-left #5a8a4a / #8ac060, shade #3b5a45, a dark green rim #263a32 instead of the black outline, so they do not look like reachable cover; shadow to the bottom-right) | assets/art/tiles/glade_backdrop.png | 128x128, seamless | mean brightness 81 (glade floor 117, wall top 115); `python tools/art/make_backdrops.py glade` | generated (v2) |
+
+### Sounds
+
+The CC0 packs have no bowstring sample: the old bow and crossbow sounds were built from creaking-door samples (creak1, creak2). These three are now synthesised in code, `tools/audio/synth_sfx.py`, and get the same treatment as every other sound in `tools/audio/make_audio.py` (layer `synth:<name>`; building them needs no sources folder: `python tools/audio/make_audio.py . bow_draw crossbow_shot crossbow_reload`).
+
+| Prio | File | Length | What | Status |
+| --- | --- | --- | --- | --- |
+| C | assets/audio/sfx/bow_draw.ogg | 0.46 s | short string stretch: filtered noise sliding up and a faint rising tone (150 to 210 Hz), a cloth rustle at the start; no creak | generated (v2) |
+| C | assets/audio/sfx/crossbow_shot.ogg | 0.33 s | trigger click, a low plucked-string twang (98 Hz) with a wooden thump, the bolt's whoosh | generated (v2) |
+| C | assets/audio/sfx/crossbow_reload.ogg | 0.58 s | a ratchet of six dry clicks speeding up, then the latch: metal clack over a wooden knock | generated (v2) |

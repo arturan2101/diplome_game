@@ -150,6 +150,7 @@ func _test_fight() -> void:
 		if game.level.grid.get_cell(cell) != LevelGrid.Cell.WALL:
 			sealed = false
 	check(sealed and _markers(game) > 0, "walking in seals the doors and shows where the first wave will appear")
+	check(not game.gate.is_open, "while the room is sealed the portal is dark: no leaving through it mid-fight")
 	await physics_frames(roundi(tracker.warning_time * Engine.physics_ticks_per_second) + 3)
 	var far: bool = _enemies_in(game, room.rect) > 0
 	for enemy: Enemy in game.get_enemies():
@@ -170,6 +171,7 @@ func _test_fight() -> void:
 		if game.level.grid.get_cell(cell) != LevelGrid.Cell.FLOOR:
 			open = false
 	check(open and waves_fought == 2, "the waves come one after another (%d) and then the doors open" % waves_fought)
+	check(game.gate.is_open, "and the portal lights up again")
 	game.queue_free()
 	GameManager.config = GameManager.DEFAULT_CONFIG
 	await physics_frames(3)

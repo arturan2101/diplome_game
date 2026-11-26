@@ -18,6 +18,7 @@ boss_chest = false
 elemental_bosses = false
 breakable_cover = false
 extra_floor_styles = false
+boss_escort_on_seal = false
 meta_progression = false
 extra_enemies = false
 depth_pressure = false

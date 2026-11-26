@@ -91,7 +91,7 @@ func _send_wave(room: CombatRoom) -> void:
 		var data: EnemyData = game.get_enemy_data(entry["id"])
 		if data == null:
 			continue
-		var cell: Vector2i = _spawn_cell(room, entry["cell"], used)
+		var cell: Vector2i = pick_spawn_cell(room.rect, entry["cell"], used)
 		used[cell] = true
 		var marker: SpawnMarker = MARKER_SCENE.instantiate() as SpawnMarker
 		marker.cell = cell
@@ -131,7 +131,7 @@ func _check(room: CombatRoom) -> void:
 
 ## The planned cell if it is far enough from the player, else the nearest free floor
 ## cell of the room that is (the farthest one if none is).
-func _spawn_cell(room: CombatRoom, planned: Vector2i, used: Dictionary) -> Vector2i:
+func pick_spawn_cell(rect: Rect2i, planned: Vector2i, used: Dictionary) -> Vector2i:
 	var player_position: Vector2 = game.player.global_position
 	var level: Level = game.level
 	if level.grid.is_floor(planned) and not used.has(planned) \
@@ -141,7 +141,7 @@ func _spawn_cell(room: CombatRoom, planned: Vector2i, used: Dictionary) -> Vecto
 	var best_score: float = INF
 	var farthest: Vector2i = planned
 	var farthest_distance: float = -1.0
-	var inside: Rect2i = room.rect.grow(-1)
+	var inside: Rect2i = rect.grow(-1)
 	for y in range(inside.position.y, inside.end.y):
 		for x in range(inside.position.x, inside.end.x):
 			var cell: Vector2i = Vector2i(x, y)
