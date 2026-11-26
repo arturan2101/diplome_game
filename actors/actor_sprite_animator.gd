@@ -202,9 +202,12 @@ func _on_summon_requested() -> void:
 	play_action("summon", summon_time)
 
 
-## Plays "<action>_<dir>" once and stays on its last frame while the action lasts.
+## Plays "<action>_<dir>" (or "<action>" without directions: the scarab's burrow) once
+## and stays on its last frame while the action lasts.
 func _hold_pose(action: String) -> bool:
 	var anim: StringName = StringName(action + "_" + _direction)
+	if not sprite_frames.has_animation(anim):
+		anim = StringName(action)
 	if not sprite_frames.has_animation(anim):
 		return false
 	if animation != anim:

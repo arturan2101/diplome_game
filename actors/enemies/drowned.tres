@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://actors/enemies/enemy_data.gd" id="1"]
 [ext_resource type="SpriteFrames" path="res://assets/art/enemies/drowned_frames.tres" id="frames"]
 [ext_resource type="Resource" path="res://actors/enemies/drowned_grip.tres" id="weapon"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/grip_seaweed.png" id="mark"]
 
 
 [resource]
@@ -23,3 +24,4 @@ recovery = 0.8
 floor_style = &"flooded"
 hit_slow_multiplier = 0.5
 hit_slow_time = 1.2
+hit_slow_mark = ExtResource("mark")

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/enemy_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/mummy_frames.tres" id="frames"]
+[ext_resource type="Resource" path="res://actors/enemies/mummy_grip.tres" id="weapon"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/grip_bandage.png" id="mark"]
+
+[resource]
+script = ExtResource("1")
+attack_sound = &"skeleton_swing"
+windup_sound = &"mummy_groan"
+death_sound = &"skeleton_death"
+id = &"mummy"
+display_name = "Mummy"
+sprite_frames = ExtResource("frames")
+weapon = ExtResource("weapon")
+danger_cost = 3
+max_hp = 70
+move_speed = 30.0
+detection_range = 150.0
+attack_range = 20.0
+windup = 0.7
+attack_strike_frame = 2
+recovery = 0.8
+floor_style = &"sand"
+hit_slow_multiplier = 0.5
+hit_slow_time = 1.5
+hit_slow_mark = ExtResource("mark")

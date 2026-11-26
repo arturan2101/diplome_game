@@ -69,6 +69,11 @@ extends Resource
 ## hit_slow_time seconds (the drowned's grip). 0 = no slowing.
 @export var hit_slow_multiplier: float = 1.0
 @export var hit_slow_time: float = 0.0
+## Shown round the player's legs while that slow lasts (a looping strip: the drowned's
+## seaweed, the mummy's bandages); null = nothing shown.
+@export var hit_slow_mark: Texture2D
+@export var hit_slow_mark_frames: int = 4
+@export var hit_slow_mark_fps: float = 8.0
 ## A patch left where it dies (the magma beetle's lava), hurting the player who steps
 ## in; null = none.
 @export var death_zone: ZoneData

@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="SandSerpentData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/sand_serpent_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/sand_serpent_frames.tres" id="frames"]
+[ext_resource type="Resource" path="res://actors/enemies/sand_serpent_bite.tres" id="weapon"]
+[ext_resource type="PackedScene" path="res://actors/enemies/sand_serpent.tscn" id="scene"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/sand_ripple.png" id="ripple"]
+
+[resource]
+script = ExtResource("1")
+hidden_speed = 35.0
+hold_distance = 18.0
+emerge_range = 30.0
+resurface_delay = 1.5
+sink_time = 0.33
+ripple = ExtResource("ripple")
+ripple_frames = 4
+ripple_fps = 8.0
+windup_sound = &"serpent_emerge"
+id = &"sand_serpent"
+display_name = "Sand serpent"
+sprite_frames = ExtResource("frames")
+feet_row = 28
+attack_strike_frame = 3
+danger_cost = 3
+max_hp = 45
+move_speed = 0.0
+detection_range = 170.0
+attack_range = 34.0
+windup = 0.7
+recovery = 1.1
+weapon = ExtResource("weapon")
+scene = ExtResource("scene")
+floor_style = &"sand"

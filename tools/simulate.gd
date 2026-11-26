@@ -16,6 +16,8 @@ extends Node
 ##                           spell unlocked
 ##   --weapon=ID, --skill=ID starting weapon (combat/weapons/ID.tres) and basic skill
 ##                           (combat/skills/ID.tres); default sword and dash
+##   --depth=N               start every run at this depth (0 = the first; stage 49:
+##                           to try the enemies of a deep floor style directly)
 ##   --calibrate             also measure the time the bot spends in each room and in the
 ##                           tunnels, written to user://calibration/<session>.json
 ## Each section is written to the usual JSONL log.
@@ -30,6 +32,7 @@ const CALIBRATE_ARG: String = "--calibrate"
 const PERKS_ARG: String = "--perks="
 const WEAPON_ARG: String = "--weapon="
 const SKILL_ARG: String = "--skill="
+const DEPTH_ARG: String = "--depth="
 const SIM_LOGS_ROOT: String = "user://sim_logs"
 const CALIBRATION_DIR: String = "user://calibration"
 const DEFAULT_RUNS: int = 5
@@ -45,6 +48,7 @@ const STUCK_TIME: float = 600.0
 var _runs: int = DEFAULT_RUNS
 var _max_sections: int = DEFAULT_SECTIONS
 var _first_seed: int = DEFAULT_FIRST_SEED
+var _start_depth: int = 0
 var _profile: BotProfile = null
 var _calibrate: bool = false
 ## Calibration: one entry per finished section {"rooms": {name: [seconds]}, "tunnel": s, "tunnels": n, "time": s}.
@@ -64,6 +68,7 @@ func _ready() -> void:
 	_runs = _int_argument(RUNS_ARG, DEFAULT_RUNS)
 	_max_sections = _int_argument(SECTIONS_ARG, DEFAULT_SECTIONS)
 	_first_seed = _int_argument(SEED_ARG, DEFAULT_FIRST_SEED)
+	_start_depth = maxi(_int_argument(DEPTH_ARG, 0), 0)
 	_calibrate = CALIBRATE_ARG in OS.get_cmdline_user_args()
 	var weapon_id: String = _string_argument(WEAPON_ARG, "")
 	if weapon_id != "":
@@ -120,6 +125,7 @@ func _play_run(run_seed: int) -> int:
 	# Nothing of a previous run may keep the game paused.
 	get_tree().paused = false
 	GameManager.start_run(run_seed)
+	GameManager.depth = _start_depth
 	_game = GAME_SCENE.instantiate() as Game
 	_game.death_screen_enabled = false
 	_game.section_started.connect(_on_section_started)

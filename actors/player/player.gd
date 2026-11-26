@@ -49,6 +49,9 @@ const GROUP: StringName = &"player"
 @export var step_sound: StringName = &"footstep_stone"
 @export var step_distance: float = 22.0
 @export_group("")
+## Centre of an enemy's grip shown round the legs while slowed (show_slow_mark()): the
+## 16x8 strip sits on the feet row of the 24x24 frame.
+@export var slow_mark_offset: Vector2 = Vector2(0.0, 3.0)
 
 ## Bonuses of the camp's permanent skills (set by the game at the start of a run; all
 ## neutral by default): weapon damage, what health packs heal, the basic skill's
@@ -89,6 +92,9 @@ var _sure_crit_left: float = 0.0
 var _slow_left: float = 0.0
 var _step_left: float = 0.0
 var _slow_multiplier: float = 1.0
+## The grip round the legs (the drowned's seaweed, the mummy's bandages), made when first
+## shown and hidden when the slow ends.
+var _slow_mark: StripSprite = null
 
 
 func _ready() -> void:
@@ -125,6 +131,8 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	_sure_crit_left = maxf(_sure_crit_left - delta, 0.0)
 	_slow_left = maxf(_slow_left - delta, 0.0)
+	if _slow_mark != null and _slow_mark.visible and not is_slowed():
+		_slow_mark.visible = false
 	_move(delta)
 	_handle_skill_input()
 	if Input.is_action_just_pressed("swap_weapon"):
@@ -256,6 +264,23 @@ func slow(multiplier: float, seconds: float) -> void:
 
 func is_slowed() -> bool:
 	return _slow_left > 0.0
+
+
+## Shows a grip round the legs (a looping strip) until the current slow ends.
+func show_slow_mark(strip: Texture2D, frames: int, fps: float) -> void:
+	if strip == null or not is_slowed():
+		return
+	if _slow_mark == null:
+		_slow_mark = StripSprite.new()
+		_slow_mark.name = "SlowMark"
+		_slow_mark.position = slow_mark_offset
+		add_child(_slow_mark)
+	if _slow_mark.texture != strip:
+		_slow_mark.texture = strip
+		_slow_mark.hframes = maxi(frames, 1)
+		_slow_mark.fps = fps
+		_slow_mark.play_range(0, -1, true)
+	_slow_mark.visible = true
 
 
 ## The weapon in hand gains a level (a whetstone, stage 42). False at its top level.

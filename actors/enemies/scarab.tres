@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="ScarabData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/scarab_data.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/art/enemies/scarab_frames.tres" id="frames"]
+[ext_resource type="Resource" path="res://actors/enemies/scarab_bite.tres" id="weapon"]
+[ext_resource type="PackedScene" path="res://actors/enemies/scarab.tscn" id="scene"]
+
+[resource]
+script = ExtResource("1")
+burrow_distance = 64.0
+burrow_cooldown = 3.0
+burrow_time = 0.33
+emerge_time = 0.33
+underground_speed = 75.0
+emerge_distance = 16.0
+max_underground_time = 4.0
+burrow_sound = &"scarab_burrow"
+attack_sound = &"beetle_bite"
+id = &"scarab"
+display_name = "Scarab swarm"
+sprite_frames = ExtResource("frames")
+attack_strike_frame = 2
+body_radius = 4.0
+danger_cost = 4
+pack_min = 4
+pack_max = 6
+max_hp = 14
+move_speed = 70.0
+detection_range = 150.0
+attack_range = 12.0
+windup = 0.3
+recovery = 0.45
+weapon = ExtResource("weapon")
+scene = ExtResource("scene")
+floor_style = &"sand"

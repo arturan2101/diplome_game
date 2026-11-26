@@ -33,6 +33,8 @@ const OWNER_SEARCH_DEPTH: int = 4
 @export_flags_2d_physics var sight_mask: int = 1
 ## Physics layers its death patch hurts (player_hurtbox).
 @export_flags_2d_physics var death_zone_mask: int = 8
+## Layers its body still bumps into while under the floor (set_buried(): world).
+@export_flags_2d_physics var buried_collision_mask: int = 1
 ## Tint during the windup. White (none) since stage 41: the wind-up pose of the art
 ## shows the attack coming; a colour brings the old orange warning back.
 @export var windup_color: Color = Color.WHITE
@@ -95,6 +97,9 @@ var _slow_multiplier: float = 1.0
 ## Drops shown while wet and ice shown while frozen, created when first needed.
 var _wet_mark: AnimatedSprite2D = null
 var _ice_mark: Sprite2D = null
+## Under the floor (set_buried()), and the layers of its body and hurtbox kept meanwhile.
+var _buried: bool = false
+var _surface_layers: Vector3i = Vector3i.ZERO
 
 
 func _ready() -> void:
@@ -339,6 +344,30 @@ func _show_ice(frozen: bool) -> void:
 	_ice_mark.visible = frozen
 
 
+## Goes under the floor or comes back up (stage 49: the burrowing scarab, the hidden
+## sand serpent). Under it there is no body to bump into (only walls stop it), no
+## hurtbox for weapons, auto-aim and spells to find, and Health is invulnerable.
+func set_buried(buried: bool) -> void:
+	if buried == _buried:
+		return
+	_buried = buried
+	if buried:
+		_surface_layers = Vector3i(collision_layer, collision_mask, hurtbox.collision_layer)
+		collision_layer = 0
+		collision_mask = buried_collision_mask
+		hurtbox.collision_layer = 0
+		health.make_invulnerable(INF)
+	else:
+		collision_layer = _surface_layers.x
+		collision_mask = _surface_layers.y
+		hurtbox.collision_layer = _surface_layers.z
+		health.end_invulnerability()
+
+
+func is_buried() -> bool:
+	return _buried
+
+
 ## The enemy a hurtbox belongs to (a spell effect hits hurtboxes), or null.
 static func owner_of(hurtbox: Node) -> Enemy:
 	var node: Node = hurtbox
@@ -544,11 +573,14 @@ func _create_weapon() -> void:
 		weapon.attack_performed.connect(_on_attack_performed)
 
 
-## The drowned's grip: a blow that landed slows the player.
+## The drowned's grip: a blow that landed slows the player, its seaweed (the mummy's
+## bandages) wrapped round the player's legs meanwhile.
 func _on_attack_performed(_step: int, hits: int) -> void:
 	var player: Player = _target as Player
 	if hits > 0 and player != null and is_instance_valid(player):
 		player.slow(data.hit_slow_multiplier, data.hit_slow_time)
+		if data.hit_slow_mark != null:
+			player.show_slow_mark(data.hit_slow_mark, data.hit_slow_mark_frames, data.hit_slow_mark_fps)
 
 
 func _on_hit_received(info: DamageInfo) -> void:
