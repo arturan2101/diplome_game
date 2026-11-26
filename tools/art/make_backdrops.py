@@ -1,6 +1,6 @@
 """Batch 16: level backdrops, the rock behind the one-tile walls.
 
-One seamless 64x64 texture per style, repeated under the whole level and seen only
+One seamless 64x64 texture per style (the glade 128x128), repeated under the whole level and seen only
 outside the walls. Dark and low-contrast (well below the wall top and at or below the
 floor of its style, so the floor and the walls read over it), no outline, light from the
 top-left very weak (one step up on the top-left of a stone, one step down on the
@@ -13,10 +13,12 @@ Output: assets/art/tiles/<style>_backdrop.png for
   flooded wet blue-green stone, streaks, rare moss
   fire    black basalt, rare dim orange veins
   sand    dark sandstone with sand drifts
-  glade   dense grass and bushes seen from above, at dusk (the merchant's glade)
-Run from the project root: python tools/art/make_backdrops.py
+  glade   v2, 128x128: the merchant's glade going on at dusk - darker grass in the
+          floor's hue, a winding path, tree crowns and bushes like the cover tree
+Run from the project root: python tools/art/make_backdrops.py [style ...]
 (it prints the mean brightness next to the floor and the wall top of each style)
 """
+import contextlib
 import math
 import os
 import random
@@ -25,39 +27,42 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-from make_batch15 import RGB  # noqa: E402
+from make_batch15 import RGB, hexc  # noqa: E402
 
 N = 64
 OUT = "assets/art/tiles"
 
 
 class Tex:
-    """A 64x64 grid of palette keys; every coordinate wraps, so drawing is seamless."""
+    """An NxN grid of palette keys (64, the glade 128); every coordinate wraps, so drawing is seamless."""
 
     def __init__(self, fill):
         self.k = [[fill] * N for _ in range(N)]
         self.keep = set()  # pixels the clean-up must not touch (intended single dots)
 
     def get(self, x, y):
-        return self.k[int(y) % N][int(x) % N]
+        n = len(self.k)
+        return self.k[int(y) % n][int(x) % n]
 
     def set(self, x, y, key, keep=False):
-        x, y = int(round(x)) % N, int(round(y)) % N
+        n = len(self.k)
+        x, y = int(round(x)) % n, int(round(y)) % n
         self.k[y][x] = key
         if keep:
             self.keep.add((x, y))
 
     def image(self):
-        img = Image.new("RGBA", (N, N))
+        n = len(self.k)
+        img = Image.new("RGBA", (n, n))
         px = img.load()
-        for y in range(N):
-            for x in range(N):
+        for y in range(n):
+            for x in range(n):
                 px[x, y] = RGB[self.k[y][x]]
         return img
 
 
 def periodic_noise(seed, cells, octaves=((32, 1.0), (16, 0.7), (8, 0.35))):
-    """Smooth value noise that repeats every 64 px: lattice values on a wrapping grid,
+    """Smooth value noise that repeats every N px: lattice values on a wrapping grid,
     cosine-interpolated, rescaled to 0 ... 1. octaves = (lattice size in px, weight)."""
     rnd = random.Random(seed)
     field = [[0.0] * N for _ in range(N)]
@@ -106,7 +111,7 @@ def clean(t, passes=2):
                 nb = [t.get(x + 1, y), t.get(x - 1, y), t.get(x, y + 1), t.get(x, y - 1)]
                 same = nb.count(me)
                 if same <= 1:
-                    best = max(set(nb), key=nb.count)
+                    best = max(sorted(set(nb)), key=nb.count)  # sorted: same result every run
                     if nb.count(best) >= 3 or same == 0:
                         changes.append((x, y, best))
         for x, y, k in changes:
@@ -340,46 +345,119 @@ def sand():
     return t
 
 
+# dusk grass of the glade backdrop (nature theme extras, docs/art-style.md): the glade
+# floor's #5a8a4a one step darker, same hue
+RGB.update({"gd": hexc("#466b3a"), "gD": hexc("#34502c"), "ws": hexc("#6a6656")})
+
+
+@contextlib.contextmanager
+def tile_size(n):
+    """Draw one texture at another size (every helper reads N when it is called)."""
+    global N
+    old, N = N, n
+    try:
+        yield
+    finally:
+        N = old
+
+
+def blob_cells(cx, cy, r, rnd, lobes=4):
+    """A round, slightly lumpy crown: a few overlapping circles."""
+    parts = [(cx, cy, r * 0.8)]
+    for i in range(lobes):
+        a = rnd.uniform(0, math.tau) + i * math.tau / lobes
+        parts.append((cx + math.cos(a) * r * 0.35, cy + math.sin(a) * r * 0.3, r * rnd.uniform(0.6, 0.72)))
+    cells = set()
+    for y in range(int(cy - r) - 2, int(cy + r) + 3):
+        for x in range(int(cx - r) - 2, int(cx + r) + 3):
+            if any(math.hypot(x + 0.5 - px, y + 0.5 - py) <= pr for px, py, pr in parts):
+                cells.add((x, y))
+    return cells
+
+
+def crown(t, cells, cx, cy, r):
+    """A tree crown or a bush in the style of the cover tree (nature slot 5), one step
+    darker: body #466b3a, lit top-left #5a8a4a with a few #8ac060 leaves, shade #3b5a45 on
+    the bottom-right, a dark green rim #263a32 instead of the black outline (the backdrop
+    must not look like cover the player can reach), a shadow on the grass to the
+    bottom-right."""
+    for x, y in cells:  # shadow first, so the crown covers its own part
+        for sx, sy in ((1, 1), (2, 2), (2, 1)):
+            if (x + sx, y + sy) not in cells:
+                t.set(x + sx, y + sy, "g" if sx == 2 and sy == 2 else "n")
+    for x, y in cells:
+        if any((x + dx, y + dy) not in cells for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+            t.set(x, y, "n")
+            continue
+        lit = math.hypot(x + 0.5 - (cx - r * 0.3), y + 0.5 - (cy - r * 0.32)) <= r * 0.5
+        shade = (x - 2, y - 2) not in cells or (x - 3, y - 1) not in cells or (x - 1, y - 3) not in cells
+        t.set(x, y, "G" if lit else "N" if shade else "gd")
+    # leaf texture: little lit tufts on the lit half, dark gaps on the shaded half
+    for x, y in cells:
+        inner = all((x + dx, y + dy) in cells for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+        if not inner:
+            continue
+        h = (x * 7 + y * 13) % 17
+        here = t.get(x, y)
+        if here == "G" and h in (0, 7):
+            t.set(x, y, "V")  # a few bright leaves in the light
+        elif here == "gd" and h in (3, 11):
+            t.set(x, y, "G")  # leaf clusters catching some light
+        elif here in ("gd", "N") and h == 5:
+            t.set(x, y, "gD")  # gaps between the leaves
+
+
 def glade():
-    rnd = random.Random(166)
-    t = Tex("n")
-    base_layers(t, periodic_noise(8, None), [(0.08, "g"), (2, "n")])
-    # grass blades: short strokes leaning one way, lighter tip
-    for n in range(260):
-        x, y = rnd.randrange(N), rnd.randrange(N)
-        lean = rnd.choice((0, 0, 1, -1))
-        h = rnd.randint(2, 3)
-        for s in range(h):
-            t.set(x + (lean if s == h - 1 else 0), y - s, "N" if s else "n")
-    clean(t, 1)
-    # bushes: round clumps, mid green, a few lit leaves top-left, dark under the clump
-    for cx, cy in scatter(rnd, 24, 7, []):
-        r = rnd.uniform(3.0, 5.0)
-        lobes = [(cx + math.cos(a) * r * 0.45, cy + math.sin(a) * r * 0.4, r * rnd.uniform(0.55, 0.7))
-                 for a in (rnd.uniform(0, math.tau) + i * math.tau / 4 for i in range(4))]
-        cells = set()
-        for y in range(int(cy - r) - 2, int(cy + r) + 3):
-            for x in range(int(cx - r) - 2, int(cx + r) + 3):
-                if any(math.hypot(x + 0.5 - lx, y + 0.5 - ly) <= lr for lx, ly, lr in lobes):
-                    cells.add((x, y))
-        for x, y in cells:
-            if (x, y + 1) not in cells:
-                t.set(x, y + 1, "k")
-            if (x + 1, y + 1) not in cells:
-                t.set(x + 1, y + 1, "g")
-        for x, y in cells:
-            edge_lit = (x - 1, y) not in cells or (x, y - 1) not in cells
-            edge_dark = (x + 1, y) not in cells or (x, y + 1) not in cells
-            k = "N"
-            if edge_dark:
-                k = "n"
-            elif edge_lit and (x + y) % 3 == 0:
-                k = "G"
-            elif (x * 3 + y * 5) % 11 == 0:
-                k = "n"  # leaf gaps
-            t.set(x, y, k)
-    clean(t, 1)
-    return t
+    """v2, 128x128: the glade going on behind the walls at dusk. Grass in the floor's hue
+    one step darker, a winding trodden path, tree crowns and bushes like the cover tree."""
+    rnd = random.Random(266)
+    with tile_size(128):
+        t = Tex("gd")
+        # grass: darker and lighter patches, then blades
+        base_layers(t, periodic_noise(9, None, ((64, 1.0), (32, 0.7), (16, 0.4))),
+                    [(0.22, "gD"), (2, "gd")])
+        clean(t, 1)
+        for n in range(700):  # blades: 2 px strokes, most dark, some with a lit tip
+            x, y = rnd.randrange(N), rnd.randrange(N)
+            lit = n % 4 == 0
+            t.set(x, y, "G" if lit else "gD", keep=True)
+            t.set(x + (n % 3 == 0), y + 1, "gd" if lit else "gD", keep=True)
+        for n in range(14):  # a few dim flowers
+            t.set(rnd.randrange(N), rnd.randrange(N), "u" if n % 3 else "Z", keep=True)
+        # the path: winds top to bottom (seamless: the curve repeats every 128 px)
+        path = set()
+        for y in range(N):
+            xc = 44 + 16 * math.sin(y * math.tau / N) + 5 * math.sin(y * 2 * math.tau / N + 1.3)
+            w = 4.2 + 0.9 * math.sin(y * 3 * math.tau / N)
+            for x in range(int(xc - w - 1), int(xc + w + 2)):
+                if abs(x + 0.5 - xc) <= w:
+                    path.add((x % N, y))
+        for x, y in path:
+            t.set(x, y, "3")
+        rows = {}
+        for x, y in path:
+            rows.setdefault(y, set()).add(x)
+        for x, y in path:  # dark edges (more on the right, away from the light), grass tufts creeping in
+            if (x + 1) % N not in rows[y] or ((x + 2) % N not in rows[y] and y % 3):
+                t.set(x, y, "2")
+            elif (x - 1) % N not in rows[y]:
+                t.set(x, y, "gd" if y % 4 == 0 else "2" if y % 4 == 2 else "3")
+        for n in range(26):  # pebbles on the path
+            x, y = rnd.choice(sorted(path))
+            t.set(x, y, "ws", keep=True)
+        path_pts = [(px, py) for px, py in path if py % 8 == 0]
+        # trees: big crowns, away from the path
+        trees = scatter(rnd, 7, 30, [(x, y) for x, y in path_pts])
+        for cx, cy in trees:
+            r = rnd.uniform(9, 13)
+            crown(t, blob_cells(cx, cy, r, rnd, 5), cx, cy, r)
+        # bushes, smaller, may touch the path edge
+        taken = [(x, y) for x, y in trees] + [(x, y) for x, y in path_pts]
+        for cx, cy in scatter(rnd, 16, 11, taken):
+            r = rnd.uniform(3.5, 5.5)
+            crown(t, blob_cells(cx, cy, r, rnd, 3), cx, cy, r)
+        clean(t, 1)
+        return t
 
 
 STYLES = {"ruins": ruins, "fungal": fungal, "flooded": flooded, "fire": fire, "sand": sand, "glade": glade}
@@ -394,7 +472,10 @@ def lum_of(pixels):
 
 
 def main():
+    only = set(sys.argv[1:])
     for name, make in STYLES.items():
+        if only and name not in only:
+            continue
         img = make().image()
         img.save(f"{OUT}/{name}_backdrop.png")
         atlas, fslot, wslot = REF[name]

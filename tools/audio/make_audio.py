@@ -13,6 +13,9 @@ Sources (all CC0, see assets/audio/CREDITS.md), unpacked into one folder:
          [512 sounds]" (opengameart.org/content/512-sound-effects-8-bit-style), flat
   jadv:  Juhani Junkala, "Chiptune Adventures" (opengameart.org/content/4-chiptunes-adventure)
   jret:  Juhani Junkala, "Retro Game Music Pack" (opengameart.org/content/5-chiptunes-action)
+  synth: sounds synthesised in code, tools/audio/synth_sfx.py (bow_draw, crossbow_shot,
+         crossbow_reload since batch 17: the packs only had creaking-door samples for them);
+         building only these needs no sources folder (pass any folder, e.g. .)
 Usage (from the project root, ffmpeg on PATH or FFMPEG=<path to ffmpeg.exe>):
     python tools/audio/make_audio.py <sources folder> [name ...]
 Writes assets/audio/sfx/<name>.ogg and assets/audio/music/<name>.ogg and prints each
@@ -27,6 +30,9 @@ import tempfile
 import numpy as np
 from scipy import signal
 from scipy.io import wavfile
+
+sys.path.insert(0, os.path.dirname(__file__))
+from synth_sfx import SYNTH  # noqa: E402
 
 SR = 44100
 FFMPEG = os.environ.get("FFMPEG", "ffmpeg")
@@ -45,6 +51,8 @@ SRC = ""
 
 def load(ref, channels=1):
     root, name = ref.split(":", 1)
+    if root == "synth":  # synthesised in code (tools/audio/synth_sfx.py), no pack needed
+        return SYNTH[name]()
     path = os.path.join(SRC, ROOTS[root], name)
     raw = subprocess.run([FFMPEG, "-v", "error", "-i", path, "-f", "f32le", "-ac", str(channels), "-ar", str(SR), "-"],
                          capture_output=True, check=True).stdout
@@ -161,12 +169,12 @@ SFX = {
     "sword_hit_2": ([L("k_impact:impactPlate_light_002.ogg"), L("j512:sfx_damage_hit3.wav", -6)], {}),
     "sword_hit_3": ([L("k_impact:impactPlate_light_004.ogg"), L("j512:sfx_damage_hit5.wav", -6)], {}),
     "heavy_slash": ([L("j512:sfx_wpn_sword2.wav", 0, 0, 0.8), L("k_impact:impactMetal_heavy_001.ogg", -4, 0.06)], {}),
-    "bow_draw": ([L("k_rpg:creak1.ogg", 0, 0, 1.15)], {"max": 0.8}),
+    "bow_draw": ([L("synth:bow_draw")], {"max": 0.5}),
     "bow_release": ([L("k_rpg:drawKnife2.ogg", 0, 0, 1.3), L("j512:sfx_wpn_dagger.wav", -6)], {"max": 0.5}),
     "arrow_hit_flesh": ([L("k_impact:impactGeneric_light_001.ogg"), L("j512:sfx_damage_hit7.wav", -8)], {}),
     "arrow_hit_wall": ([L("k_impact:impactPlank_medium_002.ogg", 0, 0, 1.2), L("k_impact:impactMining_001.ogg", -6)], {}),
-    "crossbow_shot": ([L("k_rpg:metalLatch.ogg"), L("j512:sfx_wpn_dagger.wav", -3, 0.02, 0.85)], {"max": 0.6}),
-    "crossbow_reload": ([L("k_rpg:metalClick.ogg"), L("k_rpg:creak2.ogg", -4, 0.08, 1.3)], {"max": 0.9}),
+    "crossbow_shot": ([L("synth:crossbow_shot")], {"max": 0.5}),
+    "crossbow_reload": ([L("synth:crossbow_reload")], {"max": 0.8}),
     "spear_thrust_1": ([L("k_rpg:knifeSlice.ogg", 0, 0, 0.85)], {}),
     "spear_thrust_2": ([L("k_rpg:knifeSlice2.ogg", 0, 0, 0.85)], {}),
     "dagger_stab_1": ([L("k_rpg:knifeSlice.ogg", 0, 0, 1.25)], {"max": 0.4}),

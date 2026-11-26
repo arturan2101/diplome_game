@@ -15,3 +15,5 @@ Every sound and music file in `assets/audio/` is built by `tools/audio/make_audi
 | The Essential Retro Video Game Sound Effects Collection [512 sounds] | Juhani Junkala (SubspaceAudio) | https://opengameart.org/content/512-sound-effects-8-bit-style | CC0 |
 | Chiptune Adventures (4 chiptunes) | Juhani Junkala (SubspaceAudio) | https://opengameart.org/content/4-chiptunes-adventure | CC0 |
 | Retro Game Music Pack (5 chiptunes, action) | Juhani Junkala (SubspaceAudio) | https://opengameart.org/content/5-chiptunes-action | CC0 |
+
+Since batch 17, `bow_draw.ogg`, `crossbow_shot.ogg` and `crossbow_reload.ogg` are not built from a pack: they are synthesised in code by `tools/audio/synth_sfx.py` (original, no third-party material) and then get the same treatment as the other sounds.
