@@ -861,6 +861,19 @@ def floor_plates():
     out.save(path)
 
 
+def sand_spikes():
+    """The ruins spikes recoloured as sandstone: ridge and tip light sand #d8bc84 (still the
+    brightest pixels, so the hazard reads), lit face #b0905c, shaded face #8a7048; the slab
+    under them is the dark sand floor."""
+    return remap(load_slot(HAZ, 1), {"f": "7", "5": "6", "m": "D", "s": "S", "e": "9"})
+
+
+def sand_hazards():
+    blank = Canvas(T, T)
+    return row([sand_pit_edge(), sand_spikes(), quicksand(0), blank, blank, blank, blank,
+                load_slot(HAZ, 7)])
+
+
 def main():
     blank = Canvas(T, T)
     # fungal
@@ -881,9 +894,7 @@ def main():
     # sand
     row([sand_floor(i) for i in range(3)] + [sand_wall(3, 0), sand_top(4), sand_cover(),
         sand_wall(6, 0), sand_top(7), sand_wall(3, 1)]).save(f"{TILES}/sand_tiles_atlas.png")
-    sp = remap(load_slot(HAZ, 1), {"f": "7", "5": "6"})
-    row([sand_pit_edge(), sp, quicksand(0), blank, blank, blank, blank,
-         load_slot(HAZ, 7)]).save(f"{TILES}/sand_hazards.png")
+    sand_hazards().save(f"{TILES}/sand_hazards.png")
     row([quicksand(i) for i in range(4)]).save(f"{TILES}/sand_quicksand.png")
     sand_decals().save(f"{TILES}/sand_decals.png")
     sand_wall_details().save(f"{TILES}/sand_wall_details.png")

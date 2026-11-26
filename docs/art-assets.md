@@ -687,7 +687,7 @@ Tiles, props and floor effects: `tools/art/make_biome_tiles.py`; small enemies a
 | Prio | What | File | Size / frames | Anchor / notes | Status |
 | --- | --- | --- | --- | --- | --- |
 | C | Tiles: 0-2 dark sandstone floor (1 sand drift, 2 turquoise tile fragment), 3 sandstone wall front with a gold line, 4 sandstone wall top with sand, 5 cover (block with turquoise tiles), 6-7 cracked front / top, 8 wall front with a turquoise tile band | assets/art/tiles/sand_tiles_atlas.png | 16x16 slots, 9 in a row (144x16) | ruins layout + slot 8 | generated |
-| C | Hazards: 0 pit edge (sand trickling in), 1 spikes, 2 quicksand still frame, 7 pit inside | assets/art/tiles/sand_hazards.png | 16x16 slots (128x16) | quicksand is walkable (slows), animated by sand_quicksand.png | generated |
+| C | Hazards: 0 pit edge (sand trickling in), 1 sandstone spikes (the ruins spikes recoloured: light sand tips #d8bc84, faces #b0905c / #8a7048), 2 quicksand still frame, 7 pit inside | assets/art/tiles/sand_hazards.png | 16x16 slots (128x16) | quicksand is walkable (slows), animated by sand_quicksand.png | generated (slot 1 recoloured after stage 48) |
 | C | Quicksand: sand swirling into the centre | assets/art/tiles/sand_quicksand.png | 16x16, 4, loop | seamless | generated |
 | C | Decals: sand drift, broken turquoise tiles, pottery shards, bones in the sand | assets/art/tiles/sand_decals.png | 16x16 each (64x16) | | generated |
 | C | Wall details: hieroglyphs (eye, bird), turquoise tile inlay, gold sun disc, torn sand banner with an eye, sand pouring from a crack | assets/art/tiles/sand_wall_details.png | 16x16 each (80x16) | rows 6-14 of the wall front | generated |
