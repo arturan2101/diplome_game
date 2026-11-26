@@ -760,16 +760,16 @@ Not wired in: the level code (a repeating texture under the TileMapLayers, chose
 
 ### Side walls
 
-`wall_side`: the top of a wall that runs vertically, seen from above, the floor on its right (for a floor on the left the code mirrors the tile). Drawn by `tools/art/make_wall_side.py` from the style's wall top (slot 4), so moss, mushrooms and stones match: the joint row of the wall top is removed, so the tile repeats vertically without a seam; the edge towards the floor is on the right, in the order of the wall front below its lip, squeezed into 3 px: column 13 the lip colour, 14 #17161f, 15 the contact shadow #08070b. **Always slot 9** of the style's atlas; the ruins and nature atlases grew from 8 to 10 slots (slot 8 is empty there), the others from 9 to 10. The atlas generators (make_biome_tiles.py, make_depth_styles.py, make_nature_tiles.py ...) write the atlases without slot 9: run make_wall_side.py after them.
+`wall_side`: the top of a wall that runs vertically, seen from above. **v2 (the author's decision):** simply the style's wall top (slot 4) without its joint row: the bottom row (the joint) becomes plain top face, so the tile repeats vertically without a seam, and the edge towards the floor is the colour of the wall top itself, with no lip and no dark line (v1 had a 3 px edge on the right, #17161f and #08070b; removed). The same tile works for a floor on either side. Drawn by `tools/art/make_wall_side.py`. **Always slot 9** of the style's atlas; the ruins and nature atlases grew from 8 to 10 slots (slot 8 is empty there), the others from 9 to 10. The atlas generators (make_biome_tiles.py, make_depth_styles.py, make_nature_tiles.py ...) write the atlases without slot 9: run make_wall_side.py after them.
 
-| Prio | Style | Atlas, slot | Size | Edge (column 13 / 14 / 15), details | Status |
+| Prio | Style | Atlas, slot | Size | Notes | Status |
 | --- | --- | --- | --- | --- | --- |
-| C | ruins | assets/art/tiles/ruins_tiles_atlas.png, slot 9 (atlas now 160x16) | 16x16, repeats vertically | #5d6072 / #17161f / #08070b | generated |
-| C | fungal | assets/art/tiles/fungal_tiles_atlas.png, slot 9 (160x16) | 16x16, repeats vertically | as ruins; moss and a root on the lip, the wall top's mushrooms and moss | generated |
-| C | flooded | assets/art/tiles/flooded_tiles_atlas.png, slot 9 (160x16) | 16x16, repeats vertically | as ruins; moss on the lip | generated |
-| C | fire | assets/art/tiles/fire_tiles_atlas.png, slot 9 (160x16) | 16x16, repeats vertically | #4c4e5f / #17161f / #08070b; dark-red embers on the lip | generated |
-| C | sand | assets/art/tiles/sand_tiles_atlas.png, slot 9 (160x16) | 16x16, repeats vertically | #8a7048 / #17161f / #08070b; light sand on the lip | generated |
-| C | glade | assets/art/tiles/nature_tiles_atlas.png, slot 9 (atlas now 160x16) | 16x16, repeats vertically | grass to column 11 with tufts over the lip, warm stone #8a8466 (12) and #6a6656 (13), #17161f (14), #08070b (15), like the top of the nature wall front | generated |
+| C | ruins | assets/art/tiles/ruins_tiles_atlas.png, slot 9 (atlas now 160x16) | 16x16, repeats vertically | wall top #767a8c without the #5d6072 joint row | generated (v2) |
+| C | fungal | assets/art/tiles/fungal_tiles_atlas.png, slot 9 (160x16) | 16x16, repeats vertically | wall top with its moss and mushrooms, no joint row | generated (v2) |
+| C | flooded | assets/art/tiles/flooded_tiles_atlas.png, slot 9 (160x16) | 16x16, repeats vertically | wall top with its moss, no joint row | generated (v2) |
+| C | fire | assets/art/tiles/fire_tiles_atlas.png, slot 9 (160x16) | 16x16, repeats vertically | wall top #5d6072 without the #4c4e5f joint row | generated (v2) |
+| C | sand | assets/art/tiles/sand_tiles_atlas.png, slot 9 (160x16) | 16x16, repeats vertically | wall top #b0905c without the #8a7048 joint row | generated (v2) |
+| C | glade | assets/art/tiles/nature_tiles_atlas.png, slot 9 (atlas now 160x16) | 16x16, repeats vertically | grass wall top without the #3b5a45 joint row | generated (v2) |
 
 ### Glade backdrop v2
 
