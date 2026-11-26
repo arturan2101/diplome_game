@@ -241,22 +241,6 @@ func _update_interaction() -> void:
 		interaction_changed.emit(nearest)
 
 
-## Every carried weapon below its top level gains one level (after a boss, stage 39).
-## The weapon keeps its node; only its data and damage change. Returns how many rose.
-func raise_weapon_levels() -> int:
-	var raised: int = 0
-	for carried: Weapon in _weapons:
-		if carried.data.is_max_level():
-			continue
-		carried.data = carried.data.with_level(carried.data.level + 1)
-		carried.damage_multiplier = carried.data.get_damage_multiplier() * damage_bonus
-		raised += 1
-	if raised > 0:
-		Sound.play(level_up_sound)
-		weapon_changed.emit(_active_slot, weapon.data)
-	return raised
-
-
 ## Walks at multiplier of its speed for this many seconds (the drowned's grip). The
 ## stronger slow wins while both last.
 func slow(multiplier: float, seconds: float) -> void:

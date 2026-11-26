@@ -22,6 +22,7 @@ const DEFAULT_CHEST_WEAPONS: WeaponPool = preload("res://combat/weapons/chest_we
 const ARSENAL_CHEST_WEAPONS: WeaponPool = preload("res://combat/weapons/chest_weapons_arsenal.tres")
 const DEFAULT_RARITY_TABLE: RarityTable = preload("res://combat/weapons/rarity_table.tres")
 const DEFAULT_BOSS_RARITY_TABLE: RarityTable = preload("res://combat/weapons/boss_rarity_table.tres")
+const DEFAULT_WEAPON_LEVEL_TABLE: WeaponLevelTable = preload("res://combat/weapons/level_table.tres")
 ## How far (cells) a bought weapon lands from the merchant (stage 47).
 const BOUGHT_WEAPON_DISTANCE: int = 2
 const BOSS_CHEST_SCENE: PackedScene = preload("res://actors/pickups/chest_boss.tscn")
@@ -79,6 +80,9 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 ## Rarities of the weapon in the chest the fallen boss leaves. Empty =
 ## combat/weapons/boss_rarity_table.tres (rare or legendary).
 @export var boss_rarity_table: RarityTable
+## Levels of the weapons in chests and shops by depth (with ExperimentConfig.arsenal);
+## empty = combat/weapons/level_table.tres.
+@export var weapon_level_table: WeaponLevelTable
 ## The boss chest holds this many times the coins of an ordinary chest.
 @export var boss_chest_coin_scale: float = 2.0
 ## Sound of the boss chest opening (stage 48, batch 15 part 5).
@@ -182,6 +186,8 @@ func _ready() -> void:
 		rarity_table = DEFAULT_RARITY_TABLE
 	if boss_rarity_table == null:
 		boss_rarity_table = DEFAULT_BOSS_RARITY_TABLE
+	if weapon_level_table == null:
+		weapon_level_table = DEFAULT_WEAPON_LEVEL_TABLE
 	if spell_pool == null:
 		spell_pool = DEFAULT_SPELL_POOL
 	_run_spells = spell_pool.unlocked() if GameManager.config.meta_progression else spell_pool
@@ -521,7 +527,7 @@ func _spawn_item(entry: Dictionary, shop_rng: RandomNumberGenerator = null) -> v
 		merchant.offers = ShopStock.make_offers(shop_data, GameManager.depth, stock_rng,
 				chest_weapons, current_rarity_table() if GameManager.config.rarity_enabled else null,
 				_run_spells if GameManager.config.spells_enabled else null, player.spell_book, merchant.wandering,
-				get_shop_fusions(), get_shop_goods())
+				get_shop_fusions(), get_shop_goods(), current_level_table())
 		_check_goods(merchant.offers)
 		merchant.shop_requested.connect(_on_shop_requested)
 	_contents.add_child(item)
@@ -708,7 +714,7 @@ func _use_goods(offer: ShopOffer) -> void:
 			merchant.offers = ShopStock.make_offers(shop_data, GameManager.depth, rng, chest_weapons,
 					current_rarity_table() if GameManager.config.rarity_enabled else null,
 					_run_spells if GameManager.config.spells_enabled else null, player.spell_book, merchant.wandering,
-					get_shop_fusions(), get_shop_goods())
+					get_shop_fusions(), get_shop_goods(), current_level_table())
 			_check_goods(merchant.offers)
 
 
@@ -934,12 +940,9 @@ func _on_boss_defeated(boss: Node2D) -> void:
 			servant.tree_entered.connect(servant.queue_free)
 	_servants.clear()
 	hud.hide_boss()
-	# Batch 8: the weapons the player carries grow a level with every boss.
-	if GameManager.config.arsenal and player.raise_weapon_levels() > 0:
-		hud.show_banner("%s has fallen
-Your weapons grow stronger" % _boss_name(boss))
-	else:
-		hud.show_banner("%s has fallen" % _boss_name(boss))
+	# Weapons no longer grow with a boss (after stage 49): chests and merchants sell
+	# them at their level.
+	hud.show_banner("%s has fallen" % _boss_name(boss))
 	# With the glade, spells are bought from its merchant instead.
 	if _bot == null and GameManager.config.spells_enabled and not GameManager.config.merchant_glade:
 		spell_choice.open_offers.call_deferred(_run_spells.offer(shrine_offer_count, _loot_rng), player.spell_book)
@@ -980,13 +983,31 @@ func _on_spell_choice_closed(learned: SpellData) -> void:
 	_pending_scroll = null
 
 
-## A random weapon from the chest pool with a random rarity for the current depth.
+## A random weapon from the chest pool with a random rarity and level for the current
+## depth (the chest luck rolls both ahead).
 func _roll_chest_weapon() -> WeaponData:
 	var base: WeaponData = chest_weapons.pick(_loot_rng)
 	if base == null or not GameManager.config.rarity_enabled:
 		return base
 	var rarity: WeaponRarity = current_rarity_table().pick(GameManager.depth + _chest_luck(), _loot_rng)
-	return base.with_rarity(rarity) if rarity != null else base
+	var weapon: WeaponData = base.with_rarity(rarity) if rarity != null else base
+	return _with_found_level(weapon, GameManager.depth + _chest_luck())
+
+
+## The weapon at a level rolled for this depth (after stage 49: weapons are found at
+## their level instead of growing with every boss); unchanged without levels.
+func _with_found_level(weapon: WeaponData, depth: int) -> WeaponData:
+	var levels: WeaponLevelTable = current_level_table()
+	if weapon == null or levels == null:
+		return weapon
+	var found: int = levels.pick(depth, _loot_rng)
+	return weapon.with_level(found) if found > 1 else weapon
+
+
+## The level table chests and merchants use, or null when the series has no weapon
+## levels (ExperimentConfig.arsenal off).
+func current_level_table() -> WeaponLevelTable:
+	return weapon_level_table if GameManager.config.arsenal else null
 
 
 ## The rarity table chests and merchants use now: until the first boss falls
@@ -1015,7 +1036,8 @@ func spawn_boss_chest(at: Vector2) -> Chest:
 	chest.position = level.to_local(level.cell_center(spot))
 	var base: WeaponData = chest_weapons.pick(_loot_rng)
 	var rarity: WeaponRarity = boss_rarity_table.pick(0, _loot_rng) if GameManager.config.rarity_enabled else null
-	chest.loot_weapon = base.with_rarity(rarity) if base != null and rarity != null else base
+	chest.loot_weapon = _with_found_level(base.with_rarity(rarity) if base != null and rarity != null else base,
+			GameManager.depth)
 	chest.loot_coins = roundi(_loot_rng.randi_range(chest_coins_min, chest_coins_max) * boss_chest_coin_scale)
 	chest.collect_sound = boss_chest_sound
 	chest.opened.connect(_on_chest_opened)

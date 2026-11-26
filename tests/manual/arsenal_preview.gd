@@ -6,7 +6,7 @@ extends Node2D
 ## skeleton to parry, and a pit to teleport over. The skill is the first user argument
 ## (parry, teleport, dash or block; parry by default); a second argument "near" starts
 ## next to the legendary crossbow with its card open. Critical hits are on, and K
-## raises the carried weapons a level, as a boss kill would.
+## raises the weapon in hand a level, as a whetstone would.
 
 const PICKUP_SCENE: PackedScene = preload("res://actors/pickups/weapon_pickup.tscn")
 const PLAYER_SCENE: PackedScene = preload("res://actors/player/player.tscn")
@@ -83,4 +83,4 @@ func _ready() -> void:
 func _unhandled_key_input(event: InputEvent) -> void:
 	var key: InputEventKey = event as InputEventKey
 	if key != null and key.pressed and not key.echo and key.keycode == KEY_K:
-		_player.raise_weapon_levels()
+		_player.raise_active_weapon_level()

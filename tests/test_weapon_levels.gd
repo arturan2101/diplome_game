@@ -1,8 +1,10 @@
 extends TestCase
 ## Headless test for batch 8's weapon levels and critical hits (stage 39): levels in the
 ## data, critical hits that only touch the random stream when they are possible, the
-## player's switch for them, levels after a boss, the sure critical hit after a parry
-## the level marks in the HUD and the card of a weapon on the floor.
+## player's switch for them, the sure critical hit after a parry, the level marks in the
+## HUD and the card of a weapon on the floor. After stage 49 weapons no longer grow with
+## a boss: chests and merchants hand them out at a level rolled by depth
+## (combat/weapons/level_table.tres), never high on the first floor.
 
 const SWORD: String = "res://combat/weapons/sword.tres"
 const BOW: String = "res://combat/weapons/bow.tres"
@@ -13,11 +15,17 @@ const PICKUP_SCENE: String = "res://actors/pickups/weapon_pickup.tscn"
 const PLAYER_SCENE: String = "res://actors/player/player.tscn"
 const GAME_SCENE: String = "res://main/main.tscn"
 const DRAWS: int = 4000
+const LEVELS: String = "res://combat/weapons/level_table.tres"
+const SHOP: String = "res://shop/shop.tres"
+const CHEST_WEAPONS: String = "res://combat/weapons/chest_weapons_arsenal.tres"
+const ROLLS: int = 600
 
 
 func run() -> void:
 	_test_data()
 	_test_make_hit()
+	_test_level_table()
+	_test_shop_levels()
 	await _test_player_switch()
 	await _test_levels_in_game()
 	await _test_weapon_card()
@@ -89,18 +97,17 @@ func _test_player_switch() -> void:
 	player.damage_bonus = 1.2
 	var changes: Array[int] = [0]
 	player.weapon_changed.connect(func(_slot: int, _data: WeaponData) -> void: changes[0] += 1)
-	var raised: int = player.raise_weapon_levels()
-	check(raised == 2 and player.weapon.data.level == 2 and changes[0] == 1
+	check(player.raise_active_weapon_level() and player.weapon.data.level == 2 and changes[0] == 1
 			and is_equal_approx(player.weapon.damage_multiplier, 1.25 * 1.2),
-			"after a boss both weapons are level 2 and hit harder (with the camp's bonus)")
-	player.raise_weapon_levels()
-	check(player.raise_weapon_levels() == 0 and player.weapon.data.level == 3, "level 3 is the top")
+			"a whetstone raises the weapon in hand to level 2 (with the camp's bonus)")
+	player.raise_active_weapon_level()
+	check(not player.raise_active_weapon_level() and player.weapon.data.level == 3, "level 3 is the top")
 	player.queue_free()
 	await physics_frames(1)
 
 
-## In the full game (the tests' default config) a boss raises the carried weapons and the
-## HUD shows level marks under them.
+## In the full game (the tests' default config) the HUD shows level marks under the
+## weapon; a boss no longer raises it (after stage 49).
 func _test_levels_in_game() -> void:
 	check(GameManager.config.arsenal, "the default config has batch 8 on")
 	GameManager.start_run(4242)
@@ -113,8 +120,21 @@ func _test_levels_in_game() -> void:
 			"one level mark under the weapon in hand")
 	check(game.player.critical_hits and game.player.weapon.crit_chance > 0.0, "the game switches critical hits on")
 	game._on_boss_defeated(game.player)
-	check(game.player.weapon.data.level == 2 and (pips.texture as AtlasTexture).region.position.x == game.hud.level_pip_size.x,
-			"after the boss the weapon is level 2 and shows two marks")
+	check(game.player.weapon.data.level == 1, "beating a boss does not raise the weapon")
+	game.player.raise_active_weapon_level()
+	check((pips.texture as AtlasTexture).region.position.x == game.hud.level_pip_size.x, "level 2 shows two marks")
+	var first_floor: bool = true
+	GameManager.depth = 0
+	for _i in ROLLS:
+		var found: WeaponData = game._roll_chest_weapon()
+		first_floor = first_floor and found.level < 3
+	check(first_floor, "a chest on the first floor never holds a level 3 weapon")
+	var deep_levels: Dictionary = {}
+	GameManager.depth = 6
+	for _i in ROLLS:
+		deep_levels[game._roll_chest_weapon().level] = true
+	check(deep_levels.has(2) and deep_levels.has(3), "deeper chests hold level 2 and 3 weapons too")
+	GameManager.depth = 0
 	game.queue_free()
 	await physics_frames(2)
 
@@ -152,3 +172,42 @@ func _test_weapon_card() -> void:
 	check(not card.visible, "the card hides when the player walks away")
 	game.queue_free()
 	await physics_frames(2)
+
+
+func _test_level_table() -> void:
+	var table: WeaponLevelTable = load(LEVELS) as WeaponLevelTable
+	check(table.chance(3, 0) == 0.0 and table.chance(1, 0) >= 0.85, "on the first floor almost every weapon is level 1, none level 3")
+	var rising: bool = true
+	for depth in range(1, 6):
+		rising = rising and table.chance(3, depth) >= table.chance(3, depth - 1) and table.chance(1, depth) <= table.chance(1, depth - 1)
+	check(rising, "higher levels come gradually deeper down")
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	rng.seed = 49
+	var counts: Dictionary = {}
+	for _i in DRAWS:
+		var level: int = table.pick(2, rng)
+		counts[level] = int(counts.get(level, 0)) + 1
+	check(absf(float(counts.get(3, 0)) / DRAWS - table.chance(3, 2)) < 0.03, "rolls follow the table (%s)" % [counts])
+
+
+func _test_shop_levels() -> void:
+	var data: ShopData = load(SHOP) as ShopData
+	var weapons: WeaponPool = load(CHEST_WEAPONS) as WeaponPool
+	var table: WeaponLevelTable = load(LEVELS) as WeaponLevelTable
+	var priced: bool = true
+	var levels_seen: Dictionary = {}
+	var plain_levels: bool = true
+	for i in 80:
+		var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+		rng.seed = 4900 + i
+		for offer: ShopOffer in ShopStock.make_offers(data, 5, rng, weapons, null, null, null, false, null, [], table):
+			if offer.kind != ShopOffer.Kind.WEAPON:
+				continue
+			levels_seen[offer.weapon.level] = true
+			var base: float = data.weapon_price * (1.0 + data.weapon_level_price * float(offer.weapon.level - 1))
+			priced = priced and offer.price == data.price_for(base, 5, false)
+		rng.seed = 4900 + i
+		for offer: ShopOffer in ShopStock.make_offers(data, 5, rng, weapons, null, null, null, false):
+			plain_levels = plain_levels and (offer.kind != ShopOffer.Kind.WEAPON or offer.weapon.level == 1)
+	check(levels_seen.size() >= 2 and priced, "merchants sell weapons of several levels, each level adding to the price")
+	check(plain_levels, "without a level table every weapon is level 1")

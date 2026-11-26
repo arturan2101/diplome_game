@@ -10,12 +10,13 @@ extends RefCounted
 
 
 ## min_offers..max_offers offers (merges and the dice besides), at most
-## ShopData.max_shown_offers in all. spells = null: the series has no spells.
+## ShopData.max_shown_offers in all. levels: the weapons' levels by depth (null = all
+## level 1, nothing drawn). spells = null: the series has no spells.
 ## book: the player's spells (null = none known, both slots free).
 ## fusions = null: no merging in the series.
 static func make_offers(data: ShopData, depth: int, rng: RandomNumberGenerator, weapons: WeaponPool,
 		rarity_table: RarityTable, spells: SpellPool, book: SpellBook, wandering: bool,
-		fusions: FusionTable = null, goods: Array[StringName] = []) -> Array[ShopOffer]:
+		fusions: FusionTable = null, goods: Array[StringName] = [], levels: WeaponLevelTable = null) -> Array[ShopOffer]:
 	var offers: Array[ShopOffer] = []
 	var offered_spells: Dictionary = {}
 	if fusions != null:
@@ -43,7 +44,9 @@ static func make_offers(data: ShopData, depth: int, rng: RandomNumberGenerator, 
 			var rarity: WeaponRarity = rarity_table.pick(depth, rng) if rarity_table != null else null
 			var weapon: WeaponData = weapons.pick(rng)
 			offer.weapon = weapon.with_rarity(rarity) if rarity != null else weapon
-			base = data.weapon_price * float(data.rarity_price.get(offer.weapon.get_rarity().id, 1.0))
+			if levels != null:
+				offer.weapon = offer.weapon.with_level(levels.pick(depth, rng))
+			base = data.weapon_price * float(data.rarity_price.get(offer.weapon.get_rarity().id, 1.0)) 					* (1.0 + data.weapon_level_price * float(offer.weapon.level - 1))
 		elif offer.kind == ShopOffer.Kind.SPELL and _choose_spell(offer, spells, book, offered_spells, rng, fusions):
 			base = data.spell_level_price * (offer.spell_level - 1) if offer.kind == ShopOffer.Kind.SPELL_LEVEL else data.spell_price
 			offered_spells[offer.spell.id] = true

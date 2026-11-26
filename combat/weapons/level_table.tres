@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="WeaponLevelTable" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://combat/weapons/weapon_level_table.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+weights_by_depth = Array[PackedFloat32Array]([PackedFloat32Array(90, 10, 0), PackedFloat32Array(70, 27, 3), PackedFloat32Array(55, 35, 10), PackedFloat32Array(45, 38, 17), PackedFloat32Array(35, 40, 25)])

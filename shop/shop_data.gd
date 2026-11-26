@@ -39,6 +39,8 @@ extends Resource
 @export var goods_icon_order: Array[StringName] = [&"whetstone", &"dice", &"elixir", &"charm", &"rune_key"]
 ## Weapon prices by rarity id (common, rare, legendary).
 @export var rarity_price: Dictionary = {&"common": 1.0, &"rare": 1.8, &"legendary": 3.0}
+## Each weapon level above the first adds this share of its price (after stage 49).
+@export var weapon_level_price: float = 0.5
 ## Every depth after the first adds this share of the price (0.2 = +20% per depth).
 @export var price_growth_per_depth: float = 0.2
 ## A wandering merchant's prices are multiplied by this.
