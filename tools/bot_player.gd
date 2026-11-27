@@ -45,6 +45,17 @@ const MELEE_REACH_MARGIN: float = 2.0
 const PARRY_TIMING: float = 0.5
 const SPIKE_LOOKAHEAD: float = 24.0
 const SPIKE_SAFETY: float = 0.1
+## Boss patterns (stage 50): the bot steps out when a hazard it has read will hurt its
+## spot within HAZARD_HORIZON seconds (body radius HAZARD_MARGIN), looks for a new spot
+## every ESCAPE_RECHECK seconds, and does not walk on into a hazard due within
+## HAZARD_AHEAD_TIME seconds HAZARD_AHEAD pixels ahead. With a dash ready it dashes out
+## of a hazard due within HAZARD_DASH_TIME it cannot walk out of in time.
+const HAZARD_HORIZON: float = 0.9
+const HAZARD_MARGIN: float = 8.0
+const ESCAPE_RECHECK: float = 0.1
+const HAZARD_AHEAD: float = 16.0
+const HAZARD_AHEAD_TIME: float = 0.6
+const HAZARD_DASH_TIME: float = 0.25
 
 ## The run this bot plays.
 @export var game: Game
@@ -92,6 +103,12 @@ var _waiting_for_spikes: bool = false
 var _spike_error: float = 0.0
 var _spike_error_drawn: bool = false
 var _progress_distance: float = INF
+## Boss hazards: instance id -> seconds the bot has seen it; the ones it has read and
+## walks out of; the spot it is heading for (INF = none) and when to look again.
+var _hazard_seen: Dictionary = {}
+var _hazard_known: Array[BossHazard] = []
+var _escape_spot: Vector2 = Vector2.INF
+var _escape_check_left: float = 0.0
 
 
 ## The profile asked for on the command line, or null if no bot was asked for.
@@ -129,6 +146,7 @@ func _physics_process(delta: float) -> void:
 		_release_everything()
 		return
 	_update_target(player, delta)
+	_read_hazards(delta)
 	_handle_skill(player, delta)
 	var noticed: Enemy = _target if _target_time >= profile.reaction_time else null
 	var stand_still: bool = _handle_attack(player, noticed, delta)
@@ -171,6 +189,9 @@ func _update_target(player: Player, delta: float) -> void:
 ## Where to walk this frame: dodge first, then a health pack when hurt, then the
 ## noticed enemy, else the gate. Zero = stand still.
 func _movement_direction(player: Player, enemy: Enemy, delta: float, stand_still: bool) -> Vector2:
+	var escape: Vector2 = _hazard_escape(player, delta)
+	if escape != Vector2.INF:
+		return escape
 	if _dodge_time_left > 0.0:
 		_dodge_time_left -= delta
 		if is_instance_valid(_dodge_from) and player.global_position.distance_to(_dodge_from.global_position) >= _dodge_clear_distance:
@@ -189,7 +210,70 @@ func _movement_direction(player: Player, enemy: Enemy, delta: float, stand_still
 	if enemy != null and not enemy.is_dormant and player.weapon != null and player.weapon.is_ranged() and profile.bow_keep_distance > 0.0 \
 			and player.global_position.distance_to(enemy.global_position) < profile.bow_keep_distance:
 		return enemy.global_position.direction_to(player.global_position)
-	return _jitter(_direction_along_path(player, goal, delta), delta)
+	return _keep_off_hazards(player, _jitter(_direction_along_path(player, goal, delta), delta))
+
+
+# --- boss patterns -------------------------------------------------------
+
+## Notices the boss hazards whose warning shows; each one, after the reaction time, is
+## read (walked out of) with pattern_read_chance, else ignored.
+func _read_hazards(delta: float) -> void:
+	_hazard_known = _hazard_known.filter(func(hazard: BossHazard) -> bool:
+		return is_instance_valid(hazard) and not hazard.is_queued_for_deletion())
+	for node: Node in get_tree().get_nodes_in_group(BossHazard.GROUP):
+		var hazard: BossHazard = node as BossHazard
+		if hazard == null or hazard.age < hazard.start_delay:
+			continue
+		var id: int = hazard.get_instance_id()
+		var seen: float = float(_hazard_seen.get(id, 0.0))
+		if seen < 0.0:
+			continue
+		seen += delta
+		_hazard_seen[id] = seen
+		if seen >= profile.reaction_time:
+			# Decided once: read, or ignored for good (marked negative).
+			if _rng.randf() < profile.pattern_read_chance:
+				_hazard_known.append(hazard)
+			_hazard_seen[id] = -1.0
+	if _hazard_known.is_empty() and get_tree().get_nodes_in_group(BossHazard.GROUP).is_empty():
+		_hazard_seen.clear()
+
+
+## The way out of a read hazard that will hurt the bot's spot soon, or Vector2.INF when
+## it is safe (or nowhere is: then it fights on). Dashes out when it is too late to walk.
+func _hazard_escape(player: Player, delta: float) -> Vector2:
+	if _hazard_known.is_empty():
+		_escape_spot = Vector2.INF
+		return Vector2.INF
+	var here: Vector2 = player.global_position
+	if not BossHazard.threat_at(get_tree(), here, HAZARD_MARGIN, 0.0, HAZARD_HORIZON, _hazard_known):
+		_escape_spot = Vector2.INF
+		_escape_check_left = 0.0
+		return Vector2.INF
+	# Looks again every ESCAPE_RECHECK seconds (also after finding nothing).
+	_escape_check_left -= delta
+	if _escape_check_left <= 0.0:
+		_escape_check_left = ESCAPE_RECHECK
+		_escape_spot = HazardEscape.find_spot(game.level, get_tree(), here, player.move_speed, HAZARD_MARGIN,
+				_hazard_known, _rng.randf() * TAU, HAZARD_HORIZON)
+	if _escape_spot == Vector2.INF:
+		return Vector2.INF
+	var direction: Vector2 = here.direction_to(_escape_spot)
+	var distance: float = here.distance_to(_escape_spot)
+	if player.skill is DashSkill and player.skill.is_ready() and distance > player.move_speed * HAZARD_DASH_TIME 			and BossHazard.threat_at(get_tree(), here, HAZARD_MARGIN, 0.0, HAZARD_DASH_TIME, _hazard_known) 			and _rng.randf() < profile.skill_use_chance:
+		Input.action_press(&"skill")
+		_skill_pressed_last_frame = true
+	return direction
+
+
+## Stops instead of walking on into a read hazard that is about to strike just ahead.
+func _keep_off_hazards(player: Player, direction: Vector2) -> Vector2:
+	if _hazard_known.is_empty() or direction.is_zero_approx():
+		return direction
+	var ahead: Vector2 = player.global_position + direction.normalized() * HAZARD_AHEAD
+	if BossHazard.threat_at(get_tree(), ahead, HAZARD_MARGIN, 0.0, HAZARD_AHEAD_TIME, _hazard_known):
+		return Vector2.ZERO
+	return direction
 
 
 func _check_progress(player: Player, goal: Vector2, delta: float) -> void:

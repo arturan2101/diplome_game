@@ -12,6 +12,9 @@ extends Resource
 ## When dodging, chance to use the basic skill (dash away / raise the shield)
 ## instead of just stepping aside.
 @export_range(0.0, 1.0) var skill_use_chance: float = 0.5
+## Chance to read a boss pattern's warning on the floor (stage 50) and walk out of it;
+## a pattern it does not read it ignores until it is over.
+@export_range(0.0, 1.0) var pattern_read_chance: float = 0.85
 ## How long a dodge step lasts, in seconds.
 @export var dodge_time: float = 0.35
 ## Chance that an attack is started too early, from out of reach (a wasted swing).
