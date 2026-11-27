@@ -786,3 +786,15 @@ The CC0 packs have no bowstring sample: the old bow and crossbow sounds were bui
 | C | assets/audio/sfx/bow_draw.ogg | 0.46 s | short string stretch: filtered noise sliding up and a faint rising tone (150 to 210 Hz), a cloth rustle at the start; no creak | generated (v2) |
 | C | assets/audio/sfx/crossbow_shot.ogg | 0.33 s | trigger click, a low plucked-string twang (98 Hz) with a wooden thump, the bolt's whoosh | generated (v2) |
 | C | assets/audio/sfx/crossbow_reload.ogg | 0.58 s | a ratchet of six dry clicks speeding up, then the latch: metal clack over a wooden knock | generated (v2) |
+
+## Batch 18 (boss attack patterns: Mycelium Mother)
+
+Drawn in code: `tools/art/make_boss_patterns.py` (`python tools/art/make_boss_patterns.py`). The Mother's colours: bark #7a4a2c / #4a2f22 / #b07040, moss #5a8a4a / #3b5a45 / #8ac060, violet #9a5ae0 / #d0a0f0, mint glow #6ae0c0 / #9af0e0. All strips are 16x16 frames in a row. The Sand Pharaoh's pieces (quicksand cell, rotating beam segment and end) come later in the same file.
+
+| Prio | What | File | Size, frames | Notes | Status |
+| --- | --- | --- | --- | --- | --- |
+| C | Long vine for the spinning vines and the vine beams: twisted bark lit on top, a moss pad, a mint glowing nodule, a thorn up with a violet tip and a thorn down per tile; sways +-1 px | assets/art/fx/mother_vine.png | 16x16, 4, loop | seamless left-right: tile along x, rotate for the direction; centre line row 8 (it sways over rows 2-14) | generated |
+| C | Vine tip: tapers over 13 px and curls up a little, a rootlet splits off below, violet point | assets/art/fx/mother_vine_tip.png | 16x16, 4, loop | attached on the left, point at x 13; play the same frame as the segments (frame i of the tip continues frame i of mother_vine) | generated |
+| C | Line warning: a glowing mint crack in a black rim with earth lips and small side cracks, dashed mint lane edges, glow motes; frame 1 brighter, the dashes move | assets/art/fx/line_warn.png | 16x16, 2, loop | seamless left-right; crack on rows 7-8, lane edges rows 1 and 14; checked on the fungal and the sand floor | generated |
+| C | Field cell warning: the floor of the cell lights up green from the centre (#3b5a45), spores grow on it (#5a8a4a / #8ac060 / #b8e050), violet sparks and bright corner marks on the last frame | assets/art/fx/spore_cell_warn.png | 16x16, 3, once | hold frame 2 until the burst; neighbouring cells tile into a field with the corners marking the grid | generated |
+| C | Spore burst: a puff of toxic spores rising out of the cell, thinning into loose puffs, violet sparks | assets/art/fx/spore_burst.png | 16x16, 4, once | centre (8, 8), the cloud rises about 2 px | generated |
