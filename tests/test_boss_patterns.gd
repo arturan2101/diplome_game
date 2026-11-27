@@ -37,6 +37,8 @@ const ROOM: String = """#####################
 const CENTER: Vector2i = Vector2i(10, 7)
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+## How many hazards the reading bot still remembered after the last one was gone.
+var _known_left: int = -1
 
 
 func run() -> void:
@@ -250,6 +252,7 @@ func _test_bot_reads() -> void:
 	var blind: int = await _bot_hits(0.0)
 	check(blind > 0 and reading * 3 <= blind, "a bot that reads patterns is hit far less (%d) than one that does not (%d)"
 			% [reading, blind])
+	check(_known_left == 0, "the bot forgets hazards once they are gone, even freed unseen (%d left)" % _known_left)
 
 
 func _bot_hits(read_chance: float) -> int:
@@ -275,7 +278,7 @@ func _bot_hits(read_chance: float) -> int:
 	var profile: BotProfile = (BotPlayer.load_profile("strong")).duplicate() as BotProfile
 	profile.pattern_read_chance = read_chance
 	profile.dodge_chance = 0.0
-	game.add_bot(profile)
+	var bot: BotPlayer = game.add_bot(profile)
 	var hits: Array[int] = [0]
 	game.player.health.damaged.connect(func(info: DamageInfo) -> void:
 		if info.source_id == &"test_boss":
@@ -289,6 +292,16 @@ func _bot_hits(read_chance: float) -> int:
 			origin = at
 		_cast(patterns[i], game.level, origin, at, true)
 		await physics_frames(roundi(2.2 * 60.0))
+	if read_chance > 0.0:
+		while not get_tree().get_nodes_in_group(BossHazard.GROUP).is_empty():
+			await physics_frames(1)
+		await physics_frames(2)
+		# One freed while the bot was not looking (a section change): it must go too.
+		var gone: LineHazard = LineHazard.new()
+		bot._hazard_known.append(gone)
+		gone.free()
+		bot._read_hazards(0.0)
+		_known_left = bot._hazard_known.size()
 	game.queue_free()
 	await physics_frames(3)
 	return hits[0]

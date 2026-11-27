@@ -38,6 +38,26 @@ extends EnemyData
 @export var summon_interval: float = 9.0
 @export var summon_max_alive: int = 4
 
+@export_group("Attack patterns (stage 50)")
+## Room-wide patterns (BossPattern) of each phase: one at a time, while the player is
+## within pattern_range, picked at random but never the same twice in a row. The boss
+## stands still while it plays. Empty phase one = the boss has none (the Wardens); empty
+## phase two = phase one's go on.
+@export var patterns_phase_one: Array[BossPattern] = []
+@export var patterns_phase_two: Array[BossPattern] = []
+@export var pattern_range: float = 220.0
+## Seconds from the end of one pattern to the next wind-up, by phase; the first waits
+## first_pattern_delay after the boss wakes.
+@export var pattern_cooldown: float = 3.5
+@export var pattern_cooldown_phase_two: float = 2.0
+@export var first_pattern_delay: float = 2.0
+## Seconds of the wind-up before the pattern's warning shows.
+@export var pattern_windup: float = 0.5
+## A pattern cast at home (sweeps): the boss walks back to where it woke for at most
+## home_walk_time seconds (then casts where it is); within home_reach pixels it is there.
+@export var home_walk_time: float = 3.0
+@export var home_reach: float = 8.0
+
 ## Where the special attack's strikes fall (stage 45): in a line from the boss towards
 ## the player (geysers), or on the player and around them (meteors).
 enum SpecialPattern { LINE, AROUND_TARGET }

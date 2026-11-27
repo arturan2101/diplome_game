@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="GuardianData" load_steps=9 format=3]
+[gd_resource type="Resource" script_class="GuardianData" load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://actors/enemies/guardian_data.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/guardian.tres" id="2"]
@@ -8,6 +8,15 @@
 [ext_resource type="Resource" path="res://actors/enemies/boss_effects/root_spike.tres" id="special"]
 [ext_resource type="Resource" path="res://actors/enemies/boss_effects/mother_spores.tres" id="slam_zone"]
 [ext_resource type="SpriteFrames" path="res://assets/art/enemies/mycelium_mother_frames.tres" id="frames"]
+
+[ext_resource type="Script" path="res://actors/enemies/boss_patterns/boss_pattern.gd" id="pattern_script"]
+[ext_resource type="Resource" path="res://actors/enemies/boss_patterns/mother_rays.tres" id="mother_rays"]
+[ext_resource type="Resource" path="res://actors/enemies/boss_patterns/mother_rays_double.tres" id="mother_rays_double"]
+[ext_resource type="Resource" path="res://actors/enemies/boss_patterns/mother_sweep.tres" id="mother_sweep"]
+[ext_resource type="Resource" path="res://actors/enemies/boss_patterns/mother_sweep_three.tres" id="mother_sweep_three"]
+[ext_resource type="Resource" path="res://actors/enemies/boss_patterns/mother_spore_stripes.tres" id="mother_spore_stripes"]
+[ext_resource type="Resource" path="res://actors/enemies/boss_patterns/mother_spore_checker.tres" id="mother_spore_checker"]
+[ext_resource type="Resource" path="res://actors/enemies/boss_patterns/mother_spore_rings.tres" id="mother_spore_rings"]
 
 [resource]
 script = ExtResource("1")
@@ -26,7 +35,7 @@ sprite_frames = ExtResource("frames")
 sprite_scale = 2.0
 body_radius = 11.0
 danger_cost = 16
-max_hp = 180
+max_hp = 260
 move_speed = 32.0
 detection_range = 150.0
 attack_range = 30.0
@@ -37,10 +46,11 @@ recovery = 0.8
 weapon = ExtResource("3")
 scene = ExtResource("4")
 is_boss = true
+escort_ids = Array[StringName]([&"sporeling"])
 phase_two_speed_multiplier = 1.2
-shockwave_damage = 10
+shockwave_damage = 8
 summon_id = &"sporeling"
-summon_interval = 11.0
+summon_interval = 14.0
 summon_max_alive = 3
 floor_style = &"fungal"
 slam_zone = ExtResource("slam_zone")
@@ -56,5 +66,9 @@ special_count_phase_two = 7
 special_spacing = 22.0
 special_stagger = 0.1
 special_windup = 0.9
-special_cooldown = 5.0
+special_cooldown = 8.0
 special_min_distance = 36.0
+patterns_phase_one = Array[ExtResource("pattern_script")]([ExtResource("mother_rays"), ExtResource("mother_spore_stripes")])
+patterns_phase_two = Array[ExtResource("pattern_script")]([ExtResource("mother_rays_double"), ExtResource("mother_sweep"), ExtResource("mother_sweep_three"), ExtResource("mother_spore_checker"), ExtResource("mother_spore_rings")])
+pattern_cooldown = 4.5
+pattern_cooldown_phase_two = 3.0

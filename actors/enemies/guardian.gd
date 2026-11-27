@@ -17,12 +17,16 @@ extends Enemy
 ## after a warning (geysers in a line, meteors on and around the player).
 ## Stage 48: the Mycelium Mother of the fungal floors too: no throw, a spore burst all
 ## round that leaves a cloud, roots bursting from the floor in a line, a spore ring.
+## Stage 50: room-wide attack patterns (GuardianData.patterns_phase_one/two, BossPattern):
+## a short wind-up, then the pattern shows where it will strike and the boss stands
+## holding its cast pose until it is over. A pattern cast at home (a sweep) first sends
+## the boss back to where it woke, the middle of its arena.
 
 signal phase_changed(phase: int)
 ## The game spawns the servants: it owns the enemies of the section.
 signal summon_requested(guardian: Guardian, count: int)
 
-enum Attack { SLAM, THROW, SHOCKWAVE, SPECIAL }
+enum Attack { SLAM, THROW, SHOCKWAVE, SPECIAL, PATTERN }
 
 ## Physics layers the stone and the shockwave hurt (player_hurtbox).
 @export_flags_2d_physics var player_hurtbox_mask: int = 8
@@ -41,6 +45,16 @@ var _shockwave_next: bool = false
 var _special_cooldown_left: float = 0.0
 ## The patches with damage_multiplier applied, made on first use.
 var _scaled_zones: Dictionary = {}
+## The pattern being wound up or played (or the last one).
+var _pattern: BossPattern = null
+var _pattern_cooldown_left: float = 0.0
+## Seconds left to walk home before the chosen pattern; 0 = not walking home.
+var _home_walk_left: float = 0.0
+## Where the boss woke: the middle of its arena.
+var _home: Vector2 = Vector2.ZERO
+var _home_known: bool = false
+## True while the boss stands still for its pattern.
+var _casting: bool = false
 
 
 func _ready() -> void:
@@ -56,13 +70,20 @@ func _ready() -> void:
 	health.damaged.connect(_check_phase)
 	# The first special attack waits half its cooldown after the boss wakes.
 	_special_cooldown_left = _stats.special_cooldown * 0.5
+	_pattern_cooldown_left = _stats.first_pattern_delay
 
 
 func _physics_process(delta: float) -> void:
 	if is_dormant:
 		return
+	if not _home_known:
+		_home_known = true
+		_home = global_position
 	_throw_cooldown_left = maxf(_throw_cooldown_left - delta, 0.0)
 	_special_cooldown_left = maxf(_special_cooldown_left - delta, 0.0)
+	_casting = _casting and state == State.RECOVER
+	if not _casting:
+		_pattern_cooldown_left = maxf(_pattern_cooldown_left - delta, 0.0)
 	if phase == 2:
 		_summon_left -= delta
 		if _summon_left <= 0.0:
@@ -84,6 +105,9 @@ func get_windup_reach() -> float:
 			return _stats.shockwave_radius
 		Attack.SPECIAL:
 			return _stats.special_range
+		Attack.PATTERN:
+			# The bots read a pattern from its warning on the floor, not from the wind-up.
+			return 0.0
 	return data.attack_range
 
 
@@ -94,6 +118,38 @@ func is_windup_ranged() -> bool:
 ## True when this boss has a special attack (the elemental Wardens).
 func has_special() -> bool:
 	return _stats != null and _stats.special_zone != null
+
+
+## True when this boss casts room-wide patterns (stage 50).
+func has_patterns() -> bool:
+	return _stats != null and not _stats.patterns_phase_one.is_empty()
+
+
+## The pattern being wound up or played, or null.
+func get_pattern() -> BossPattern:
+	if _casting or _home_walk_left > 0.0 or (state == State.WINDUP and attack == Attack.PATTERN):
+		return _pattern
+	return null
+
+
+func is_casting() -> bool:
+	return _casting
+
+
+func is_walking_home() -> bool:
+	return _home_walk_left > 0.0
+
+
+## Where the boss woke (the middle of its arena).
+func get_home() -> Vector2:
+	return _home
+
+
+## Standing for a pattern, the boss holds the last frame of its cast animation.
+func get_pose() -> StringName:
+	if _casting and _pattern != null and _pattern.cast_animation != "":
+		return StringName(_pattern.cast_animation)
+	return &""
 
 
 func is_roaring() -> bool:
@@ -113,10 +169,15 @@ func get_attack_sound() -> StringName:
 			return _stats.shockwave_sound
 		Attack.SPECIAL:
 			return _stats.special_sound
+		Attack.PATTERN:
+			# The pattern sounds its own warning and strike.
+			return &""
 	return data.attack_sound
 
 
 func get_attack_animation() -> String:
+	if attack == Attack.PATTERN and _pattern != null and _pattern.cast_animation != "":
+		return _pattern.cast_animation
 	if attack == Attack.SPECIAL and _stats.special_animation != "":
 		return _stats.special_animation
 	if attack == Attack.SLAM and _stats.slam_animation != "":
@@ -135,7 +196,19 @@ func _update_chase(delta: float) -> void:
 	if not is_instance_valid(_target):
 		super(delta)
 		return
+	if _home_walk_left > 0.0:
+		_walk_home(delta)
+		return
 	var distance: float = global_position.distance_to(_target.global_position)
+	if _wants_pattern(distance):
+		_pattern = _pick_pattern()
+		if _pattern.cast_at_home and global_position.distance_to(_home) > _stats.home_reach:
+			_home_walk_left = _stats.home_walk_time
+			_repath_time_left = 0.0
+			_walk_home(delta)
+			return
+		_start_attack(Attack.PATTERN)
+		return
 	if _can_see_target():
 		if phase == 2 and _shockwave_next and distance <= _stats.shockwave_radius:
 			_start_attack(Attack.SHOCKWAVE)
@@ -165,6 +238,8 @@ func _start_attack(kind: Attack) -> void:
 			_state_time_left = _stats.shockwave_windup
 		Attack.SPECIAL:
 			_state_time_left = _stats.special_windup
+		Attack.PATTERN:
+			_state_time_left = _stats.pattern_windup
 	_windup_total = _state_time_left
 
 
@@ -193,10 +268,65 @@ func _update_windup(delta: float) -> void:
 		Attack.SPECIAL:
 			_special()
 			_special_cooldown_left = _stats.special_cooldown
+		Attack.PATTERN:
+			_cast_pattern()
+			return
 	struck.emit()
 	_enter(State.RECOVER)
 	if phase == 2:
 		_state_time_left *= _stats.phase_two_recovery_multiplier
+
+
+## True when a pattern is due: it has some, its cooldown is over, none of its hazards
+## is still on the floor and the player is within reach.
+func _wants_pattern(distance: float) -> bool:
+	if not has_patterns() or _pattern_cooldown_left > 0.0 or distance > _stats.pattern_range:
+		return false
+	for node: Node in get_tree().get_nodes_in_group(BossHazard.GROUP):
+		var hazard: BossHazard = node as BossHazard
+		if hazard != null and hazard.caster == self and not hazard.is_queued_for_deletion():
+			return false
+	return true
+
+
+## A pattern of the current phase at random, not the last one again.
+func _pick_pattern() -> BossPattern:
+	var patterns: Array[BossPattern] = _stats.patterns_phase_one
+	if phase == 2 and not _stats.patterns_phase_two.is_empty():
+		patterns = _stats.patterns_phase_two
+	var choices: Array[BossPattern] = []
+	for pattern: BossPattern in patterns:
+		if pattern != _pattern:
+			choices.append(pattern)
+	if choices.is_empty():
+		choices = patterns
+	return choices[GameManager.rng.randi_range(0, choices.size() - 1)]
+
+
+## Back to the middle of the arena before a pattern cast at home; casts on arrival or
+## when the time is up.
+func _walk_home(delta: float) -> void:
+	_home_walk_left -= delta
+	if global_position.distance_to(_home) <= _stats.home_reach or _home_walk_left <= 0.0:
+		_home_walk_left = 0.0
+		_start_attack(Attack.PATTERN)
+		return
+	velocity = _direction_to_point(_home, delta) * get_walk_speed()
+	if phase == 2:
+		velocity *= _stats.phase_two_speed_multiplier
+
+
+## Casts the wound-up pattern and stands still while it plays; the cooldown starts when
+## it is over.
+func _cast_pattern() -> void:
+	var aim: Vector2 = _target.global_position if is_instance_valid(_target) else global_position + _attack_direction
+	_pattern.cast(get_parent(), global_position, aim, self, data.id, damage_multiplier, player_hurtbox_mask,
+			GameManager.rng)
+	struck.emit()
+	_enter(State.RECOVER)
+	_state_time_left = _pattern.get_duration()
+	_casting = true
+	_pattern_cooldown_left = _stats.pattern_cooldown_phase_two if phase == 2 else _stats.pattern_cooldown
 
 
 func _throw() -> void:
@@ -285,6 +415,8 @@ func _check_phase(_info: DamageInfo) -> void:
 
 func _enter_phase_two() -> void:
 	phase = 2
+	_home_walk_left = 0.0
+	_casting = false
 	if weapon != null:
 		weapon.cancel_attack()
 	_enter(State.CHASE)

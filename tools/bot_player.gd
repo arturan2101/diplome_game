@@ -218,8 +218,12 @@ func _movement_direction(player: Player, enemy: Enemy, delta: float, stand_still
 ## Notices the boss hazards whose warning shows; each one, after the reaction time, is
 ## read (walked out of) with pattern_read_chance, else ignored.
 func _read_hazards(delta: float) -> void:
-	_hazard_known = _hazard_known.filter(func(hazard: BossHazard) -> bool:
-		return is_instance_valid(hazard) and not hazard.is_queued_for_deletion())
+	# A plain loop over Variants: a typed filter fails on an entry already freed.
+	var still_known: Array[BossHazard] = []
+	for entry: Variant in _hazard_known:
+		if is_instance_valid(entry) and not (entry as BossHazard).is_queued_for_deletion():
+			still_known.append(entry as BossHazard)
+	_hazard_known = still_known
 	for node: Node in get_tree().get_nodes_in_group(BossHazard.GROUP):
 		var hazard: BossHazard = node as BossHazard
 		if hazard == null or hazard.age < hazard.start_delay:

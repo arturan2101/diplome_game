@@ -486,13 +486,19 @@ func _enter(new_state: State) -> void:
 ## Unit direction of the next step towards the target: along the grid path on a Level,
 ## straight otherwise. Zero when there is no way.
 func _direction_to_target(delta: float) -> Vector2:
-	var straight: Vector2 = global_position.direction_to(_target.global_position)
+	return _direction_to_point(_target.global_position, delta)
+
+
+## The same towards any world point (stage 50: a boss walking back to the arena's middle).
+## Set _repath_time_left to 0 when the point changes.
+func _direction_to_point(point: Vector2, delta: float) -> Vector2:
+	var straight: Vector2 = global_position.direction_to(point)
 	if not is_instance_valid(_level):
 		return straight
 	_repath_time_left -= delta
 	if _repath_time_left <= 0.0:
 		_repath_time_left = data.repath_interval
-		_path = _level.find_path(global_position, _target.global_position)
+		_path = _level.find_path(global_position, point)
 		# Point 0 is the cell the enemy already stands on.
 		_path_index = 1
 	while _path_index < _path.size() and global_position.distance_to(_path[_path_index]) <= waypoint_reach:

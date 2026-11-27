@@ -8,10 +8,11 @@
 [resource]
 script = ExtResource("1")
 warn_time = 0.85
-damage = 12
+damage = 10
 knockback = 140.0
 warn_sound = &"vines_grow"
 strike_sound = &"vine_lash"
+cast_animation = "roots"
 count = 6
 length = 220.0
 half_width = 7.0

@@ -56,6 +56,9 @@ extends Resource
 @export var scene: PackedScene
 ## Bosses are never bought from the danger budget; the director places them itself.
 @export var is_boss: bool = false
+## A boss whose arena escort is bought only among these enemy ids (stage 50: the
+## Mycelium Mother brings only sporelings); empty = any enemy the floor allows.
+@export var escort_ids: Array[StringName] = []
 ## Elite variants (stage 23) are bought only where the series allows them
 ## (ExperimentConfig.elite_enemies), and only from depth min_depth on (0 = the first).
 @export var is_elite: bool = false

@@ -157,12 +157,23 @@ func finish_arena(plan: SectionPlan, rng: RandomNumberGenerator) -> void:
 		return
 	var boss: EnemyData = boss_for_depth(plan.depth) if plan.is_boss else null
 	if boss != null:
-		plan.enemy_mix = buy_enemies(maxi(0, plan.budget - boss.danger_cost), rng, {}, plan.depth)
+		plan.enemy_mix = buy_enemies(maxi(0, plan.budget - boss.danger_cost), rng, escort_weights(boss), plan.depth)
 		plan.enemy_mix[boss.id] = 1
 		plan.waves = 1
 		return
 	plan.is_boss = false
 	plan.waves = 2 if plan.budget >= settings.arena_two_waves_budget else 1
+
+
+## Weights for buying a boss's escort: only its EnemyData.escort_ids (stage 50), or
+## none (every type as usual) when it has no list.
+func escort_weights(boss: EnemyData) -> Dictionary:
+	var weights: Dictionary = {}
+	if boss.escort_ids.is_empty():
+		return weights
+	for enemy_data: EnemyData in catalog.enemies:
+		weights[enemy_data.id] = 1.0 if enemy_data.id in boss.escort_ids else 0.0
+	return weights
 
 
 ## The boss of a boss arena at this depth: the floor style's own boss when

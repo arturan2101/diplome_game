@@ -3,7 +3,9 @@ extends Node
 ## floor, with the Mycelium Mother standing in the middle (asleep, only for the look).
 ## With a folder argument it photographs each pattern's warning and strike and quits;
 ## without one it casts the patterns one after another forever, aimed at you, and you
-## walk round them. Not part of the test suite.
+## walk round them. With fight on (stage 50, part 2) the Mother is awake and fights you
+## as in the game, both phases (no servants come; you cannot die). Not part of the test
+## suite.
 ## Usage: godot --path . res://tests/manual/boss_patterns_preview.tscn [-- <folder>]
 
 const PLAYER_SCENE: PackedScene = preload("res://actors/player/player.tscn")
@@ -23,12 +25,16 @@ const PLAYER_HURTBOX: int = 8
 const BIG_HP: int = 100000
 const PAUSE: float = 1.0
 
+## The Mother fights you instead of the patterns looping by themselves.
+@export var fight: bool = false
+
 var _out_dir: String = ""
 var _level: Level = null
 var _player: Player = null
 var _center: Vector2 = Vector2.ZERO
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _label: Label = null
+var _mother: Guardian = null
 
 
 func _ready() -> void:
@@ -43,6 +49,9 @@ func _ready() -> void:
 		DirAccess.make_dir_recursive_absolute(_out_dir)
 		await _shoot_all()
 		get_tree().quit()
+		return
+	if fight:
+		_mother.awaken()
 		return
 	while true:
 		for path: String in PATTERNS:
@@ -70,6 +79,7 @@ func _build() -> void:
 	add_child(mother)
 	mother.global_position = _center
 	mother.make_dormant()
+	_mother = mother
 	_player = PLAYER_SCENE.instantiate() as Player
 	add_child(_player)
 	_player.global_position = _level.cell_center(middle + Vector2i(4, 2))
@@ -80,6 +90,14 @@ func _build() -> void:
 	_label = Label.new()
 	_label.position = Vector2(8.0, 4.0)
 	layer.add_child(_label)
+
+
+func _process(_delta: float) -> void:
+	if not fight or _mother == null or not is_instance_valid(_mother):
+		return
+	var pattern: BossPattern = _mother.get_pattern()
+	_label.text = "phase %d   HP %d/%d   %s" % [_mother.phase, _mother.health.hp, _mother.health.max_hp,
+			pattern.resource_path.get_file().get_basename() if pattern != null else ""]
 
 
 func _shoot_all() -> void:

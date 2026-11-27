@@ -6,7 +6,7 @@
 
 [sub_resource type="Resource" id="burst_step"]
 script = ExtResource("1")
-damage = 12
+damage = 9
 reach = 34.0
 arc_degrees = 360.0
 duration = 0.15

@@ -15,6 +15,13 @@ extends Resource
 ## Played when the warning appears and when the strike lands (Sound ids).
 @export var warn_sound: StringName = &""
 @export var strike_sound: StringName = &""
+@export_group("Boss")
+## The boss's animation while it casts the pattern ("<name>_<dir>"): its wind-up, then
+## held on the last frame while the pattern plays. Empty = the boss's plain attack.
+@export var cast_animation: String = ""
+## The boss first walks back to where it woke (the middle of its arena) and casts from
+## there: a sweep round the whole room.
+@export var cast_at_home: bool = false
 @export_group("Look")
 ## The warning on the floor: a strip of 16x16 frames (a crack along a line, a lit cell).
 ## Without it a band in warn_color is drawn.
