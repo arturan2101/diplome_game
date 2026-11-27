@@ -16,6 +16,8 @@ extends Node
 ##                           spell unlocked
 ##   --weapon=ID, --skill=ID starting weapon (combat/weapons/ID.tres) and basic skill
 ##                           (combat/skills/ID.tres); default sword and dash
+##   --spells=ID[,ID][:L]    the player starts every run knowing these spells
+##                           (combat/spells/ID.tres), at level L (default 1)
 ##   --depth=N               start every run at this depth (0 = the first; stage 49:
 ##                           to try the enemies of a deep floor style directly)
 ##   --calibrate             also measure the time the bot spends in each room and in the
@@ -33,6 +35,7 @@ const PERKS_ARG: String = "--perks="
 const WEAPON_ARG: String = "--weapon="
 const SKILL_ARG: String = "--skill="
 const DEPTH_ARG: String = "--depth="
+const SPELLS_ARG: String = "--spells="
 const SIM_LOGS_ROOT: String = "user://sim_logs"
 const CALIBRATION_DIR: String = "user://calibration"
 const DEFAULT_RUNS: int = 5
@@ -49,6 +52,9 @@ var _runs: int = DEFAULT_RUNS
 var _max_sections: int = DEFAULT_SECTIONS
 var _first_seed: int = DEFAULT_FIRST_SEED
 var _start_depth: int = 0
+## Spells the player knows from the start of every run (--spells), and their level.
+var _start_spells: Array[SpellData] = []
+var _start_spell_level: int = 1
 var _profile: BotProfile = null
 var _calibrate: bool = false
 ## Calibration: one entry per finished section {"rooms": {name: [seconds]}, "tunnel": s, "tunnels": n, "time": s}.
@@ -69,6 +75,7 @@ func _ready() -> void:
 	_max_sections = _int_argument(SECTIONS_ARG, DEFAULT_SECTIONS)
 	_first_seed = _int_argument(SEED_ARG, DEFAULT_FIRST_SEED)
 	_start_depth = maxi(_int_argument(DEPTH_ARG, 0), 0)
+	_read_start_spells(_string_argument(SPELLS_ARG, ""))
 	_calibrate = CALIBRATE_ARG in OS.get_cmdline_user_args()
 	var weapon_id: String = _string_argument(WEAPON_ARG, "")
 	if weapon_id != "":
@@ -132,6 +139,9 @@ func _play_run(run_seed: int) -> int:
 	_game.section_finished.connect(_on_section_finished)
 	add_child(_game)
 	_game.add_bot(_profile)
+	for spell_data: SpellData in _start_spells:
+		for _i in _start_spell_level:
+			_game.player.spell_book.learn(spell_data)
 	var time_left: float = RUN_TIME_PER_SECTION * _max_sections
 	var section_seen: int = -1
 	var section_time: float = 0.0
@@ -214,3 +224,18 @@ func _string_argument(prefix: String, default_value: String) -> String:
 		if arg.begins_with(prefix):
 			return arg.trim_prefix(prefix)
 	return default_value
+
+
+## --spells=fireball,lightning:2 -> the two spells at level 2.
+func _read_start_spells(value: String) -> void:
+	if value == "":
+		return
+	var parts: PackedStringArray = value.split(":")
+	if parts.size() > 1:
+		_start_spell_level = clampi(parts[1].to_int(), 1, SpellData.MAX_LEVEL)
+	for id: String in parts[0].split(","):
+		var path: String = "res://combat/spells/%s.tres" % id.strip_edges()
+		if ResourceLoader.exists(path):
+			_start_spells.append(load(path) as SpellData)
+		else:
+			push_warning("Unknown spell '%s'" % id)

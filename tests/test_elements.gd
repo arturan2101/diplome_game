@@ -87,6 +87,23 @@ func _test_plasma() -> void:
 	check(by_wall.health.hp == TARGET_HP - damage and reported[0] == damage * 3,
 			"it bursts at the wall: the target there is hurt, %d reported" % reported[0])
 	await _clean_up([player, first, second, by_wall, wall])
+	# After stage 49: an enemy killed on the way is freed; the ball used to stop in the
+	# air with an error every frame and never burst.
+	player = await _add_player(origin)
+	var doomed: Hurtbox = _add_target(origin + Vector2(40.0, 0.0))
+	doomed.health.died.connect(func(_info: DamageInfo) -> void: doomed.queue_free())
+	doomed.health.max_hp = 1
+	doomed.health.reset()
+	var behind: Hurtbox = _add_target(origin + Vector2(140.0, 0.0))
+	await physics_frames(2)
+	player.spell_book.learn(plasma)
+	reported[0] = 0
+	player.spell_book.spell_damage_dealt.connect(func(_id: StringName, amount: int) -> void: reported[0] += amount)
+	player.spell_book.get_spell(0).try_cast(Vector2.RIGHT)
+	await physics_frames(60)
+	check(not is_instance_valid(doomed) and behind.health.hp == TARGET_HP - damage and reported[0] > damage,
+			"after killing an enemy on its way it flies on, hits the next and bursts (%d reported)" % reported[0])
+	await _clean_up([player, behind])
 
 
 func _test_lava_and_meteor() -> void:

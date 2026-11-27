@@ -38,3 +38,8 @@ extends Resource
 ## Timed spikes: the bot waits until the spikes ahead stay down while it crosses, but
 ## misjudges the moment by up to this many seconds (0 = never wrong).
 @export var spike_timing_error: float = 0.0
+## Spells (after stage 49): a ready spell is cast at the noticed enemy once it is within
+## this share of the spell's auto-aim radius and in sight; a spell around the player
+## (no aim: the whirlwind, the storm cloud) once the enemy is within spell_near_distance.
+@export_range(0.0, 1.0) var spell_aim_share: float = 0.8
+@export var spell_near_distance: float = 40.0

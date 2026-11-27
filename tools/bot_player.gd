@@ -80,6 +80,8 @@ var _block_time_left: float = 0.0
 ## With the parry: the melee enemy whose blow the bot waits for, to press in time.
 var _parry_target: Enemy = null
 var _skill_pressed_last_frame: bool = false
+## Spell slot actions pressed this frame, released on the next one.
+var _spells_pressed: Array[StringName] = []
 var _hesitation_left: float = 0.0
 var _jitter_angle: float = 0.0
 var _jitter_time_left: float = 0.0
@@ -130,6 +132,7 @@ func _physics_process(delta: float) -> void:
 	_handle_skill(player, delta)
 	var noticed: Enemy = _target if _target_time >= profile.reaction_time else null
 	var stand_still: bool = _handle_attack(player, noticed, delta)
+	_handle_spells(player, noticed)
 	_move(player, _movement_direction(player, noticed, delta, stand_still))
 	_handle_interact(player)
 
@@ -372,6 +375,32 @@ func _handle_attack(player: Player, enemy: Enemy, delta: float) -> bool:
 	return false
 
 
+## Casts one ready spell per frame at the noticed enemy when it is in the spell's
+## reach and in sight (the slot's action is pressed for one frame, like a player tap).
+func _handle_spells(player: Player, enemy: Enemy) -> void:
+	_release_spells()
+	if enemy == null or enemy.is_dormant or player.spell_book == null or _block_time_left > 0.0:
+		return
+	var distance: float = player.global_position.distance_to(enemy.global_position)
+	for slot in player.spell_book.slot_count:
+		var spell: Spell = player.spell_book.get_spell(slot)
+		if spell == null or not spell.is_ready():
+			continue
+		var aim: float = spell.data.auto_aim_radius
+		var reach: float = aim * profile.spell_aim_share if aim > 0.0 else profile.spell_near_distance
+		if distance <= reach and _can_see(player, enemy):
+			var action: StringName = SpellBook.SLOT_ACTIONS[slot]
+			Input.action_press(action)
+			_spells_pressed.append(action)
+			return
+
+
+func _release_spells() -> void:
+	for action: StringName in _spells_pressed:
+		Input.action_release(action)
+	_spells_pressed.clear()
+
+
 # --- moving --------------------------------------------------------------
 
 func _direction_along_path(player: Player, goal: Vector2, delta: float) -> Vector2:
@@ -492,6 +521,7 @@ func _set_attack(pressed: bool) -> void:
 
 
 func _release_everything() -> void:
+	_release_spells()
 	Input.action_release(&"interact")
 	Input.action_release(&"skill")
 	_skill_pressed_last_frame = false

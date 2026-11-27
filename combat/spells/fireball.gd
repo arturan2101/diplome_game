@@ -122,10 +122,12 @@ func _physics_process(delta: float) -> void:
 	var ray: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(from, to, _target_mask | _wall_mask)
 	ray.collide_with_areas = true
 	ray.hit_from_inside = true
+	# An enemy the ball killed on its way is freed: drop it before the typed loop (a
+	# freed object in a typed variable stopped the ball in mid-air, after stage 49).
+	_passed = _passed.filter(func(passed: Variant) -> bool: return is_instance_valid(passed))
 	var exclude: Array[RID] = []
 	for passed: Hurtbox in _passed:
-		if is_instance_valid(passed):
-			exclude.append(passed.get_rid())
+		exclude.append(passed.get_rid())
 	ray.exclude = exclude
 	var result: Dictionary = get_world_2d().direct_space_state.intersect_ray(ray)
 	if not result.is_empty():
