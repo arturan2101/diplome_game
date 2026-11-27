@@ -15,13 +15,13 @@ func _cast(direction: Vector2) -> void:
 	var struck: Array[Hurtbox] = []
 	var target: Hurtbox = caster.aim_target(stats.auto_aim_radius)
 	var dealt: int = 0
-	var damage: int = SpellData.int_at(stats.damage, level)
+	var damage: int = spell_damage(stats.damage)
 	while target != null and struck.size() < SpellData.int_at(stats.chain_count, level):
 		struck.append(target)
 		points.append(target.global_position)
 		dealt += strike(target, damage, stats.wet_multiplier, caster, stats.id, points[points.size() - 2])
 		if stats.zone_on_hit != null:
-			var zone: SpellZone = SpellZone.spawn(_effect_parent(), target.global_position, stats.zone_on_hit, level,
+			var zone: SpellZone = SpellZone.spawn(_effect_parent(), target.global_position, scaled_zone(stats.zone_on_hit), level,
 					caster, stats.id, target_mask, wall_mask)
 			zone.damage_dealt.connect(_report_damage)
 		target = _next_target(space, target.global_position, stats.jump_range, struck)

@@ -62,6 +62,9 @@ var damage_bonus: float = 1.0
 var heal_multiplier: float = 1.0
 var skill_cooldown_multiplier: float = 1.0
 var coin_magnet_radius: float = 0.0
+## The elements' damage times this (after stage 49, set by the game every section: the
+## base power times the enemies' health growth at this depth). 1 = the data's numbers.
+var spell_power: float = 1.0
 ## Critical hits of the player's weapons (ExperimentConfig.arsenal, set by the game
 ## before the weapons are made). On: each weapon crits with its data's chance; off: never.
 var critical_hits: bool = false

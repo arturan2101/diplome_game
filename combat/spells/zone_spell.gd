@@ -11,7 +11,7 @@ func _cast(direction: Vector2) -> void:
 	var stats: ZoneData = data as ZoneData
 	if stats == null:
 		return
-	var zone: SpellZone = SpellZone.spawn(_effect_parent(), _landing(stats, direction), stats, level, caster, stats.id,
+	var zone: SpellZone = SpellZone.spawn(_effect_parent(), _landing(stats, direction), scaled_zone(stats), level, caster, stats.id,
 			target_mask, wall_mask)
 	# If this spell is forgotten while the patch lasts, Godot drops the connection.
 	zone.damage_dealt.connect(_report_damage)

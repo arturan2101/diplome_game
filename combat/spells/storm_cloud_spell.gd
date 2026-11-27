@@ -67,7 +67,7 @@ func _strike() -> void:
 	if target == null:
 		return
 	var cloud: Vector2 = caster.global_position + Vector2(0.0, -stats.cloud_height)
-	_report_damage(LightningSpell.strike(target, SpellData.int_at(stats.strike_damage, level), stats.wet_multiplier,
+	_report_damage(LightningSpell.strike(target, spell_damage(stats.strike_damage), stats.wet_multiplier,
 			caster, stats.id, cloud))
 	LightningBolt.spawn(_effect_parent(), PackedVector2Array([cloud, target.global_position]), stats.color, stats.bolt_time,
 			stats.frames, stats.bolt_animation, stats.hit_animation)

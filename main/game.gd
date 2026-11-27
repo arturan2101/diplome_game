@@ -83,6 +83,10 @@ const DEBUG_ZOOM_SCRIPT: String = "res://tools/debug/debug_camera_zoom.gd"
 ## Levels of the weapons in chests and shops by depth (with ExperimentConfig.arsenal);
 ## empty = combat/weapons/level_table.tres.
 @export var weapon_level_table: WeaponLevelTable
+## The elements' damage (after stage 49): this times the enemies' health growth at the
+## depth (EnemyCatalog.hp_multiplier), so a spell keeps its share of an enemy's health.
+## Spells only exist with ExperimentConfig.spells_enabled (off in the clean series).
+@export var spell_base_power: float = 1.5
 ## The boss chest holds this many times the coins of an ordinary chest.
 @export var boss_chest_coin_scale: float = 2.0
 ## Sound of the boss chest opening (stage 48, batch 15 part 5).
@@ -344,6 +348,7 @@ func _start_section() -> void:
 	_is_arena_cleared = false
 	_clear_section()
 	_apply_floor_style()
+	_update_spell_power()
 	level.build(layout.grid)
 	_contents = Node2D.new()
 	_contents.name = "Contents"
@@ -981,6 +986,13 @@ func _on_spell_choice_closed(learned: SpellData) -> void:
 	if learned != null and is_instance_valid(_pending_scroll) and _pending_scroll.spell_data == learned:
 		_pending_scroll.queue_free()
 	_pending_scroll = null
+
+
+## The player's spell power for the current depth (spell_base_power times the enemies'
+## health growth there).
+func _update_spell_power() -> void:
+	player.spell_power = spell_base_power * _director.catalog.hp_multiplier(GameManager.depth,
+			_director.settings.depth_pressure)
 
 
 ## A random weapon from the chest pool with a random rarity and level for the current

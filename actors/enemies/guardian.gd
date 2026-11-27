@@ -260,18 +260,8 @@ func _scaled(zone: ZoneData) -> ZoneData:
 	if is_equal_approx(damage_multiplier, 1.0):
 		return zone
 	if not _scaled_zones.has(zone):
-		var copy: ZoneData = zone.duplicate() as ZoneData
-		copy.impact_damage = _times(zone.impact_damage)
-		copy.tick_damage = _times(zone.tick_damage)
-		_scaled_zones[zone] = copy
+		_scaled_zones[zone] = zone.scaled(damage_multiplier)
 	return _scaled_zones[zone]
-
-
-func _times(values: PackedInt32Array) -> PackedInt32Array:
-	var scaled: PackedInt32Array = PackedInt32Array()
-	for value: int in values:
-		scaled.append(roundi(value * damage_multiplier))
-	return scaled
 
 
 ## The shockwave's ring, scaled to its reach.

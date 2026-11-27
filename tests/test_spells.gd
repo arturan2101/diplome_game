@@ -32,6 +32,7 @@ func run() -> void:
 	_test_data()
 	await _test_book()
 	await _test_fireball()
+	await _test_spell_power()
 	await _test_whirlwind()
 	await _test_water()
 	await _test_scroll_and_shrine()
@@ -111,6 +112,47 @@ func _test_fireball() -> void:
 	check(reported[0] == damage * 2, "the spell reports the blast damage (%d)" % reported[0])
 	for node: Node in [player, near, beside, walled, wall]:
 		node.queue_free()
+	await physics_frames(2)
+
+
+## After stage 49: the elements hit harder with the caster's spell power, patches too,
+## and the game sets the power by depth like the enemies' health.
+func _test_spell_power() -> void:
+	var player: Player = _add_player(Vector2(100.0, 100.0))
+	var near: Hurtbox = _add_target(Vector2(160.0, 100.0))
+	await physics_frames(2)
+	player.spell_power = 2.0
+	player.spell_book.learn(_fireball)
+	var damage: int = SpellData.int_at((_fireball as FireballData).damage, 1)
+	player.spell_book.get_spell(0).try_cast(Vector2.RIGHT)
+	await physics_frames(30)
+	check(_damage_taken(near) == damage * 2, "with spell power 2 the fireball hits twice as hard (%d)" % _damage_taken(near))
+	var lava: ZoneData = load("res://combat/spells/lava.tres") as ZoneData
+	var spell: Spell = player.spell_book.get_spell(0)
+	var scaled: ZoneData = spell.scaled_zone(lava)
+	check(scaled != lava and scaled.tick_damage[0] == lava.tick_damage[0] * 2 and lava.tick_damage[0] != scaled.tick_damage[0]
+			and spell.scaled_zone(lava) == scaled, "a patch's damage doubles too, on a copy kept for the next cast")
+	player.spell_power = 1.0
+	check(spell.scaled_zone(lava) == lava, "with power 1 the patch's own data is used")
+	for node: Node in [player, near]:
+		node.queue_free()
+	await physics_frames(2)
+	GameManager.start_run(RUN_SEED)
+	var game: Game = (load("res://main/main.tscn") as PackedScene).instantiate() as Game
+	game.death_screen_enabled = false
+	add_child(game)
+	await physics_frames(2)
+	var first: float = game.player.spell_power
+	GameManager.depth = 4
+	game._start_section()
+	await physics_frames(2)
+	var catalog: EnemyCatalog = game._director.catalog
+	var pressure: bool = game._director.settings.depth_pressure
+	check(is_equal_approx(first, game.spell_base_power)
+			and is_equal_approx(game.player.spell_power, game.spell_base_power * catalog.hp_multiplier(4, pressure)),
+			"the game's spell power: x%.2f on the first floor, x%.2f at depth 5, as the enemies' health grows"
+			% [first, game.player.spell_power])
+	game.queue_free()
 	await physics_frames(2)
 
 

@@ -12,7 +12,7 @@ func _cast(direction: Vector2) -> void:
 		return
 	var ball: Fireball = stats.projectile_scene.instantiate() as Fireball
 	ball.explode_sound = stats.explode_sound
-	var info: DamageInfo = DamageInfo.new(SpellData.int_at(stats.damage, level), caster, stats.id)
+	var info: DamageInfo = DamageInfo.new(spell_damage(stats.damage), caster, stats.id)
 	ball.setup(info, direction, stats.speed, stats.max_range, SpellData.float_at(stats.radius, level),
 			stats.knockback, target_mask, wall_mask)
 	ball.color = stats.color

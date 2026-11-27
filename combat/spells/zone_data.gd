@@ -55,5 +55,21 @@ func ticks_at(level: int) -> int:
 	return maxi(1, ceili(float_at(duration, level) / tick_interval - TICK_EPSILON))
 
 
+## A copy whose impact and tick damage are times multiplier (rounded); this one is not
+## changed. The spell power and a boss's depth scaling use it.
+func scaled(multiplier: float) -> ZoneData:
+	var copy: ZoneData = duplicate() as ZoneData
+	copy.impact_damage = _times(impact_damage, multiplier)
+	copy.tick_damage = _times(tick_damage, multiplier)
+	return copy
+
+
+static func _times(values: PackedInt32Array, multiplier: float) -> PackedInt32Array:
+	var result: PackedInt32Array = PackedInt32Array()
+	for value: int in values:
+		result.append(roundi(value * multiplier))
+	return result
+
+
 func power_at(level: int) -> float:
 	return float(int_at(impact_damage, level) + int_at(tick_damage, level) * ticks_at(level))

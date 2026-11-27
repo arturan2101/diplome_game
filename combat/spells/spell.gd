@@ -20,6 +20,8 @@ var caster: Player = null
 var level: int = 1
 
 var _cooldown_left: float = 0.0
+## Patches of this spell with their damage times the caster's spell power, by power.
+var _scaled_zones: Dictionary = {}
 
 
 ## Called by the spell book right after creating the spell, before adding it to the tree.
@@ -65,6 +67,29 @@ func _physics_process(delta: float) -> void:
 ## The effect itself. direction is normalized.
 func _cast(_direction: Vector2) -> void:
 	pass
+
+
+## The caster's spell power (after stage 49: the elements grow with the depth like
+## the enemies' health), 1 without a caster.
+func get_power() -> float:
+	return caster.spell_power if caster != null else 1.0
+
+
+## Damage of this level from a per-level table, times the spell power.
+func spell_damage(values: PackedInt32Array) -> int:
+	return roundi(SpellData.int_at(values, level) * get_power())
+
+
+## A patch's data with its damage times the spell power (the same copy while the power
+## stays the same).
+func scaled_zone(stats: ZoneData) -> ZoneData:
+	var power: float = get_power()
+	if stats == null or is_equal_approx(power, 1.0):
+		return stats
+	var key: Array = [stats, power]
+	if not _scaled_zones.has(key):
+		_scaled_zones[key] = stats.scaled(power)
+	return _scaled_zones[key]
 
 
 func _report_damage(amount: int) -> void:

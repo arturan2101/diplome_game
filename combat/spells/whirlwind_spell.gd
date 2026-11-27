@@ -54,7 +54,7 @@ func _physics_process(delta: float) -> void:
 		_tick_left += stats.tick_interval
 		var on_hit: Callable = _on_hit if stats.has_status() else Callable()
 		_report_damage(AreaDamage.hit(get_world_2d().direct_space_state, caster.global_position,
-				_radius(), SpellData.int_at(stats.damage, level), caster, stats.id, stats.knockback,
+				_radius(), spell_damage(stats.damage), caster, stats.id, stats.knockback,
 				target_mask, wall_mask, on_hit))
 	if not is_active():
 		_hide_look()

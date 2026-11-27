@@ -21,7 +21,7 @@ func _cast(direction: Vector2) -> void:
 	_direction = direction
 	var ice: bool = stats.is_ice(level)
 	_report_damage(AreaDamage.hit(get_world_2d().direct_space_state, caster.global_position,
-			SpellData.float_at(stats.reach, level), SpellData.int_at(stats.damage, level), caster, stats.id,
+			SpellData.float_at(stats.reach, level), spell_damage(stats.damage), caster, stats.id,
 			0.0 if ice else stats.knockback, target_mask, wall_mask, _on_hit.bind(ice), direction, stats.arc_degrees))
 	_look_left = stats.look_time
 	_show_look(stats, direction)

@@ -37,7 +37,7 @@ func _cast(direction: Vector2) -> void:
 			if not hurtbox in hit:
 				hit.append(hurtbox)
 	var dealt: int = 0
-	var damage: int = SpellData.int_at(stats.damage, level)
+	var damage: int = spell_damage(stats.damage)
 	for hurtbox: Hurtbox in hit:
 		var info: DamageInfo = DamageInfo.new(damage, caster, stats.id)
 		info.direction = direction
