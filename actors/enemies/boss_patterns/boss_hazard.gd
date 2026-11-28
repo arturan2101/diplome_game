@@ -171,7 +171,8 @@ static func reach_on(level: Level, from: Vector2, angle: float, max_length: floa
 # --- drawing -------------------------------------------------------------
 
 ## Draws a strip's frame tiled along +x (local) from start to end, centred on the x
-## axis, height high; the last piece is cut to fit. Without a texture, a band in color.
+## axis, at the strip's own height (frames side by side: 16x16 vines, 16x8 beams); the
+## last piece is cut to fit. Without a texture, a band in color, height high.
 func _draw_band(texture: Texture2D, frames: int, frame: int, start: float, end: float, height: float,
 		color: Color, alpha: float) -> void:
 	if end <= start:
@@ -179,17 +180,19 @@ func _draw_band(texture: Texture2D, frames: int, frame: int, start: float, end: 
 	if texture == null:
 		draw_rect(Rect2(start, -height * 0.5, end - start, height), Color(color, color.a * alpha))
 		return
-	var size: float = float(texture.get_height())
-	var source_x: float = float(posmod(frame, maxi(frames, 1))) * size
+	var frame_width: float = float(texture.get_width()) / maxi(frames, 1)
+	var frame_height: float = float(texture.get_height())
+	var source_x: float = float(posmod(frame, maxi(frames, 1))) * frame_width
 	var x: float = start
 	while x < end:
-		var piece: float = minf(size, end - x)
-		draw_texture_rect_region(texture, Rect2(x, -height * 0.5, piece, height),
-				Rect2(source_x, 0.0, piece, size), Color(1.0, 1.0, 1.0, alpha))
+		var piece: float = minf(frame_width, end - x)
+		draw_texture_rect_region(texture, Rect2(x, -frame_height * 0.5, piece, frame_height),
+				Rect2(source_x, 0.0, piece, frame_height), Color(1.0, 1.0, 1.0, alpha))
 		x += piece
 
 
-## The striking body (a vine) along +x from 0 to reach, its tip at the end.
+## The striking body (a vine, a beam) along +x from 0 to reach, its tip at the end and
+## the pattern's end flash centred on the end (a beam meeting the wall).
 func _draw_strike(reach: float, frame: int) -> void:
 	if reach <= 0.0:
 		return
@@ -200,6 +203,11 @@ func _draw_strike(reach: float, frame: int) -> void:
 		var size: float = float(pattern.tip_texture.get_height())
 		draw_texture_rect_region(pattern.tip_texture, Rect2(reach - tip, -8.0, tip, 16.0),
 				Rect2(posmod(frame, maxi(pattern.strike_frames, 1)) * size + size - tip, 0.0, tip, size))
+	if pattern.end_texture != null:
+		var flash: float = float(pattern.end_texture.get_height())
+		var flash_frame: int = BossHazard.frame_at(age, pattern.end_fps, pattern.end_frames)
+		draw_texture_rect_region(pattern.end_texture, Rect2(reach - flash * 0.5, -flash * 0.5, flash, flash),
+				Rect2(flash_frame * flash, 0.0, flash, flash))
 
 
 ## A strip's frame at a time, looping at fps.

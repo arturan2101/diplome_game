@@ -119,8 +119,8 @@ func _test_real_resources() -> void:
 	check(catalog != null and catalog.get_ids() == ([&"skeleton", &"archer", &"beetle", &"guardian", &"skeleton_shield",
 			&"archer_triple", &"golem", &"ghost", &"drowned", &"tide_crab", &"ember_imp", &"magma_beetle",
 			&"tide_warden", &"molten_warden", &"sporeling", &"spore_bat", &"vine_lurker", &"mycelium_mother",
-			&"mummy", &"scarab", &"sand_serpent"] as Array[StringName]),
-			"enemy catalog lists skeleton, archer, beetle, the boss, the two elites, the golem, the ghost, the floor enemies, the floor bosses, the fungal enemies and their boss, the sand temple's enemies")
+			&"mummy", &"scarab", &"sand_serpent", &"sun_pharaoh"] as Array[StringName]),
+			"enemy catalog lists skeleton, archer, beetle, the boss, the two elites, the golem, the ghost, the floor enemies, the floor bosses, the fungal enemies and their boss, the sand temple's enemies and their boss")
 	if catalog == null:
 		return
 	var beetle: EnemyData = catalog.get_by_id(&"beetle")

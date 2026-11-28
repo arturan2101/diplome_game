@@ -20,13 +20,19 @@ extends Enemy
 ## Stage 50: room-wide attack patterns (GuardianData.patterns_phase_one/two, BossPattern):
 ## a short wind-up, then the pattern shows where it will strike and the boss stands
 ## holding its cast pose until it is over. A pattern cast at home (a sweep) first sends
-## the boss back to where it woke, the middle of its arena.
+## the boss back to where it woke, the middle of its arena. A boss that burrows (the Sun
+## Pharaoh) instead sinks into the floor before each pattern of its second phase and
+## comes up where it casts from.
 
 signal phase_changed(phase: int)
 ## The game spawns the servants: it owns the enemies of the section.
 signal summon_requested(guardian: Guardian, count: int)
 
 enum Attack { SLAM, THROW, SHOCKWAVE, SPECIAL, PATTERN }
+## Going under the floor before a pattern (GuardianData.burrow_in_phase_two).
+enum Burrow { NONE, SINKING, EMERGING }
+## Spots tried for coming up away from the player before falling back to the middle.
+const BURROW_TRIES: int = 24
 
 ## Physics layers the stone and the shockwave hurt (player_hurtbox).
 @export_flags_2d_physics var player_hurtbox_mask: int = 8
@@ -55,6 +61,10 @@ var _home: Vector2 = Vector2.ZERO
 var _home_known: bool = false
 ## True while the boss stands still for its pattern.
 var _casting: bool = false
+var _burrow: Burrow = Burrow.NONE
+var _burrow_left: float = 0.0
+## Where the boss comes up.
+var _burrow_to: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -127,7 +137,7 @@ func has_patterns() -> bool:
 
 ## The pattern being wound up or played, or null.
 func get_pattern() -> BossPattern:
-	if _casting or _home_walk_left > 0.0 or (state == State.WINDUP and attack == Attack.PATTERN):
+	if _casting or _home_walk_left > 0.0 or _burrow != Burrow.NONE or (state == State.WINDUP and attack == Attack.PATTERN):
 		return _pattern
 	return null
 
@@ -140,6 +150,10 @@ func is_walking_home() -> bool:
 	return _home_walk_left > 0.0
 
 
+func is_burrowing() -> bool:
+	return _burrow != Burrow.NONE
+
+
 ## Where the boss woke (the middle of its arena).
 func get_home() -> Vector2:
 	return _home
@@ -147,6 +161,10 @@ func get_home() -> Vector2:
 
 ## Standing for a pattern, the boss holds the last frame of its cast animation.
 func get_pose() -> StringName:
+	if _burrow == Burrow.SINKING:
+		return StringName(_stats.sink_animation)
+	if _burrow == Burrow.EMERGING:
+		return StringName(_stats.emerge_animation)
 	if _casting and _pattern != null and _pattern.cast_animation != "":
 		return StringName(_pattern.cast_animation)
 	return &""
@@ -199,9 +217,15 @@ func _update_chase(delta: float) -> void:
 	if _home_walk_left > 0.0:
 		_walk_home(delta)
 		return
+	if _burrow != Burrow.NONE:
+		_update_burrow(delta)
+		return
 	var distance: float = global_position.distance_to(_target.global_position)
 	if _wants_pattern(distance):
 		_pattern = _pick_pattern()
+		if phase == 2 and _stats.burrow_in_phase_two:
+			_start_burrow()
+			return
 		if _pattern.cast_at_home and global_position.distance_to(_home) > _stats.home_reach:
 			_home_walk_left = _stats.home_walk_time
 			_repath_time_left = 0.0
@@ -316,6 +340,48 @@ func _walk_home(delta: float) -> void:
 		velocity *= _stats.phase_two_speed_multiplier
 
 
+## Sinks into the floor to come up where the chosen pattern is cast from.
+func _start_burrow() -> void:
+	_burrow = Burrow.SINKING
+	_burrow_left = _stats.sink_time
+	_burrow_to = _home if _pattern.cast_at_home else _burrow_spot()
+	velocity = Vector2.ZERO
+	Sound.play_at(_stats.sink_sound, global_position)
+
+
+## Sinking, then (out of reach under the floor) moved and coming up; casts once up.
+func _update_burrow(delta: float) -> void:
+	velocity = Vector2.ZERO
+	_burrow_left -= delta
+	if _burrow_left > 0.0:
+		return
+	if _burrow == Burrow.SINKING:
+		set_buried(true)
+		global_position = _burrow_to
+		_burrow = Burrow.EMERGING
+		_burrow_left = _stats.emerge_time
+		Sound.play_at(_stats.emerge_sound, global_position)
+		return
+	_burrow = Burrow.NONE
+	set_buried(false)
+	_start_attack(Attack.PATTERN)
+
+
+## A plain floor spot near the middle of the arena, away from the player; the middle
+## itself when none is found.
+func _burrow_spot() -> Vector2:
+	var level: Level = get_tree().get_first_node_in_group(Level.GROUP) as Level
+	var player: Vector2 = _target.global_position if is_instance_valid(_target) else global_position
+	for _i in BURROW_TRIES:
+		var spot: Vector2 = _home + Vector2.from_angle(GameManager.rng.randf() * TAU) 				* _stats.burrow_radius * sqrt(GameManager.rng.randf())
+		if level != null:
+			# Come up in the middle of a cell.
+			spot = level.cell_center(level.cell_at(spot))
+		if _on_floor(spot, level) and spot.distance_to(player) >= _stats.burrow_min_distance:
+			return spot
+	return _home
+
+
 ## Casts the wound-up pattern and stands still while it plays; the cooldown starts when
 ## it is over.
 func _cast_pattern() -> void:
@@ -417,6 +483,7 @@ func _enter_phase_two() -> void:
 	phase = 2
 	_home_walk_left = 0.0
 	_casting = false
+	_burrow = Burrow.NONE
 	if weapon != null:
 		weapon.cancel_attack()
 	_enter(State.CHASE)

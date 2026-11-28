@@ -109,8 +109,12 @@ func _draw() -> void:
 		var frame: int = clampi(int(progress * frames), 0, maxi(frames, 1) - 1)
 		var color: Color = pattern.warn_color if warning else pattern.strike_color
 		var alpha: float = lerpf(0.5, 1.0, progress) if warning else 1.0 - progress * 0.5
+		var field: FieldPattern = pattern as FieldPattern
+		var fill: bool = warning and texture != null and field != null and field.fill_warning
 		for corner: Vector2 in _corners[wave]:
 			var rect: Rect2 = Rect2(corner, Vector2.ONE * _tile)
+			if fill:
+				draw_rect(rect.grow(-1.0), Color(color, color.a * alpha))
 			if texture == null:
 				draw_rect(rect.grow(-1.0), Color(color, color.a * alpha))
 			else:

@@ -36,6 +36,11 @@ extends Resource
 @export var strike_fps: float = 10.0
 @export var tip_texture: Texture2D
 @export var strike_color: Color = Color(0.48, 0.29, 0.17, 1.0)
+## A flash of square frames centred where a line ends while it strikes (a beam meeting
+## the wall); null = none.
+@export var end_texture: Texture2D
+@export var end_frames: int = 4
+@export var end_fps: float = 12.0
 
 
 ## Places the pattern's hazards under host, from origin (the boss), aimed with target

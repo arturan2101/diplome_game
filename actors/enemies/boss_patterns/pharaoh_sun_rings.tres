@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="FieldPattern" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/boss_patterns/field_pattern.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/sand_ripple.png" id="warn"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/sun_beam_hit.png" id="burst"]
+
+[resource]
+script = ExtResource("1")
+warn_time = 0.9
+damage = 8
+knockback = 0.0
+strike_sound = &"scarab_burrow"
+cast_animation = "storm"
+warn_color = Color(1, 0.75, 0.3, 0.3)
+strike_color = Color(1, 0.85, 0.45, 0.85)
+layout = 2
+block_tiles = 2
+ring_width = 32.0
+fill_warning = true
+waves = 2
+warn_texture = ExtResource("warn")
+warn_frames = 4
+strike_texture = ExtResource("burst")
+strike_frames = 4

@@ -58,6 +58,21 @@ extends EnemyData
 @export var home_walk_time: float = 3.0
 @export var home_reach: float = 8.0
 
+@export_group("Burrowing (stage 50)")
+## Second phase (the Sun Pharaoh): before each pattern the boss sinks into the floor,
+## travels under it and comes up at a new spot to cast from: the middle of its arena for
+## a pattern cast at home, else a floor spot within burrow_radius of the middle and at
+## least burrow_min_distance from the player. Under the floor nothing can hit it.
+@export var burrow_in_phase_two: bool = false
+@export var sink_animation: String = "sink"
+@export var emerge_animation: String = "emerge"
+@export var sink_time: float = 0.6
+@export var emerge_time: float = 0.6
+@export var burrow_radius: float = 120.0
+@export var burrow_min_distance: float = 64.0
+@export var sink_sound: StringName = &""
+@export var emerge_sound: StringName = &""
+
 ## Where the special attack's strikes fall (stage 45): in a line from the boss towards
 ## the player (geysers), or on the player and around them (meteors).
 enum SpecialPattern { LINE, AROUND_TARGET }

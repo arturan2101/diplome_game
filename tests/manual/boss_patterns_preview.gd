@@ -1,32 +1,28 @@
 extends Node
-## Manual preview of the boss attack patterns (stage 50) in the boss arena of the fungal
-## floor, with the Mycelium Mother standing in the middle (asleep, only for the look).
+## Manual preview of a boss's attack patterns (stage 50) in the boss arena of its floor,
+## the boss standing in the middle (asleep, only for the look): the Mycelium Mother or
+## the Sun Pharaoh (pharaoh on). Its patterns of both phases come from its GuardianData.
 ## With a folder argument it photographs each pattern's warning and strike and quits;
 ## without one it casts the patterns one after another forever, aimed at you, and you
-## walk round them. With fight on (stage 50, part 2) the Mother is awake and fights you
-## as in the game, both phases (no servants come; you cannot die). Not part of the test
-## suite.
-## Usage: godot --path . res://tests/manual/boss_patterns_preview.tscn [-- <folder>]
+## walk round them. With fight on the boss is awake and fights you as in the game, both
+## phases (no servants come; you cannot die). Not part of the test suite.
+## Usage: godot --path . res://tests/manual/boss_patterns_preview.tscn [-- <folder> [pharaoh]]
 
 const PLAYER_SCENE: PackedScene = preload("res://actors/player/player.tscn")
-const GAME_THEME: String = "res://level/fungal_theme.tres"
 const ARENA: String = "res://rooms/arena.txt"
 const MOTHER: String = "res://actors/enemies/mycelium_mother.tres"
-const PATTERNS: Array[String] = [
-	"res://actors/enemies/boss_patterns/mother_rays.tres",
-	"res://actors/enemies/boss_patterns/mother_rays_double.tres",
-	"res://actors/enemies/boss_patterns/mother_sweep.tres",
-	"res://actors/enemies/boss_patterns/mother_sweep_three.tres",
-	"res://actors/enemies/boss_patterns/mother_spore_stripes.tres",
-	"res://actors/enemies/boss_patterns/mother_spore_checker.tres",
-	"res://actors/enemies/boss_patterns/mother_spore_rings.tres",
-]
+const MOTHER_THEME: String = "res://level/fungal_theme.tres"
+const PHARAOH: String = "res://actors/enemies/sun_pharaoh.tres"
+const PHARAOH_THEME: String = "res://level/sand_theme.tres"
+const PHARAOH_ARG: String = "pharaoh"
 const PLAYER_HURTBOX: int = 8
 const BIG_HP: int = 100000
 const PAUSE: float = 1.0
 
-## The Mother fights you instead of the patterns looping by themselves.
+## The boss fights you instead of the patterns looping by themselves.
 @export var fight: bool = false
+## The Sun Pharaoh on the sand floor instead of the Mother on the fungal one.
+@export var pharaoh: bool = false
 
 var _out_dir: String = ""
 var _level: Level = null
@@ -34,13 +30,15 @@ var _player: Player = null
 var _center: Vector2 = Vector2.ZERO
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _label: Label = null
-var _mother: Guardian = null
+var _boss: Guardian = null
+var _patterns: Array[BossPattern] = []
 
 
 func _ready() -> void:
 	var args: PackedStringArray = OS.get_cmdline_user_args()
 	if args.size() > 0:
 		_out_dir = args[0]
+	pharaoh = pharaoh or args.has(PHARAOH_ARG)
 	Telemetry.write_enabled = false
 	GameManager.start_run(5050)
 	_rng.seed = 5050
@@ -51,12 +49,11 @@ func _ready() -> void:
 		get_tree().quit()
 		return
 	if fight:
-		_mother.awaken()
+		_boss.awaken()
 		return
 	while true:
-		for path: String in PATTERNS:
-			_label.text = path.get_file().get_basename()
-			var pattern: BossPattern = load(path) as BossPattern
+		for pattern: BossPattern in _patterns:
+			_label.text = _name_of(pattern)
 			pattern.cast(_level, _center, _player.global_position, null, &"preview", 1.0, PLAYER_HURTBOX, _rng)
 			await get_tree().create_timer(pattern.get_duration() + PAUSE).timeout
 
@@ -64,7 +61,7 @@ func _ready() -> void:
 func _build() -> void:
 	_level = Level.new()
 	add_child(_level)
-	_level.set_theme(load(GAME_THEME) as TileTheme)
+	_level.set_theme(load(PHARAOH_THEME if pharaoh else MOTHER_THEME) as TileTheme)
 	var rows: PackedStringArray = PackedStringArray()
 	for line: String in FileAccess.get_file_as_string(ARENA).split("\n"):
 		if line.strip_edges() != "" and not line.begins_with(";"):
@@ -73,13 +70,15 @@ func _build() -> void:
 	var middle: Vector2i = Vector2i(rows[0].length() / 2, rows.size() / 2)
 	# Where the game puts the boss: the floor cell nearest the arena's middle.
 	_center = _level.cell_center(_level.nearest_floor_cell(middle))
-	var stats: GuardianData = load(MOTHER) as GuardianData
-	var mother: Guardian = stats.scene.instantiate() as Guardian
-	mother.data = stats
-	add_child(mother)
-	mother.global_position = _center
-	mother.make_dormant()
-	_mother = mother
+	var stats: GuardianData = load(PHARAOH if pharaoh else MOTHER) as GuardianData
+	for pattern: BossPattern in stats.patterns_phase_one + stats.patterns_phase_two:
+		if not pattern in _patterns:
+			_patterns.append(pattern)
+	_boss = stats.scene.instantiate() as Guardian
+	_boss.data = stats
+	add_child(_boss)
+	_boss.global_position = _center
+	_boss.make_dormant()
 	_player = PLAYER_SCENE.instantiate() as Player
 	add_child(_player)
 	_player.global_position = _level.cell_center(middle + Vector2i(4, 2))
@@ -93,19 +92,18 @@ func _build() -> void:
 
 
 func _process(_delta: float) -> void:
-	if not fight or _mother == null or not is_instance_valid(_mother):
+	if not fight or _boss == null or not is_instance_valid(_boss):
 		return
-	var pattern: BossPattern = _mother.get_pattern()
-	_label.text = "phase %d   HP %d/%d   %s" % [_mother.phase, _mother.health.hp, _mother.health.max_hp,
-			pattern.resource_path.get_file().get_basename() if pattern != null else ""]
+	var pattern: BossPattern = _boss.get_pattern()
+	_label.text = "phase %d   HP %d/%d   %s" % [_boss.phase, _boss.health.hp, _boss.health.max_hp,
+			_name_of(pattern) if pattern != null else ""]
 
 
 func _shoot_all() -> void:
 	await _frames(10)
-	for path: String in PATTERNS:
-		var name: String = path.get_file().get_basename()
+	for pattern: BossPattern in _patterns:
+		var name: String = _name_of(pattern)
 		_label.text = name
-		var pattern: BossPattern = load(path) as BossPattern
 		pattern.cast(_level, _center, _player.global_position, null, &"preview", 1.0, PLAYER_HURTBOX, _rng)
 		await _frames(roundi(pattern.warn_time * 0.7 * 60.0))
 		await _save("%s_1_warning.png" % name)
@@ -115,6 +113,10 @@ func _shoot_all() -> void:
 			await _frames(roundi(pattern.warn_time * 0.9 * 60.0))
 			await _save("%s_3_later.png" % name)
 		await _frames(roundi((pattern.get_duration() + 0.6) * 60.0))
+
+
+func _name_of(pattern: BossPattern) -> String:
+	return pattern.resource_path.get_file().get_basename()
 
 
 func _save(file_name: String) -> void:

@@ -71,8 +71,7 @@ func _test_escort() -> void:
 	rng.seed = 50
 	director.finish_arena(plan, rng)
 	var ids: Array = plan.enemy_mix.keys()
-	ids.sort()
-	check(ids == [&"mycelium_mother", &"sporeling"] and int(plan.enemy_mix[&"mycelium_mother"]) == 1,
+	check(ids.size() == 2 and ids.has(&"mycelium_mother") and ids.has(&"sporeling") and int(plan.enemy_mix[&"mycelium_mother"]) == 1,
 			"her arena holds her and sporelings only: %s" % [plan.enemy_mix])
 	var ruins: SectionPlan = SectionPlan.new()
 	ruins.depth = table.depths_per_style - 1

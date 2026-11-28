@@ -5,6 +5,8 @@ extends BossPattern
 ## stops at the first wall (it lashes over pillars).
 ## With several volleys, each comes when the one before strikes, turned by volley_turn
 ## of the gap: half a gap puts the next lashes into the wedges that were safe.
+## With spread_degrees under 360 the lashes are a fan centred on the aim (the Sun
+## Pharaoh's beams): the safe floor is outside the fan and between its lashes far out.
 
 ## How many lashes and how far they reach at most (pixels); half the band's width.
 @export var count: int = 6
@@ -12,6 +14,8 @@ extends BossPattern
 @export var half_width: float = 7.0
 ## One lash points at the player (else the whole fan starts at a random angle).
 @export var aim_at_target: bool = false
+## Angle the lashes cover: 360 = all round, less = a fan centred on the aim.
+@export_range(0.0, 360.0) var spread_degrees: float = 360.0
 @export var volleys: int = 1
 ## Share of the gap between two lashes the next volley turns by.
 @export_range(0.0, 1.0) var volley_turn: float = 0.5
@@ -28,6 +32,10 @@ func cast(host: Node, origin: Vector2, target: Vector2, caster: Node, source_id:
 	var lashes: int = maxi(count, 1)
 	var gap: float = TAU / lashes
 	var start: float = origin.angle_to_point(target) if aim_at_target else rng.randf() * TAU
+	if is_fan():
+		var spread: float = deg_to_rad(spread_degrees)
+		gap = spread / (lashes - 1)
+		start -= spread * 0.5
 	var hit: int = scaled_damage(damage_scale)
 	Sound.play_at(warn_sound, origin)
 	for volley in maxi(volleys, 1):
@@ -40,6 +48,11 @@ func cast(host: Node, origin: Vector2, target: Vector2, caster: Node, source_id:
 			line.retract_time = retract_time
 			made.append(line)
 	return made
+
+
+## True when the lashes are a fan, not all round.
+func is_fan() -> bool:
+	return spread_degrees < 360.0 and count > 1
 
 
 func get_duration() -> float:

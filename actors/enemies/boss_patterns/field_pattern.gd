@@ -15,6 +15,9 @@ enum Layout { STRIPES, CHECKER, RINGS }
 ## Cells farther from the boss than this (pixels) stay dark.
 @export var area_radius: float = 170.0
 @export var waves: int = 2
+## Under the warning art, each lit cell is also filled with warn_color (art that is
+## faint on its floor, like the sand ripple on sand).
+@export var fill_warning: bool = false
 @export_group("Burst")
 ## Seconds a burst hurts after the strike, and how long its art plays.
 @export var active_time: float = 0.15
